@@ -1,9 +1,9 @@
 import qs from 'query-string';
 
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { configuration, features } from '../../config';
+import { configuration } from '../../config';
 
-const API_VERSION = features.ANALYTICS_API_V1 ? 'v1' : 'v0';
+const API_VERSION = 'v1';
 class EnterpriseDataApiService {
   // TODO: This should access the data-api through the gateway instead of direct
   static apiClient = getAuthenticatedHttpClient;
