@@ -52,3 +52,13 @@
     overflow: scroll;
   }
 }
+
+.data-table-selector-column-wrapper {
+  table {
+    thead {
+      th:first-of-type {
+        width: 125px;
+      }
+    }
+  }
+}
