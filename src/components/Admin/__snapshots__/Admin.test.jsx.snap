@@ -6106,36 +6106,36 @@ exports[`<Admin /> renders correctly with error state 1`] = `
         className="col"
       >
         <div
-          className="alert fade alert-danger show"
-          hidden={false}
+          className="fade alert-content undefined alert alert-danger show"
           role="alert"
         >
-          <div
-            className="alert-dialog"
+          <span
+            className="pgn__icon alert-icon"
           >
-            <div
-              className="d-flex"
+            <svg
+              aria-hidden={true}
+              aria-label=""
+              fill="none"
+              focusable={false}
+              height={24}
+              role="img"
+              viewBox="0 0 24 24"
+              width={24}
+              xmlns="http://www.w3.org/2000/svg"
             >
-              <div
-                className="icon mr-2"
-              >
-                <span
-                  aria-hidden={true}
-                  className="fa fa-times-circle"
-                  id="Icon109"
-                />
-              </div>
-              <div
-                className="message"
-              >
-                <span
-                  className="title"
-                >
-                  Unable to load overview
-                </span>
-                Try refreshing your screen (Network Error)
-              </div>
+              <path
+                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"
+                fill="currentColor"
+              />
+            </svg>
+          </span>
+          <div>
+            <div
+              className="alert-heading h4"
+            >
+              Unable to load overview
             </div>
+            Try refreshing your screen (Network Error)
           </div>
         </div>
       </div>
