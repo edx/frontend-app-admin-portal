@@ -219,4 +219,85 @@ describe('<PeopleManagementPage >', () => {
       expect(screen.queryByText('Group deleted')).toBeInTheDocument();
     });
   });
+  describe('Learners Tab', () => {
+    it('renders the Learners tab', () => {
+      useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+      render(<PeopleManagementPageWrapper />);
+      const learnersTab = screen.getByRole('tab', { name: /learners/i });
+      expect(learnersTab).toBeInTheDocument();
+    });
+
+    it('Learners tab is active by default', () => {
+      useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+      render(<PeopleManagementPageWrapper />);
+      const learnersTab = screen.getByRole('tab', { name: /learners/i });
+      expect(learnersTab).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('displays learner content when Learners tab is active', () => {
+      useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+      render(<PeopleManagementPageWrapper />);
+      const learnersTab = screen.getByRole('tab', { name: /learners/i });
+      expect(learnersTab).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByText("Your organization's groups")).toBeInTheDocument();
+    });
+  });
+
+  // describe('Admins Tab', () => {
+  //   it('renders the Admins tab', () => {
+  //     useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+  //     render(<PeopleManagementPageWrapper />);
+  //     const adminsTab = screen.getByRole('tab', { name: /admins/i });
+  //     expect(adminsTab).toBeInTheDocument();
+  //   });
+
+  //   it('Admins tab is not active by default', () => {
+  //     useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+  //     render(<PeopleManagementPageWrapper />);
+  //     const adminsTab = screen.getByRole('tab', { name: /admins/i });
+  //     expect(adminsTab).toHaveAttribute('aria-selected', 'false');
+  //   });
+
+  //   it('Admins tab becomes active when clicked', async () => {
+  //     const user = userEvent.setup();
+  //     useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+  //     render(<PeopleManagementPageWrapper />);
+  //     const adminsTab = screen.getByRole('tab', { name: /admins/i });
+  //     await user.click(adminsTab);
+  //     await waitFor(() => {
+  //       expect(adminsTab).toHaveAttribute('aria-selected', 'true');
+  //     });
+  //   });
+
+  //   it('displays admin content when Admins tab is active', async () => {
+  //     const user = userEvent.setup();
+  //     useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+  //     render(<PeopleManagementPageWrapper />);
+  //     const adminsTab = screen.getByRole('tab', { name: /admins/i });
+  //     await user.click(adminsTab);
+  //     await waitFor(() => {
+  //       expect(screen.getByText('Admin management functionality will be available soon.')).toBeInTheDocument();
+  //     });
+  //   });
+
+  //   it('switching between Learners and Admins tabs works correctly', async () => {
+  //     const user = userEvent.setup();
+  //     useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+  //     render(<PeopleManagementPageWrapper />);
+  //     const learnersTab = screen.getByRole('tab', { name: /learners/i });
+  //     const adminsTab = screen.getByRole('tab', { name: /admins/i });
+  //     expect(learnersTab).toHaveAttribute('aria-selected', 'true');
+  //     await user.click(adminsTab);
+  //     await waitFor(() => {
+  //       expect(adminsTab).toHaveAttribute('aria-selected', 'true');
+  //       expect(learnersTab).toHaveAttribute('aria-selected', 'false');
+  //     });
+
+  //     await user.click(learnersTab);
+  //     await waitFor(() => {
+  //       expect(learnersTab).toHaveAttribute('aria-selected', 'true');
+  //       expect(adminsTab).toHaveAttribute('aria-selected', 'false');
+  //     });
+  //   });
+  // });
 });
