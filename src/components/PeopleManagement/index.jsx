@@ -4,12 +4,10 @@ import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { useIntl, FormattedMessage } from '@edx/frontend-platform/i18n';
 import {
-  ActionRow, Button, Skeleton, Toast, useToggle,
-  Tabs, Tab,
+  ActionRow, Button, Skeleton, Toast, Tabs, Tab, useToggle,
 } from '@openedx/paragon';
 import { Add } from '@openedx/paragon/icons';
 import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
-
 import Hero from '../Hero';
 import { SUBSIDY_TYPES } from '../../data/constants/subsidyTypes';
 import { EnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
@@ -119,10 +117,11 @@ const PeopleManagementPage = ({ enterpriseId }) => {
             title={intl.formatMessage({
               id: 'adminPortal.peopleManagement.tabs.learners',
               defaultMessage: 'Learners',
+              description: 'Learners tab title for people management page.',
             })}
           >
             <span id={ORGANIZE_LEARNER_TARGETS.ORG_GROUPS}>
-              <ActionRow className="mb-4">
+              <ActionRow className="mb-4 mt-2">
                 <span className="flex-column">
                   <span className="d-flex">
                     <h3 className="mt-2">
@@ -190,21 +189,6 @@ const PeopleManagementPage = ({ enterpriseId }) => {
             </span>
           </Tab>
 
-          {/* ================= Admin Tab ================= */}
-          {/* <Tab
-            eventKey="admins"
-            title={intl.formatMessage({
-              id: 'adminPortal.peopleManagement.tabs.admins',
-              defaultMessage: 'Admins',
-            })}
-          >
-            <div className="py-5 text-center text-muted">
-              <FormattedMessage
-                id="adminPortal.peopleManagement.admins.empty"
-                defaultMessage="Admin management functionality will be available soon."
-              />
-            </div>
-          </Tab> */}
         </Tabs>
       </div>
 
