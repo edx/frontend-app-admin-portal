@@ -46,7 +46,7 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isModalOpen, openModal, closeModal] = useToggle(false);
   const [groups, setGroups] = useState();
-  const [activeTab, setActiveTab] = useState('learners');
+  const [activeTab, setActiveTab] = useState(learnersTabEnabled ? 'learners' : null);
 
   useEffect(() => {
     if (data !== undefined) {
@@ -105,6 +105,7 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
       />
       <div className="mx-3 mt-4">
         {learnersTabEnabled ? (
+        // NOTE:  this Tabs wrapper is intentional as we’ll be adding additional tabs soon.
           <Tabs
             activeKey={activeTab}
             onSelect={(key) => setActiveTab(key)}
@@ -127,7 +128,6 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
                   closeModal={closeModal}
                   handleInviteError={handleInviteError}
                   groupsCardSection={groupsCardSection}
-                  learnersTabEnabled={learnersTabEnabled}
                 />
               </div>
             </Tab>
@@ -142,7 +142,6 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
             closeModal={closeModal}
             handleInviteError={handleInviteError}
             groupsCardSection={groupsCardSection}
-            learnersTabEnabled={learnersTabEnabled}
           />
         )}
       </div>
@@ -152,12 +151,16 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
 
 const mapStateToProps = (state) => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
-  learnersTabEnabled: state.portalConfiguration.enterpriseFeatures?.enterprise_invite_admins_enabled ?? false,
+  learnersTabEnabled: state.portalConfiguration.enterpriseFeatures?.enterpriseInviteAdminsEnabled ?? false,
 });
 
 PeopleManagementPage.propTypes = {
   enterpriseId: PropTypes.string.isRequired,
-  learnersTabEnabled: PropTypes.bool.isRequired,
+  learnersTabEnabled: PropTypes.bool,
+};
+
+PeopleManagementPage.defaultProps = {
+  learnersTabEnabled: false,
 };
 
 export default connect(mapStateToProps)(PeopleManagementPage);

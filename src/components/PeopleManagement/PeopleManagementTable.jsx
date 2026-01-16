@@ -16,6 +16,7 @@ const LearnerSearchFilter = (props) => (
   />
 );
 
+LearnerSearchFilter.propTypes = TableTextFilter.propTypes;
 const FilterStatus = (rest) => <DataTable.FilterStatus showFilteredFields={false} {...rest} />;
 
 const PeopleManagementTable = ({ enterpriseId }) => {
