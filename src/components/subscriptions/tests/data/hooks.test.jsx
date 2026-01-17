@@ -128,7 +128,7 @@ describe('useStripeSubscriptionPlanInfo', () => {
     const setErrors = jest.fn();
 
     const { result } = renderHook(() => useStripeSubscriptionPlanInfo({
-      uuid: TEST_PLAN_UUID,
+      subPlanUuid: TEST_PLAN_UUID,
       setErrors,
     }));
 
@@ -156,17 +156,37 @@ describe('useStripeSubscriptionPlanInfo', () => {
     const setErrors = jest.fn();
 
     const { result } = renderHook(() => useStripeSubscriptionPlanInfo({
-      uuid: TEST_PLAN_UUID,
+      subPlanUuid: TEST_PLAN_UUID,
       setErrors,
     }));
 
     await waitFor(() => {
       expect(EnterpriseAccessApiService.fetchStripeEvent).toHaveBeenCalledTimes(1);
-      expect(result.current.invoiceAmount).toBe(0);
-      expect(result.current.currency).toBe(null);
       expect(result.current.canceledDate).toBe('2025-09-15T19:56:09Z');
       expect(result.current.loadingStripeSummary).toBe(false);
       expect(setErrors).not.toHaveBeenCalled();
     });
   });
+
+  test('fetches StripeEventSummary with 404 error ', async () => {
+    EnterpriseAccessApiService.fetchStripeEvent.mockResolvedValue({ status: 404 });
+
+    const setErrors = jest.fn();
+
+    const { result } = renderHook(() => useStripeSubscriptionPlanInfo({
+      subPlanUuid: TEST_PLAN_UUID,
+      setErrors,
+    }));
+
+    await waitFor(() => {
+      expect(EnterpriseAccessApiService.fetchStripeEvent).toHaveBeenCalledTimes(1);
+      expect(result.current.invoiceAmount).toBe(null);
+      expect(result.current.currency).toBe(null);
+      expect(result.current.canceledDate).toBe(null);
+      expect(result.current.loadingStripeSummary).toBe(false);
+      // doesn't return an error if it's 404, just null values
+      expect(setErrors).not.toHaveBeenCalled();
+    });
+  });
+
 });

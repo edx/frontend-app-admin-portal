@@ -37,7 +37,7 @@ const SubscriptionCard = ({
   } = useStripeSubscriptionPlanInfo({ subPlanUuid, setErrors });
   const formattedStartDate = dayjs(startDate).format('MMMM D, YYYY');
   const formattedExpirationDate = dayjs(expirationDate).format('MMMM D, YYYY');
-  const formattedCanceledDate = dayjs(canceledDate).format('MMMM D, YYYY');
+  const formattedCanceledDate = canceledDate ? dayjs(canceledDate).format('MMMM D, YYYY') : null;
   const subscriptionStatus = getSubscriptionStatus(subscription, canceledDate);
 
   let subscriptionUpcomingPrice;
