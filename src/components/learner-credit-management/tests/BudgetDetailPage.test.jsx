@@ -1700,7 +1700,8 @@ describe("<BudgetDetailPage />", () => {
     const firstDataRow = within(tableElement).getAllByRole("row")[1]; // Skip header row
     const firstRowCells = within(firstDataRow).getAllByRole("cell");
 
-    const requestDetailsCell = firstRowCells[0];
+    // Note: firstRowCells[0] is the checkbox column from isSelectable
+    const requestDetailsCell = firstRowCells[1];
     expect(
       within(requestDetailsCell).getByText(mockLearnerEmail),
     ).toBeInTheDocument();
@@ -1708,15 +1709,15 @@ describe("<BudgetDetailPage />", () => {
       within(requestDetailsCell).getByText(mockContentTitle),
     ).toBeInTheDocument();
 
-    const amountCell = firstRowCells[1];
+    const amountCell = firstRowCells[2];
     expect(within(amountCell).getByText("-$1.99")).toBeInTheDocument();
 
-    const statusCell = firstRowCells[2];
+    const statusCell = firstRowCells[3];
     expect(
       within(statusCell).getByRole("button", { name: "Waiting for learner" }),
     ).toBeInTheDocument();
 
-    const recentActionCell = firstRowCells[3];
+    const recentActionCell = firstRowCells[4];
     expect(
       within(recentActionCell).getByText("Approved: Oct 27, 2023"),
     ).toBeInTheDocument();
@@ -1802,14 +1803,15 @@ describe("<BudgetDetailPage />", () => {
     const dataRows = within(tableElement).getAllByRole("row").slice(1);
 
     // Test new status labels from LEARNER_CREDIT_REQUEST_STATE_LABELS
+    // Note: firstRowCells[0] is the checkbox column from isSelectable
     const firstRowCells = within(dataRows[0]).getAllByRole("cell");
-    const failedStatusCell = firstRowCells[2];
+    const failedStatusCell = firstRowCells[3];
     expect(
       within(failedStatusCell).getByText("Failed: Cancellation"),
     ).toBeInTheDocument();
 
     const secondRowCells = within(dataRows[1]).getAllByRole("cell");
-    const acceptedStatusCell = secondRowCells[2];
+    const acceptedStatusCell = secondRowCells[3];
     expect(
       within(acceptedStatusCell).getByText("Redeemed By Learner"),
     ).toBeInTheDocument();
