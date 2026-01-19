@@ -1,25 +1,25 @@
-import React from "react";
-import algoliasearch from "algoliasearch/lite";
-import { useParams } from "react-router-dom";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { Provider } from "react-redux";
-import thunk from "redux-thunk";
-import configureMockStore from "redux-mock-store";
-import { screen, waitFor, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import "@testing-library/jest-dom/extend-expect";
-import { getAuthenticatedUser } from "@edx/frontend-platform/auth";
-import { IntlProvider } from "@edx/frontend-platform/i18n";
+import React from 'react';
+import algoliasearch from 'algoliasearch/lite';
+import { useParams } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { Provider } from 'react-redux';
+import thunk from 'redux-thunk';
+import configureMockStore from 'redux-mock-store';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import '@testing-library/jest-dom/extend-expect';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { IntlProvider } from '@edx/frontend-platform/i18n';
 import {
   renderWithRouter,
   sendEnterpriseTrackEvent,
-} from "@edx/frontend-enterprise-utils";
-import { act } from "react-dom/test-utils";
-import { v4 as uuidv4, validate as uuidValidate } from "uuid";
-import dayjs from "dayjs";
+} from '@edx/frontend-enterprise-utils';
+import { act } from 'react-dom/test-utils';
+import { v4 as uuidv4, validate as uuidValidate } from 'uuid';
+import dayjs from 'dayjs';
 
-import EnterpriseAccessApiService from "../../../data/services/EnterpriseAccessApiService";
-import BudgetDetailPage from "../BudgetDetailPage";
+import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
+import BudgetDetailPage from '../BudgetDetailPage';
 import {
   DEFAULT_PAGE,
   formatDate,
@@ -38,12 +38,12 @@ import {
   useIsLargeOrGreater,
   useSubsidyAccessPolicy,
   useSubsidySummaryAnalyticsApi,
-} from "../data";
+} from '../data';
 import {
   BUDGET_DETAIL_ACTIVITY_TAB,
   BUDGET_DETAIL_CATALOG_TAB,
-} from "../data/constants";
-import { EnterpriseSubsidiesContext } from "../../EnterpriseSubsidiesContext";
+} from '../data/constants';
+import { EnterpriseSubsidiesContext } from '../../EnterpriseSubsidiesContext';
 import {
   mockAssignableSubsidyAccessPolicy,
   mockAssignableSubsidyAccessPolicyWithNoUtilization,
@@ -56,38 +56,38 @@ import {
   mockSpendLimitNoGroupsSubsidyAccessPolicy,
   mockSubsidyAccessPolicyUUID,
   mockSubsidySummary,
-} from "../data/tests/constants";
-import { getButtonElement, queryClient } from "../../test/testUtils";
-import { useAlgoliaSearch } from "../../algolia-search";
-import useBnrSubsidyRequests from "../data/hooks/useBnrSubsidyRequests";
+} from '../data/tests/constants';
+import { getButtonElement, queryClient } from '../../test/testUtils';
+import { useAlgoliaSearch } from '../../algolia-search';
+import useBnrSubsidyRequests from '../data/hooks/useBnrSubsidyRequests';
 
-jest.mock("@edx/frontend-platform/auth", () => ({
-  ...jest.requireActual("@edx/frontend-platform/auth"),
+jest.mock('@edx/frontend-platform/auth', () => ({
+  ...jest.requireActual('@edx/frontend-platform/auth'),
   getAuthenticatedUser: jest.fn(),
 }));
 
 const mockNavigate = jest.fn();
 
-jest.mock("@edx/frontend-enterprise-utils", () => ({
-  ...jest.requireActual("@edx/frontend-enterprise-utils"),
+jest.mock('@edx/frontend-enterprise-utils', () => ({
+  ...jest.requireActual('@edx/frontend-enterprise-utils'),
   sendEnterpriseTrackEvent: jest.fn(),
 }));
 
-jest.mock("react-router-dom", () => ({
-  ...jest.requireActual("react-router-dom"),
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate,
   useParams: jest.fn(),
 }));
 
-jest.mock("../../algolia-search/useAlgoliaSearch");
+jest.mock('../../algolia-search/useAlgoliaSearch');
 
-jest.mock("../../EnterpriseSubsidiesContext/data/hooks", () => ({
-  ...jest.requireActual("../../EnterpriseSubsidiesContext/data/hooks"),
+jest.mock('../../EnterpriseSubsidiesContext/data/hooks', () => ({
+  ...jest.requireActual('../../EnterpriseSubsidiesContext/data/hooks'),
   useEnterpriseBudgets: jest.fn(),
 }));
 
-jest.mock("../data", () => ({
-  ...jest.requireActual("../data"),
+jest.mock('../data', () => ({
+  ...jest.requireActual('../data'),
   useBudgetContentAssignments: jest.fn(),
   useBudgetDetailActivityOverview: jest.fn(),
   useBudgetRedemptions: jest.fn(),
@@ -105,14 +105,14 @@ jest.mock("../data", () => ({
   useBudgetId: jest.fn(),
 }));
 
-jest.mock("../../../data/services/EnterpriseAccessApiService");
+jest.mock('../../../data/services/EnterpriseAccessApiService');
 
-jest.mock("../data/hooks/useBnrSubsidyRequests");
+jest.mock('../data/hooks/useBnrSubsidyRequests');
 
 const mockStore = configureMockStore([thunk]);
 const getMockStore = (store) => mockStore(store);
-const enterpriseSlug = "test-enterprise";
-const enterpriseUUID = "1234";
+const enterpriseSlug = 'test-enterprise';
+const enterpriseUUID = '1234';
 const initialStoreState = {
   portalConfiguration: {
     enterpriseId: enterpriseUUID,
@@ -121,10 +121,10 @@ const initialStoreState = {
   },
 };
 
-const mockLearnerEmail = "edx@example.com";
-const mockSecondLearnerEmail = "edx001@example.com";
-const mockCourseKey = "edX+DemoX";
-const mockContentTitle = "edx Demo";
+const mockLearnerEmail = 'edx@example.com';
+const mockSecondLearnerEmail = 'edx001@example.com';
+const mockCourseKey = 'edX+DemoX';
+const mockContentTitle = 'edx Demo';
 
 const mockEmptyStateBudgetDetailActivityOverview = {
   contentAssignments: { count: 0 },
@@ -140,107 +140,107 @@ const mockEmptyBudgetRedemptions = {
   results: [],
 };
 const mockSuccessfulNotifiedAction = {
-  uuid: "test-assignment-action-uuid",
-  actionType: "notified",
-  completedAt: "2023-10-27",
+  uuid: 'test-assignment-action-uuid',
+  actionType: 'notified',
+  completedAt: '2023-10-27',
   errorReason: null,
 };
 const mockSuccessfulLinkedLearnerAction = {
-  uuid: "test-assignment-action-uuid",
-  actionType: "notified",
-  completedAt: "2023-10-27",
+  uuid: 'test-assignment-action-uuid',
+  actionType: 'notified',
+  completedAt: '2023-10-27',
   errorReason: null,
 };
 const mockFailedNotifiedAction = {
   ...mockSuccessfulNotifiedAction,
   completedAt: null,
-  errorReason: "email_error",
+  errorReason: 'email_error',
 };
 const mockFailedLinkedLearnerAction = {
   ...mockFailedNotifiedAction,
-  actionType: "learner_linked",
-  errorReason: "internal_api_error",
+  actionType: 'learner_linked',
+  errorReason: 'internal_api_error',
 };
 const mockLearnerContentAssignment = {
-  uuid: "test-uuid",
+  uuid: 'test-uuid',
   learnerEmail: mockLearnerEmail,
   contentKey: mockCourseKey,
   contentTitle: mockContentTitle,
   contentQuantity: -19900,
-  learnerState: "waiting",
-  recentAction: { actionType: "assigned", timestamp: "2023-10-27" },
+  learnerState: 'waiting',
+  recentAction: { actionType: 'assigned', timestamp: '2023-10-27' },
   actions: [mockSuccessfulLinkedLearnerAction, mockSuccessfulNotifiedAction],
   errorReason: null,
   assignmentConfiguration: expect.any(Object),
-  earliestPossibleExpiration: { date: dayjs().add(5, "days").toISOString() },
+  earliestPossibleExpiration: { date: dayjs().add(5, 'days').toISOString() },
 };
 const createMockLearnerContentAssignment = () => ({
   ...mockLearnerContentAssignment,
   uuid: uuidv4(),
-  learnerEmail: "example@edx.org",
+  learnerEmail: 'example@edx.org',
 });
 const mockEnrollmentTransactionReversal = {
-  uuid: "test-transaction-reversal-uuid",
-  created: "2023-10-31",
+  uuid: 'test-transaction-reversal-uuid',
+  created: '2023-10-31',
 };
 const mockEnrollmentTransaction = {
-  uuid: "test-transaction-uuid",
-  enrollmentDate: "2023-10-28",
+  uuid: 'test-transaction-uuid',
+  enrollmentDate: '2023-10-28',
   courseKey: mockCourseKey,
   courseTitle: mockContentTitle,
   userEmail: mockLearnerEmail,
-  fulfillmentIdentifier: "test-fulfillment-identifier",
+  fulfillmentIdentifier: 'test-fulfillment-identifier',
   courseListPrice: 100,
   reversal: null,
 };
 const mockEnrollmentTransactionWithReversal = {
   ...mockEnrollmentTransaction,
-  uuid: "test-transaction-with-reversal-uuid",
+  uuid: 'test-transaction-with-reversal-uuid',
   userEmail: mockSecondLearnerEmail,
   reversal: mockEnrollmentTransactionReversal,
 };
 
 const mockFailedCancelledLearnerAction = {
-  actionType: "cancelled",
+  actionType: 'cancelled',
   completedAt: null,
-  errorReason: "email_error",
+  errorReason: 'email_error',
 };
 
 const mockFailedReminderLearnerAction = {
-  actionType: "reminded",
+  actionType: 'reminded',
   completedAt: null,
-  errorReason: "email_error",
+  errorReason: 'email_error',
 };
 
 const mockFailedRedemptionLearnerAction = {
-  actionType: "redeemed",
+  actionType: 'redeemed',
   completedAt: null,
-  errorReason: "enrollment_error",
+  errorReason: 'enrollment_error',
 };
 
 const mockApprovedRequest = {
-  uuid: "test-approved-request-uuid",
+  uuid: 'test-approved-request-uuid',
   email: mockLearnerEmail,
   courseTitle: mockContentTitle,
   courseId: mockCourseKey,
   amount: 199,
-  requestDate: "Oct 27, 2023",
-  requestStatus: "approved",
-  lastActionStatus: "waiting_for_learner",
+  requestDate: 'Oct 27, 2023',
+  requestStatus: 'approved',
+  lastActionStatus: 'waiting_for_learner',
   lastActionErrorReason: undefined,
   latestAction: {
-    status: "approved",
-    timestamp: "2023-10-27",
-    recentAction: "approved",
+    status: 'approved',
+    timestamp: '2023-10-27',
+    recentAction: 'approved',
   },
-  learnerRequestState: "waiting",
-  lastActionDate: "Oct 27, 2023",
+  learnerRequestState: 'waiting',
+  lastActionDate: 'Oct 27, 2023',
 };
 
 const createMockApprovedRequest = () => ({
   ...mockApprovedRequest,
   uuid: uuidv4(),
-  email: "example@edx.org",
+  email: 'example@edx.org',
 });
 
 const mockEmptyApprovedRequests = {
@@ -274,7 +274,7 @@ const BudgetDetailPageWrapper = ({
   );
 };
 
-describe("<BudgetDetailPage />", () => {
+describe('<BudgetDetailPage />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
@@ -297,7 +297,7 @@ describe("<BudgetDetailPage />", () => {
 
     // Mock useEnterpriseBudgets to return an empty array to prevent the forEach error
     const { useEnterpriseBudgets } = jest.requireMock(
-      "../../EnterpriseSubsidiesContext/data/hooks",
+      '../../EnterpriseSubsidiesContext/data/hooks',
     );
     useEnterpriseBudgets.mockReturnValue({
       data: [],
@@ -320,16 +320,16 @@ describe("<BudgetDetailPage />", () => {
     useEnterpriseGroup.mockReturnValue({
       data: {
         appliesToAllContexts: true,
-        enterpriseCustomer: "test-customer-uuid",
-        name: "test-name",
-        uuid: "test-uuid",
+        enterpriseCustomer: 'test-customer-uuid',
+        name: 'test-name',
+        uuid: 'test-uuid',
       },
     });
 
     useEnterpriseCustomer.mockReturnValue({
       data: {
-        uuid: "test-customer-uuid",
-        activeIntegrations: ["BLACKBOARD"],
+        uuid: 'test-customer-uuid',
+        activeIntegrations: ['BLACKBOARD'],
       },
     });
 
@@ -343,11 +343,11 @@ describe("<BudgetDetailPage />", () => {
 
     useAlgoliaSearch.mockReturnValue({
       isCatalogQueryFiltersEnabled: true,
-      securedAlgoliaApiKey: "mock-secured-algolia-api-key",
+      securedAlgoliaApiKey: 'mock-secured-algolia-api-key',
       isLoading: false,
-      searchClient: algoliasearch("test-app-id", "test-api-key"),
+      searchClient: algoliasearch('test-app-id', 'test-api-key'),
       catalogUuidsToCatalogQueryUuids: {
-        [mockSubsidyAccessPolicyUUID]: "test-catalog-query-uuid",
+        [mockSubsidyAccessPolicyUUID]: 'test-catalog-query-uuid',
       },
     });
 
@@ -379,12 +379,12 @@ describe("<BudgetDetailPage />", () => {
     });
   });
 
-  it("renders page not found messaging if budget is a subsidy access policy, but the REST API returns a 404", () => {
+  it('renders page not found messaging if budget is a subsidy access policy, but the REST API returns a 404', () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
-      budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-      activeTabKey: "activity",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
+      budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -396,17 +396,17 @@ describe("<BudgetDetailPage />", () => {
       data: mockEmptyStateBudgetDetailActivityOverview,
     });
     renderWithRouter(<BudgetDetailPageWrapper />);
-    expect(screen.getByText("404", { selector: "h1" }));
+    expect(screen.getByText('404', { selector: 'h1' }));
   });
 
-  it.each([{ displayName: null }, { displayName: "Test Budget Display Name" }])(
-    "renders budget header data (%s)",
+  it.each([{ displayName: null }, { displayName: 'Test Budget Display Name' }])(
+    'renders budget header data (%s)',
     ({ displayName }) => {
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
-        budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-        activeTabKey: "activity",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
+        budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -425,15 +425,15 @@ describe("<BudgetDetailPage />", () => {
         isLoading: false,
         data: mockEmptyStateBudgetDetailActivityOverview,
       });
-      const expectedDisplayName = displayName || "Overview";
+      const expectedDisplayName = displayName || 'Overview';
       renderWithRouter(<BudgetDetailPageWrapper />);
 
       // Hero
-      expect(screen.getByText("Learner Credit Management"));
+      expect(screen.getByText('Learner Credit Management'));
       // Breadcrumb
-      expect(screen.getByText(expectedDisplayName, { selector: "li" }));
+      expect(screen.getByText(expectedDisplayName, { selector: 'li' }));
       // Page heading
-      expect(screen.getByText(expectedDisplayName, { selector: "h2" }));
+      expect(screen.getByText(expectedDisplayName, { selector: 'h2' }));
     },
   );
 
@@ -459,8 +459,8 @@ describe("<BudgetDetailPage />", () => {
           mockAssignableSubsidyAccessPolicy.aggregates.spendAvailableUsd,
         ),
         utilized: formatPrice(
-          mockAssignableSubsidyAccessPolicy.aggregates.amountAllocatedUsd +
-            mockAssignableSubsidyAccessPolicy.aggregates.amountRedeemedUsd,
+          mockAssignableSubsidyAccessPolicy.aggregates.amountAllocatedUsd
+            + mockAssignableSubsidyAccessPolicy.aggregates.amountRedeemedUsd,
         ),
         limit: formatPrice(mockAssignableSubsidyAccessPolicy.spendLimit / 100),
         allocated: formatPrice(
@@ -484,8 +484,8 @@ describe("<BudgetDetailPage />", () => {
         ),
         utilized: formatPrice(
           mockAssignableSubsidyAccessPolicyWithNoUtilization.aggregates
-            .amountAllocatedUsd +
-            mockAssignableSubsidyAccessPolicyWithNoUtilization.aggregates
+            .amountAllocatedUsd
+            + mockAssignableSubsidyAccessPolicyWithNoUtilization.aggregates
               .amountRedeemedUsd,
         ),
         limit: formatPrice(
@@ -515,13 +515,13 @@ describe("<BudgetDetailPage />", () => {
         ),
         utilized: formatPrice(
           mockAssignableSubsidyAccessPolicyWithSpendNoAllocations.aggregates
-            .amountAllocatedUsd +
-            mockAssignableSubsidyAccessPolicyWithSpendNoAllocations.aggregates
+            .amountAllocatedUsd
+            + mockAssignableSubsidyAccessPolicyWithSpendNoAllocations.aggregates
               .amountRedeemedUsd,
         ),
         limit: formatPrice(
-          mockAssignableSubsidyAccessPolicyWithSpendNoAllocations.spendLimit /
-            100,
+          mockAssignableSubsidyAccessPolicyWithSpendNoAllocations.spendLimit
+            / 100,
         ),
         allocated: formatPrice(
           mockAssignableSubsidyAccessPolicyWithSpendNoAllocations.aggregates
@@ -546,8 +546,8 @@ describe("<BudgetDetailPage />", () => {
         ),
         utilized: formatPrice(
           mockAssignableSubsidyAccessPolicyWithSpendNoRedeemed.aggregates
-            .amountAllocatedUsd +
-            mockAssignableSubsidyAccessPolicyWithSpendNoRedeemed.aggregates
+            .amountAllocatedUsd
+            + mockAssignableSubsidyAccessPolicyWithSpendNoRedeemed.aggregates
               .amountRedeemedUsd,
         ),
         limit: formatPrice(
@@ -607,7 +607,7 @@ describe("<BudgetDetailPage />", () => {
       isLoading: false,
     },
   ])(
-    "render budget banner data (%s)",
+    'render budget banner data (%s)',
     async ({
       subsidyAccessPolicy,
       subsidySummary,
@@ -618,10 +618,10 @@ describe("<BudgetDetailPage />", () => {
       const user = userEvent.setup();
 
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
-        budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-        activeTabKey: "activity",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
+        budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -664,7 +664,7 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
 
       if (isLoading) {
-        expect(screen.getByTestId("budget-detail-skeleton"));
+        expect(screen.getByTestId('budget-detail-skeleton'));
       }
 
       if (subsidyAccessPolicy?.isAssignable) {
@@ -674,49 +674,49 @@ describe("<BudgetDetailPage />", () => {
         const utilized = redeemed + allocated;
 
         if (utilized > 0) {
-          await user.click(screen.getByText("Utilization details"));
+          await user.click(screen.getByText('Utilization details'));
 
           expect(
-            screen.getByTestId("budget-utilization-amount"),
+            screen.getByTestId('budget-utilization-amount'),
           ).toHaveTextContent(expected.utilized);
           expect(
-            screen.getByTestId("budget-utilization-assigned"),
+            screen.getByTestId('budget-utilization-assigned'),
           ).toHaveTextContent(expected.allocated);
           expect(
-            screen.getByTestId("budget-utilization-spent"),
+            screen.getByTestId('budget-utilization-spent'),
           ).toHaveTextContent(expected.redeemed);
 
           if (allocated <= 0) {
             expect(
-              screen.queryByText("View assigned activity"),
+              screen.queryByText('View assigned activity'),
             ).not.toBeInTheDocument();
           }
 
           if (redeemed <= 0) {
             expect(
-              screen.queryByText("View spent activity"),
+              screen.queryByText('View spent activity'),
             ).not.toBeInTheDocument();
           }
         }
       }
 
       if ((subsidyAccessPolicy || subsidySummary) && !isLoading) {
-        expect(screen.getByText(expected.displayName, { selector: "h2" }));
+        expect(screen.getByText(expected.displayName, { selector: 'h2' }));
 
-        expect(screen.getByTestId("budget-detail-available")).toHaveTextContent(
+        expect(screen.getByTestId('budget-detail-available')).toHaveTextContent(
           expected.spend,
         );
-        expect(screen.getByTestId("budget-detail-utilized")).toHaveTextContent(
+        expect(screen.getByTestId('budget-detail-utilized')).toHaveTextContent(
           `Utilized ${expected.utilized}`,
         );
-        expect(screen.getByTestId("budget-detail-limit")).toHaveTextContent(
+        expect(screen.getByTestId('budget-detail-limit')).toHaveTextContent(
           expected.limit,
         );
       }
     },
   );
 
-  it("does not render bne zero state when the groups feature flag disabled", async () => {
+  it('does not render bne zero state when the groups feature flag disabled', async () => {
     const initialState = {
       portalConfiguration: {
         ...initialStoreState.portalConfiguration,
@@ -724,10 +724,10 @@ describe("<BudgetDetailPage />", () => {
       },
     };
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
-      budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-      activeTabKey: "activity",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
+      budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -756,12 +756,12 @@ describe("<BudgetDetailPage />", () => {
     // Overview empty state (no content assignments, no spent transactions)
     expect(
       screen.queryByText(
-        "No budget activity yet? Invite members to browse the catalog and enroll!",
+        'No budget activity yet? Invite members to browse the catalog and enroll!',
       ),
     ).not.toBeInTheDocument();
   });
 
-  it("does not render bne zero state when the customer does not have any group associations", async () => {
+  it('does not render bne zero state when the customer does not have any group associations', async () => {
     const initialState = {
       portalConfiguration: {
         ...initialStoreState.portalConfiguration,
@@ -769,10 +769,10 @@ describe("<BudgetDetailPage />", () => {
       },
     };
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
-      budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-      activeTabKey: "activity",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
+      budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -801,21 +801,21 @@ describe("<BudgetDetailPage />", () => {
     // Overview empty state (no content assignments, no spent transactions)
     expect(
       screen.queryByText(
-        "No budget activity yet? Invite members to browse the catalog and enroll!",
+        'No budget activity yet? Invite members to browse the catalog and enroll!',
       ),
     ).not.toBeInTheDocument();
   });
 
   it.each([{ isLargeViewport: true }, { isLargeViewport: false }])(
-    "displays assignable budget activity overview empty state",
+    'displays assignable budget activity overview empty state',
     async ({ isLargeViewport }) => {
       const user = userEvent.setup();
       useIsLargeOrGreater.mockReturnValue(isLargeViewport);
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
-        budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-        activeTabKey: "activity",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
+        budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -838,35 +838,31 @@ describe("<BudgetDetailPage />", () => {
 
       // Overview empty state (no content assignments, no spent transactions)
       expect(
-        screen.getByText("No budget activity yet? Assign a course!"),
+        screen.getByText('No budget activity yet? Assign a course!'),
       ).toBeInTheDocument();
       const illustrationTestIds = [
-        "find-the-right-course-illustration",
-        "name-your-learners-illustration",
-        "confirm-spend-illustration",
+        'find-the-right-course-illustration',
+        'name-your-learners-illustration',
+        'confirm-spend-illustration',
       ];
-      illustrationTestIds.forEach((testId) =>
-        expect(screen.getByTestId(testId)).toBeInTheDocument(),
-      );
+      illustrationTestIds.forEach((testId) => expect(screen.getByTestId(testId)).toBeInTheDocument());
       expect(
-        screen.getByText("Get started", { selector: "a" }),
+        screen.getByText('Get started', { selector: 'a' }),
       ).toBeInTheDocument();
-      await user.click(screen.getByText("Get started"));
-      await waitFor(() =>
-        expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1),
-      );
+      await user.click(screen.getByText('Get started'));
+      await waitFor(() => expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1));
     },
   );
 
   it.each([{ isLargeViewport: true }, { isLargeViewport: false }])(
-    "displays bnr budget activity overview empty state",
+    'displays bnr budget activity overview empty state',
     async ({ isLargeViewport }) => {
       useIsLargeOrGreater.mockReturnValue(isLargeViewport);
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
-        budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-        activeTabKey: "activity",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
+        budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -904,32 +900,30 @@ describe("<BudgetDetailPage />", () => {
       // Overview empty state (no content assignments, no spent transactions)
       expect(
         screen.getByText(
-          "No budget activity yet? Invite members to browse the catalog and enroll!",
+          'No budget activity yet? Invite members to browse the catalog and enroll!',
         ),
       ).toBeInTheDocument();
       const illustrationTestIds = [
-        "name-your-members-illustration",
-        "members-browse-illustration",
-        "enroll-and-spend-illustration",
+        'name-your-members-illustration',
+        'members-browse-illustration',
+        'enroll-and-spend-illustration',
       ];
-      illustrationTestIds.forEach((testId) =>
-        expect(screen.getByTestId(testId)).toBeInTheDocument(),
-      );
+      illustrationTestIds.forEach((testId) => expect(screen.getByTestId(testId)).toBeInTheDocument());
       expect(
-        screen.getByText("Get started", { selector: "a" }),
+        screen.getByText('Get started', { selector: 'a' }),
       ).toBeInTheDocument();
     },
   );
 
   it.each([{ isLargeViewport: true }, { isLargeViewport: false }])(
-    "displays learner credit bnr budget activity overview empty state",
+    'displays learner credit bnr budget activity overview empty state',
     async ({ isLargeViewport }) => {
       useIsLargeOrGreater.mockReturnValue(isLargeViewport);
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
-        budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9d",
-        activeTabKey: "activity",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
+        budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9d',
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -970,29 +964,27 @@ describe("<BudgetDetailPage />", () => {
       // Overview empty state (no content assignments)
       expect(
         screen.getByText(
-          "No budget activity yet? Invite learners to browse the catalog and request content!",
+          'No budget activity yet? Invite learners to browse the catalog and request content!',
         ),
       ).toBeInTheDocument();
       const illustrationTestIds = [
-        "find-course-illustration",
-        "invite-learner-illustration",
-        "approve-request-illustration",
+        'find-course-illustration',
+        'invite-learner-illustration',
+        'approve-request-illustration',
       ];
-      illustrationTestIds.forEach((testId) =>
-        expect(screen.getByTestId(testId)).toBeInTheDocument(),
-      );
+      illustrationTestIds.forEach((testId) => expect(screen.getByTestId(testId)).toBeInTheDocument());
       expect(
-        screen.getByText("Get started", { selector: "a" }),
+        screen.getByText('Get started', { selector: 'a' }),
       ).toBeInTheDocument();
     },
   );
 
-  it("still render bne zero state if there are members but no spend", async () => {
+  it('still render bne zero state if there are members but no spend', async () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
-      budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-      activeTabKey: "activity",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
+      budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1005,9 +997,9 @@ describe("<BudgetDetailPage />", () => {
         next: null,
         numPages: 1,
         results: {
-          enterpriseGroupMembershipUuid: "cde2e374-032f-4c08-8c0d-bf3205fa7c7e",
+          enterpriseGroupMembershipUuid: 'cde2e374-032f-4c08-8c0d-bf3205fa7c7e',
           learnerId: 4382,
-          memberDetails: { userEmail: "foobar@test.com", userName: "ayy lmao" },
+          memberDetails: { userEmail: 'foobar@test.com', userName: 'ayy lmao' },
         },
       },
     });
@@ -1034,22 +1026,22 @@ describe("<BudgetDetailPage />", () => {
     // Overview empty state (no content assignments, no spent transactions)
     expect(
       screen.getByText(
-        "No budget activity yet? Invite members to browse the catalog and enroll!",
+        'No budget activity yet? Invite members to browse the catalog and enroll!',
       ),
     ).toBeInTheDocument();
 
     expect(
-      screen.getByText("Invite more members", { selector: "a" }),
+      screen.getByText('Invite more members', { selector: 'a' }),
     ).toBeInTheDocument();
   });
 
-  it("does not display bnr budget activity overview empty state and displays empty spent table", async () => {
+  it('does not display bnr budget activity overview empty state and displays empty spent table', async () => {
     useIsLargeOrGreater.mockReturnValue(true);
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
-      budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-      activeTabKey: "activity",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
+      budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1091,10 +1083,10 @@ describe("<BudgetDetailPage />", () => {
 
     // Display spent table when there is no spent activity but appliesToAllContext is true
     expect(
-      screen.getByText("Search by enrollment details"),
+      screen.getByText('Search by enrollment details'),
     ).toBeInTheDocument();
     expect(
-      screen.queryByText("Invite more members", { selector: "a" }),
+      screen.queryByText('Invite more members', { selector: 'a' }),
     ).not.toBeInTheDocument();
   });
 
@@ -1144,10 +1136,10 @@ describe("<BudgetDetailPage />", () => {
     'displays spend table in "Activity" tab with empty results (%s)',
     async ({ subsidyAccessPolicy, enterpriseOfferMetadata, budgetId }) => {
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useSubsidySummaryAnalyticsApi.mockReturnValue({
         isLoading: false,
@@ -1197,13 +1189,13 @@ describe("<BudgetDetailPage />", () => {
     },
   );
 
-  it("renders with assigned table empty state with spent table and catalog tab available for assignable budgets", async () => {
+  it('renders with assigned table empty state with spent table and catalog tab available for assignable budgets', async () => {
     const user = userEvent.setup();
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1250,29 +1242,29 @@ describe("<BudgetDetailPage />", () => {
 
     // Assigned table empty state is visible within Activity tab contents
     expect(
-      screen.getByText("Assign more courses to maximize your budget."),
+      screen.getByText('Assign more courses to maximize your budget.'),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("available balance of $10,000", { exact: false }),
+      screen.getByText('available balance of $10,000', { exact: false }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Assign courses", { selector: "a" }),
+      screen.getByText('Assign courses', { selector: 'a' }),
     ).toBeInTheDocument();
 
     // Catalog tab exists and is NOT active
-    expect(screen.getByText("Catalog").getAttribute("aria-selected")).toBe(
-      "false",
+    expect(screen.getByText('Catalog').getAttribute('aria-selected')).toBe(
+      'false',
     );
 
     // Spend table renders rows of data
-    const spentSection = within(screen.getByText("Spent").closest("section"));
+    const spentSection = within(screen.getByText('Spent').closest('section'));
     expect(
-      spentSection.queryByText("No results found"),
+      spentSection.queryByText('No results found'),
     ).not.toBeInTheDocument();
     expect(spentSection.getByText(mockLearnerEmail)).toBeInTheDocument();
     expect(spentSection.getByText(mockSecondLearnerEmail)).toBeInTheDocument();
     expect(
-      spentSection.queryAllByText(mockContentTitle, { selector: "a" }),
+      spentSection.queryAllByText(mockContentTitle, { selector: 'a' }),
     ).toHaveLength(2);
     expect(
       spentSection.queryAllByText(
@@ -1282,7 +1274,7 @@ describe("<BudgetDetailPage />", () => {
 
     // Includes reversal messaging on table row, when appropriate
     const transactionRowWithReversal = within(
-      spentSection.getByText(mockSecondLearnerEmail).closest("tr"),
+      spentSection.getByText(mockSecondLearnerEmail).closest('tr'),
     );
     expect(
       transactionRowWithReversal.getByText(
@@ -1296,19 +1288,19 @@ describe("<BudgetDetailPage />", () => {
     ).toBeInTheDocument();
 
     await user.click(
-      spentSection.queryAllByText(mockContentTitle, { selector: "a" })[0],
+      spentSection.queryAllByText(mockContentTitle, { selector: 'a' })[0],
     );
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
   });
 
-  it("renders with assigned table data and handles table refresh", async () => {
+  it('renders with assigned table data and handles table refresh', async () => {
     const user = userEvent.setup();
     const NUMBER_OF_ASSIGNMENTS_TO_GENERATE = 60;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1345,7 +1337,7 @@ describe("<BudgetDetailPage />", () => {
         count: NUMBER_OF_ASSIGNMENTS_TO_GENERATE,
         results: mockAssignmentsList,
         learnerStateCounts: [
-          { learnerState: "waiting", count: NUMBER_OF_ASSIGNMENTS_TO_GENERATE },
+          { learnerState: 'waiting', count: NUMBER_OF_ASSIGNMENTS_TO_GENERATE },
         ],
         numPages: Math.floor(NUMBER_OF_ASSIGNMENTS_TO_GENERATE / PAGE_SIZE),
         currentPage: 1,
@@ -1361,32 +1353,32 @@ describe("<BudgetDetailPage />", () => {
 
     // Assigned table is visible within Activity tab contents
     const assignedSection = within(
-      screen.getByText("Assigned").closest("section"),
+      screen.getByText('Assigned').closest('section'),
     );
     expect(
-      assignedSection.queryByText("No results found"),
+      assignedSection.queryByText('No results found'),
     ).not.toBeInTheDocument();
     expect(assignedSection.getByText(mockLearnerEmail)).toBeInTheDocument();
     const viewCourseCTA = assignedSection.queryAllByText(mockContentTitle, {
-      selector: "a",
+      selector: 'a',
     })[0];
     expect(viewCourseCTA).toBeInTheDocument();
-    expect(viewCourseCTA.getAttribute("href")).toEqual(
+    expect(viewCourseCTA.getAttribute('href')).toEqual(
       `${process.env.ENTERPRISE_LEARNER_PORTAL_URL}/${enterpriseSlug}/course/${mockCourseKey}`,
     );
-    expect(assignedSection.queryAllByText("-$199")).toHaveLength(PAGE_SIZE);
-    expect(assignedSection.queryAllByText("Waiting for learner")).toHaveLength(
+    expect(assignedSection.queryAllByText('-$199')).toHaveLength(PAGE_SIZE);
+    expect(assignedSection.queryAllByText('Waiting for learner')).toHaveLength(
       PAGE_SIZE,
     );
     expect(
-      assignedSection.queryAllByText(`Assigned: ${formatDate("2023-10-27")}`),
+      assignedSection.queryAllByText(`Assigned: ${formatDate('2023-10-27')}`),
     ).toHaveLength(PAGE_SIZE);
 
     // Assert the "Select all X" label count is correct, after selecting a row. This verifies the
     // temporary patch of Paragon is working as intended. If this test fails, it may mean Paragon
     // was upgraded to a version that does not yet contain a fix for the underlying bug related to
     // the incorrect "Select all X" count.
-    const selectAllCheckbox = screen.queryAllByRole("checkbox")[0];
+    const selectAllCheckbox = screen.queryAllByRole('checkbox')[0];
     await user.click(selectAllCheckbox);
 
     await waitFor(() => {
@@ -1397,7 +1389,7 @@ describe("<BudgetDetailPage />", () => {
       ).toBeInTheDocument();
     });
 
-    const selectAllCheckbox2 = screen.queryAllByRole("checkbox")[0];
+    const selectAllCheckbox2 = screen.queryAllByRole('checkbox')[0];
     // Unselect the checkbox the "Refresh" table action appears
     await user.click(selectAllCheckbox2);
 
@@ -1405,7 +1397,7 @@ describe("<BudgetDetailPage />", () => {
       pageIndex: DEFAULT_PAGE,
       pageSize: PAGE_SIZE,
       filters: [],
-      sortBy: [{ id: "recentAction", desc: true }], // default table sort order
+      sortBy: [{ id: 'recentAction', desc: true }], // default table sort order
     };
     expect(mockFetchContentAssignments).toHaveBeenCalledTimes(1); // called once on initial render
     expect(mockFetchContentAssignments).toHaveBeenCalledWith(
@@ -1413,8 +1405,8 @@ describe("<BudgetDetailPage />", () => {
     );
 
     // Verify "Refresh" behavior
-    const refreshCTA = assignedSection.getByText("Refresh", {
-      selector: "button",
+    const refreshCTA = assignedSection.getByText('Refresh', {
+      selector: 'button',
     });
     expect(refreshCTA).toBeInTheDocument();
     await user.click(refreshCTA);
@@ -1428,17 +1420,17 @@ describe("<BudgetDetailPage />", () => {
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
   }, 60000);
 
-  it("cancels a approved learner credit request", async () => {
+  it('cancels a approved learner credit request', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.cancelApprovedBnrSubsidyRequest.mockResolvedValueOnce(
       { status: 200 },
     );
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 60;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1490,29 +1482,29 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     // First, open the dropdown menu
     const dropdownToggle = screen.getByTestId(
-      "dropdown-toggle-test-approved-request-uuid",
+      'dropdown-toggle-test-approved-request-uuid',
     );
     expect(dropdownToggle).toBeInTheDocument();
     await user.click(dropdownToggle);
 
     // Then find and click the cancel approval item
     const cancelIconButton = screen.getByTestId(
-      "cancel-approval-test-approved-request-uuid",
+      'cancel-approval-test-approved-request-uuid',
     );
     expect(cancelIconButton).toBeInTheDocument();
     await user.click(cancelIconButton);
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
 
-    const modalDialog = screen.getByRole("dialog");
+    const modalDialog = screen.getByRole('dialog');
     expect(modalDialog).toBeInTheDocument();
-    expect(screen.getByText("Cancel approval?")).toBeInTheDocument();
+    expect(screen.getByText('Cancel approval?')).toBeInTheDocument();
 
-    const cancelDialogButton = getButtonElement("Cancel approval");
+    const cancelDialogButton = getButtonElement('Cancel approval');
     await user.click(cancelDialogButton);
 
     await waitFor(() => {
@@ -1520,24 +1512,24 @@ describe("<BudgetDetailPage />", () => {
         EnterpriseAccessApiService.cancelApprovedBnrSubsidyRequest,
       ).toHaveBeenCalledWith({
         enterpriseId: enterpriseUUID,
-        subsidyRequestUUID: "test-approved-request-uuid",
+        subsidyRequestUUID: 'test-approved-request-uuid',
       });
     });
 
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
   }, 30000);
 
-  it("reminds an approved learner credit request", async () => {
+  it('reminds an approved learner credit request', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.remindApprovedBnrSubsidyRequests.mockResolvedValueOnce(
       { status: 200 },
     );
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 60;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1589,36 +1581,36 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     // First, open the dropdown menu
     const dropdownToggle = screen.getByTestId(
-      "dropdown-toggle-test-approved-request-uuid",
+      'dropdown-toggle-test-approved-request-uuid',
     );
     expect(dropdownToggle).toBeInTheDocument();
     await user.click(dropdownToggle);
 
     // Then find and click the remind approval item
     const remindIconButton = screen.getByTestId(
-      "remind-approval-test-approved-request-uuid",
+      'remind-approval-test-approved-request-uuid',
     );
     expect(remindIconButton).toBeInTheDocument();
     await user.click(remindIconButton);
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
 
-    const modalDialog = screen.getByRole("dialog");
+    const modalDialog = screen.getByRole('dialog');
     expect(modalDialog).toBeInTheDocument();
-    expect(screen.getByText("Remind learner?")).toBeInTheDocument();
+    expect(screen.getByText('Remind learner?')).toBeInTheDocument();
 
-    const remindDialogButton = getButtonElement("Send reminder");
+    const remindDialogButton = getButtonElement('Send reminder');
     await user.click(remindDialogButton);
 
     await waitFor(() => {
       expect(
         EnterpriseAccessApiService.remindApprovedBnrSubsidyRequests,
       ).toHaveBeenCalledWith({
-        subsidyRequestUUIDs: ["test-approved-request-uuid"],
+        subsidyRequestUUIDs: ['test-approved-request-uuid'],
         enterpriseId: enterpriseUUID,
       });
     });
@@ -1626,13 +1618,13 @@ describe("<BudgetDetailPage />", () => {
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
   }, 30000);
 
-  it("renders with approved requests table data and verifies first field data", async () => {
+  it('renders with approved requests table data and verifies first field data', async () => {
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 60;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1684,21 +1676,21 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     const pendingSection = within(
-      screen.getByText("Pending").closest("section"),
+      screen.getByText('Pending').closest('section'),
     );
 
-    expect(pendingSection.getByText("Request details")).toBeInTheDocument();
-    expect(pendingSection.getByText("Amount")).toBeInTheDocument();
-    expect(pendingSection.getByText("Status")).toBeInTheDocument();
-    expect(pendingSection.getByText("Recent action")).toBeInTheDocument();
+    expect(pendingSection.getByText('Request details')).toBeInTheDocument();
+    expect(pendingSection.getByText('Amount')).toBeInTheDocument();
+    expect(pendingSection.getByText('Status')).toBeInTheDocument();
+    expect(pendingSection.getByText('Recent action')).toBeInTheDocument();
 
-    const tableElement = pendingSection.getByRole("table");
-    const firstDataRow = within(tableElement).getAllByRole("row")[1]; // Skip header row
-    const firstRowCells = within(firstDataRow).getAllByRole("cell");
+    const tableElement = pendingSection.getByRole('table');
+    const firstDataRow = within(tableElement).getAllByRole('row')[1]; // Skip header row
+    const firstRowCells = within(firstDataRow).getAllByRole('cell');
 
     // Note: firstRowCells[0] is the checkbox column from isSelectable
     const requestDetailsCell = firstRowCells[1];
@@ -1710,25 +1702,25 @@ describe("<BudgetDetailPage />", () => {
     ).toBeInTheDocument();
 
     const amountCell = firstRowCells[2];
-    expect(within(amountCell).getByText("-$1.99")).toBeInTheDocument();
+    expect(within(amountCell).getByText('-$1.99')).toBeInTheDocument();
 
     const statusCell = firstRowCells[3];
     expect(
-      within(statusCell).getByRole("button", { name: "Waiting for learner" }),
+      within(statusCell).getByRole('button', { name: 'Waiting for learner' }),
     ).toBeInTheDocument();
 
     const recentActionCell = firstRowCells[4];
     expect(
-      within(recentActionCell).getByText("Approved: Oct 27, 2023"),
+      within(recentActionCell).getByText('Approved: Oct 27, 2023'),
     ).toBeInTheDocument();
   }, 30000);
 
-  it("handles new learner request states from PR #1643", async () => {
+  it('handles new learner request states from PR #1643', async () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1756,18 +1748,18 @@ describe("<BudgetDetailPage />", () => {
     const mockRequestsWithNewStates = [
       {
         ...mockApprovedRequest,
-        uuid: "request-1",
-        learnerRequestState: "failed",
-        lastActionErrorReason: "failed_cancellation",
-        latestAction: { status: "failed", recentAction: "cancelled" },
-        lastActionDate: "Oct 26, 2023",
+        uuid: 'request-1',
+        learnerRequestState: 'failed',
+        lastActionErrorReason: 'failed_cancellation',
+        latestAction: { status: 'failed', recentAction: 'cancelled' },
+        lastActionDate: 'Oct 26, 2023',
       },
       {
         ...mockApprovedRequest,
-        uuid: "request-2",
-        learnerRequestState: "accepted",
-        latestAction: { status: "accepted", recentAction: "accepted" },
-        lastActionDate: "Oct 28, 2023",
+        uuid: 'request-2',
+        learnerRequestState: 'accepted',
+        latestAction: { status: 'accepted', recentAction: 'accepted' },
+        lastActionDate: 'Oct 28, 2023',
       },
     ];
 
@@ -1793,49 +1785,49 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     const pendingSection = within(
-      screen.getByText("Pending").closest("section"),
+      screen.getByText('Pending').closest('section'),
     );
-    const tableElement = pendingSection.getByRole("table");
-    const dataRows = within(tableElement).getAllByRole("row").slice(1);
+    const tableElement = pendingSection.getByRole('table');
+    const dataRows = within(tableElement).getAllByRole('row').slice(1);
 
     // Test new status labels from LEARNER_CREDIT_REQUEST_STATE_LABELS
     // Note: firstRowCells[0] is the checkbox column from isSelectable
-    const firstRowCells = within(dataRows[0]).getAllByRole("cell");
+    const firstRowCells = within(dataRows[0]).getAllByRole('cell');
     const failedStatusCell = firstRowCells[3];
     expect(
-      within(failedStatusCell).getByText("Failed: Cancellation"),
+      within(failedStatusCell).getByText('Failed: Cancellation'),
     ).toBeInTheDocument();
 
-    const secondRowCells = within(dataRows[1]).getAllByRole("cell");
+    const secondRowCells = within(dataRows[1]).getAllByRole('cell');
     const acceptedStatusCell = secondRowCells[3];
     expect(
-      within(acceptedStatusCell).getByText("Redeemed By Learner"),
+      within(acceptedStatusCell).getByText('Redeemed By Learner'),
     ).toBeInTheDocument();
   }, 30000);
 
   it.skip.each([
     {
-      sortByColumnHeader: "Amount",
-      expectedSortBy: [{ id: "amount", desc: false }],
+      sortByColumnHeader: 'Amount',
+      expectedSortBy: [{ id: 'amount', desc: false }],
     },
     {
-      sortByColumnHeader: "Recent action",
-      expectedSortBy: [{ id: "recentAction", desc: true }],
+      sortByColumnHeader: 'Recent action',
+      expectedSortBy: [{ id: 'recentAction', desc: true }],
     },
   ])(
-    "renders sortable approved requests table data",
+    'renders sortable approved requests table data',
     async ({ sortByColumnHeader, expectedSortBy }) => {
       const user = userEvent.setup();
       const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 60;
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -1886,13 +1878,13 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
 
       const pendingSection = within(
-        screen.getByText("Pending").closest("section"),
+        screen.getByText('Pending').closest('section'),
       );
       const expectedDefaultTableFetchDataArgs = {
         pageIndex: DEFAULT_PAGE,
         pageSize: PAGE_SIZE,
-        filters: [{ id: "requestStatus", value: ["approved"] }], // default filter for approved requests
-        sortBy: [{ id: "recentAction", desc: true }], // default table sort order
+        filters: [{ id: 'requestStatus', value: ['approved'] }], // default filter for approved requests
+        sortBy: [{ id: 'recentAction', desc: true }], // default table sort order
       };
       const expectedDefaultTableFetchDataArgsAfterSort = {
         ...expectedDefaultTableFetchDataArgs,
@@ -1913,13 +1905,13 @@ describe("<BudgetDetailPage />", () => {
     },
   );
 
-  it("renders approved requests table with empty filter choices when no status counts", async () => {
+  it('renders approved requests table with empty filter choices when no status counts', async () => {
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 10;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -1976,23 +1968,23 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     const pendingSection = within(
-      screen.getByText("Pending").closest("section"),
+      screen.getByText('Pending').closest('section'),
     );
-    expect(pendingSection.getByRole("table")).toBeInTheDocument();
+    expect(pendingSection.getByRole('table')).toBeInTheDocument();
   });
 
-  it("renders approved requests table with refresh action and tests click", async () => {
+  it('renders approved requests table with refresh action and tests click', async () => {
     const user = userEvent.setup();
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 5;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2038,23 +2030,23 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Refresh")).toBeInTheDocument();
+    expect(screen.getByText('Refresh')).toBeInTheDocument();
 
-    const refreshButton = screen.getByText("Refresh");
+    const refreshButton = screen.getByText('Refresh');
     await user.click(refreshButton);
     expect(mockFetchLearnerCreditRequests).toHaveBeenCalledTimes(2);
   });
 
-  it("renders approved requests table with empty filter choices when no status counts (tests line 61)", async () => {
+  it('renders approved requests table with empty filter choices when no status counts (tests line 61)', async () => {
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 5;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2102,23 +2094,23 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     const pendingSection = within(
-      screen.getByText("Pending").closest("section"),
+      screen.getByText('Pending').closest('section'),
     );
-    expect(pendingSection.getByRole("table")).toBeInTheDocument();
+    expect(pendingSection.getByRole('table')).toBeInTheDocument();
   });
 
-  it("renders failed cancellation status chip and handles interactions (tests lines 12, 16, 23, 31)", async () => {
+  it('renders failed cancellation status chip and handles interactions (tests lines 12, 16, 23, 31)', async () => {
     const user = userEvent.setup();
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 1;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2145,12 +2137,12 @@ describe("<BudgetDetailPage />", () => {
 
     const mockFailedCancellationRequest = {
       ...mockApprovedRequest,
-      lastActionErrorReason: "failed_cancellation",
+      lastActionErrorReason: 'failed_cancellation',
       latestAction: {
         ...mockApprovedRequest.latestAction,
-        errorReason: "failed_cancellation",
+        errorReason: 'failed_cancellation',
       },
-      learnerRequestState: "failed",
+      learnerRequestState: 'failed',
     };
     useBnrSubsidyRequests.mockReturnValue({
       isLoading: false,
@@ -2174,10 +2166,10 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
-    const failedCancellationChip = screen.getByText("Failed: Cancellation");
+    const failedCancellationChip = screen.getByText('Failed: Cancellation');
     expect(failedCancellationChip).toBeInTheDocument();
 
     await user.click(failedCancellationChip);
@@ -2185,24 +2177,24 @@ describe("<BudgetDetailPage />", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          "This approved request was not canceled. Something went wrong behind the scenes.",
+          'This approved request was not canceled. Something went wrong behind the scenes.',
         ),
       ).toBeInTheDocument();
     });
 
     expect(
-      screen.getByText("Help Center: Learner Selected Content"),
+      screen.getByText('Help Center: Learner Selected Content'),
     ).toBeInTheDocument();
   });
 
-  it("renders failed redemption status chip and handles interactions", async () => {
+  it('renders failed redemption status chip and handles interactions', async () => {
     const user = userEvent.setup();
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 1;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2229,12 +2221,12 @@ describe("<BudgetDetailPage />", () => {
 
     const mockFailedRedemptionRequest = {
       ...mockApprovedRequest,
-      lastActionErrorReason: "failed_redemption",
+      lastActionErrorReason: 'failed_redemption',
       latestAction: {
         ...mockApprovedRequest.latestAction,
-        errorReason: "failed_redemption",
+        errorReason: 'failed_redemption',
       },
-      learnerRequestState: "failed",
+      learnerRequestState: 'failed',
     };
     useBnrSubsidyRequests.mockReturnValue({
       isLoading: false,
@@ -2258,10 +2250,10 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
-    const failedRedemptionChip = screen.getByText("Failed: Redemption");
+    const failedRedemptionChip = screen.getByText('Failed: Redemption');
     expect(failedRedemptionChip).toBeInTheDocument();
 
     await user.click(failedRedemptionChip);
@@ -2269,23 +2261,23 @@ describe("<BudgetDetailPage />", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          "Something went wrong behind the scenes when the learner attempted to redeem the requested course. Associated Learner credit funds have been released into your available balance.",
+          'Something went wrong behind the scenes when the learner attempted to redeem the requested course. Associated Learner credit funds have been released into your available balance.',
         ),
       ).toBeInTheDocument();
     });
 
     expect(
-      screen.getByText("Help Center: Learner Selected Content"),
+      screen.getByText('Help Center: Learner Selected Content'),
     ).toBeInTheDocument();
   });
 
-  it("renders request status cells with different statuses", async () => {
+  it('renders request status cells with different statuses', async () => {
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 3;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2312,19 +2304,19 @@ describe("<BudgetDetailPage />", () => {
     const mockRequestsWithDifferentStatuses = [
       {
         ...mockApprovedRequest,
-        lastActionStatus: "reminded",
-        learnerRequestState: "waiting",
+        lastActionStatus: 'reminded',
+        learnerRequestState: 'waiting',
       },
       {
         ...createMockApprovedRequest(),
-        lastActionStatus: "refunded",
-        lastActionErrorReason: "failed_cancellation",
-        learnerRequestState: "failed",
+        lastActionStatus: 'refunded',
+        lastActionErrorReason: 'failed_cancellation',
+        learnerRequestState: 'failed',
       },
       {
         ...createMockApprovedRequest(),
-        lastActionStatus: "completed",
-        learnerRequestState: "waiting",
+        lastActionStatus: 'completed',
+        learnerRequestState: 'waiting',
       },
     ];
     useBnrSubsidyRequests.mockReturnValue({
@@ -2348,25 +2340,25 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     // Verify basic table structure and status rendering
     const pendingSection = within(
-      screen.getByText("Pending").closest("section"),
+      screen.getByText('Pending').closest('section'),
     );
-    expect(pendingSection.getByRole("table")).toBeInTheDocument();
-    expect(screen.getAllByText("Waiting for learner")).toHaveLength(2);
-    expect(screen.getAllByText("Failed: Cancellation")).toHaveLength(1);
+    expect(pendingSection.getByRole('table')).toBeInTheDocument();
+    expect(screen.getAllByText('Waiting for learner')).toHaveLength(2);
+    expect(screen.getAllByText('Failed: Cancellation')).toHaveLength(1);
   });
 
-  it("handles approved requests table pagination correctly", async () => {
+  it('handles approved requests table pagination correctly', async () => {
     const NUMBER_OF_APPROVE_REQUEST_TO_GENERATE = 50;
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2390,9 +2382,7 @@ describe("<BudgetDetailPage />", () => {
       },
     });
     const mockFetchLearnerCreditRequests = jest.fn();
-    const mockRequestsList = Array.from({ length: PAGE_SIZE }, () =>
-      createMockApprovedRequest(),
-    );
+    const mockRequestsList = Array.from({ length: PAGE_SIZE }, () => createMockApprovedRequest());
     useBnrSubsidyRequests.mockReturnValue({
       isLoading: false,
       bnrRequests: {
@@ -2415,23 +2405,23 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     // Verify table with pagination
     const pendingSection = within(
-      screen.getByText("Pending").closest("section"),
+      screen.getByText('Pending').closest('section'),
     );
-    expect(pendingSection.getByRole("table")).toBeInTheDocument();
-    expect(pendingSection.getAllByRole("row")).toHaveLength(PAGE_SIZE + 1); // +1 for header row
+    expect(pendingSection.getByRole('table')).toBeInTheDocument();
+    expect(pendingSection.getAllByRole('row')).toHaveLength(PAGE_SIZE + 1); // +1 for header row
   });
 
-  it("handles approved requests table loading state", async () => {
+  it('handles approved requests table loading state', async () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2476,23 +2466,23 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     await waitFor(() => {
-      expect(screen.getByText("Pending")).toBeInTheDocument();
+      expect(screen.getByText('Pending')).toBeInTheDocument();
     });
 
     // Verify loading state is handled (table should still render with loading indicator)
     const pendingSection = within(
-      screen.getByText("Pending").closest("section"),
+      screen.getByText('Pending').closest('section'),
     );
-    expect(pendingSection.getByRole("table")).toBeInTheDocument();
+    expect(pendingSection.getByRole('table')).toBeInTheDocument();
   });
 
-  it("renders budget detail activity tab contents with different states", async () => {
+  it('renders budget detail activity tab contents with different states', async () => {
     // Test when there are no approved requests but there are assignments
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2519,7 +2509,7 @@ describe("<BudgetDetailPage />", () => {
       contentAssignments: {
         count: 5,
         results: [mockLearnerContentAssignment],
-        learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+        learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
         numPages: 1,
         currentPage: 1,
       },
@@ -2538,27 +2528,27 @@ describe("<BudgetDetailPage />", () => {
 
     await waitFor(() => {
       // Should render assigned section instead of pending for assignable budget
-      expect(screen.getByText("Assigned")).toBeInTheDocument();
+      expect(screen.getByText('Assigned')).toBeInTheDocument();
     });
 
     // Verify that no pending section is shown for non-BNR budget
-    expect(screen.queryByText("Pending")).not.toBeInTheDocument();
+    expect(screen.queryByText('Pending')).not.toBeInTheDocument();
   });
 
   it.each([
     {
-      sortByColumnHeader: "Amount",
-      expectedSortBy: [{ id: "amount", desc: false }],
+      sortByColumnHeader: 'Amount',
+      expectedSortBy: [{ id: 'amount', desc: false }],
     },
   ])(
-    "renders sortable assigned table data",
+    'renders sortable assigned table data',
     async ({ sortByColumnHeader, expectedSortBy }) => {
       const user = userEvent.setup();
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -2586,7 +2576,7 @@ describe("<BudgetDetailPage />", () => {
         contentAssignments: {
           count: 1,
           results: [mockLearnerContentAssignment],
-          learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+          learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
           numPages: 1,
           currentPage: 1,
         },
@@ -2600,13 +2590,13 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
 
       const assignedSection = within(
-        screen.getByText("Assigned").closest("section"),
+        screen.getByText('Assigned').closest('section'),
       );
       const expectedDefaultTableFetchDataArgs = {
         pageIndex: DEFAULT_PAGE,
         pageSize: PAGE_SIZE,
         filters: [],
-        sortBy: [{ id: "recentAction", desc: true }], // default table sort order
+        sortBy: [{ id: 'recentAction', desc: true }], // default table sort order
       };
       const expectedDefaultTableFetchDataArgsAfterSort = {
         ...expectedDefaultTableFetchDataArgs,
@@ -2631,29 +2621,29 @@ describe("<BudgetDetailPage />", () => {
   it.each([
     {
       filterBy: {
-        field: "status",
-        value: ["waiting"],
+        field: 'status',
+        value: ['waiting'],
       },
-      expectedFilters: [{ id: "learnerState", value: ["waiting"] }],
+      expectedFilters: [{ id: 'learnerState', value: ['waiting'] }],
     },
     {
       filterBy: {
-        field: "search",
+        field: 'search',
         value: mockLearnerEmail,
       },
-      expectedFilters: [{ id: "assignmentDetails", value: mockLearnerEmail }],
+      expectedFilters: [{ id: 'assignmentDetails', value: mockLearnerEmail }],
     },
   ])(
-    "renders filterable assigned table data (%s)",
+    'renders filterable assigned table data (%s)',
     async ({ filterBy, expectedFilters }) => {
       const user = userEvent.setup();
       const { field, value } = filterBy;
 
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -2681,7 +2671,7 @@ describe("<BudgetDetailPage />", () => {
         contentAssignments: {
           count: 1,
           results: [mockLearnerContentAssignment],
-          learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+          learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
           numPages: 1,
           currentPage: 1,
         },
@@ -2695,13 +2685,13 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
 
       const assignedSection = within(
-        screen.getByText("Assigned").closest("section"),
+        screen.getByText('Assigned').closest('section'),
       );
       const expectedDefaultTableFetchDataArgs = {
         pageIndex: DEFAULT_PAGE,
         pageSize: PAGE_SIZE,
         filters: [],
-        sortBy: [{ id: "recentAction", desc: true }], // default table sort order
+        sortBy: [{ id: 'recentAction', desc: true }], // default table sort order
       };
       const expectedTableFetchDataArgsAfterFilter = {
         ...expectedDefaultTableFetchDataArgs,
@@ -2712,14 +2702,13 @@ describe("<BudgetDetailPage />", () => {
         expect.objectContaining(expectedDefaultTableFetchDataArgs),
       );
 
-      if (field === "status") {
-        const filtersButton = getButtonElement("Filters", {
+      if (field === 'status') {
+        const filtersButton = getButtonElement('Filters', {
           screenOverride: assignedSection,
         });
         await user.click(filtersButton);
-        if (value.includes("waiting")) {
-          const waitingForLearnerOption =
-            await screen.findByLabelText(/Waiting for learner/i);
+        if (value.includes('waiting')) {
+          const waitingForLearnerOption = await screen.findByLabelText(/Waiting for learner/i);
           expect(waitingForLearnerOption).toBeInTheDocument();
           waitingForLearnerOption.click();
           waitingForLearnerOption.checked = true;
@@ -2732,9 +2721,9 @@ describe("<BudgetDetailPage />", () => {
         }
       }
 
-      if (field === "search") {
+      if (field === 'search') {
         const assignmentDetailsInputField = assignedSection.getByLabelText(
-          "Search by assignment details",
+          'Search by assignment details',
         );
         await user.type(assignmentDetailsInputField, value);
 
@@ -2751,18 +2740,18 @@ describe("<BudgetDetailPage />", () => {
 
   it.each([
     {
-      columnHeader: "Amount",
-      columnId: "amount",
+      columnHeader: 'Amount',
+      columnId: 'amount',
     },
   ])(
-    "renders sortable assigned table data (%s)",
+    'renders sortable assigned table data (%s)',
     async ({ columnHeader, columnId }) => {
       const user = userEvent.setup();
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -2790,7 +2779,7 @@ describe("<BudgetDetailPage />", () => {
         contentAssignments: {
           count: 1,
           results: [mockLearnerContentAssignment],
-          learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+          learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
           numPages: 1,
           currentPage: 1,
         },
@@ -2804,13 +2793,13 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
 
       const assignedSection = within(
-        screen.getByText("Assigned").closest("section"),
+        screen.getByText('Assigned').closest('section'),
       );
       const expectedDefaultTableFetchDataArgs = {
         pageIndex: DEFAULT_PAGE,
         pageSize: PAGE_SIZE,
         filters: [],
-        sortBy: [{ id: "recentAction", desc: true }], // default table sort order
+        sortBy: [{ id: 'recentAction', desc: true }], // default table sort order
       };
       const expectedTableFetchDataArgsAfterSortAsc = {
         ...expectedDefaultTableFetchDataArgs,
@@ -2839,10 +2828,10 @@ describe("<BudgetDetailPage />", () => {
 
   it('renders with assigned table data "View Course" hyperlink default when content title is null', () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2869,7 +2858,7 @@ describe("<BudgetDetailPage />", () => {
       contentAssignments: {
         count: 1,
         results: [{ ...mockLearnerContentAssignment, contentTitle: null }],
-        learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+        learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
         numPages: 1,
         currentPage: 1,
       },
@@ -2884,28 +2873,28 @@ describe("<BudgetDetailPage />", () => {
 
     // Assigned table is visible within Activity tab contents
     const assignedSection = within(
-      screen.getByText("Assigned").closest("section"),
+      screen.getByText('Assigned').closest('section'),
     );
     expect(
-      assignedSection.queryByText("No results found"),
+      assignedSection.queryByText('No results found'),
     ).not.toBeInTheDocument();
     expect(assignedSection.getByText(mockLearnerEmail)).toBeInTheDocument();
-    const viewCourseCTA = assignedSection.getByText("View Course", {
-      selector: "a",
+    const viewCourseCTA = assignedSection.getByText('View Course', {
+      selector: 'a',
     });
     expect(viewCourseCTA).toBeInTheDocument();
-    expect(viewCourseCTA.getAttribute("href")).toEqual(
+    expect(viewCourseCTA.getAttribute('href')).toEqual(
       `${process.env.ENTERPRISE_LEARNER_PORTAL_URL}/${enterpriseSlug}/course/${mockCourseKey}`,
     );
   });
 
-  it("renders with incomplete assignments table data, when budget is retired", async () => {
+  it('renders with incomplete assignments table data, when budget is retired', async () => {
     const user = userEvent.setup();
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -2936,7 +2925,7 @@ describe("<BudgetDetailPage />", () => {
       contentAssignments: {
         count: 1,
         results: [{ ...mockLearnerContentAssignment, contentTitle: null }],
-        learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+        learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
         numPages: 1,
         currentPage: 1,
       },
@@ -2950,55 +2939,55 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     const assignedSection = within(
-      screen.getByText("Incomplete assignments").closest("section"),
+      screen.getByText('Incomplete assignments').closest('section'),
     );
 
     expect(
-      assignedSection.queryByText("Refresh", { selector: "button" }),
+      assignedSection.queryByText('Refresh', { selector: 'button' }),
     ).not.toBeInTheDocument();
     expect(
-      assignedSection.queryByTestId("remind-assignment-test-uuid"),
+      assignedSection.queryByTestId('remind-assignment-test-uuid'),
     ).not.toBeInTheDocument();
     expect(
-      assignedSection.queryByTestId("cancel-assignment-test-uuid"),
+      assignedSection.queryByTestId('cancel-assignment-test-uuid'),
     ).not.toBeInTheDocument();
 
-    const incompleteStatusChips = assignedSection.queryAllByText("Incomplete");
+    const incompleteStatusChips = assignedSection.queryAllByText('Incomplete');
 
     expect(incompleteStatusChips).toHaveLength(1);
-    expect(assignedSection.queryAllByText("-$199")).toHaveLength(1);
+    expect(assignedSection.queryAllByText('-$199')).toHaveLength(1);
     expect(
-      assignedSection.queryAllByText(`Assigned: ${formatDate("2023-10-27")}`),
+      assignedSection.queryAllByText(`Assigned: ${formatDate('2023-10-27')}`),
     ).toHaveLength(1);
 
-    incompleteStatusChips[0].style.pointerEvents = "auto";
+    incompleteStatusChips[0].style.pointerEvents = 'auto';
 
     await user.click(incompleteStatusChips[0]);
 
     await waitFor(() => {
       expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
       expect(
-        screen.getByTestId("assignment-status-modalpopup-contents"),
+        screen.getByTestId('assignment-status-modalpopup-contents'),
       ).toBeInTheDocument();
     });
 
     // Modal popup is visible with expected text
     const modalPopupContents = within(
-      screen.getByTestId("assignment-status-modalpopup-contents"),
+      screen.getByTestId('assignment-status-modalpopup-contents'),
     );
     expect(
-      modalPopupContents.getByText("Incomplete assignment"),
+      modalPopupContents.getByText('Incomplete assignment'),
     ).toBeInTheDocument();
     expect(
       modalPopupContents.getByText(
-        "This budget became inactive before the learner enrolled.",
+        'This budget became inactive before the learner enrolled.',
         { exact: false },
       ),
     ).toBeInTheDocument();
 
     // Help Center link clicked
     const helpCenterLink = modalPopupContents.getByText(
-      "Help Center: Course Assignments",
+      'Help Center: Course Assignments',
     );
     await user.click(helpCenterLink);
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
@@ -3006,37 +2995,37 @@ describe("<BudgetDetailPage />", () => {
     await user.click(incompleteStatusChips[0]);
 
     // Contacting your support link clicked and modal closed
-    const contactSupport = modalPopupContents.getByText("contacting support.");
+    const contactSupport = modalPopupContents.getByText('contacting support.');
     await user.click(contactSupport);
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(4);
   });
 
   it.each([
     {
-      learnerState: "notifying",
+      learnerState: 'notifying',
       hasLearnerEmail: true,
-      expectedChipStatus: "Notifying learner",
+      expectedChipStatus: 'Notifying learner',
       expectedModalPopupHeading: `Notifying ${mockLearnerEmail}`,
       expectedModalPopupContent: `Our system is busy emailing ${mockLearnerEmail}!`,
       actions: [],
       errorReason: null,
     },
     {
-      learnerState: "notifying",
+      learnerState: 'notifying',
       hasLearnerEmail: false,
-      expectedChipStatus: "Notifying learner",
-      expectedModalPopupHeading: "Notifying learner",
-      expectedModalPopupContent: "Our system is busy emailing the learner!",
+      expectedChipStatus: 'Notifying learner',
+      expectedModalPopupHeading: 'Notifying learner',
+      expectedModalPopupContent: 'Our system is busy emailing the learner!',
       actions: [],
       errorReason: null,
     },
     {
-      learnerState: "waiting",
+      learnerState: 'waiting',
       hasLearnerEmail: true,
-      expectedChipStatus: "Waiting for learner",
+      expectedChipStatus: 'Waiting for learner',
       expectedModalPopupHeading: `Waiting for ${mockLearnerEmail}`,
       expectedModalPopupContent:
-        "This learner must create an edX account and complete enrollment in the course",
+        'This learner must create an edX account and complete enrollment in the course',
       actions: [
         mockSuccessfulLinkedLearnerAction,
         mockSuccessfulNotifiedAction,
@@ -3044,12 +3033,12 @@ describe("<BudgetDetailPage />", () => {
       errorReason: null,
     },
     {
-      learnerState: "waiting",
+      learnerState: 'waiting',
       hasLearnerEmail: false,
-      expectedChipStatus: "Waiting for learner",
-      expectedModalPopupHeading: "Waiting for learner",
+      expectedChipStatus: 'Waiting for learner',
+      expectedModalPopupHeading: 'Waiting for learner',
       expectedModalPopupContent:
-        "This learner must create an edX account and complete enrollment in the course",
+        'This learner must create an edX account and complete enrollment in the course',
       actions: [
         mockSuccessfulLinkedLearnerAction,
         mockSuccessfulNotifiedAction,
@@ -3057,97 +3046,97 @@ describe("<BudgetDetailPage />", () => {
       errorReason: null,
     },
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: true,
-      expectedChipStatus: "Failed: Bad email",
-      expectedModalPopupHeading: "Failed: Bad email",
+      expectedChipStatus: 'Failed: Bad email',
+      expectedModalPopupHeading: 'Failed: Bad email',
       expectedModalPopupContent: `This course assignment failed because a notification to ${mockLearnerEmail} could not be sent.`,
       actions: [mockSuccessfulLinkedLearnerAction, mockFailedNotifiedAction],
       errorReason: {
-        errorReason: "email_error",
-        actionType: "notified",
+        errorReason: 'email_error',
+        actionType: 'notified',
       },
     },
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: false,
-      expectedChipStatus: "Failed: Bad email",
-      expectedModalPopupHeading: "Failed: Bad email",
+      expectedChipStatus: 'Failed: Bad email',
+      expectedModalPopupHeading: 'Failed: Bad email',
       expectedModalPopupContent:
-        "This course assignment failed because a notification to the learner could not be sent.",
+        'This course assignment failed because a notification to the learner could not be sent.',
       actions: [mockSuccessfulLinkedLearnerAction, mockFailedNotifiedAction],
       errorReason: {
-        errorReason: "email_error",
-        actionType: "notified",
+        errorReason: 'email_error',
+        actionType: 'notified',
       },
     },
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: true,
-      expectedChipStatus: "Failed: System",
-      expectedModalPopupHeading: "Failed: System",
-      expectedModalPopupContent: "Something went wrong behind the scenes.",
+      expectedChipStatus: 'Failed: System',
+      expectedModalPopupHeading: 'Failed: System',
+      expectedModalPopupContent: 'Something went wrong behind the scenes.',
       actions: [mockFailedLinkedLearnerAction],
       errorReason: {
-        errorReason: "internal_api_error",
-        actionType: "notified",
+        errorReason: 'internal_api_error',
+        actionType: 'notified',
       },
     },
     // This test case is weird because we always serialize the latest failed action into error_reason in the assignment
     // API response.  Nevertheless, keep it in just to cover potential backend serializer bugs.
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: true,
-      expectedChipStatus: "Failed: System",
-      expectedModalPopupHeading: "Failed: System",
-      expectedModalPopupContent: "Something went wrong behind the scenes.",
+      expectedChipStatus: 'Failed: System',
+      expectedModalPopupHeading: 'Failed: System',
+      expectedModalPopupContent: 'Something went wrong behind the scenes.',
       actions: [mockFailedLinkedLearnerAction],
       errorReason: null,
     },
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: true,
-      expectedChipStatus: "Failed: Cancellation",
-      expectedModalPopupHeading: "Failed: Cancellation",
-      expectedModalPopupContent: "Something went wrong behind the scenes.",
+      expectedChipStatus: 'Failed: Cancellation',
+      expectedModalPopupHeading: 'Failed: Cancellation',
+      expectedModalPopupContent: 'Something went wrong behind the scenes.',
       actions: [mockFailedCancelledLearnerAction],
       errorReason: {
-        errorReason: "email_error",
-        actionType: "cancelled",
+        errorReason: 'email_error',
+        actionType: 'cancelled',
       },
     },
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: true,
-      expectedChipStatus: "Failed: Cancellation",
-      expectedModalPopupHeading: "Failed: Cancellation",
-      expectedModalPopupContent: "Something went wrong behind the scenes.",
+      expectedChipStatus: 'Failed: Cancellation',
+      expectedModalPopupHeading: 'Failed: Cancellation',
+      expectedModalPopupContent: 'Something went wrong behind the scenes.',
       actions: [mockFailedCancelledLearnerAction],
       errorReason: {
-        errorReason: "internal_api_error",
-        actionType: "cancelled",
+        errorReason: 'internal_api_error',
+        actionType: 'cancelled',
       },
     },
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: true,
-      expectedChipStatus: "Failed: Reminder",
-      expectedModalPopupHeading: "Failed: Reminder",
-      expectedModalPopupContent: "Something went wrong behind the scenes.",
+      expectedChipStatus: 'Failed: Reminder',
+      expectedModalPopupHeading: 'Failed: Reminder',
+      expectedModalPopupContent: 'Something went wrong behind the scenes.',
       actions: [mockFailedReminderLearnerAction],
       errorReason: {
-        errorReason: "internal_api_error",
-        actionType: "reminded",
+        errorReason: 'internal_api_error',
+        actionType: 'reminded',
       },
     },
     {
-      learnerState: "failed",
+      learnerState: 'failed',
       hasLearnerEmail: true,
-      expectedChipStatus: "Failed: Redemption",
-      expectedModalPopupHeading: "Failed: Redemption",
+      expectedChipStatus: 'Failed: Redemption',
+      expectedModalPopupHeading: 'Failed: Redemption',
       expectedModalPopupContent:
-        "Something went wrong behind the scenes when the learner attempted to redeem this course assignment. " +
-        "Associated Learner credit funds have been released into your available balance.",
+        'Something went wrong behind the scenes when the learner attempted to redeem this course assignment. '
+        + 'Associated Learner credit funds have been released into your available balance.',
       actions: [
         mockSuccessfulLinkedLearnerAction,
         mockSuccessfulNotifiedAction,
@@ -3159,7 +3148,7 @@ describe("<BudgetDetailPage />", () => {
       },
     },
   ])(
-    "renders correct status chips with assigned table data (%s)",
+    'renders correct status chips with assigned table data (%s)',
     async ({
       learnerState,
       hasLearnerEmail,
@@ -3171,10 +3160,10 @@ describe("<BudgetDetailPage />", () => {
     }) => {
       const user = userEvent.setup();
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -3224,17 +3213,17 @@ describe("<BudgetDetailPage />", () => {
 
       // Assigned table is visible within Activity tab contents
       const assignedSection = within(
-        screen.getByText("Assigned").closest("section"),
+        screen.getByText('Assigned').closest('section'),
       );
       if (hasLearnerEmail) {
         expect(assignedSection.getByText(mockLearnerEmail)).toBeInTheDocument();
       } else {
-        expect(assignedSection.getByText("Email hidden")).toBeInTheDocument();
+        expect(assignedSection.getByText('Email hidden')).toBeInTheDocument();
       }
       const statusChip = assignedSection.getByText(expectedChipStatus);
       expect(statusChip).toBeInTheDocument();
 
-      statusChip.style.pointerEvents = "auto";
+      statusChip.style.pointerEvents = 'auto';
 
       await user.click(statusChip);
 
@@ -3242,7 +3231,7 @@ describe("<BudgetDetailPage />", () => {
 
       // Modal popup is visible with expected text
       const modalPopupContents = within(
-        screen.getByTestId("assignment-status-modalpopup-contents"),
+        screen.getByTestId('assignment-status-modalpopup-contents'),
       );
       expect(
         modalPopupContents.getByText(expectedModalPopupHeading),
@@ -3254,9 +3243,9 @@ describe("<BudgetDetailPage />", () => {
       ).toBeInTheDocument();
 
       // Help Center link clicked and modal closed
-      if (screen.queryByText("Help Center: Course Assignments")) {
+      if (screen.queryByText('Help Center: Course Assignments')) {
         const helpCenterLink = screen.getByText(
-          "Help Center: Course Assignments",
+          'Help Center: Course Assignments',
         );
         await user.click(helpCenterLink);
         expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
@@ -3272,14 +3261,14 @@ describe("<BudgetDetailPage />", () => {
     },
   );
 
-  it.each([{ displayName: null }, { displayName: "Test Budget Display Name" }])(
-    "renders with catalog tab active on initial load for assignable budgets with %s display name",
+  it.each([{ displayName: null }, { displayName: 'Test Budget Display Name' }])(
+    'renders with catalog tab active on initial load for assignable budgets with %s display name',
     ({ displayName }) => {
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "catalog",
+        activeTabKey: 'catalog',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -3301,22 +3290,22 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
       const expectedDisplayName = displayName
         ? `${displayName} catalog`
-        : "Overview";
+        : 'Overview';
       // Catalog tab exists and is active
-      expect(screen.getByText("Catalog")).toBeInTheDocument();
-      expect(screen.getByText("Catalog").getAttribute("aria-selected")).toBe(
-        "true",
+      expect(screen.getByText('Catalog')).toBeInTheDocument();
+      expect(screen.getByText('Catalog').getAttribute('aria-selected')).toBe(
+        'true',
       );
-      expect(screen.getByText(expectedDisplayName, { selector: "h3" }));
+      expect(screen.getByText(expectedDisplayName, { selector: 'h3' }));
     },
   );
 
-  it("hides catalog tab when budget is not assignable", () => {
+  it('hides catalog tab when budget is not assignable', () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -3350,18 +3339,18 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     // Catalog tab does NOT exist
-    expect(screen.queryByText("Catalog")).toBeFalsy();
+    expect(screen.queryByText('Catalog')).toBeFalsy();
 
     // Ensure no assignments-related empty states are rendered
     expect(
-      screen.queryByText("No budget activity yet? Assign a course!"),
+      screen.queryByText('No budget activity yet? Assign a course!'),
     ).not.toBeInTheDocument();
   });
 
-  it("defaults to activity tab is no activeTabKey is provided", () => {
+  it('defaults to activity tab is no activeTabKey is provided', () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
       activeTabKey: undefined,
     });
@@ -3388,17 +3377,17 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     // Activity tab exists and is active
-    expect(screen.getByText("Activity").getAttribute("aria-selected")).toBe(
-      "true",
+    expect(screen.getByText('Activity').getAttribute('aria-selected')).toBe(
+      'true',
     );
   });
 
-  it("displays not found message is invalid activeTabKey is provided", () => {
+  it('displays not found message is invalid activeTabKey is provided', () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "invalid",
+      activeTabKey: 'invalid',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -3418,19 +3407,19 @@ describe("<BudgetDetailPage />", () => {
       data: mockEmptyStateBudgetDetailActivityOverview,
     });
     renderWithRouter(<BudgetDetailPageWrapper />);
-    expect(screen.getByText("404")).toBeInTheDocument();
+    expect(screen.getByText('404')).toBeInTheDocument();
     expect(
-      screen.getByText("something went wrong", { exact: false }),
+      screen.getByText('something went wrong', { exact: false }),
     ).toBeInTheDocument();
   });
 
-  it("handles user switching to catalog tab", async () => {
+  it('handles user switching to catalog tab', async () => {
     const user = userEvent.setup();
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
@@ -3450,7 +3439,7 @@ describe("<BudgetDetailPage />", () => {
       data: mockEmptyStateBudgetDetailActivityOverview,
     });
     renderWithRouter(<BudgetDetailPageWrapper />);
-    const catalogTab = screen.getByText("Catalog");
+    const catalogTab = screen.getByText('Catalog');
 
     await act(async () => {
       await user.click(catalogTab);
@@ -3460,17 +3449,17 @@ describe("<BudgetDetailPage />", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByTestId("budget-detail-catalog-tab-contents"),
+        screen.getByTestId('budget-detail-catalog-tab-contents'),
       ).toBeInTheDocument();
     });
   });
 
-  it("displays loading message while loading subsidy access policy metadata from API", () => {
+  it('displays loading message while loading subsidy access policy metadata from API', () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: true,
@@ -3491,20 +3480,20 @@ describe("<BudgetDetailPage />", () => {
       />,
     );
 
-    expect(screen.getByText("loading budget details")).toBeInTheDocument();
+    expect(screen.getByText('loading budget details')).toBeInTheDocument();
   });
 
   it.each([
     { isActivityOverviewLoading: true },
     { isActivityOverviewLoading: false },
   ])(
-    "displays loading skeletons while fetching budget detail activity overview data from API endpoints (%s)",
+    'displays loading skeletons while fetching budget detail activity overview data from API endpoints (%s)',
     ({ isActivityOverviewLoading }) => {
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isInitialLoading: false,
@@ -3526,29 +3515,29 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
 
       expect(
-        screen.getByText("loading budget activity overview"),
+        screen.getByText('loading budget activity overview'),
       ).toBeInTheDocument();
     },
   );
 
   it.each([
     {
-      learnerState: "waiting",
+      learnerState: 'waiting',
       shouldDisplayRemindAction: true,
     },
     {
-      learnerState: "notifying",
+      learnerState: 'notifying',
       shouldDisplayRemindAction: false,
     },
   ])(
-    "displays remind and cancel row and bulk actions when appropriate (%s)",
+    'displays remind and cancel row and bulk actions when appropriate (%s)',
     async ({ learnerState, shouldDisplayRemindAction }) => {
       const user = userEvent.setup();
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useBudgetRedemptions.mockReturnValue({
         isLoading: false,
@@ -3592,39 +3581,39 @@ describe("<BudgetDetailPage />", () => {
         fetchContentAssignments: jest.fn(),
       });
       renderWithRouter(<BudgetDetailPageWrapper />);
-      const cancelRowAction = screen.getByTestId("cancel-assignment-test-uuid");
+      const cancelRowAction = screen.getByTestId('cancel-assignment-test-uuid');
       expect(cancelRowAction).toBeInTheDocument();
       if (shouldDisplayRemindAction) {
         const remindRowAction = screen.getByTestId(
-          "remind-assignment-test-uuid",
+          'remind-assignment-test-uuid',
         );
         expect(remindRowAction).toBeInTheDocument();
       }
       // 2 checkboxes exist; the first is the "Select all" checkbox; the 2nd is the checkbox for the first row
-      const checkBox = screen.getAllByRole("checkbox")[1];
+      const checkBox = screen.getAllByRole('checkbox')[1];
       expect(checkBox).toBeInTheDocument();
       await user.click(checkBox);
-      expect(await screen.findByText("Cancel (1)")).toBeInTheDocument();
+      expect(await screen.findByText('Cancel (1)')).toBeInTheDocument();
       if (shouldDisplayRemindAction) {
-        expect(await screen.findByText("Remind (1)")).toBeInTheDocument();
+        expect(await screen.findByText('Remind (1)')).toBeInTheDocument();
       } else {
-        const remindButton = await screen.findByText("Remind (0)");
+        const remindButton = await screen.findByText('Remind (0)');
         expect(remindButton).toBeInTheDocument();
         expect(remindButton).toBeDisabled();
       }
     },
   );
 
-  it("cancels assignments in bulk", async () => {
+  it('cancels assignments in bulk', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.cancelAllContentAssignments.mockResolvedValueOnce(
       { status: 200 },
     );
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useBudgetRedemptions.mockReturnValue({
       isLoading: false,
@@ -3657,35 +3646,35 @@ describe("<BudgetDetailPage />", () => {
         count: 2,
         results: [
           {
-            uuid: "test-uuid1",
+            uuid: 'test-uuid1',
             contentKey: mockCourseKey,
             contentQuantity: -19900,
-            learnerState: "waiting",
-            recentAction: { actionType: "assigned", timestamp: "2023-10-27" },
+            learnerState: 'waiting',
+            recentAction: { actionType: 'assigned', timestamp: '2023-10-27' },
             actions: [mockSuccessfulNotifiedAction],
             errorReason: null,
-            state: "allocated",
+            state: 'allocated',
             earliestPossibleExpiration: {
-              date: dayjs().add(5, "days").toISOString(),
+              date: dayjs().add(5, 'days').toISOString(),
             },
           },
           {
-            uuid: "test-uuid2",
+            uuid: 'test-uuid2',
             contentKey: mockCourseKey,
             contentQuantity: -29900,
-            learnerState: "waiting",
-            recentAction: { actionType: "assigned", timestamp: "2023-11-27" },
+            learnerState: 'waiting',
+            recentAction: { actionType: 'assigned', timestamp: '2023-11-27' },
             actions: [mockSuccessfulNotifiedAction],
             errorReason: null,
-            state: "allocated",
+            state: 'allocated',
             earliestPossibleExpiration: {
-              date: dayjs().add(5, "days").toISOString(),
+              date: dayjs().add(5, 'days').toISOString(),
             },
           },
         ],
         learnerStateCounts: [
-          { learnerState: "waiting", count: 1 },
-          { learnerState: "waiting", count: 1 },
+          { learnerState: 'waiting', count: 1 },
+          { learnerState: 'waiting', count: 1 },
         ],
         numPages: 1,
         currentPage: 1,
@@ -3694,39 +3683,35 @@ describe("<BudgetDetailPage />", () => {
     });
     renderWithRouter(<BudgetDetailPageWrapper />);
     const cancelRowAction = screen.getByTitle(
-      "Toggle All Current Page Rows Selected",
+      'Toggle All Current Page Rows Selected',
     );
     expect(cancelRowAction).toBeInTheDocument();
     await user.click(cancelRowAction);
-    const cancelBulkActionButton = screen.getByText("Cancel (2)");
+    const cancelBulkActionButton = screen.getByText('Cancel (2)');
     expect(cancelBulkActionButton).toBeInTheDocument();
     await user.click(cancelBulkActionButton);
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
-    const modalDialog = screen.getByRole("dialog");
+    const modalDialog = screen.getByRole('dialog');
     expect(modalDialog).toBeInTheDocument();
-    const cancelDialogButton = getButtonElement("Cancel assignments (2)");
+    const cancelDialogButton = getButtonElement('Cancel assignments (2)');
     await user.click(cancelDialogButton);
-    await waitFor(() =>
-      expect(
-        EnterpriseAccessApiService.cancelAllContentAssignments,
-      ).toHaveBeenCalled(),
-    );
-    await waitFor(() =>
-      expect(screen.getByText("Assignments canceled (2)")).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(
+      EnterpriseAccessApiService.cancelAllContentAssignments,
+    ).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText('Assignments canceled (2)')).toBeInTheDocument());
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
   });
 
-  it("reminds assignments in bulk", async () => {
+  it('reminds assignments in bulk', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.remindAllContentAssignments.mockResolvedValueOnce(
       { status: 202 },
     );
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useBudgetRedemptions.mockReturnValue({
       isLoading: false,
@@ -3759,48 +3744,48 @@ describe("<BudgetDetailPage />", () => {
         count: 3,
         results: [
           {
-            uuid: "test-uuid1",
+            uuid: 'test-uuid1',
             contentKey: mockCourseKey,
             contentQuantity: -19900,
-            learnerState: "waiting",
-            recentAction: { actionType: "assigned", timestamp: "2023-10-27" },
+            learnerState: 'waiting',
+            recentAction: { actionType: 'assigned', timestamp: '2023-10-27' },
             actions: [mockSuccessfulNotifiedAction],
             errorReason: null,
-            state: "allocated",
+            state: 'allocated',
             earliestPossibleExpiration: {
-              date: dayjs().add(5, "days").toISOString(),
+              date: dayjs().add(5, 'days').toISOString(),
             },
           },
           {
-            uuid: "test-uuid2",
+            uuid: 'test-uuid2',
             contentKey: mockCourseKey,
             contentQuantity: -29900,
-            learnerState: "waiting",
-            recentAction: { actionType: "assigned", timestamp: "2023-11-27" },
+            learnerState: 'waiting',
+            recentAction: { actionType: 'assigned', timestamp: '2023-11-27' },
             actions: [mockSuccessfulNotifiedAction],
             errorReason: null,
-            state: "allocated",
+            state: 'allocated',
             earliestPossibleExpiration: {
-              date: dayjs().add(5, "days").toISOString(),
+              date: dayjs().add(5, 'days').toISOString(),
             },
           },
           {
-            uuid: "test-uuid3",
+            uuid: 'test-uuid3',
             contentKey: mockCourseKey,
             contentQuantity: -29900,
-            learnerState: "notifying",
-            recentAction: { actionType: "assigned", timestamp: "2023-11-27" },
+            learnerState: 'notifying',
+            recentAction: { actionType: 'assigned', timestamp: '2023-11-27' },
             actions: [mockSuccessfulNotifiedAction],
             errorReason: null,
-            state: "allocated",
+            state: 'allocated',
             earliestPossibleExpiration: {
-              date: dayjs().add(5, "days").toISOString(),
+              date: dayjs().add(5, 'days').toISOString(),
             },
           },
         ],
         learnerStateCounts: [
-          { learnerState: "waiting", count: 2 },
-          { learnerState: "notifying", count: 1 },
+          { learnerState: 'waiting', count: 2 },
+          { learnerState: 'notifying', count: 1 },
         ],
         numPages: 1,
         currentPage: 1,
@@ -3809,43 +3794,35 @@ describe("<BudgetDetailPage />", () => {
     });
     renderWithRouter(<BudgetDetailPageWrapper />);
     const remindRowAction = screen.getByTitle(
-      "Toggle All Current Page Rows Selected",
+      'Toggle All Current Page Rows Selected',
     );
     expect(remindRowAction).toBeInTheDocument();
     await user.click(remindRowAction);
-    const remindBulkActionButton = screen.getByText("Remind (2)");
+    const remindBulkActionButton = screen.getByText('Remind (2)');
     expect(remindBulkActionButton).toBeInTheDocument();
     await user.click(remindBulkActionButton);
-    await waitFor(() =>
-      expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1),
-    );
-    const modalDialog = screen.getByRole("dialog");
+    await waitFor(() => expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1));
+    const modalDialog = screen.getByRole('dialog');
     expect(modalDialog).toBeInTheDocument();
-    const remindDialogButton = getButtonElement("Send reminders (2)");
+    const remindDialogButton = getButtonElement('Send reminders (2)');
     await user.click(remindDialogButton);
-    await waitFor(() =>
-      expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2),
-    );
-    await waitFor(() =>
-      expect(
-        EnterpriseAccessApiService.remindAllContentAssignments,
-      ).toHaveBeenCalled(),
-    );
-    await waitFor(() =>
-      expect(screen.getByText("Reminders sent (2)")).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(
+      EnterpriseAccessApiService.remindAllContentAssignments,
+    ).toHaveBeenCalled());
+    await waitFor(() => expect(screen.getByText('Reminders sent (2)')).toBeInTheDocument());
   });
 
-  it("cancels a single assignment", async () => {
+  it('cancels a single assignment', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.cancelContentAssignments.mockResolvedValueOnce({
       status: 200,
     });
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useBudgetRedemptions.mockReturnValue({
       isLoading: false,
@@ -3878,50 +3855,48 @@ describe("<BudgetDetailPage />", () => {
         count: 1,
         results: [
           {
-            uuid: "test-uuid",
+            uuid: 'test-uuid',
             contentKey: mockCourseKey,
             contentQuantity: -19900,
-            learnerState: "waiting",
-            recentAction: { actionType: "assigned", timestamp: "2023-10-27" },
+            learnerState: 'waiting',
+            recentAction: { actionType: 'assigned', timestamp: '2023-10-27' },
             actions: [mockSuccessfulNotifiedAction],
             errorReason: null,
-            state: "allocated",
+            state: 'allocated',
             earliestPossibleExpiration: {
-              date: dayjs().add(5, "days").toISOString(),
+              date: dayjs().add(5, 'days').toISOString(),
             },
           },
         ],
-        learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+        learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
         numPages: 1,
         currentPage: 1,
       },
       fetchContentAssignments: jest.fn(),
     });
     renderWithRouter(<BudgetDetailPageWrapper />);
-    const cancelIconButton = screen.getByTestId("cancel-assignment-test-uuid");
+    const cancelIconButton = screen.getByTestId('cancel-assignment-test-uuid');
     expect(cancelIconButton).toBeInTheDocument();
     await user.click(cancelIconButton);
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
-    const modalDialog = screen.getByRole("dialog");
+    const modalDialog = screen.getByRole('dialog');
     expect(modalDialog).toBeInTheDocument();
-    const cancelDialogButton = getButtonElement("Cancel assignment");
+    const cancelDialogButton = getButtonElement('Cancel assignment');
     await user.click(cancelDialogButton);
-    await waitFor(() =>
-      expect(screen.getByText("Assignment canceled")).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('Assignment canceled')).toBeInTheDocument());
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
   }, 10000);
 
-  it("reminds a single assignment", async () => {
+  it('reminds a single assignment', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.remindContentAssignments.mockResolvedValueOnce({
       status: 200,
     });
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useBudgetRedemptions.mockReturnValue({
       isLoading: false,
@@ -3954,41 +3929,39 @@ describe("<BudgetDetailPage />", () => {
         count: 1,
         results: [
           {
-            uuid: "test-uuid",
+            uuid: 'test-uuid',
             contentKey: mockCourseKey,
             contentQuantity: -19900,
-            learnerState: "waiting",
-            recentAction: { actionType: "assigned", timestamp: "2023-10-27" },
+            learnerState: 'waiting',
+            recentAction: { actionType: 'assigned', timestamp: '2023-10-27' },
             actions: [mockSuccessfulNotifiedAction],
             errorReason: null,
-            state: "allocated",
+            state: 'allocated',
             earliestPossibleExpiration: {
-              date: dayjs().add(5, "days").toISOString(),
+              date: dayjs().add(5, 'days').toISOString(),
             },
           },
         ],
-        learnerStateCounts: [{ learnerState: "waiting", count: 1 }],
+        learnerStateCounts: [{ learnerState: 'waiting', count: 1 }],
         numPages: 1,
         currentPage: 1,
       },
       fetchContentAssignments: jest.fn(),
     });
     renderWithRouter(<BudgetDetailPageWrapper />);
-    const remindIconButton = screen.getByTestId("remind-assignment-test-uuid");
+    const remindIconButton = screen.getByTestId('remind-assignment-test-uuid');
     expect(remindIconButton).toBeInTheDocument();
     await user.click(remindIconButton);
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(1);
-    const modalDialog = screen.getByRole("dialog");
+    const modalDialog = screen.getByRole('dialog');
     expect(modalDialog).toBeInTheDocument();
-    const remindDialogButton = getButtonElement("Send reminder");
+    const remindDialogButton = getButtonElement('Send reminder');
     await user.click(remindDialogButton);
-    await waitFor(() =>
-      expect(screen.getByText("Reminder sent")).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByText('Reminder sent')).toBeInTheDocument());
     expect(sendEnterpriseTrackEvent).toHaveBeenCalledTimes(2);
   });
 
-  it("displays the custom integrated channel budget card", () => {
+  it('displays the custom integrated channel budget card', () => {
     const initialState = {
       portalConfiguration: {
         ...initialStoreState.portalConfiguration,
@@ -3996,10 +3969,10 @@ describe("<BudgetDetailPage />", () => {
       },
     };
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
       budgetId: mockSubsidyAccessPolicyUUID,
-      activeTabKey: "activity",
+      activeTabKey: 'activity',
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: true,
@@ -4029,9 +4002,9 @@ describe("<BudgetDetailPage />", () => {
         next: null,
         numPages: 1,
         results: {
-          enterpriseGroupMembershipUuid: "cde2e374-032f-4c08-8c0d-bf3205fa7c7e",
+          enterpriseGroupMembershipUuid: 'cde2e374-032f-4c08-8c0d-bf3205fa7c7e',
           learnerId: 4382,
-          memberDetails: { userEmail: "foobar@test.com", userName: "ayy lmao" },
+          memberDetails: { userEmail: 'foobar@test.com', userName: 'ayy lmao' },
         },
       },
     });
@@ -4041,9 +4014,7 @@ describe("<BudgetDetailPage />", () => {
     });
     renderWithRouter(<BudgetDetailPageWrapper initialState={initialState} />);
     expect(
-      screen.getByText((text) =>
-        text.includes("Enroll via Integrated Learning Platform"),
-      ),
+      screen.getByText((text) => text.includes('Enroll via Integrated Learning Platform')),
     ).toBeInTheDocument();
   });
   it.each([
@@ -4054,14 +4025,14 @@ describe("<BudgetDetailPage />", () => {
       modifiedDayOffset: 15,
     },
   ])(
-    "displays upcoming expiring allocation (%s)",
+    'displays upcoming expiring allocation (%s)',
     async ({ modifiedDayOffset }) => {
       const user = userEvent.setup();
       useParams.mockReturnValue({
-        enterpriseSlug: "test-enterprise-slug",
-        enterpriseAppPage: "test-enterprise-page",
+        enterpriseSlug: 'test-enterprise-slug',
+        enterpriseAppPage: 'test-enterprise-page',
         budgetId: mockSubsidyAccessPolicyUUID,
-        activeTabKey: "activity",
+        activeTabKey: 'activity',
       });
       useBudgetRedemptions.mockReturnValue({
         isLoading: false,
@@ -4094,85 +4065,81 @@ describe("<BudgetDetailPage />", () => {
           count: 3,
           results: [
             {
-              uuid: "test-uuid1",
+              uuid: 'test-uuid1',
               contentKey: mockCourseKey,
               contentQuantity: -19900,
-              learnerState: "waiting",
-              recentAction: { actionType: "assigned", timestamp: "2023-10-27" },
+              learnerState: 'waiting',
+              recentAction: { actionType: 'assigned', timestamp: '2023-10-27' },
               actions: [mockSuccessfulNotifiedAction],
               errorReason: null,
-              state: "allocated",
+              state: 'allocated',
               earliestPossibleExpiration: {
-                date: dayjs().add(modifiedDayOffset, "days").toISOString(),
+                date: dayjs().add(modifiedDayOffset, 'days').toISOString(),
               },
             },
             {
-              uuid: "test-uuid2",
+              uuid: 'test-uuid2',
               contentKey: mockCourseKey,
               contentQuantity: -29900,
-              learnerState: "waiting",
-              recentAction: { actionType: "assigned", timestamp: "2023-11-27" },
+              learnerState: 'waiting',
+              recentAction: { actionType: 'assigned', timestamp: '2023-11-27' },
               actions: [mockSuccessfulNotifiedAction],
               errorReason: null,
-              state: "allocated",
+              state: 'allocated',
               earliestPossibleExpiration: {
-                date: dayjs().add(12, "days").toISOString(),
+                date: dayjs().add(12, 'days').toISOString(),
               },
             },
             {
-              uuid: "test-uuid3",
+              uuid: 'test-uuid3',
               contentKey: mockCourseKey,
               contentQuantity: -29900,
-              learnerState: "notifying",
-              recentAction: { actionType: "assigned", timestamp: "2023-11-27" },
+              learnerState: 'notifying',
+              recentAction: { actionType: 'assigned', timestamp: '2023-11-27' },
               actions: [mockSuccessfulNotifiedAction],
               errorReason: null,
-              state: "allocated",
+              state: 'allocated',
               earliestPossibleExpiration: {
-                date: dayjs().add(15, "days").toISOString(),
+                date: dayjs().add(15, 'days').toISOString(),
               },
             },
           ],
-          learnerStateCounts: [{ learnerState: "waiting", count: 3 }],
+          learnerStateCounts: [{ learnerState: 'waiting', count: 3 }],
           numPages: 1,
           currentPage: 1,
         },
         fetchContentAssignments: jest.fn(),
       });
       renderWithRouter(<BudgetDetailPageWrapper />);
-      const enrollByDateTooltip = screen.getByTestId("enroll-by-date-tooltip");
+      const enrollByDateTooltip = screen.getByTestId('enroll-by-date-tooltip');
       const expiringAllocationTooltip = screen.queryByTestId(
-        "upcoming-allocation-expiration-tooltip",
+        'upcoming-allocation-expiration-tooltip',
       );
 
-      expect(screen.getByText("Enroll-by date")).toBeTruthy();
+      expect(screen.getByText('Enroll-by date')).toBeTruthy();
 
       if (expiringAllocationTooltip) {
         await user.hover(expiringAllocationTooltip);
-        await waitFor(() =>
-          expect(
-            screen.getByText("Enrollment deadline approaching"),
-          ).toBeTruthy(),
-        );
+        await waitFor(() => expect(
+          screen.getByText('Enrollment deadline approaching'),
+        ).toBeTruthy());
       }
 
       await user.hover(enrollByDateTooltip);
-      await waitFor(() =>
-        expect(
-          screen.getByText(
-            "Failure to enroll by the enrollment deadline will release funds back into the budget",
-          ),
-        ).toBeTruthy(),
-      );
+      await waitFor(() => expect(
+        screen.getByText(
+          'Failure to enroll by the enrollment deadline will release funds back into the budget',
+        ),
+      ).toBeTruthy());
     },
   );
 
-  it("renders Browse & Request budget type when bnrEnabled is true", () => {
+  it('renders Browse & Request budget type when bnrEnabled is true', () => {
     useParams.mockReturnValue({
-      enterpriseSlug: "test-enterprise-slug",
-      enterpriseAppPage: "test-enterprise-page",
-      budgetId: "a52e6548-649f-4576-b73f-c5c2bee25e9c",
-      activeTabKey: "activity",
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
+      budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+      activeTabKey: 'activity',
     });
 
     useSubsidyAccessPolicy.mockReturnValue({
@@ -4186,7 +4153,7 @@ describe("<BudgetDetailPage />", () => {
 
     useEnterpriseCustomer.mockReturnValue({
       data: {
-        uuid: "test-customer-uuid",
+        uuid: 'test-customer-uuid',
         activeIntegrations: [],
       },
     });
@@ -4194,9 +4161,9 @@ describe("<BudgetDetailPage />", () => {
     useEnterpriseGroup.mockReturnValue({
       data: {
         appliesToAllContexts: true,
-        enterpriseCustomer: "test-customer-uuid",
-        name: "test-name",
-        uuid: "test-uuid",
+        enterpriseCustomer: 'test-customer-uuid',
+        name: 'test-name',
+        uuid: 'test-uuid',
       },
     });
 
@@ -4224,33 +4191,33 @@ describe("<BudgetDetailPage />", () => {
     renderWithRouter(<BudgetDetailPageWrapper />);
 
     expect(
-      screen.getByText("Browse & Request", { exact: false }),
+      screen.getByText('Browse & Request', { exact: false }),
     ).toBeInTheDocument();
   });
 
-  describe("when there are no assignments but there is spend", () => {
+  describe('when there are no assignments but there is spend', () => {
     test.each([
       [
-        "retired",
+        'retired',
         {
           ...mockAssignableSubsidyAccessPolicy,
           retired: true,
         },
       ],
       [
-        "expired",
+        'expired',
         {
           ...mockAssignableSubsidyAccessPolicy,
-          subsidyExpirationDatetime: dayjs().subtract(1, "day").toISOString(),
+          subsidyExpirationDatetime: dayjs().subtract(1, 'day').toISOString(),
         },
       ],
     ])(
-      "should NOT show assign more courses empty state for a %s budget",
+      'should NOT show assign more courses empty state for a %s budget',
       async (status, budgetData) => {
         useParams.mockReturnValue({
           budgetId: mockSubsidyAccessPolicyUUID,
           enterpriseSlug,
-          enterpriseAppPage: "learner-credit",
+          enterpriseAppPage: 'learner-credit',
         });
         useSubsidyAccessPolicy.mockReturnValue({
           isLoading: false,
@@ -4273,24 +4240,24 @@ describe("<BudgetDetailPage />", () => {
         renderWithRouter(<BudgetDetailPageWrapper />);
         await waitFor(() => {
           expect(
-            screen.queryByText("Assign more courses"),
+            screen.queryByText('Assign more courses'),
           ).not.toBeInTheDocument();
         });
       },
     );
 
-    it("should show assign more courses empty state for an active budget", async () => {
+    it('should show assign more courses empty state for an active budget', async () => {
       useParams.mockReturnValue({
         budgetId: mockSubsidyAccessPolicyUUID,
         enterpriseSlug,
-        enterpriseAppPage: "learner-credit",
+        enterpriseAppPage: 'learner-credit',
       });
       useSubsidyAccessPolicy.mockReturnValue({
         isLoading: false,
         data: {
           ...mockAssignableSubsidyAccessPolicy,
           retired: false,
-          subsidyExpirationDatetime: dayjs().add(1, "year").toISOString(),
+          subsidyExpirationDatetime: dayjs().add(1, 'year').toISOString(),
         },
       });
       useBudgetDetailActivityOverview.mockReturnValue({
@@ -4310,35 +4277,35 @@ describe("<BudgetDetailPage />", () => {
       renderWithRouter(<BudgetDetailPageWrapper />);
       await waitFor(() => {
         expect(
-          screen.getByText("Assign more courses to maximize your budget."),
+          screen.getByText('Assign more courses to maximize your budget.'),
         ).toBeInTheDocument();
         expect(
-          screen.getByText("available balance of $10,000", { exact: false }),
+          screen.getByText('available balance of $10,000', { exact: false }),
         ).toBeInTheDocument();
         expect(
-          screen.getByText("Assign courses", { selector: "a" }),
+          screen.getByText('Assign courses', { selector: 'a' }),
         ).toBeInTheDocument();
       });
     });
   });
 
-  describe("tab redirection for expired and retired budgets", () => {
+  describe('tab redirection for expired and retired budgets', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
 
     const testCases = [
       {
-        status: "expired",
+        status: 'expired',
         mockPolicyData: {
           ...mockAssignableSubsidyAccessPolicy,
-          endDate: dayjs().subtract(1, "day").format(),
+          endDate: dayjs().subtract(1, 'day').format(),
           isRetired: false,
           isRetiredOrExpired: true,
         },
       },
       {
-        status: "retired",
+        status: 'retired',
         mockPolicyData: {
           ...mockAssignableSubsidyAccessPolicy,
           isRetired: true,
@@ -4348,11 +4315,11 @@ describe("<BudgetDetailPage />", () => {
     ];
 
     it.each(testCases)(
-      "should redirect from catalog to activity tab for $status budgets",
+      'should redirect from catalog to activity tab for $status budgets',
       async ({ mockPolicyData }) => {
         useParams.mockReturnValue({
           enterpriseSlug,
-          enterpriseAppPage: "learner-credit",
+          enterpriseAppPage: 'learner-credit',
           budgetId: mockSubsidyAccessPolicyUUID,
           activeTabKey: BUDGET_DETAIL_CATALOG_TAB,
         });

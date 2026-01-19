@@ -1,14 +1,14 @@
-import { getConfig } from "@edx/frontend-platform";
-import { logInfo } from "@edx/frontend-platform/logging";
-import { camelCaseObject } from "@edx/frontend-platform/utils";
-import dayjs from "dayjs";
-import { v4 as uuidv4 } from "uuid";
+import { getConfig } from '@edx/frontend-platform';
+import { logInfo } from '@edx/frontend-platform/logging';
+import { camelCaseObject } from '@edx/frontend-platform/utils';
+import dayjs from 'dayjs';
+import { v4 as uuidv4 } from 'uuid';
 
-import EnterpriseAccessApiService from "../../../data/services/EnterpriseAccessApiService";
-import EnterpriseDataApiService from "../../../data/services/EnterpriseDataApiService";
-import SubsidyApiService from "../../../data/services/EnterpriseSubsidyApiService";
-import { isPlanApproachingExpiry } from "../../BudgetExpiryAlertAndModal/data/utils";
-import { BUDGET_STATUSES } from "../../EnterpriseApp/data/constants";
+import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
+import EnterpriseDataApiService from '../../../data/services/EnterpriseDataApiService';
+import SubsidyApiService from '../../../data/services/EnterpriseSubsidyApiService';
+import { isPlanApproachingExpiry } from '../../BudgetExpiryAlertAndModal/data/utils';
+import { BUDGET_STATUSES } from '../../EnterpriseApp/data/constants';
 import {
   APPROVED_REQUEST_TYPE,
   ASSIGNMENT_ENROLLMENT_DEADLINE,
@@ -19,8 +19,8 @@ import {
   LOW_REMAINING_BALANCE_PERCENT_THRESHOLD,
   NO_BALANCE_REMAINING_DOLLAR_THRESHOLD,
   START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS,
-} from "./constants";
-import { capitalizeFirstLetter } from "../../../utils";
+} from './constants';
+import { capitalizeFirstLetter } from '../../../utils';
 
 /**
  * Transforms subsidy (offer or Subsidy) summary from API for display in the UI, guarding
@@ -38,11 +38,9 @@ export const transformSubsidySummary = (subsidySummary) => {
   if (subsidySummary?.budgets) {
     const budgets = subsidySummary?.budgets;
     for (let i = 0; i < budgets.length; i++) {
-      const redeemedFunds =
-        budgets[i].amountOfPolicySpent &&
-        parseFloat(budgets[i].amountOfPolicySpent);
-      const remainingFunds =
-        budgets[i].remainingBalance && parseFloat(budgets[i].remainingBalance);
+      const redeemedFunds = budgets[i].amountOfPolicySpent
+        && parseFloat(budgets[i].amountOfPolicySpent);
+      const remainingFunds = budgets[i].remainingBalance && parseFloat(budgets[i].remainingBalance);
       const updatedBudgetDetail = {
         redeemedFunds,
         remainingFunds,
@@ -52,17 +50,13 @@ export const transformSubsidySummary = (subsidySummary) => {
     }
   }
 
-  const totalFunds =
-    subsidySummary.maxDiscount && parseFloat(subsidySummary.maxDiscount);
-  let redeemedFunds =
-    subsidySummary.amountOfOfferSpent &&
-    parseFloat(subsidySummary.amountOfOfferSpent);
-  let redeemedFundsOcm =
-    subsidySummary.amountOfferSpentOcm &&
-    parseFloat(subsidySummary.amountOfferSpentOcm);
-  let redeemedFundsExecEd =
-    subsidySummary.amountOfferSpentExecEd &&
-    parseFloat(subsidySummary.amountOfferSpentExecEd);
+  const totalFunds = subsidySummary.maxDiscount && parseFloat(subsidySummary.maxDiscount);
+  let redeemedFunds = subsidySummary.amountOfOfferSpent
+    && parseFloat(subsidySummary.amountOfOfferSpent);
+  let redeemedFundsOcm = subsidySummary.amountOfferSpentOcm
+    && parseFloat(subsidySummary.amountOfferSpentOcm);
+  let redeemedFundsExecEd = subsidySummary.amountOfferSpentExecEd
+    && parseFloat(subsidySummary.amountOfferSpentExecEd);
 
   // cap redeemed funds at the maximum funds available (`maxDiscount`), if applicable, so we
   // don't display redeemed funds > funds available.
@@ -72,17 +66,15 @@ export const transformSubsidySummary = (subsidySummary) => {
     redeemedFundsExecEd = Math.min(redeemedFundsExecEd, totalFunds);
   }
 
-  let remainingFunds =
-    subsidySummary.remainingBalance &&
-    parseFloat(subsidySummary.remainingBalance);
+  let remainingFunds = subsidySummary.remainingBalance
+    && parseFloat(subsidySummary.remainingBalance);
   // prevent remaining funds from going below $0, if applicable.
   if (remainingFunds) {
     remainingFunds = Math.max(remainingFunds, 0.0);
   }
 
-  let percentUtilized =
-    subsidySummary.percentOfOfferSpent &&
-    parseFloat(subsidySummary.percentOfOfferSpent);
+  let percentUtilized = subsidySummary.percentOfOfferSpent
+    && parseFloat(subsidySummary.percentOfOfferSpent);
   // prevent percent utilized from going over 1.0, if applicable.
   if (percentUtilized) {
     percentUtilized = Math.min(percentUtilized, 1.0);
@@ -113,27 +105,25 @@ export const transformSubsidySummary = (subsidySummary) => {
  *
  * @returns List of transformed results for display in spent table.
  */
-export const transformUtilizationTableResults = (results) =>
-  results.map((result) => ({
-    created: result.created,
-    enterpriseEnrollmentId: result.enterpriseEnrollmentId,
-    userEmail: result.userEmail,
-    courseTitle: result.courseTitle,
-    courseListPrice: result.courseListPrice,
-    courseRunStartDate: result.courseRunStartDate,
-    enrollmentDate: result.enrollmentDate,
-    uuid: uuidv4(),
-    courseKey: result.courseKey,
-  }));
+export const transformUtilizationTableResults = (results) => results.map((result) => ({
+  created: result.created,
+  enterpriseEnrollmentId: result.enterpriseEnrollmentId,
+  userEmail: result.userEmail,
+  courseTitle: result.courseTitle,
+  courseListPrice: result.courseListPrice,
+  courseRunStartDate: result.courseRunStartDate,
+  enrollmentDate: result.enrollmentDate,
+  uuid: uuidv4(),
+  courseKey: result.courseKey,
+}));
 
-export const transformGroupMembersTableResults = (results) =>
-  results.map((result) => ({
-    memberDetails: result.memberDetails,
-    status: result.status,
-    recentAction: result.recentAction,
-    memberEnrollments: result.memberEnrollments,
-    enrollmentCount: result.enrollmentCount,
-  }));
+export const transformGroupMembersTableResults = (results) => results.map((result) => ({
+  memberDetails: result.memberDetails,
+  status: result.status,
+  recentAction: result.recentAction,
+  memberEnrollments: result.memberEnrollments,
+  enrollmentCount: result.enrollmentCount,
+}));
 
 /**
  * Transforms redemptions data from transaction list API to fields for display in learner credit spent table.
@@ -145,23 +135,22 @@ export const transformGroupMembersTableResults = (results) =>
  *
  * @returns List of transformed results for display in spent table.
  */
-export const transformUtilizationTableSubsidyTransactionResults = (results) =>
-  results.map((result) => ({
-    created: result.created,
-    enrollmentDate: result.created,
-    fulfillmentIdentifier: result.fulfillmentIdentifier,
-    reversal: result.reversal,
-    userEmail: result.lmsUserEmail,
-    courseTitle: result.contentTitle,
-    courseRunStartDate: result.courseRunStartDate,
-    courseListPrice:
-      result.unit === "usd_cents"
+export const transformUtilizationTableSubsidyTransactionResults = (results) => results.map((result) => ({
+  created: result.created,
+  enrollmentDate: result.created,
+  fulfillmentIdentifier: result.fulfillmentIdentifier,
+  reversal: result.reversal,
+  userEmail: result.lmsUserEmail,
+  courseTitle: result.contentTitle,
+  courseRunStartDate: result.courseRunStartDate,
+  courseListPrice:
+      result.unit === 'usd_cents'
         ? -1 * (result.quantity / 100)
         : -1 * results.quantity,
-    uuid: result.uuid,
-    // In the transaction list response, `parent_content_key` is the course key, and `content_key` is the course run key.
-    courseKey: result.parentContentKey,
-  }));
+  uuid: result.uuid,
+  // In the transaction list response, `parent_content_key` is the course key, and `content_key` is the course run key.
+  courseKey: result.parentContentKey,
+}));
 
 /**
  * Gets appropriate color variant for the annotated progress bar.
@@ -172,14 +161,14 @@ export const transformUtilizationTableSubsidyTransactionResults = (results) =>
  * @returns Appropriate color variant for annotated progress bar.
  */
 export const getProgressBarVariant = ({ percentUtilized, remainingFunds }) => {
-  let variant = "success"; // default to green
+  let variant = 'success'; // default to green
   if (
-    percentUtilized > LOW_REMAINING_BALANCE_PERCENT_THRESHOLD &&
-    remainingFunds > NO_BALANCE_REMAINING_DOLLAR_THRESHOLD
+    percentUtilized > LOW_REMAINING_BALANCE_PERCENT_THRESHOLD
+    && remainingFunds > NO_BALANCE_REMAINING_DOLLAR_THRESHOLD
   ) {
-    variant = "danger"; // yellow
+    variant = 'danger'; // yellow
   } else if (remainingFunds <= NO_BALANCE_REMAINING_DOLLAR_THRESHOLD) {
-    variant = "error"; // red
+    variant = 'error'; // red
   }
   return variant;
 };
@@ -201,8 +190,8 @@ export const getBudgetStatus = ({
   if (isBudgetRetired) {
     return {
       status: BUDGET_STATUSES.retired,
-      badgeVariant: "light",
-      term: "Retired",
+      badgeVariant: 'light',
+      term: 'Retired',
       date: retiredDateStr,
     };
   }
@@ -211,8 +200,8 @@ export const getBudgetStatus = ({
   if (currentDate < startDate) {
     return {
       status: BUDGET_STATUSES.scheduled,
-      badgeVariant: "secondary",
-      term: "Starts",
+      badgeVariant: 'secondary',
+      term: 'Starts',
       date: startDateStr,
     };
   }
@@ -220,8 +209,8 @@ export const getBudgetStatus = ({
   if (isPlanApproachingExpiry(intl, endDateStr)) {
     return {
       status: BUDGET_STATUSES.expiring,
-      badgeVariant: "warning",
-      term: "Expiring",
+      badgeVariant: 'warning',
+      term: 'Expiring',
       date: endDateStr,
     };
   }
@@ -230,8 +219,8 @@ export const getBudgetStatus = ({
   if (currentDate >= startDate && currentDate <= endDate) {
     return {
       status: BUDGET_STATUSES.active,
-      badgeVariant: "primary",
-      term: "Expires",
+      badgeVariant: 'primary',
+      term: 'Expires',
       date: endDateStr,
     };
   }
@@ -239,16 +228,16 @@ export const getBudgetStatus = ({
   // Otherwise, budget must be expired
   return {
     status: BUDGET_STATUSES.expired,
-    badgeVariant: "light",
-    term: "Expired",
+    badgeVariant: 'light',
+    term: 'Expired',
     date: endDateStr,
   };
 };
 
 export const formatPrice = (price, options = {}) => {
-  const USDollar = new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  const USDollar = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     minimumFractionDigits: 0,
     ...options,
   });
@@ -317,7 +306,7 @@ export const orderBudgets = (intl, budgets) => {
  * @param {string} format
  * @returns {string}
  */
-export function formatDate(date, format = "MMM D, YYYY") {
+export function formatDate(date, format = 'MMM D, YYYY') {
   return dayjs(date).format(format);
 }
 
@@ -326,7 +315,7 @@ export function formatDate(date, format = "MMM D, YYYY") {
 export function getEnrollmentDeadline(enrollByDate) {
   const assignmentEnrollmentDeadline = dayjs().add(
     ASSIGNMENT_ENROLLMENT_DEADLINE,
-    "days",
+    'days',
   );
   if (!enrollByDate) {
     return formatDate(assignmentEnrollmentDeadline);
@@ -423,7 +412,7 @@ export async function fetchSpentTransactions({
 
   if (!response) {
     logInfo(
-      "[fetchSpentTransactions] Spent transactions were not fetched from API. No budget identifier provided.",
+      '[fetchSpentTransactions] Spent transactions were not fetched from API. No budget identifier provided.',
     );
   }
 
@@ -520,8 +509,7 @@ export const transformSelectedRows = (selectedFlatRows) => {
   );
   const uniqueLearnerState = {};
   flatMappedLearnerState.forEach((learnerState) => {
-    uniqueLearnerState[learnerState] =
-      (uniqueLearnerState[learnerState] || 0) + 1;
+    uniqueLearnerState[learnerState] = (uniqueLearnerState[learnerState] || 0) + 1;
   });
 
   // Count of unique assignment states, where the key is the assignment state,
@@ -560,36 +548,36 @@ export const getTranslatedBudgetStatus = (intl, status) => {
   switch (status) {
     case BUDGET_STATUSES.active:
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.status.active",
-        defaultMessage: "Active",
-        description: "Status for an active budget",
+        id: 'lcm.budgets.budget.card.status.active',
+        defaultMessage: 'Active',
+        description: 'Status for an active budget',
       });
     case BUDGET_STATUSES.expiring:
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.status.expiring",
-        defaultMessage: "Expiring",
-        description: "Status for an expiring budget",
+        id: 'lcm.budgets.budget.card.status.expiring',
+        defaultMessage: 'Expiring',
+        description: 'Status for an expiring budget',
       });
     case BUDGET_STATUSES.expired:
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.status.expired",
-        defaultMessage: "Expired",
-        description: "Status for an expired budget",
+        id: 'lcm.budgets.budget.card.status.expired',
+        defaultMessage: 'Expired',
+        description: 'Status for an expired budget',
       });
     case BUDGET_STATUSES.retired:
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.status.retired",
-        defaultMessage: "Retired",
-        description: "Status for a retired budget",
+        id: 'lcm.budgets.budget.card.status.retired',
+        defaultMessage: 'Retired',
+        description: 'Status for a retired budget',
       });
     case BUDGET_STATUSES.scheduled:
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.status.scheduled",
-        defaultMessage: "Scheduled",
-        description: "Status for a scheduled budget",
+        id: 'lcm.budgets.budget.card.status.scheduled',
+        defaultMessage: 'Scheduled',
+        description: 'Status for a scheduled budget',
       });
     default:
-      return "";
+      return '';
   }
 };
 
@@ -601,43 +589,43 @@ export const getTranslatedBudgetStatus = (intl, status) => {
  */
 export const getTranslatedBudgetTerm = (intl, term) => {
   switch (term) {
-    case "Starts":
+    case 'Starts':
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.term.starts",
-        defaultMessage: "Starts",
-        description: "Term for when a budget starts",
+        id: 'lcm.budgets.budget.card.term.starts',
+        defaultMessage: 'Starts',
+        description: 'Term for when a budget starts',
       });
-    case "Expires":
+    case 'Expires':
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.term.expires",
-        defaultMessage: "Expires",
-        description: "Term for when a budget expires",
+        id: 'lcm.budgets.budget.card.term.expires',
+        defaultMessage: 'Expires',
+        description: 'Term for when a budget expires',
       });
-    case "Expiring":
+    case 'Expiring':
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.term.expiring",
-        defaultMessage: "Expiring",
-        description: "Term for when a budget is expiring",
+        id: 'lcm.budgets.budget.card.term.expiring',
+        defaultMessage: 'Expiring',
+        description: 'Term for when a budget is expiring',
       });
-    case "Expired":
+    case 'Expired':
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.term.expired",
-        defaultMessage: "Expired",
-        description: "Term for when a budget has expired",
+        id: 'lcm.budgets.budget.card.term.expired',
+        defaultMessage: 'Expired',
+        description: 'Term for when a budget has expired',
       });
-    case "Retired":
+    case 'Retired':
       return intl.formatMessage({
-        id: "lcm.budgets.budget.card.term.retired",
-        defaultMessage: "Retired",
-        description: "Term for when a budget has retired",
+        id: 'lcm.budgets.budget.card.term.retired',
+        defaultMessage: 'Retired',
+        description: 'Term for when a budget has retired',
       });
     default:
-      return "";
+      return '';
   }
 };
 
-export const isLmsBudget = (activeIntegrationsLength, isUniversalGroup) =>
-  activeIntegrationsLength > 0 && isUniversalGroup;
+// eslint-disable-next-line max-len
+export const isLmsBudget = (activeIntegrationsLength, isUniversalGroup) => activeIntegrationsLength > 0 && isUniversalGroup;
 
 /**
  * Determines if the course has already started. Mostly used around text formatting for tense
@@ -647,25 +635,22 @@ export const isLmsBudget = (activeIntegrationsLength, isUniversalGroup) =>
  */
 export const isDateBeforeToday = (date) => dayjs(date).isBefore(dayjs());
 
-const subsidyExpirationRefundCutoffDate = ({ subsidyExpirationDatetime }) =>
-  dayjs(subsidyExpirationDatetime).toDate();
+const subsidyExpirationRefundCutoffDate = ({ subsidyExpirationDatetime }) => dayjs(subsidyExpirationDatetime).toDate();
 
-export const isCourseSelfPaced = ({ pacingType }) =>
-  pacingType === COURSE_PACING_MAP.SELF_PACED;
+export const isCourseSelfPaced = ({ pacingType }) => pacingType === COURSE_PACING_MAP.SELF_PACED;
 
 export const hasTimeToComplete = ({ end, weeksToComplete }) => {
   if (!weeksToComplete || !end) {
     return true;
   }
   const today = dayjs();
-  const differenceInWeeks = dayjs(end).diff(today, "week");
+  const differenceInWeeks = dayjs(end).diff(today, 'week');
   return weeksToComplete <= differenceInWeeks;
 };
 
-const isWithinMinimumStartDateThreshold = ({ start }) =>
-  dayjs(start).isBefore(
-    dayjs().subtract(START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS, "days"),
-  );
+const isWithinMinimumStartDateThreshold = ({ start }) => dayjs(start).isBefore(
+  dayjs().subtract(START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS, 'days'),
+);
 
 /**
  * Normalizes the course start_date based on a heuristic for the purpose of
@@ -699,12 +684,12 @@ export const getNormalizedStartDate = ({
   }
   const startDateIso = dayjs(start).toISOString();
   if (
-    isCourseSelfPaced({ pacingType }) &&
-    dayjs(startDateIso).isBefore(dayjs())
+    isCourseSelfPaced({ pacingType })
+    && dayjs(startDateIso).isBefore(dayjs())
   ) {
     if (
-      hasTimeToComplete({ end, weeksToComplete }) ||
-      isWithinMinimumStartDateThreshold({ start })
+      hasTimeToComplete({ end, weeksToComplete })
+      || isWithinMinimumStartDateThreshold({ start })
     ) {
       // always today's date (incentivizes enrollment)
       return todayToIso;
@@ -719,7 +704,7 @@ export const getNormalizedEnrollByDate = (enrollBy) => {
   }
   const ninetyDaysFromNow = dayjs().add(
     DAYS_UNTIL_ASSIGNMENT_ALLOCATION_EXPIRATION,
-    "days",
+    'days',
   );
   if (dayjs(enrollBy).isAfter(ninetyDaysFromNow)) {
     return ninetyDaysFromNow.toISOString();
@@ -747,7 +732,7 @@ const isStartDateWithinThreshold = ({
   const subsidyExpirationDate = subsidyExpirationRefundCutoffDate({
     subsidyExpirationDatetime,
   });
-  return dayjs(earliestStartDate).isBefore(subsidyExpirationDate, "seconds");
+  return dayjs(earliestStartDate).isBefore(subsidyExpirationDate, 'seconds');
 };
 
 const isEnrollByDateWithinThreshold = ({
@@ -762,10 +747,10 @@ const isEnrollByDateWithinThreshold = ({
   if (isLateRedemptionAllowed) {
     enrollmentEffectiveDate = enrollmentEffectiveDate.subtract(
       LATE_ENROLLMENTS_BUFFER_DAYS,
-      "days",
+      'days',
     );
   }
-  return dayjs(enrollBy).isAfter(enrollmentEffectiveDate, "seconds");
+  return dayjs(enrollBy).isAfter(enrollmentEffectiveDate, 'seconds');
 };
 
 export const startAndEnrollBySortLogic = (prev, next) => {
@@ -776,7 +761,7 @@ export const startAndEnrollBySortLogic = (prev, next) => {
   const nextStartDateTimestamp = dayjs(next.start).valueOf();
 
   // When start dates are equivalent, compare enrollBy dates.
-  if (dayjs(prev.start).isSame(next.start, "day")) {
+  if (dayjs(prev.start).isSame(next.start, 'day')) {
     return prevEnrollByDateTimestamp - nextEnrollByDateTimestamp;
   }
   // Otherwise, compare start dates
@@ -912,11 +897,10 @@ export const getAssignableCourseRuns = ({
  * @param {string} status The budget status to check
  * @returns {boolean} True if the budget is retired or expired, false otherwise
  */
-export const isBudgetRetiredOrExpired = (status) =>
-  [BUDGET_STATUSES.retired, BUDGET_STATUSES.expired].includes(status);
+export const isBudgetRetiredOrExpired = (status) => [BUDGET_STATUSES.retired, BUDGET_STATUSES.expired].includes(status);
 
 export const transformRequestOverview = (requestStates) => {
-  const allowedStates = ["requested", "cancelled", "declined"];
+  const allowedStates = ['requested', 'cancelled', 'declined'];
 
   return requestStates
     .filter(({ state }) => allowedStates.includes(state))
@@ -941,8 +925,7 @@ export const transformLearnerRequestStateCounts = (
 
   return learnerRequestStateCounts
     .filter(({ learnerRequestState }) => {
-      const displayName =
-        LEARNER_CREDIT_REQUEST_STATE_LABELS[learnerRequestState];
+      const displayName = LEARNER_CREDIT_REQUEST_STATE_LABELS[learnerRequestState];
       return !!displayName;
     })
     .map(({ learnerRequestState, count }) => ({
@@ -974,8 +957,7 @@ export const transformSelectedApprovedRequestRows = (selectedFlatRows) => {
   );
   const uniqueLearnerRequestState = {};
   flatMappedLearnerRequestState.forEach((state) => {
-    uniqueLearnerRequestState[state] =
-      (uniqueLearnerRequestState[state] || 0) + 1;
+    uniqueLearnerRequestState[state] = (uniqueLearnerRequestState[state] || 0) + 1;
   });
 
   return {
@@ -1000,7 +982,7 @@ export const calculateTotalToRemindApprovedRequests = ({
   requestUuids,
   isEntireTableSelected,
   learnerRequestStateCounts,
-  remindableState = "waiting",
+  remindableState = 'waiting',
 }) => {
   if (isEntireTableSelected) {
     // When entire table is selected, use the count from the API response

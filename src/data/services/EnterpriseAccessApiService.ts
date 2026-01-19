@@ -1,8 +1,8 @@
-import type { AxiosResponse } from "axios";
-import { getAuthenticatedHttpClient } from "@edx/frontend-platform/auth";
-import { camelCaseObject, snakeCaseObject } from "@edx/frontend-platform/utils";
+import type { AxiosResponse } from 'axios';
+import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import { camelCaseObject, snakeCaseObject } from '@edx/frontend-platform/utils';
 
-import { configuration } from "../../config";
+import { configuration } from '../../config';
 
 export type LearnerProfileResponse = Promise<AxiosResponse<LearnerProfileType>>;
 
@@ -129,7 +129,7 @@ class EnterpriseAccessApiService {
       ...options,
     });
     if (requestStatusFilters?.length > 0) {
-      params.set("state", requestStatusFilters.join(","));
+      params.set('state', requestStatusFilters.join(','));
     }
     const url = `${EnterpriseAccessApiService.baseUrl}/license-requests/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
@@ -154,7 +154,7 @@ class EnterpriseAccessApiService {
       ...options,
     });
     if (requestStatusFilters?.length > 0) {
-      params.set("state", requestStatusFilters.join(","));
+      params.set('state', requestStatusFilters.join(','));
     }
     const url = `${EnterpriseAccessApiService.baseUrl}/coupon-code-requests/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
@@ -182,7 +182,7 @@ class EnterpriseAccessApiService {
       page_size: 25,
       // Only include assignments with allocated or errored states. The table should NOT
       // include assignments in the canceled or accepted states.
-      state__in: "allocated,errored",
+      state__in: 'allocated,errored',
       ...snakeCaseObject(optionsRest),
     };
     if (learnerState) {
@@ -196,7 +196,7 @@ class EnterpriseAccessApiService {
   static listSubsidyAccessPolicies(enterpriseCustomerId) {
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerId,
-      active: "true",
+      active: 'true',
     });
     const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/?${queryParams.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
@@ -302,7 +302,7 @@ class EnterpriseAccessApiService {
   ) {
     const queryParams = new URLSearchParams(options);
     if (selectedEmails) {
-      selectedEmails.forEach((email) => queryParams.append("learners", email));
+      selectedEmails.forEach((email) => queryParams.append('learners', email));
     }
     const subsidyHydratedGroupLearnersEndpoint = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/${subsidyAccessPolicyUUID}/group-members?${queryParams.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(
