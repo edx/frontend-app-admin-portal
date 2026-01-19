@@ -11,7 +11,7 @@
 /**
  * @constant PROJECT_NAME leading project identifier for event names
  */
-const PROJECT_NAME = "edx.ui.enterprise.admin_portal";
+const PROJECT_NAME = 'edx.ui.enterprise.admin_portal';
 
 const SUBSCRIPTION_PREFIX = `${PROJECT_NAME}.subscriptions`;
 const SETTINGS_PREFIX = `${PROJECT_NAME}.settings`;

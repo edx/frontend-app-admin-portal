@@ -1,19 +1,19 @@
-import { QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, act, waitFor } from "@testing-library/react";
+import { QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, act, waitFor } from '@testing-library/react';
 
-import useRemindApprovedRequest from "../useRemindApprovedRequest";
-import useBudgetId from "../useBudgetId";
-import EnterpriseAccessApiService from "../../../../../data/services/EnterpriseAccessApiService";
-import { queryClient } from "../../../../test/testUtils";
-import { learnerCreditManagementQueryKeys } from "../../constants";
+import useRemindApprovedRequest from '../useRemindApprovedRequest';
+import useBudgetId from '../useBudgetId';
+import EnterpriseAccessApiService from '../../../../../data/services/EnterpriseAccessApiService';
+import { queryClient } from '../../../../test/testUtils';
+import { learnerCreditManagementQueryKeys } from '../../constants';
 
-jest.mock("../useBudgetId");
-jest.mock("../../../../../data/services/EnterpriseAccessApiService");
-jest.mock("@edx/frontend-platform/logging");
+jest.mock('../useBudgetId');
+jest.mock('../../../../../data/services/EnterpriseAccessApiService');
+jest.mock('@edx/frontend-platform/logging');
 
-const mockSubsidyAccessPolicyId = "test-policy-id";
-const mockSubsidyRequestUUID = "test-request-uuid";
-const mockEnterpriseId = "test-enterprise-id";
+const mockSubsidyAccessPolicyId = 'test-policy-id';
+const mockSubsidyRequestUUID = 'test-request-uuid';
+const mockEnterpriseId = 'test-enterprise-id';
 
 let mockQueryClient;
 
@@ -21,7 +21,7 @@ const wrapper = ({ children }) => (
   <QueryClientProvider client={mockQueryClient}>{children}</QueryClientProvider>
 );
 
-describe("useRemindApprovedRequest", () => {
+describe('useRemindApprovedRequest', () => {
   let mockOnSuccess;
   let mockOnFailure;
 
@@ -35,44 +35,42 @@ describe("useRemindApprovedRequest", () => {
     });
 
     mockQueryClient = queryClient();
-    jest.spyOn(mockQueryClient, "invalidateQueries");
+    jest.spyOn(mockQueryClient, 'invalidateQueries');
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  describe("initial state", () => {
-    it("should return correct initial values", () => {
+  describe('initial state', () => {
+    it('should return correct initial values', () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
-      expect(result.current.remindButtonState).toBe("default");
+      expect(result.current.remindButtonState).toBe('default');
       expect(result.current.isOpen).toBe(false);
-      expect(typeof result.current.remindApprovedRequests).toBe("function");
-      expect(typeof result.current.open).toBe("function");
-      expect(typeof result.current.close).toBe("function");
+      expect(typeof result.current.remindApprovedRequests).toBe('function');
+      expect(typeof result.current.open).toBe('function');
+      expect(typeof result.current.close).toBe('function');
     });
   });
 
-  describe("modal toggle functionality", () => {
-    it("should open modal when open is called", () => {
+  describe('modal toggle functionality', () => {
+    it('should open modal when open is called', () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -83,15 +81,14 @@ describe("useRemindApprovedRequest", () => {
       expect(result.current.isOpen).toBe(true);
     });
 
-    it("should close modal when close is called", () => {
+    it('should close modal when close is called', () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -109,7 +106,7 @@ describe("useRemindApprovedRequest", () => {
     });
   });
 
-  describe("successful reminder", () => {
+  describe('successful reminder', () => {
     const mockResponse = { data: { success: true } };
 
     beforeEach(() => {
@@ -118,15 +115,14 @@ describe("useRemindApprovedRequest", () => {
       );
     });
 
-    it("should handle successful reminder flow", async () => {
+    it('should handle successful reminder flow', async () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -136,7 +132,7 @@ describe("useRemindApprovedRequest", () => {
         reminderPromise = result.current.remindApprovedRequests();
       });
 
-      expect(result.current.remindButtonState).toBe("pending");
+      expect(result.current.remindButtonState).toBe('pending');
 
       await waitFor(async () => {
         const resolvedResult = await reminderPromise;
@@ -144,18 +140,17 @@ describe("useRemindApprovedRequest", () => {
         expect(resolvedResult.response).toBe(mockResponse);
       });
 
-      expect(result.current.remindButtonState).toBe("complete");
+      expect(result.current.remindButtonState).toBe('complete');
     });
 
-    it("should call API service with correct parameters", async () => {
+    it('should call API service with correct parameters', async () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -171,15 +166,14 @@ describe("useRemindApprovedRequest", () => {
       });
     });
 
-    it("should call onSuccess callback with response", async () => {
+    it('should call onSuccess callback with response', async () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -191,15 +185,14 @@ describe("useRemindApprovedRequest", () => {
       expect(mockOnFailure).not.toHaveBeenCalled();
     });
 
-    it("should invalidate relevant queries after successful reminder", async () => {
+    it('should invalidate relevant queries after successful reminder', async () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -214,15 +207,14 @@ describe("useRemindApprovedRequest", () => {
       });
     });
 
-    it("should work without onSuccess callback", async () => {
+    it('should work without onSuccess callback', async () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            null, // No onSuccess callback
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          null, // No onSuccess callback
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -230,12 +222,12 @@ describe("useRemindApprovedRequest", () => {
         await result.current.remindApprovedRequests();
       });
 
-      expect(result.current.remindButtonState).toBe("complete");
+      expect(result.current.remindButtonState).toBe('complete');
     });
   });
 
-  describe("failed reminder", () => {
-    const mockError = new Error("API Error");
+  describe('failed reminder', () => {
+    const mockError = new Error('API Error');
 
     beforeEach(() => {
       EnterpriseAccessApiService.remindApprovedBnrSubsidyRequests.mockRejectedValue(
@@ -243,15 +235,14 @@ describe("useRemindApprovedRequest", () => {
       );
     });
 
-    it("should handle failed reminder flow", async () => {
+    it('should handle failed reminder flow', async () => {
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
@@ -261,73 +252,71 @@ describe("useRemindApprovedRequest", () => {
         reminderPromise = result.current.remindApprovedRequests();
       });
 
-      expect(result.current.remindButtonState).toBe("pending");
+      expect(result.current.remindButtonState).toBe('pending');
 
       await waitFor(async () => {
-        await expect(reminderPromise).rejects.toThrow("API Error");
+        await expect(reminderPromise).rejects.toThrow('API Error');
       });
 
-      expect(result.current.remindButtonState).toBe("error");
+      expect(result.current.remindButtonState).toBe('error');
       expect(mockOnFailure).toHaveBeenCalledWith(mockError);
       expect(mockOnSuccess).not.toHaveBeenCalled();
       expect(mockQueryClient.invalidateQueries).not.toHaveBeenCalled();
     });
   });
 
-  describe("button state transitions", () => {
-    it("should transition through states correctly on success", async () => {
+  describe('button state transitions', () => {
+    it('should transition through states correctly on success', async () => {
       EnterpriseAccessApiService.remindApprovedBnrSubsidyRequests.mockResolvedValue(
         { data: { success: true } },
       );
 
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
-      expect(result.current.remindButtonState).toBe("default");
+      expect(result.current.remindButtonState).toBe('default');
 
       act(() => {
         result.current.remindApprovedRequests();
       });
 
-      expect(result.current.remindButtonState).toBe("pending");
+      expect(result.current.remindButtonState).toBe('pending');
 
       await waitFor(() => {
-        expect(result.current.remindButtonState).toBe("complete");
+        expect(result.current.remindButtonState).toBe('complete');
       });
     });
 
-    it("should transition through states correctly on error", async () => {
+    it('should transition through states correctly on error', async () => {
       EnterpriseAccessApiService.remindApprovedBnrSubsidyRequests.mockRejectedValue(
-        new Error("API Error"),
+        new Error('API Error'),
       );
 
       const { result } = renderHook(
-        () =>
-          useRemindApprovedRequest(
-            mockSubsidyRequestUUID,
-            mockEnterpriseId,
-            mockOnSuccess,
-            mockOnFailure,
-          ),
+        () => useRemindApprovedRequest(
+          mockSubsidyRequestUUID,
+          mockEnterpriseId,
+          mockOnSuccess,
+          mockOnFailure,
+        ),
         { wrapper },
       );
 
-      expect(result.current.remindButtonState).toBe("default");
+      expect(result.current.remindButtonState).toBe('default');
       act(() => {
         result.current.remindApprovedRequests().catch(() => {});
       });
 
-      expect(result.current.remindButtonState).toBe("pending");
+      expect(result.current.remindButtonState).toBe('pending');
       await waitFor(() => {
-        expect(result.current.remindButtonState).toBe("error");
+        expect(result.current.remindButtonState).toBe('error');
       });
     });
   });

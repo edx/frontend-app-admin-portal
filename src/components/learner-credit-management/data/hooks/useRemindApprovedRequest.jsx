@@ -1,11 +1,11 @@
-import { useCallback, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { logError } from "@edx/frontend-platform/logging";
-import { useToggle } from "@openedx/paragon";
+import { useCallback, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { logError } from '@edx/frontend-platform/logging';
+import { useToggle } from '@openedx/paragon';
 
-import EnterpriseAccessApiService from "../../../../data/services/EnterpriseAccessApiService";
-import { learnerCreditManagementQueryKeys } from "../constants";
-import useBudgetId from "./useBudgetId";
+import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
+import { learnerCreditManagementQueryKeys } from '../constants';
+import useBudgetId from './useBudgetId';
 
 const useRemindApprovedRequest = (
   subsidyRequestUUID,
@@ -14,20 +14,19 @@ const useRemindApprovedRequest = (
   onFailure,
 ) => {
   const [isOpen, open, close] = useToggle(false);
-  const [remindButtonState, setRemindButtonState] = useState("default");
+  const [remindButtonState, setRemindButtonState] = useState('default');
   const queryClient = useQueryClient();
   const { subsidyAccessPolicyId } = useBudgetId();
 
   const remindApprovedRequests = useCallback(async () => {
-    setRemindButtonState("pending");
+    setRemindButtonState('pending');
     try {
-      const response =
-        await EnterpriseAccessApiService.remindApprovedBnrSubsidyRequests({
-          subsidyRequestUUIDs: [subsidyRequestUUID],
-          enterpriseId,
-        });
+      const response = await EnterpriseAccessApiService.remindApprovedBnrSubsidyRequests({
+        subsidyRequestUUIDs: [subsidyRequestUUID],
+        enterpriseId,
+      });
 
-      setRemindButtonState("complete");
+      setRemindButtonState('complete');
 
       if (onSuccess) {
         onSuccess(response);
@@ -42,7 +41,7 @@ const useRemindApprovedRequest = (
       return { success: true, response };
     } catch (err) {
       logError(err);
-      setRemindButtonState("error");
+      setRemindButtonState('error');
 
       if (onFailure) {
         onFailure(err);

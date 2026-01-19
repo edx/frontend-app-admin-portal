@@ -1,30 +1,30 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { DataTable, CheckboxFilter } from "@openedx/paragon";
-import { useIntl } from "@edx/frontend-platform/i18n";
-import TableTextFilter from "./TableTextFilter";
-import CustomDataTableEmptyState from "./CustomDataTableEmptyState";
-import RequestDetailsTableCell from "./RequestDetailsTableCell";
-import RequestStatusTableCell from "./RequestStatusTableCell";
-import RequestAmountTableCell from "./RequestAmountTableCell";
-import RequestRecentActionTableCell from "./RequestRecentActionTableCell";
-import ApprovedRequestActionsTableCell from "./ApprovedRequestActionsTableCell";
-import ApprovedRequestsTableRefreshAction from "./ApprovedRequestsTableRefreshAction";
-import ApprovedRequestBulkRemindAction from "./ApprovedRequestBulkRemindAction";
+import React from 'react';
+import PropTypes from 'prop-types';
+import { DataTable, CheckboxFilter } from '@openedx/paragon';
+import { useIntl } from '@edx/frontend-platform/i18n';
+import TableTextFilter from './TableTextFilter';
+import CustomDataTableEmptyState from './CustomDataTableEmptyState';
+import RequestDetailsTableCell from './RequestDetailsTableCell';
+import RequestStatusTableCell from './RequestStatusTableCell';
+import RequestAmountTableCell from './RequestAmountTableCell';
+import RequestRecentActionTableCell from './RequestRecentActionTableCell';
+import ApprovedRequestActionsTableCell from './ApprovedRequestActionsTableCell';
+import ApprovedRequestsTableRefreshAction from './ApprovedRequestsTableRefreshAction';
+import ApprovedRequestBulkRemindAction from './ApprovedRequestBulkRemindAction';
 import {
   DEFAULT_PAGE,
   PAGE_SIZE,
   useBudgetId,
   useSubsidyAccessPolicy,
-} from "./data";
-import { transformLearnerRequestStateCounts } from "./data/utils";
+} from './data';
+import { transformLearnerRequestStateCounts } from './data/utils';
 
 const FilterStatus = (rest) => (
   <DataTable.FilterStatus showFilteredFields={false} {...rest} />
 );
 
 const selectColumn = {
-  id: "selection",
+  id: 'selection',
   Header: DataTable.ControlledSelectHeader,
   Cell: DataTable.ControlledSelect,
   disableSortBy: true,
@@ -84,59 +84,59 @@ const BudgetDetailApprovedRequestTable = ({
       columns={[
         {
           Header: intl.formatMessage({
-            id: "lcm.budget.detail.page.approved.requests.table.columns.request.details",
-            defaultMessage: "Request details",
+            id: 'lcm.budget.detail.page.approved.requests.table.columns.request.details',
+            defaultMessage: 'Request details',
             description:
-              "Column header for the request details column in the approved requests table",
+              'Column header for the request details column in the approved requests table',
           }),
-          accessor: "requestDetails",
+          accessor: 'requestDetails',
           Cell: RequestDetailsTableCell,
           disableSortBy: true,
         },
         {
           Header: intl.formatMessage({
-            id: "lcm.budget.detail.page.approved.requests.table.columns.amount",
-            defaultMessage: "Amount",
+            id: 'lcm.budget.detail.page.approved.requests.table.columns.amount',
+            defaultMessage: 'Amount',
             description:
-              "Column header for the amount column in the approved requests table",
+              'Column header for the amount column in the approved requests table',
           }),
-          accessor: "amount",
+          accessor: 'amount',
           Cell: RequestAmountTableCell,
           disableFilters: true,
         },
         {
           Header: intl.formatMessage({
-            id: "lcm.budget.detail.page.approved.requests.table.columns.status",
-            defaultMessage: "Status",
+            id: 'lcm.budget.detail.page.approved.requests.table.columns.status',
+            defaultMessage: 'Status',
             description:
-              "Column header for the status column in the approved requests table",
+              'Column header for the status column in the approved requests table',
           }),
-          accessor: "learnerRequestState",
+          accessor: 'learnerRequestState',
           Cell: RequestStatusTableCell,
           Filter: CheckboxFilter,
-          filter: "includesValue",
+          filter: 'includesValue',
           filterChoices: statusFilterChoices,
           disableFilters: false,
         },
         {
           Header: intl.formatMessage({
-            id: "lcm.budget.detail.page.approved.requests.table.columns.recent.action",
-            defaultMessage: "Recent action",
+            id: 'lcm.budget.detail.page.approved.requests.table.columns.recent.action',
+            defaultMessage: 'Recent action',
             description:
-              "Column header for the recent action column in the approved requests table",
+              'Column header for the recent action column in the approved requests table',
           }),
-          accessor: "recentAction",
+          accessor: 'recentAction',
           Cell: RequestRecentActionTableCell,
           disableFilters: true,
         },
         {
           Header: intl.formatMessage({
-            id: "lcm.budget.detail.page.approved.requests.table.columns.actions",
-            defaultMessage: "Actions",
+            id: 'lcm.budget.detail.page.approved.requests.table.columns.actions',
+            defaultMessage: 'Actions',
             description:
-              "Column header for the actions column in the approved requests table",
+              'Column header for the actions column in the approved requests table',
           }),
-          accessor: "actions",
+          accessor: 'actions',
           Cell: ApprovedRequestActionsTableCell,
           disableFilters: true,
           disableSortBy: true,
@@ -152,7 +152,7 @@ const BudgetDetailApprovedRequestTable = ({
         pageIndex: DEFAULT_PAGE,
         sortBy: [
           {
-            id: "recentAction",
+            id: 'recentAction',
             desc: true,
           },
         ],
