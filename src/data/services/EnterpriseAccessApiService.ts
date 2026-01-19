@@ -1,8 +1,8 @@
-import type { AxiosResponse } from 'axios';
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import { camelCaseObject, snakeCaseObject } from '@edx/frontend-platform/utils';
+import type { AxiosResponse } from "axios";
+import { getAuthenticatedHttpClient } from "@edx/frontend-platform/auth";
+import { camelCaseObject, snakeCaseObject } from "@edx/frontend-platform/utils";
 
-import { configuration } from '../../config';
+import { configuration } from "../../config";
 
 export type LearnerProfileResponse = Promise<AxiosResponse<LearnerProfileType>>;
 
@@ -41,10 +41,7 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 
-  static createSubsidyRequestConfiguration({
-    enterpriseId,
-    subsidyType,
-  }) {
+  static createSubsidyRequestConfiguration({ enterpriseId, subsidyType }) {
     const url = `${EnterpriseAccessApiService.baseUrl}/customer-configurations/`;
     const options = {
       enterprise_customer_uuid: enterpriseId,
@@ -55,10 +52,7 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().post(url, options);
   }
 
-  static updateSubsidyRequestConfiguration(
-    enterpriseId,
-    options,
-  ) {
+  static updateSubsidyRequestConfiguration(enterpriseId, options) {
     const url = `${EnterpriseAccessApiService.baseUrl}/customer-configurations/${enterpriseId}/`;
     return EnterpriseAccessApiService.apiClient().patch(url, options);
   }
@@ -135,7 +129,7 @@ class EnterpriseAccessApiService {
       ...options,
     });
     if (requestStatusFilters?.length > 0) {
-      params.set('state', requestStatusFilters.join(','));
+      params.set("state", requestStatusFilters.join(","));
     }
     const url = `${EnterpriseAccessApiService.baseUrl}/license-requests/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
@@ -150,13 +144,17 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 
-  static getCouponCodeRequests(enterpriseId, requestStatusFilters, options = {}) {
+  static getCouponCodeRequests(
+    enterpriseId,
+    requestStatusFilters,
+    options = {},
+  ) {
     const params = new URLSearchParams({
       enterprise_customer_uuid: enterpriseId,
       ...options,
     });
     if (requestStatusFilters?.length > 0) {
-      params.set('state', requestStatusFilters.join(','));
+      params.set("state", requestStatusFilters.join(","));
     }
     const url = `${EnterpriseAccessApiService.baseUrl}/coupon-code-requests/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
@@ -174,14 +172,17 @@ class EnterpriseAccessApiService {
   /**
    * List content assignments for a specific AssignmentConfiguration.
    */
-  static listContentAssignments(assignmentConfigurationUUID, options: any = {}) {
+  static listContentAssignments(
+    assignmentConfigurationUUID,
+    options: any = {},
+  ) {
     const { learnerState, ...optionsRest } = options;
     const params = {
       page: 1,
       page_size: 25,
       // Only include assignments with allocated or errored states. The table should NOT
       // include assignments in the canceled or accepted states.
-      state__in: 'allocated,errored',
+      state__in: "allocated,errored",
       ...snakeCaseObject(optionsRest),
     };
     if (learnerState) {
@@ -195,7 +196,7 @@ class EnterpriseAccessApiService {
   static listSubsidyAccessPolicies(enterpriseCustomerId) {
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerId,
-      active: 'true',
+      active: "true",
     });
     const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/?${queryParams.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
@@ -204,7 +205,10 @@ class EnterpriseAccessApiService {
   /**
    * Cancel content assignments for a specific AssignmentConfiguration.
    */
-  static cancelContentAssignments(assignmentConfigurationUUID, assignmentUuids) {
+  static cancelContentAssignments(
+    assignmentConfigurationUUID,
+    assignmentUuids,
+  ) {
     const options = {
       assignment_uuids: assignmentUuids,
     };
@@ -215,7 +219,10 @@ class EnterpriseAccessApiService {
   /**
    * Cancel ALL content assignments for a specific AssignmentConfiguration.
    */
-  static cancelAllContentAssignments(assignmentConfigurationUUID, options: any = {}) {
+  static cancelAllContentAssignments(
+    assignmentConfigurationUUID,
+    options: any = {},
+  ) {
     const { learnerState, ...optionsRest } = options;
     const params = {
       ...snakeCaseObject(optionsRest),
@@ -234,7 +241,10 @@ class EnterpriseAccessApiService {
   /**
    * Remind content assignments for a specific AssignmentConfiguration.
    */
-  static remindContentAssignments(assignmentConfigurationUUID, assignmentUuids) {
+  static remindContentAssignments(
+    assignmentConfigurationUUID,
+    assignmentUuids,
+  ) {
     const options = {
       assignment_uuids: assignmentUuids,
     };
@@ -245,7 +255,10 @@ class EnterpriseAccessApiService {
   /**
    * Remind ALL content assignments for a specific AssignmentConfiguration.
    */
-  static remindAllContentAssignments(assignmentConfigurationUUID, options: any = {}) {
+  static remindAllContentAssignments(
+    assignmentConfigurationUUID,
+    options: any = {},
+  ) {
     const { learnerState, ...optionsRest } = options;
     const params = {
       ...snakeCaseObject(optionsRest),
@@ -282,13 +295,19 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().post(url, payload);
   }
 
-  static fetchSubsidyHydratedGroupMembersData(subsidyAccessPolicyUUID, options, selectedEmails) {
+  static fetchSubsidyHydratedGroupMembersData(
+    subsidyAccessPolicyUUID,
+    options,
+    selectedEmails,
+  ) {
     const queryParams = new URLSearchParams(options);
     if (selectedEmails) {
-      selectedEmails.forEach((email) => queryParams.append('learners', email));
+      selectedEmails.forEach((email) => queryParams.append("learners", email));
     }
     const subsidyHydratedGroupLearnersEndpoint = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/${subsidyAccessPolicyUUID}/group-members?${queryParams.toString()}`;
-    return EnterpriseAccessApiService.apiClient().get(subsidyHydratedGroupLearnersEndpoint);
+    return EnterpriseAccessApiService.apiClient().get(
+      subsidyHydratedGroupLearnersEndpoint,
+    );
   }
 
   /**
@@ -388,10 +407,7 @@ class EnterpriseAccessApiService {
    * @param params.subsidyRequestUUID - The UUID of the approved subsidy request to cancel
    * @returns A promise that resolves to the API response for the cancel operation
    */
-  static cancelApprovedBnrSubsidyRequest({
-    enterpriseId,
-    subsidyRequestUUID,
-  }) {
+  static cancelApprovedBnrSubsidyRequest({ enterpriseId, subsidyRequestUUID }) {
     const options = {
       request_uuid: subsidyRequestUUID,
       enterprise_customer_uuid: enterpriseId,
@@ -402,23 +418,61 @@ class EnterpriseAccessApiService {
   }
 
   /**
-   * Send reminder for an approved BNR (Browse and Request) subsidy request for an enterprise.
+   * Send reminder for approved BNR (Browse and Request) subsidy requests for an enterprise.
+   * Supports both single and bulk reminders.
    *
-   * @param params - The parameters for reminding the approved subsidy request
-   * @param params.subsidyRequestUUID - The UUID of the approved bnr request for reminder
+   * @param params - The parameters for reminding the approved subsidy requests
+   * @param params.enterpriseId - The UUID of the enterprise customer
+   * @param params.subsidyRequestUUIDs - Array of UUIDs of the approved BNR requests to remind
    * @returns A promise that resolves to the API response for the remind operation
    */
-  static remindApprovedBnrSubsidyRequest({
+  static remindApprovedBnrSubsidyRequests({
     enterpriseId,
-    subsidyRequestUUID,
+    subsidyRequestUUIDs,
+  }: {
+    enterpriseId: string;
+    subsidyRequestUUIDs: string[];
   }) {
     const options = {
-      learner_credit_request_uuid: subsidyRequestUUID,
+      learner_credit_request_uuids: subsidyRequestUUIDs,
       enterprise_customer_uuid: enterpriseId,
     };
 
     const url = `${EnterpriseAccessApiService.baseUrl}/learner-credit-requests/remind/`;
     return EnterpriseAccessApiService.apiClient().post(url, options);
+  }
+
+  /**
+   * Send reminder for ALL approved BNR (Browse and Request) subsidy requests
+   * matching the given filters for an enterprise.
+   *
+   * @param params - The parameters for reminding all approved subsidy requests
+   * @param params.enterpriseId - The UUID of the enterprise customer
+   * @param params.policyUuid - The UUID of the subsidy access policy
+   * @param params.options - Optional filter parameters (e.g., learnerRequestState)
+   * @returns A promise that resolves to the API response for the remind-all operation
+   */
+  static remindAllApprovedBnrSubsidyRequests({
+    enterpriseId,
+    policyUuid,
+    options = {},
+  }: {
+    enterpriseId: string;
+    policyUuid: string;
+    options?: Record<string, any>;
+  }) {
+    const { learnerRequestState, ...optionsRest } = options;
+    const params: Record<string, any> = {
+      enterprise_customer_uuid: enterpriseId,
+      policy_uuid: policyUuid,
+      ...snakeCaseObject(optionsRest),
+    };
+    if (learnerRequestState) {
+      params.learner_request_state__in = learnerRequestState;
+    }
+
+    const url = `${EnterpriseAccessApiService.baseUrl}/learner-credit-requests/remind-all/`;
+    return EnterpriseAccessApiService.apiClient().post(url, params);
   }
 
   /**

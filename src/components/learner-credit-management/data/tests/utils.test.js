@@ -1,6 +1,7 @@
-import { createIntl } from '@edx/frontend-platform/i18n';
-import dayjs from 'dayjs';
+import { createIntl } from "@edx/frontend-platform/i18n";
+import dayjs from "dayjs";
 import {
+  calculateTotalToRemindApprovedRequests,
   getAssignableCourseRuns,
   getBudgetStatus,
   getNormalizedStartDate,
@@ -11,43 +12,44 @@ import {
   startAndEnrollBySortLogic,
   transformLearnerRequestStateCounts,
   transformRequestOverview,
+  transformSelectedApprovedRequestRows,
   transformSubsidySummary,
-} from '../utils';
-import { COURSE_PACING_MAP, EXEC_ED_OFFER_TYPE } from '../constants';
-import EnterpriseDataApiService from '../../../../data/services/EnterpriseDataApiService';
-import SubsidyApiService from '../../../../data/services/EnterpriseSubsidyApiService';
-import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
+} from "../utils";
+import { COURSE_PACING_MAP, EXEC_ED_OFFER_TYPE } from "../constants";
+import EnterpriseDataApiService from "../../../../data/services/EnterpriseDataApiService";
+import SubsidyApiService from "../../../../data/services/EnterpriseSubsidyApiService";
+import EnterpriseAccessApiService from "../../../../data/services/EnterpriseAccessApiService";
 
-jest.mock('../../../../data/services/EnterpriseDataApiService', () => ({
+jest.mock("../../../../data/services/EnterpriseDataApiService", () => ({
   fetchCourseEnrollments: jest.fn(),
 }));
-jest.mock('../../../../data/services/EnterpriseSubsidyApiService', () => ({
+jest.mock("../../../../data/services/EnterpriseSubsidyApiService", () => ({
   fetchCustomerTransactions: jest.fn(),
 }));
-jest.mock('../../../../data/services/EnterpriseAccessApiService', () => ({
+jest.mock("../../../../data/services/EnterpriseAccessApiService", () => ({
   listContentAssignments: jest.fn(),
   fetchBnrSubsidyRequests: jest.fn(),
 }));
 
-jest.mock('@edx/frontend-enterprise-utils', () => ({
-  ...jest.requireActual('@edx/frontend-enterprise-utils'),
-  camelCaseObject: jest.fn(obj => obj),
+jest.mock("@edx/frontend-enterprise-utils", () => ({
+  ...jest.requireActual("@edx/frontend-enterprise-utils"),
+  camelCaseObject: jest.fn((obj) => obj),
 }));
 
-jest.mock('@edx/frontend-platform/logging', () => ({
+jest.mock("@edx/frontend-platform/logging", () => ({
   logInfo: jest.fn(),
 }));
 
 const intl = createIntl({
-  locale: 'en',
+  locale: "en",
   messages: {},
 });
-describe('transformSubsidySummary', () => {
-  it('should return null if there is no budgetSummary', () => {
+describe("transformSubsidySummary", () => {
+  it("should return null if there is no budgetSummary", () => {
     expect(transformSubsidySummary()).toBeNull();
   });
 
-  it('should safeguard against bad data', () => {
+  it("should safeguard against bad data", () => {
     const budgetSummary = {
       maxDiscount: 1,
       amountOfOfferSpent: 1.34,
@@ -69,14 +71,14 @@ describe('transformSubsidySummary', () => {
     });
   });
 
-  it('should handle when no maxDiscount is not set', () => {
+  it("should handle when no maxDiscount is not set", () => {
     const budgetSummary = {
       maxDiscount: null,
       amountOfOfferSpent: 100,
       remainingBalance: null,
       percentOfOfferSpent: null,
-      offerType: 'Site',
-      offerId: '123',
+      offerType: "Site",
+      offerId: "123",
       budgetsSummary: [],
     };
 
@@ -85,31 +87,32 @@ describe('transformSubsidySummary', () => {
       redeemedFunds: 100,
       remainingFunds: null,
       percentUtilized: null,
-      offerType: 'Site',
+      offerType: "Site",
       redeemedFundsExecEd: undefined,
       redeemedFundsOcm: undefined,
-      offerId: '123',
+      offerId: "123",
       budgetsSummary: [],
     });
   });
 
-  it('should handle when budgetsSummary is provided', () => {
+  it("should handle when budgetsSummary is provided", () => {
     const budgetSummary = {
       maxDiscount: 1000,
       amountOfOfferSpent: 500,
       remainingBalance: 500,
       percentOfOfferSpent: 0.5,
-      offerType: 'Site',
-      offerId: '123',
+      offerType: "Site",
+      offerId: "123",
       budgets: [
         {
           id: 123,
-          start: '2022-01-01',
-          end: '2022-01-01',
+          start: "2022-01-01",
+          end: "2022-01-01",
           available: 200,
           spent: 100,
-          enterpriseSlug: 'test-enterprise',
-        }],
+          enterpriseSlug: "test-enterprise",
+        },
+      ],
     };
 
     expect(transformSubsidySummary(budgetSummary)).toEqual({
@@ -117,106 +120,108 @@ describe('transformSubsidySummary', () => {
       redeemedFunds: 500,
       remainingFunds: 500,
       percentUtilized: 0.5,
-      offerType: 'Site',
+      offerType: "Site",
       redeemedFundsExecEd: NaN,
       redeemedFundsOcm: NaN,
-      offerId: '123',
-      budgetsSummary: [{
-        id: 123,
-        start: '2022-01-01',
-        end: '2022-01-01',
-        available: 200,
-        spent: 100,
-        enterpriseSlug: 'test-enterprise',
-      }],
+      offerId: "123",
+      budgetsSummary: [
+        {
+          id: 123,
+          start: "2022-01-01",
+          end: "2022-01-01",
+          available: 200,
+          spent: 100,
+          enterpriseSlug: "test-enterprise",
+        },
+      ],
     });
   });
 });
 
-describe('getBudgetStatus', () => {
+describe("getBudgetStatus", () => {
   it('should return "Scheduled" when the current date is before the start date', () => {
-    const startDateStr = '2024-09-30';
-    const endDateStr = '2027-10-30';
-    const currentDateStr = '2023-09-28';
+    const startDateStr = "2024-09-30";
+    const endDateStr = "2027-10-30";
+    const currentDateStr = "2023-09-28";
     const result = getBudgetStatus({
       startDateStr,
       endDateStr,
       currentDate: new Date(currentDateStr),
     });
-    expect(result.status).toEqual('Scheduled');
+    expect(result.status).toEqual("Scheduled");
   });
 
   it('should return "Active" when the current date is between the start and end dates', () => {
-    const startDateStr = '2023-08-01';
-    const endDateStr = '2027-10-30';
-    const currentDateStr = '2023-09-28';
+    const startDateStr = "2023-08-01";
+    const endDateStr = "2027-10-30";
+    const currentDateStr = "2023-09-28";
     const result = getBudgetStatus({
       startDateStr,
       endDateStr,
       currentDate: new Date(currentDateStr),
     });
-    expect(result.status).toEqual('Active');
+    expect(result.status).toEqual("Active");
   });
 
   it('should return "Expired" when the current date is after the end date', () => {
-    const startDateStr = '2023-08-01';
-    const endDateStr = '2023-08-31';
-    const currentDateStr = '2023-09-28';
+    const startDateStr = "2023-08-01";
+    const endDateStr = "2023-08-31";
+    const currentDateStr = "2023-09-28";
     const result = getBudgetStatus({
       intl,
       startDateStr,
       endDateStr,
       currentDate: new Date(currentDateStr),
     });
-    expect(result.status).toEqual('Expired');
+    expect(result.status).toEqual("Expired");
   });
 
   it('should return "Retired" when `isBudgetRetired=true`', () => {
-    const startDateStr = '2023-08-01';
-    const endDateStr = '2023-08-31';
-    const currentDateStr = '2023-09-28';
+    const startDateStr = "2023-08-01";
+    const endDateStr = "2023-08-31";
+    const currentDateStr = "2023-09-28";
     const result = getBudgetStatus({
       startDateStr,
       endDateStr,
       currentDate: new Date(currentDateStr),
       isBudgetRetired: true,
     });
-    expect(result.status).toEqual('Retired');
+    expect(result.status).toEqual("Retired");
   });
 });
 
 // Example Budget objects for testing
 const budgets = [
   {
-    name: 'Budget 1',
-    start: '2023-01-01T00:00:00Z',
-    end: '2023-01-10T00:00:00Z',
+    name: "Budget 1",
+    start: "2023-01-01T00:00:00Z",
+    end: "2023-01-10T00:00:00Z",
   },
   {
-    name: 'Budget 2',
-    start: '2022-12-01T00:00:00Z',
-    end: '2022-12-20T00:00:00Z',
+    name: "Budget 2",
+    start: "2022-12-01T00:00:00Z",
+    end: "2022-12-20T00:00:00Z",
   },
   {
-    name: 'Budget 3',
-    start: '2023-01-01T00:00:00Z',
-    end: '2023-01-10T00:00:00Z',
+    name: "Budget 3",
+    start: "2023-01-01T00:00:00Z",
+    end: "2023-01-10T00:00:00Z",
     isRetired: true,
   },
   {
-    name: 'Budget 4',
-    start: '2023-02-01T00:00:00Z',
-    end: '2023-02-15T00:00:00Z',
+    name: "Budget 4",
+    start: "2023-02-01T00:00:00Z",
+    end: "2023-02-15T00:00:00Z",
   },
   {
-    name: 'Budget 5',
-    start: '2023-01-15T00:00:00Z',
-    end: '2023-01-25T00:00:00Z',
+    name: "Budget 5",
+    start: "2023-01-15T00:00:00Z",
+    end: "2023-01-25T00:00:00Z",
   },
 ];
 
-describe('orderBudgets', () => {
-  it('should sort offers correctly', () => {
+describe("orderBudgets", () => {
+  it("should sort offers correctly", () => {
     const sortedBudgets = orderBudgets(intl, budgets);
 
     // Expected order:
@@ -224,84 +229,115 @@ describe('orderBudgets', () => {
     // Upcoming budgets (Budget 1, Budget 5)
     // Expired budgets (Budget 4)
     // Retired budgets (Budget 3)
-    expect(sortedBudgets.map((budget) => budget.name)).toEqual(['Budget 2', 'Budget 1', 'Budget 5', 'Budget 4', 'Budget 3']);
+    expect(sortedBudgets.map((budget) => budget.name)).toEqual([
+      "Budget 2",
+      "Budget 1",
+      "Budget 5",
+      "Budget 4",
+      "Budget 3",
+    ]);
   });
 
-  it('should handle empty input', () => {
+  it("should handle empty input", () => {
     const sortedBudgets = orderBudgets(intl, []);
     expect(sortedBudgets).toEqual([]);
   });
 
-  it('should handle offers with the same status and end date', () => {
+  it("should handle offers with the same status and end date", () => {
     const duplicateBudgets = [
-      { name: 'Budget A', start: '2023-01-01T00:00:00Z', end: '2023-01-15T00:00:00Z' },
-      { name: 'Budget B', start: '2023-01-01T00:00:00Z', end: '2023-01-15T00:00:00Z' },
+      {
+        name: "Budget A",
+        start: "2023-01-01T00:00:00Z",
+        end: "2023-01-15T00:00:00Z",
+      },
+      {
+        name: "Budget B",
+        start: "2023-01-01T00:00:00Z",
+        end: "2023-01-15T00:00:00Z",
+      },
     ];
 
     const sortedBudgets = orderBudgets(intl, duplicateBudgets);
 
     // Since both offers have the same status ("active") and end date, they should be sorted alphabetically by name.
-    expect(sortedBudgets.map((budget) => budget.name)).toEqual(['Budget A', 'Budget B']);
+    expect(sortedBudgets.map((budget) => budget.name)).toEqual([
+      "Budget A",
+      "Budget B",
+    ]);
   });
 
-  it('should handle offers with missing metadata', () => {
+  it("should handle offers with missing metadata", () => {
     const budgetWithMissingMetadata = [
-      { name: 'Budget A', start: '2023-01-01T00:00:00Z', end: '2023-01-15T00:00:00Z' },
-      { name: 'Budget B', start: '2024-01-01T00:00:00Z', end: null },
-      { name: 'Budget C', start: null, end: '2024-01-15T00:00:00Z' },
-      { name: 'Budget D', start: null, end: null },
-      { name: 'Budget E', start: '2025-09-24-T00:00:00Z', end: '2050-09-24T00:00:00Z' },
+      {
+        name: "Budget A",
+        start: "2023-01-01T00:00:00Z",
+        end: "2023-01-15T00:00:00Z",
+      },
+      { name: "Budget B", start: "2024-01-01T00:00:00Z", end: null },
+      { name: "Budget C", start: null, end: "2024-01-15T00:00:00Z" },
+      { name: "Budget D", start: null, end: null },
+      {
+        name: "Budget E",
+        start: "2025-09-24-T00:00:00Z",
+        end: "2050-09-24T00:00:00Z",
+      },
     ];
     const sortedBudgets = orderBudgets(intl, budgetWithMissingMetadata);
-    expect(sortedBudgets.map((budget) => budget.name)).toEqual(['Budget A', 'Budget C', 'Budget E', 'Budget B', 'Budget D']);
+    expect(sortedBudgets.map((budget) => budget.name)).toEqual([
+      "Budget A",
+      "Budget C",
+      "Budget E",
+      "Budget B",
+      "Budget D",
+    ]);
   });
 });
 
-describe('getTranslatedBudgetStatus', () => {
-  it('should translate the budget status correctly', () => {
+describe("getTranslatedBudgetStatus", () => {
+  it("should translate the budget status correctly", () => {
     const mockintl = { formatMessage: jest.fn() };
-    const status = 'Retired';
+    const status = "Retired";
 
     getTranslatedBudgetStatus(mockintl, status);
 
     expect(mockintl.formatMessage).toHaveBeenCalledWith({
-      id: 'lcm.budgets.budget.card.status.retired',
-      defaultMessage: 'Retired',
-      description: 'Status for a retired budget',
+      id: "lcm.budgets.budget.card.status.retired",
+      defaultMessage: "Retired",
+      description: "Status for a retired budget",
     });
   });
-  it('should handle the case for an unknown value', () => {
+  it("should handle the case for an unknown value", () => {
     const mockintl = { formatMessage: jest.fn() };
-    const status = 'unknown';
+    const status = "unknown";
 
-    expect(getTranslatedBudgetStatus(mockintl, status)).toEqual('');
+    expect(getTranslatedBudgetStatus(mockintl, status)).toEqual("");
   });
 });
 
-describe('getTranslatedBudgetTerm', () => {
-  it('should translate the budget term correctly', () => {
+describe("getTranslatedBudgetTerm", () => {
+  it("should translate the budget term correctly", () => {
     const mockintl = { formatMessage: jest.fn() };
-    const term = 'Expiring';
+    const term = "Expiring";
 
     getTranslatedBudgetTerm(mockintl, term);
 
     expect(mockintl.formatMessage).toHaveBeenCalledWith({
-      id: 'lcm.budgets.budget.card.term.expiring',
-      defaultMessage: 'Expiring',
-      description: 'Term for when a budget is expiring',
+      id: "lcm.budgets.budget.card.term.expiring",
+      defaultMessage: "Expiring",
+      description: "Term for when a budget is expiring",
     });
   });
-  it('should handle the case when unknown or null term', () => {
+  it("should handle the case when unknown or null term", () => {
     const mockintl = { formatMessage: jest.fn() };
-    const term1 = 'unknown';
+    const term1 = "unknown";
     const term2 = null;
 
-    expect(getTranslatedBudgetTerm(mockintl, term1)).toEqual('');
-    expect(getTranslatedBudgetTerm(mockintl, term2)).toEqual('');
+    expect(getTranslatedBudgetTerm(mockintl, term1)).toEqual("");
+    expect(getTranslatedBudgetTerm(mockintl, term2)).toEqual("");
   });
 });
 
-describe('getNormalizedStartDate', () => {
+describe("getNormalizedStartDate", () => {
   afterEach(() => {
     jest.useRealTimers();
   });
@@ -310,22 +346,22 @@ describe('getNormalizedStartDate', () => {
     // Self-paced, and start date is more than START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS days before today.
     // Adjust the start date to become today.
     {
-      start: '2024-01-01T00:00:00.000Z',
-      end: '2024-01-30T00:00:00.000Z',
-      today: '2024-01-20T00:00:00.000Z',
+      start: "2024-01-01T00:00:00.000Z",
+      end: "2024-01-30T00:00:00.000Z",
+      today: "2024-01-20T00:00:00.000Z",
       pacingType: COURSE_PACING_MAP.SELF_PACED,
       weeksToComplete: 300,
-      expectedResult: '2024-01-20T00:00:00.000Z',
+      expectedResult: "2024-01-20T00:00:00.000Z",
     },
     // Self-paced, and there's enough time to complete.
     // Adjust the start date to become today.
     {
-      start: '2024-01-15T00:00:00.000Z',
-      end: '2024-02-20T00:00:00.000Z',
-      today: '2024-01-20T00:00:00.000Z',
+      start: "2024-01-15T00:00:00.000Z",
+      end: "2024-02-20T00:00:00.000Z",
+      today: "2024-01-20T00:00:00.000Z",
       pacingType: COURSE_PACING_MAP.SELF_PACED,
       weeksToComplete: 3,
-      expectedResult: '2024-01-20T00:00:00.000Z',
+      expectedResult: "2024-01-20T00:00:00.000Z",
     },
 
     //
@@ -335,81 +371,82 @@ describe('getNormalizedStartDate', () => {
     // Course starts more than START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS days before today,
     // BUT the course is instructor paced.
     {
-      start: '2024-01-01T00:00:00.000Z',
-      end: '2024-02-20T00:00:00.000Z',
-      today: '2024-01-20T00:00:00.000Z',
+      start: "2024-01-01T00:00:00.000Z",
+      end: "2024-02-20T00:00:00.000Z",
+      today: "2024-01-20T00:00:00.000Z",
       pacingType: COURSE_PACING_MAP.INSTRUCTOR_PACED,
       weeksToComplete: 300,
-      expectedResult: '2024-01-01T00:00:00.000Z',
+      expectedResult: "2024-01-01T00:00:00.000Z",
     },
     // Course starts in the past, there's enough time to complete,
     // BUT the course is instructor paced.
     {
-      start: '2024-01-15T00:00:00.000Z',
-      end: '2024-02-20T00:00:00.000Z',
-      today: '2024-01-20T00:00:00.000Z',
+      start: "2024-01-15T00:00:00.000Z",
+      end: "2024-02-20T00:00:00.000Z",
+      today: "2024-01-20T00:00:00.000Z",
       pacingType: COURSE_PACING_MAP.INSTRUCTOR_PACED,
       weeksToComplete: 3,
-      expectedResult: '2024-01-15T00:00:00.000Z',
+      expectedResult: "2024-01-15T00:00:00.000Z",
     },
     // Course is Self-paced, BUT there's no time to complete and it started
     // within START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS days ago.
     {
-      start: '2024-01-15T00:00:00.000Z',
-      end: '2024-01-30T00:00:00.000Z',
-      today: '2024-01-20T00:00:00.000Z',
+      start: "2024-01-15T00:00:00.000Z",
+      end: "2024-01-30T00:00:00.000Z",
+      today: "2024-01-20T00:00:00.000Z",
       pacingType: COURSE_PACING_MAP.SELF_PACED,
       weeksToComplete: 300,
-      expectedResult: '2024-01-15T00:00:00.000Z',
+      expectedResult: "2024-01-15T00:00:00.000Z",
     },
     // NEW test case for fixing ENT-10263.
     // Course is Self-paced, there's time to complete, BUT start date is in the future.
     {
-      start: '2024-01-25T00:00:00.000Z',
-      end: '2024-02-20T00:00:00.000Z',
-      today: '2024-01-20T00:00:00.000Z',
+      start: "2024-01-25T00:00:00.000Z",
+      end: "2024-02-20T00:00:00.000Z",
+      today: "2024-01-20T00:00:00.000Z",
       pacingType: COURSE_PACING_MAP.SELF_PACED,
       weeksToComplete: 3,
-      expectedResult: '2024-01-25T00:00:00.000Z',
+      expectedResult: "2024-01-25T00:00:00.000Z",
     },
-  ])('normalizes start date as expected', ({
-    start,
-    end,
-    today,
-    pacingType,
-    weeksToComplete,
-    expectedResult,
-  }) => {
-    jest.useFakeTimers({ now: new Date(today) });
-    expect(getNormalizedStartDate({
-      start, pacingType, end, weeksToComplete,
-    })).toEqual(expectedResult);
-  });
+  ])(
+    "normalizes start date as expected",
+    ({ start, end, today, pacingType, weeksToComplete, expectedResult }) => {
+      jest.useFakeTimers({ now: new Date(today) });
+      expect(
+        getNormalizedStartDate({
+          start,
+          pacingType,
+          end,
+          weeksToComplete,
+        }),
+      ).toEqual(expectedResult);
+    },
+  );
 });
 
-describe('startAndEnrollBySortLogic', () => {
+describe("startAndEnrollBySortLogic", () => {
   it.each([
     // Unique start and enroll-by dates
     {
       sampleData: [
         {
-          enrollBy: dayjs().add(1, 'day').toISOString(),
-          start: dayjs().add(3, 'day').toISOString(),
+          enrollBy: dayjs().add(1, "day").toISOString(),
+          start: dayjs().add(3, "day").toISOString(),
           expectedOrder: 2,
         },
         {
-          enrollBy: dayjs().subtract(2, 'day').toISOString(),
-          start: dayjs().add(1, 'day').toISOString(),
+          enrollBy: dayjs().subtract(2, "day").toISOString(),
+          start: dayjs().add(1, "day").toISOString(),
           expectedOrder: 1,
         },
         {
-          enrollBy: dayjs().subtract(6, 'day').toISOString(),
-          start: dayjs().add(12, 'day').toISOString(),
+          enrollBy: dayjs().subtract(6, "day").toISOString(),
+          start: dayjs().add(12, "day").toISOString(),
           expectedOrder: 4,
         },
         {
-          enrollBy: dayjs().add(3, 'day').toISOString(),
-          start: dayjs().add(5, 'day').toISOString(),
+          enrollBy: dayjs().add(3, "day").toISOString(),
+          start: dayjs().add(5, "day").toISOString(),
           expectedOrder: 3,
         },
       ],
@@ -418,23 +455,23 @@ describe('startAndEnrollBySortLogic', () => {
     {
       sampleData: [
         {
-          enrollBy: dayjs().add(1, 'day').toISOString(),
-          start: dayjs().add(3, 'day').toISOString(),
+          enrollBy: dayjs().add(1, "day").toISOString(),
+          start: dayjs().add(3, "day").toISOString(),
           expectedOrder: 2,
         },
         {
-          enrollBy: dayjs().subtract(1, 'day').toISOString(),
-          start: dayjs().add(1, 'day').toISOString(),
+          enrollBy: dayjs().subtract(1, "day").toISOString(),
+          start: dayjs().add(1, "day").toISOString(),
           expectedOrder: 1,
         },
         {
-          enrollBy: dayjs().subtract(6, 'day').toISOString(),
-          start: dayjs().add(12, 'day').toISOString(),
+          enrollBy: dayjs().subtract(6, "day").toISOString(),
+          start: dayjs().add(12, "day").toISOString(),
           expectedOrder: 4,
         },
         {
-          enrollBy: dayjs().add(6, 'day').toISOString(),
-          start: dayjs().add(5, 'day').toISOString(),
+          enrollBy: dayjs().add(6, "day").toISOString(),
+          start: dayjs().add(5, "day").toISOString(),
           expectedOrder: 3,
         },
       ],
@@ -443,89 +480,101 @@ describe('startAndEnrollBySortLogic', () => {
     {
       sampleData: [
         {
-          enrollBy: dayjs().add(1, 'day').toISOString(),
-          start: dayjs().add(1, 'day').toISOString(),
+          enrollBy: dayjs().add(1, "day").toISOString(),
+          start: dayjs().add(1, "day").toISOString(),
           expectedOrder: 1,
         },
         {
-          enrollBy: dayjs().subtract(2, 'day').toISOString(),
-          start: dayjs().add(1, 'day').toISOString(),
+          enrollBy: dayjs().subtract(2, "day").toISOString(),
+          start: dayjs().add(1, "day").toISOString(),
           expectedOrder: 2,
         },
         {
-          enrollBy: dayjs().subtract(6, 'day').toISOString(),
-          start: dayjs().add(12, 'day').toISOString(),
+          enrollBy: dayjs().subtract(6, "day").toISOString(),
+          start: dayjs().add(12, "day").toISOString(),
           expectedOrder: 4,
         },
         {
-          enrollBy: dayjs().add(3, 'day').toISOString(),
-          start: dayjs().add(12, 'day').toISOString(),
+          enrollBy: dayjs().add(3, "day").toISOString(),
+          start: dayjs().add(12, "day").toISOString(),
           expectedOrder: 3,
         },
       ],
     },
-  ])('sorts start date and enroll by date as expected', ({ sampleData }) => {
+  ])("sorts start date and enroll by date as expected", ({ sampleData }) => {
     const sortedDates = sampleData.sort(startAndEnrollBySortLogic);
-    expect(sortedDates).toEqual(sampleData.sort((a, b) => a.expectedOrder - b.expectedOrder));
+    expect(sortedDates).toEqual(
+      sampleData.sort((a, b) => a.expectedOrder - b.expectedOrder),
+    );
   });
 });
 
-describe('getAssignableCourseRuns', () => {
-  it('includes a late, non-restricted course run when late-redemption eligible', () => {
+describe("getAssignableCourseRuns", () => {
+  it("includes a late, non-restricted course run when late-redemption eligible", () => {
     const courseRuns = [
       {
-        key: 'the-course-run',
-        enrollBy: dayjs().subtract(1, 'day'),
+        key: "the-course-run",
+        enrollBy: dayjs().subtract(1, "day"),
         hasEnrollBy: true,
-        upgradeDeadline: dayjs().add(1, 'day'),
-        start: dayjs().subtract(1, 'day'),
+        upgradeDeadline: dayjs().add(1, "day"),
+        start: dayjs().subtract(1, "day"),
         isActive: true,
       },
     ];
-    const subsidyExpirationDatetime = dayjs().add(100, 'day');
+    const subsidyExpirationDatetime = dayjs().add(100, "day");
     const isLateRedemptionAllowed = true;
 
-    const result = getAssignableCourseRuns({ courseRuns, subsidyExpirationDatetime, isLateRedemptionAllowed });
+    const result = getAssignableCourseRuns({
+      courseRuns,
+      subsidyExpirationDatetime,
+      isLateRedemptionAllowed,
+    });
     expect(result.length).toEqual(1);
-    expect(result[0].key).toEqual('the-course-run');
+    expect(result[0].key).toEqual("the-course-run");
   });
-  it('returns an empty list given only a restricted run , even when late-redemption eligible', () => {
+  it("returns an empty list given only a restricted run , even when late-redemption eligible", () => {
     const courseRuns = [
       {
-        enrollBy: dayjs().subtract(1, 'day'),
+        enrollBy: dayjs().subtract(1, "day"),
         hasEnrollBy: true,
-        restrictionType: 'b2b-enterprise',
-        upgradeDeadline: dayjs().subtract(1, 'day'),
-        start: dayjs().subtract(1, 'day'),
+        restrictionType: "b2b-enterprise",
+        upgradeDeadline: dayjs().subtract(1, "day"),
+        start: dayjs().subtract(1, "day"),
         isActive: true,
       },
     ];
-    const subsidyExpirationDatetime = dayjs().add(100, 'day');
+    const subsidyExpirationDatetime = dayjs().add(100, "day");
     const isLateRedemptionAllowed = true;
 
-    const result = getAssignableCourseRuns({ courseRuns, subsidyExpirationDatetime, isLateRedemptionAllowed });
+    const result = getAssignableCourseRuns({
+      courseRuns,
+      subsidyExpirationDatetime,
+      isLateRedemptionAllowed,
+    });
     expect(result).toEqual([]);
   });
 });
 
-const mockSpentTransactions = { results: [{ uuid: '123', amount: 100 }] };
-const mockContentAssignments = { results: [{ uuid: 'assignment-123', learnerEmail: 'test@example.com' }] };
-const mockBnrRequests = { results: [{ uuid: 'bnr-123', status: 'approved' }] };
+const mockSpentTransactions = { results: [{ uuid: "123", amount: 100 }] };
+const mockContentAssignments = {
+  results: [{ uuid: "assignment-123", learnerEmail: "test@example.com" }],
+};
+const mockBnrRequests = { results: [{ uuid: "bnr-123", status: "approved" }] };
 
-describe('retrieveBudgetDetailActivityOverview', () => {
+describe("retrieveBudgetDetailActivityOverview", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should fetch only spent transactions when top-down assignment is disabled', async () => {
+  it("should fetch only spent transactions when top-down assignment is disabled", async () => {
     EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
       data: mockSpentTransactions,
     });
 
     const result = await retrieveBudgetDetailActivityOverview({
-      budgetId: 'budget-123',
+      budgetId: "budget-123",
       subsidyAccessPolicy: null,
-      enterpriseUUID: 'enterprise-123',
+      enterpriseUUID: "enterprise-123",
       isTopDownAssignmentEnabled: false,
     });
 
@@ -533,19 +582,25 @@ describe('retrieveBudgetDetailActivityOverview', () => {
       spentTransactions: mockSpentTransactions,
     });
 
-    expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
-      'enterprise-123',
+    expect(
+      EnterpriseDataApiService.fetchCourseEnrollments,
+    ).toHaveBeenCalledWith(
+      "enterprise-123",
       expect.objectContaining({
         page: 1,
         pageSize: 25,
         ignoreNullCourseListPrice: true,
       }),
     );
-    expect(EnterpriseAccessApiService.listContentAssignments).not.toHaveBeenCalled();
-    expect(EnterpriseAccessApiService.fetchBnrSubsidyRequests).not.toHaveBeenCalled();
+    expect(
+      EnterpriseAccessApiService.listContentAssignments,
+    ).not.toHaveBeenCalled();
+    expect(
+      EnterpriseAccessApiService.fetchBnrSubsidyRequests,
+    ).not.toHaveBeenCalled();
   });
 
-  it('should fetch spent transactions and content assignments when subsidy access policy is assignable', async () => {
+  it("should fetch spent transactions and content assignments when subsidy access policy is assignable", async () => {
     SubsidyApiService.fetchCustomerTransactions.mockResolvedValue({
       data: mockSpentTransactions,
     });
@@ -554,14 +609,14 @@ describe('retrieveBudgetDetailActivityOverview', () => {
     });
 
     const result = await retrieveBudgetDetailActivityOverview({
-      budgetId: 'budget-123',
+      budgetId: "budget-123",
       subsidyAccessPolicy: {
-        subsidyUuid: 'subsidy-123',
+        subsidyUuid: "subsidy-123",
         isAssignable: true,
-        assignmentConfiguration: { uuid: 'config-123' },
+        assignmentConfiguration: { uuid: "config-123" },
         bnrEnabled: false,
       },
-      enterpriseUUID: 'enterprise-123',
+      enterpriseUUID: "enterprise-123",
       isTopDownAssignmentEnabled: true,
     });
 
@@ -571,18 +626,22 @@ describe('retrieveBudgetDetailActivityOverview', () => {
     });
 
     expect(SubsidyApiService.fetchCustomerTransactions).toHaveBeenCalledWith(
-      'subsidy-123',
+      "subsidy-123",
       expect.objectContaining({
         page: 1,
         pageSize: 25,
-        subsidyAccessPolicyUuid: 'budget-123',
+        subsidyAccessPolicyUuid: "budget-123",
       }),
     );
-    expect(EnterpriseAccessApiService.listContentAssignments).toHaveBeenCalledWith('config-123', {});
-    expect(EnterpriseAccessApiService.fetchBnrSubsidyRequests).not.toHaveBeenCalled();
+    expect(
+      EnterpriseAccessApiService.listContentAssignments,
+    ).toHaveBeenCalledWith("config-123", {});
+    expect(
+      EnterpriseAccessApiService.fetchBnrSubsidyRequests,
+    ).not.toHaveBeenCalled();
   });
 
-  it('should fetch BnR subsidy requests when subsidy access policy has bnrEnabled=true', async () => {
+  it("should fetch BnR subsidy requests when subsidy access policy has bnrEnabled=true", async () => {
     SubsidyApiService.fetchCustomerTransactions.mockResolvedValue({
       data: mockSpentTransactions,
     });
@@ -594,15 +653,15 @@ describe('retrieveBudgetDetailActivityOverview', () => {
     });
 
     const result = await retrieveBudgetDetailActivityOverview({
-      budgetId: 'budget-123',
+      budgetId: "budget-123",
       subsidyAccessPolicy: {
-        subsidyUuid: 'subsidy-123',
+        subsidyUuid: "subsidy-123",
         isAssignable: true,
-        assignmentConfiguration: { uuid: 'config-123' },
+        assignmentConfiguration: { uuid: "config-123" },
         bnrEnabled: true,
-        uuid: 'policy-uuid-123',
+        uuid: "policy-uuid-123",
       },
-      enterpriseUUID: 'enterprise-uuid-123',
+      enterpriseUUID: "enterprise-uuid-123",
       isTopDownAssignmentEnabled: true,
     });
 
@@ -613,155 +672,260 @@ describe('retrieveBudgetDetailActivityOverview', () => {
     });
 
     expect(SubsidyApiService.fetchCustomerTransactions).toHaveBeenCalledWith(
-      'subsidy-123',
+      "subsidy-123",
       expect.objectContaining({
         page: 1,
         pageSize: 25,
-        subsidyAccessPolicyUuid: 'budget-123',
+        subsidyAccessPolicyUuid: "budget-123",
       }),
     );
-    expect(EnterpriseAccessApiService.listContentAssignments).toHaveBeenCalledWith('config-123', {});
-    expect(EnterpriseAccessApiService.fetchBnrSubsidyRequests).toHaveBeenCalledWith(
-      'enterprise-uuid-123',
-      'policy-uuid-123',
+    expect(
+      EnterpriseAccessApiService.listContentAssignments,
+    ).toHaveBeenCalledWith("config-123", {});
+    expect(
+      EnterpriseAccessApiService.fetchBnrSubsidyRequests,
+    ).toHaveBeenCalledWith(
+      "enterprise-uuid-123",
+      "policy-uuid-123",
       expect.objectContaining({
-        state: 'approved',
+        state: "approved",
       }),
     );
   });
 });
 
-describe('transformRequestOverview', () => {
-  it('should transform allowed request states correctly', () => {
+describe("transformRequestOverview", () => {
+  it("should transform allowed request states correctly", () => {
     const requestStates = [
-      { state: 'requested', count: 10 },
-      { state: 'cancelled', count: 5 },
-      { state: 'declined', count: 3 },
+      { state: "requested", count: 10 },
+      { state: "cancelled", count: 5 },
+      { state: "declined", count: 3 },
     ];
 
     const result = transformRequestOverview(requestStates);
 
     expect(result).toEqual([
-      { name: 'Requested', number: 10, value: 'requested' },
-      { name: 'Cancelled', number: 5, value: 'cancelled' },
-      { name: 'Declined', number: 3, value: 'declined' },
+      { name: "Requested", number: 10, value: "requested" },
+      { name: "Cancelled", number: 5, value: "cancelled" },
+      { name: "Declined", number: 3, value: "declined" },
     ]);
   });
 
-  it('should filter out disallowed request states', () => {
+  it("should filter out disallowed request states", () => {
     const requestStates = [
-      { state: 'requested', count: 10 },
-      { state: 'approved', count: 8 },
-      { state: 'cancelled', count: 5 },
-      { state: 'pending', count: 12 },
-      { state: 'declined', count: 3 },
+      { state: "requested", count: 10 },
+      { state: "approved", count: 8 },
+      { state: "cancelled", count: 5 },
+      { state: "pending", count: 12 },
+      { state: "declined", count: 3 },
     ];
 
     const result = transformRequestOverview(requestStates);
 
     expect(result).toEqual([
-      { name: 'Requested', number: 10, value: 'requested' },
-      { name: 'Cancelled', number: 5, value: 'cancelled' },
-      { name: 'Declined', number: 3, value: 'declined' },
+      { name: "Requested", number: 10, value: "requested" },
+      { name: "Cancelled", number: 5, value: "cancelled" },
+      { name: "Declined", number: 3, value: "declined" },
     ]);
     expect(result).toHaveLength(3);
   });
 
-  it('should handle empty array input', () => {
+  it("should handle empty array input", () => {
     const requestStates = [];
     const result = transformRequestOverview(requestStates);
     expect(result).toEqual([]);
   });
 
-  it('should handle array with no allowed states', () => {
+  it("should handle array with no allowed states", () => {
     const requestStates = [
-      { state: 'approved', count: 8 },
-      { state: 'pending', count: 12 },
-      { state: 'unknown', count: 2 },
+      { state: "approved", count: 8 },
+      { state: "pending", count: 12 },
+      { state: "unknown", count: 2 },
     ];
 
     const result = transformRequestOverview(requestStates);
     expect(result).toEqual([]);
   });
 
-  it('should handle single allowed state', () => {
-    const requestStates = [
-      { state: 'requested', count: 15 },
-    ];
+  it("should handle single allowed state", () => {
+    const requestStates = [{ state: "requested", count: 15 }];
 
     const result = transformRequestOverview(requestStates);
 
     expect(result).toEqual([
-      { name: 'Requested', number: 15, value: 'requested' },
+      { name: "Requested", number: 15, value: "requested" },
     ]);
   });
 
-  it('should handle mixed case and maintain original value', () => {
+  it("should handle mixed case and maintain original value", () => {
     const requestStates = [
-      { state: 'requested', count: 10 },
-      { state: 'cancelled', count: 5 },
-      { state: 'declined', count: 3 },
+      { state: "requested", count: 10 },
+      { state: "cancelled", count: 5 },
+      { state: "declined", count: 3 },
     ];
 
     const result = transformRequestOverview(requestStates);
 
     // Verify that the original state value is preserved in the 'value' field
-    expect(result[0].value).toBe('requested');
-    expect(result[1].value).toBe('cancelled');
-    expect(result[2].value).toBe('declined');
+    expect(result[0].value).toBe("requested");
+    expect(result[1].value).toBe("cancelled");
+    expect(result[2].value).toBe("declined");
 
     // Verify that the name is properly capitalized
-    expect(result[0].name).toBe('Requested');
-    expect(result[1].name).toBe('Cancelled');
-    expect(result[2].name).toBe('Declined');
+    expect(result[0].name).toBe("Requested");
+    expect(result[1].name).toBe("Cancelled");
+    expect(result[2].name).toBe("Declined");
   });
 
-  it('should handle zero counts', () => {
+  it("should handle zero counts", () => {
     const requestStates = [
-      { state: 'requested', count: 0 },
-      { state: 'cancelled', count: 0 },
-      { state: 'declined', count: 0 },
+      { state: "requested", count: 0 },
+      { state: "cancelled", count: 0 },
+      { state: "declined", count: 0 },
     ];
 
     const result = transformRequestOverview(requestStates);
 
     expect(result).toEqual([
-      { name: 'Requested', number: 0, value: 'requested' },
-      { name: 'Cancelled', number: 0, value: 'cancelled' },
-      { name: 'Declined', number: 0, value: 'declined' },
+      { name: "Requested", number: 0, value: "requested" },
+      { name: "Cancelled", number: 0, value: "cancelled" },
+      { name: "Declined", number: 0, value: "declined" },
     ]);
   });
 });
 
-describe('transformLearnerRequestStateCounts (PR #1643)', () => {
-  it('should transform learner request state counts with new labels', () => {
+describe("transformLearnerRequestStateCounts (PR #1643)", () => {
+  it("should transform learner request state counts with new labels", () => {
     const learnerRequestStateCounts = [
-      { learnerRequestState: 'waiting', count: 10 },
-      { learnerRequestState: 'accepted', count: 5 },
+      { learnerRequestState: "waiting", count: 10 },
+      { learnerRequestState: "accepted", count: 5 },
     ];
 
-    const result = transformLearnerRequestStateCounts(learnerRequestStateCounts);
+    const result = transformLearnerRequestStateCounts(
+      learnerRequestStateCounts,
+    );
 
     expect(result).toEqual([
-      { name: 'Waiting For Learner', number: 10, value: 'waiting' },
-      { name: 'Redeemed By Learner', number: 5, value: 'accepted' },
+      { name: "Waiting For Learner", number: 10, value: "waiting" },
+      { name: "Redeemed By Learner", number: 5, value: "accepted" },
     ]);
   });
 
-  it('should filter out unknown states', () => {
+  it("should filter out unknown states", () => {
     const learnerRequestStateCounts = [
-      { learnerRequestState: 'waiting', count: 10 },
-      { learnerRequestState: 'unknown_state', count: 5 },
+      { learnerRequestState: "waiting", count: 10 },
+      { learnerRequestState: "unknown_state", count: 5 },
     ];
 
-    const result = transformLearnerRequestStateCounts(learnerRequestStateCounts);
+    const result = transformLearnerRequestStateCounts(
+      learnerRequestStateCounts,
+    );
 
     expect(result).toEqual([
-      { name: 'Waiting For Learner', number: 10, value: 'waiting' },
+      { name: "Waiting For Learner", number: 10, value: "waiting" },
     ]);
   });
 
-  it('should handle null input', () => {
+  it("should handle null input", () => {
     expect(transformLearnerRequestStateCounts(null)).toEqual([]);
+  });
+});
+
+describe("transformSelectedApprovedRequestRows", () => {
+  it("should extract request UUIDs from selected rows", () => {
+    const selectedFlatRows = [
+      { id: "uuid-1", original: { learnerRequestState: "waiting" } },
+      { id: "uuid-2", original: { learnerRequestState: "waiting" } },
+      { id: "uuid-3", original: { learnerRequestState: "failed" } },
+    ];
+
+    const result = transformSelectedApprovedRequestRows(selectedFlatRows);
+
+    expect(result.requestUuids).toEqual(["uuid-1", "uuid-2", "uuid-3"]);
+    expect(result.totalSelectedRows).toBe(3);
+  });
+
+  it("should count unique learner request states", () => {
+    const selectedFlatRows = [
+      { id: "uuid-1", original: { learnerRequestState: "waiting" } },
+      { id: "uuid-2", original: { learnerRequestState: "waiting" } },
+      { id: "uuid-3", original: { learnerRequestState: "failed" } },
+    ];
+
+    const result = transformSelectedApprovedRequestRows(selectedFlatRows);
+
+    expect(result.uniqueLearnerRequestState).toEqual({
+      waiting: 2,
+      failed: 1,
+    });
+  });
+
+  it("should handle empty array", () => {
+    const result = transformSelectedApprovedRequestRows([]);
+
+    expect(result.requestUuids).toEqual([]);
+    expect(result.totalSelectedRows).toBe(0);
+    expect(result.uniqueLearnerRequestState).toEqual({});
+  });
+});
+
+describe("calculateTotalToRemindApprovedRequests", () => {
+  it("should return request count when not entire table selected", () => {
+    const result = calculateTotalToRemindApprovedRequests({
+      requestUuids: ["uuid-1", "uuid-2", "uuid-3"],
+      isEntireTableSelected: false,
+      learnerRequestStateCounts: [
+        { learnerRequestState: "waiting", count: 10 },
+      ],
+    });
+
+    expect(result).toBe(3);
+  });
+
+  it("should return waiting state count when entire table selected", () => {
+    const result = calculateTotalToRemindApprovedRequests({
+      requestUuids: ["uuid-1", "uuid-2"],
+      isEntireTableSelected: true,
+      learnerRequestStateCounts: [
+        { learnerRequestState: "waiting", count: 25 },
+        { learnerRequestState: "failed", count: 5 },
+      ],
+    });
+
+    expect(result).toBe(25);
+  });
+
+  it("should return 0 when entire table selected but no waiting state", () => {
+    const result = calculateTotalToRemindApprovedRequests({
+      requestUuids: ["uuid-1"],
+      isEntireTableSelected: true,
+      learnerRequestStateCounts: [{ learnerRequestState: "failed", count: 5 }],
+    });
+
+    expect(result).toBe(0);
+  });
+
+  it("should use custom remindable state when provided", () => {
+    const result = calculateTotalToRemindApprovedRequests({
+      requestUuids: ["uuid-1"],
+      isEntireTableSelected: true,
+      learnerRequestStateCounts: [
+        { learnerRequestState: "waiting", count: 10 },
+        { learnerRequestState: "notifying", count: 5 },
+      ],
+      remindableState: "notifying",
+    });
+
+    expect(result).toBe(5);
+  });
+
+  it("should handle null learnerRequestStateCounts", () => {
+    const result = calculateTotalToRemindApprovedRequests({
+      requestUuids: ["uuid-1"],
+      isEntireTableSelected: true,
+      learnerRequestStateCounts: null,
+    });
+
+    expect(result).toBe(0);
   });
 });
