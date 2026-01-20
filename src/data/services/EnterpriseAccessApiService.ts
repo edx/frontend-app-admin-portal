@@ -15,6 +15,16 @@ export type LearnerCreditPlansResponse = {
   data: LearnerCreditPlan[];
 };
 
+type SubPlanStripeEvent = {
+  upcoming_invoice_amount_due: number;
+  currency: string;
+  canceled_date: string;
+};
+
+export type SubPlanStripeEventResponse = {
+  data: SubPlanStripeEvent[];
+};
+
 class EnterpriseAccessApiService {
   static baseUrl = `${configuration.ENTERPRISE_ACCESS_BASE_URL}/api/v1`;
 
@@ -440,9 +450,10 @@ class EnterpriseAccessApiService {
    * Fetches information regarding a trial SubscriptionPlan from Stripe
    * @param {string} subPlanUuid - The UUID of the subscription plan.
    *
-   * @returns A promise that resolves to an AxiosResponse with upcoming_invoice_amount_due, currency, and canceled_date
+   * @returns {Promise<SubPlanStripeEventResponse>}
+   * A promise that resolves to an AxiosResponse with upcoming_invoice_amount_due, currency, and canceled_date
    */
-  static fetchStripeEvent(subPlanUuid: string) {
+  static fetchStripeEvent(subPlanUuid: string) : Promise<SubPlanStripeEventResponse> {
     const params = new URLSearchParams({
       subscription_plan_uuid: subPlanUuid,
     });

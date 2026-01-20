@@ -188,5 +188,4 @@ describe('useStripeSubscriptionPlanInfo', () => {
       expect(setErrors).not.toHaveBeenCalled();
     });
   });
-
 });
