@@ -16,9 +16,9 @@ export type LearnerCreditPlansResponse = {
 };
 
 type SubPlanStripeEvent = {
-  upcoming_invoice_amount_due: number;
-  currency: string;
-  canceled_date: string;
+  upcoming_invoice_amount_due: number | null;
+  currency: string | null;
+  canceled_date: string | null;
 };
 
 export type SubPlanStripeEventResponse = {

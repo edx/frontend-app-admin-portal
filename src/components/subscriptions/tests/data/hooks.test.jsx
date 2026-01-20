@@ -162,6 +162,8 @@ describe('useStripeSubscriptionPlanInfo', () => {
 
     await waitFor(() => {
       expect(EnterpriseAccessApiService.fetchStripeEvent).toHaveBeenCalledTimes(1);
+      expect(result.current.invoiceAmount).toBe(null);
+      expect(result.current.currency).toBe(null);
       expect(result.current.canceledDate).toBe('2025-09-15T19:56:09Z');
       expect(result.current.loadingStripeSummary).toBe(false);
       expect(setErrors).not.toHaveBeenCalled();

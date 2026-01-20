@@ -239,7 +239,7 @@ export const useSubscriptionData = ({ enterpriseId }) => {
 /**
  * This hook fetches information about a Stripe trial SubscriptionPlan
  * @param {string} subPlanUuid - The UUID of the SubscriptionPlan.
- * @param {func} setErrors - setErrors function from SubscriptionContext
+ * @param {Function} setErrors - Function from SubscriptionContext that updates error state via a state update callback.
 */
 export const useStripeSubscriptionPlanInfo = ({ subPlanUuid, setErrors }) => {
   const [loadingStripeSummary, setLoadingStripeSummary] = useState(true);
@@ -250,9 +250,16 @@ export const useStripeSubscriptionPlanInfo = ({ subPlanUuid, setErrors }) => {
     const fetchStripeEvent = async () => {
       try {
         const response = await EnterpriseAccessApiService.fetchStripeEvent(subPlanUuid);
-        if (response.status === 404) { return; }
+        if (response.status === 404) {
+          setLoadingStripeSummary(false);
+          return;
+        }
         const results = camelCaseObject(response.data);
-        setInvoiceAmount(results.upcomingInvoiceAmountDue / 100);
+        if (results.upcomingInvoiceAmountDue !== null) {
+          setInvoiceAmount(results.upcomingInvoiceAmountDue / 100);
+        } else {
+          setInvoiceAmount(null);
+        }
         setCurrency(results.currency);
         setCanceledDate(results.canceledDate);
       } catch (error) {

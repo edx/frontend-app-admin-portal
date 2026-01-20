@@ -134,7 +134,7 @@ const SubscriptionCard = ({
                   description="Message shown to inform customers that they have canceled their free trial"
                   values={{
                     cancellation_date: <span className="font-weight-bold">{formattedCanceledDate}</span>,
-                    boldButton: <span className="font-weight-bold">Manage Subscriptions</span>,
+                    boldButton: <span className="font-weight-bold">Manage subscription</span>,
                   }}
                 />
               </span>
