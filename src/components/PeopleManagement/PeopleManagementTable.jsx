@@ -9,6 +9,13 @@ import OrgMemberCard from './OrgMemberCard';
 import useEnterpriseMembersTableData from './data/hooks/useEnterpriseMembersTableData';
 import DownloadCsvButton from './DownloadCSVButton';
 
+const LearnerSearchFilter = (props) => (
+  <TableTextFilter
+    {...props}
+    label="Search by learner details"
+  />
+);
+
 const FilterStatus = (rest) => <DataTable.FilterStatus showFilteredFields={false} {...rest} />;
 
 const PeopleManagementTable = ({ enterpriseId }) => {
@@ -29,7 +36,9 @@ const PeopleManagementTable = ({ enterpriseId }) => {
       isFilterable
       manualFilters
       isLoading={isTableLoading}
-      defaultColumnValues={{ Filter: TableTextFilter }}
+      defaultColumnValues={{
+        Filter: LearnerSearchFilter,
+      }}
       FilterStatusComponent={FilterStatus}
       numBreakoutFilters={2}
       columns={tableColumns}
