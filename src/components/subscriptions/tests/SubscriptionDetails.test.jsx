@@ -149,6 +149,102 @@ describe('SubscriptionDetails', () => {
     });
   });
 
+  describe('manage subscription button', () => {
+    it('should be rendered for self-service trial subscriptions', () => {
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext
+            detailState={{
+              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+              planType: 'self-service-trial',
+            }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+    });
+
+    it('should be rendered for self-service paid subscriptions', () => {
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext
+            detailState={{
+              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+              planType: 'self-service-paid',
+            }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+    });
+
+    it('should not be rendered for regular subscription plans', () => {
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext
+            detailState={{
+              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+              planType: 'Subscription',
+            }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.queryByTestId('manage-stripe-subscription-button')).not.toBeInTheDocument();
+    });
+
+    it('should be rendered alongside invite learners button for self-service plans with allocated licenses', () => {
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext
+            detailState={{
+              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+              planType: 'self-service-trial',
+              licenses: {
+                allocated: 1,
+                total: 10,
+              },
+            }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      // Both buttons should be present
+      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+      expect(screen.getByText(INVITE_LEARNERS_BUTTON_TEXT)).toBeInTheDocument();
+    });
+
+    it('should still be rendered even when subscription has expired for self-service plans', () => {
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext
+            detailState={{
+              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+              planType: 'self-service-paid',
+              daysUntilExpiration: -1,
+              licenses: {
+                allocated: 0,
+                total: 10,
+              },
+            }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      // Manage subscription button should still be present even if expired
+      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+      // But invite learners should not be present since subscription is expired
+      expect(screen.queryByText(INVITE_LEARNERS_BUTTON_TEXT)).not.toBeInTheDocument();
+    });
+  });
+
   describe('purchase date', () => {
     it('should not show purchase date if there are no prior renewals', () => {
       render(

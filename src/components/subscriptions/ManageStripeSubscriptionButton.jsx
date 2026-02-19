@@ -34,6 +34,7 @@ const ManageStripeSubscriptionButton = ({
 
   return (
     <StatefulButton
+      data-testid="manage-stripe-subscription-button"
       className={classNames}
       labels={{
         default: intl.formatMessage({
