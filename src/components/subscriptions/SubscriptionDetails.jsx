@@ -61,7 +61,7 @@ const SubscriptionDetails = ({
             <h2>{subscription.title}</h2>
             <div className="text-md-right" id="invite-learners-button">
               {isSelfServiceSub && (
-                <ManageStripeSubscriptionButton classNames="mr-2" />
+                <ManageStripeSubscriptionButton className="mr-2" />
               )}
               {shouldShowInviteLearnersButton && (
                 <InviteLearnersButton

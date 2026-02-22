@@ -163,7 +163,7 @@ describe('SubscriptionDetails', () => {
           </SubscriptionManagementContext>
         </IntlProvider>,
       );
-      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
     });
 
     it('should be rendered for self-service paid subscriptions', () => {
@@ -179,7 +179,7 @@ describe('SubscriptionDetails', () => {
           </SubscriptionManagementContext>
         </IntlProvider>,
       );
-      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
     });
 
     it('should not be rendered for regular subscription plans', () => {
@@ -195,7 +195,7 @@ describe('SubscriptionDetails', () => {
           </SubscriptionManagementContext>
         </IntlProvider>,
       );
-      expect(screen.queryByTestId('manage-stripe-subscription-button')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manage-subscription-button')).not.toBeInTheDocument();
     });
 
     it('should be rendered alongside invite learners button for self-service plans with allocated licenses', () => {
@@ -216,7 +216,7 @@ describe('SubscriptionDetails', () => {
         </IntlProvider>,
       );
       // Both buttons should be present
-      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
       expect(screen.getByText(INVITE_LEARNERS_BUTTON_TEXT)).toBeInTheDocument();
     });
 
@@ -239,7 +239,7 @@ describe('SubscriptionDetails', () => {
         </IntlProvider>,
       );
       // Manage subscription button should still be present even if expired
-      expect(screen.getByTestId('manage-stripe-subscription-button')).toBeInTheDocument();
+      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
       // But invite learners should not be present since subscription is expired
       expect(screen.queryByText(INVITE_LEARNERS_BUTTON_TEXT)).not.toBeInTheDocument();
     });
