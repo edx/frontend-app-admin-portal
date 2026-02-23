@@ -45,4 +45,4 @@ MultipleSubscriptionsPicker.propTypes = {
   createActions: PropTypes.func,
 };
 
-export default (MultipleSubscriptionsPicker);
+export default MultipleSubscriptionsPicker;
