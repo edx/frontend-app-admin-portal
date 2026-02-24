@@ -4,7 +4,7 @@ import { Col, Row } from '@openedx/paragon';
 
 import SubscriptionCard from './SubscriptionCard';
 import { DEFAULT_LEAD_TEXT, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL } from './data/constants';
-import ManageStripeSubscriptionButton from './ManageStripeSubscriptionButton';
+import ManageSubscriptionButton from './ManageSubscriptionButton';
 
 const MultipleSubscriptionsPicker = ({
   leadText, subscriptions, createActions,
@@ -16,7 +16,7 @@ const MultipleSubscriptionsPicker = ({
         <span className="d-flex justify-content-between">
           <h2>Plans</h2>
           {hasSelfServiceSubs && (
-            <ManageStripeSubscriptionButton />
+            <ManageSubscriptionButton />
           )}
         </span>
         <p>{leadText}</p>

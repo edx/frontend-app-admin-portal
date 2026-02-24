@@ -148,66 +148,65 @@ describe('SubscriptionDetails', () => {
       expect(screen.getByText('email addresses were successfully', { exact: false })).toBeInTheDocument();
     });
   });
-
   describe('manage subscription button', () => {
-    it('should be rendered for self-service trial subscriptions', () => {
+    test.each([
+      {
+        label: 'self-service trial subscription',
+        planType: 'self-service-trial',
+        daysUntilExpiration: 240,
+        allocatedLicenses: 0,
+        expectManageSubscriptionButton: true,
+        expectInviteLearnersButton: false,
+      },
+      {
+        label: 'self-service paid subscription',
+        planType: 'self-service-paid',
+        daysUntilExpiration: 240,
+        allocatedLicenses: 0,
+        expectManageSubscriptionButton: true,
+        expectInviteLearnersButton: false,
+      },
+      {
+        label: 'regular subscription plan',
+        planType: 'Subscription',
+        daysUntilExpiration: 240,
+        allocatedLicenses: 1,
+        expectManageSubscriptionButton: false,
+        expectInviteLearnersButton: true,
+      },
+      {
+        label: 'self-service plan with allocated licenses',
+        planType: 'self-service-trial',
+        daysUntilExpiration: 240,
+        allocatedLicenses: 1,
+        expectManageSubscriptionButton: true,
+        expectInviteLearnersButton: true,
+      },
+      {
+        label: 'expired self-service plan',
+        planType: 'self-service-paid',
+        daysUntilExpiration: -1,
+        allocatedLicenses: 0,
+        expectManageSubscriptionButton: true,
+        expectInviteLearnersButton: false,
+      },
+    ])('should render correctly for $label', ({
+      planType,
+      daysUntilExpiration,
+      allocatedLicenses,
+      expectManageSubscriptionButton,
+      expectInviteLearnersButton,
+    }) => {
       render(
         <IntlProvider locale="en">
           <SubscriptionManagementContext
             detailState={{
               ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
-              planType: 'self-service-trial',
-            }}
-          >
-            <SubscriptionDetails {...defaultProps} />
-          </SubscriptionManagementContext>
-        </IntlProvider>,
-      );
-      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
-    });
-
-    it('should be rendered for self-service paid subscriptions', () => {
-      render(
-        <IntlProvider locale="en">
-          <SubscriptionManagementContext
-            detailState={{
-              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
-              planType: 'self-service-paid',
-            }}
-          >
-            <SubscriptionDetails {...defaultProps} />
-          </SubscriptionManagementContext>
-        </IntlProvider>,
-      );
-      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
-    });
-
-    it('should not be rendered for regular subscription plans', () => {
-      render(
-        <IntlProvider locale="en">
-          <SubscriptionManagementContext
-            detailState={{
-              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
-              planType: 'Subscription',
-            }}
-          >
-            <SubscriptionDetails {...defaultProps} />
-          </SubscriptionManagementContext>
-        </IntlProvider>,
-      );
-      expect(screen.queryByTestId('manage-subscription-button')).not.toBeInTheDocument();
-    });
-
-    it('should be rendered alongside invite learners button for self-service plans with allocated licenses', () => {
-      render(
-        <IntlProvider locale="en">
-          <SubscriptionManagementContext
-            detailState={{
-              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
-              planType: 'self-service-trial',
+              planType,
+              daysUntilExpiration,
               licenses: {
-                allocated: 1,
-                total: 10,
+                ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE.licenses,
+                allocated: allocatedLicenses,
               },
             }}
           >
@@ -215,33 +214,18 @@ describe('SubscriptionDetails', () => {
           </SubscriptionManagementContext>
         </IntlProvider>,
       );
-      // Both buttons should be present
-      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
-      expect(screen.getByText(INVITE_LEARNERS_BUTTON_TEXT)).toBeInTheDocument();
-    });
 
-    it('should still be rendered even when subscription has expired for self-service plans', () => {
-      render(
-        <IntlProvider locale="en">
-          <SubscriptionManagementContext
-            detailState={{
-              ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
-              planType: 'self-service-paid',
-              daysUntilExpiration: -1,
-              licenses: {
-                allocated: 0,
-                total: 10,
-              },
-            }}
-          >
-            <SubscriptionDetails {...defaultProps} />
-          </SubscriptionManagementContext>
-        </IntlProvider>,
-      );
-      // Manage subscription button should still be present even if expired
-      expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
-      // But invite learners should not be present since subscription is expired
-      expect(screen.queryByText(INVITE_LEARNERS_BUTTON_TEXT)).not.toBeInTheDocument();
+      if (expectManageSubscriptionButton) {
+        expect(screen.getByTestId('manage-subscription-button')).toBeInTheDocument();
+      } else {
+        expect(screen.queryByTestId('manage-subscription-button')).not.toBeInTheDocument();
+      }
+
+      if (expectInviteLearnersButton) {
+        expect(screen.getByText(INVITE_LEARNERS_BUTTON_TEXT)).toBeInTheDocument();
+      } else {
+        expect(screen.queryByText(INVITE_LEARNERS_BUTTON_TEXT)).not.toBeInTheDocument();
+      }
     });
   });
 

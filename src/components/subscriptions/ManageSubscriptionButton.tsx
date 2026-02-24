@@ -28,7 +28,7 @@ const buttonMessages = defineMessages({
   },
   error: {
     id: 'subscriptions.manageSubscriptions.subscriptionButton.error',
-    defaultMessage: 'Try again',
+    defaultMessage: 'Manage subscription',
     description: 'Text for the button when creating a new session has failed',
   },
 });

@@ -15,7 +15,7 @@ import { SubscriptionContext } from './SubscriptionData';
 import SubscriptionExpirationBanner from './expiration/SubscriptionExpirationBanner';
 import { MANAGE_LEARNERS_TAB, SELF_SERVICE_TRIAL, SELF_SERVICE_PAID } from './data/constants';
 import { ADMINISTER_SUBSCRIPTIONS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
-import ManageStripeSubscriptionButton from './ManageStripeSubscriptionButton';
+import ManageSubscriptionButton from './ManageSubscriptionButton';
 
 const SubscriptionDetails = ({
   enterpriseSlug,
@@ -61,7 +61,7 @@ const SubscriptionDetails = ({
             <h2>{subscription.title}</h2>
             <div className="text-md-right" id="invite-learners-button">
               {isSelfServiceSub && (
-                <ManageStripeSubscriptionButton className="mr-2" />
+                <ManageSubscriptionButton className="mr-2" />
               )}
               {shouldShowInviteLearnersButton && (
                 <InviteLearnersButton
