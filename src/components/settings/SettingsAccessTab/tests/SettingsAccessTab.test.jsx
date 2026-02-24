@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import { renderWithRouter } from '@edx/frontend-enterprise-utils';
+import { renderWithRouter } from '@2u/frontend-enterprise-utils';
 
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import SettingsAccessTab from '../index';

@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useParams } from 'react-router';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 
 import { SubsidyRequestsContext } from '../../../subsidy-requests';
 import AdministerSubscriptionsFlow from '../flows/AdministerSubscriptionsFlow';

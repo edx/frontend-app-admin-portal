@@ -5,7 +5,7 @@ import {
 import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 
-import * as enterpriseUtils from '@edx/frontend-enterprise-utils';
+import * as enterpriseUtils from '@2u/frontend-enterprise-utils';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import SubscriptionExpirationModals from '../../expiration/SubscriptionExpirationModals';
 import { EXPIRED_MODAL_TITLE } from '../../expiration/SubscriptionExpiredModal';

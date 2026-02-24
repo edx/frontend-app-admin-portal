@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 
 import '@testing-library/jest-dom/extend-expect';
 
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import userEvent from '@testing-library/user-event';
 import DownloadCsvButton from '../DownloadCSVButton';
 import { downloadCsv } from '../../../utils';

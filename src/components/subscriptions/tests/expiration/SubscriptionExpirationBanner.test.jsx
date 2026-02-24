@@ -4,7 +4,7 @@ import {
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import * as enterpriseUtils from '@edx/frontend-enterprise-utils';
+import * as enterpriseUtils from '@2u/frontend-enterprise-utils';
 
 import SubscriptionExpirationBanner from '../../expiration/SubscriptionExpirationBanner';
 import {

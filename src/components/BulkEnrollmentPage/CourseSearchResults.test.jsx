@@ -7,7 +7,7 @@ import {
   render, screen, waitFor, within,
 } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import { SearchContext } from '@edx/frontend-enterprise-catalog-search';
+import { SearchContext } from '@2u/frontend-enterprise-catalog-search';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
 import BulkEnrollContextProvider from './BulkEnrollmentContext';

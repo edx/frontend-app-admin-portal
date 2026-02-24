@@ -7,7 +7,7 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import { renderWithRouter, sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { renderWithRouter, sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import algoliasearch from 'algoliasearch/lite';
 import {
   BUTTON_TEXT, STEPPER_STEP_TEXT,

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { MemoryRouter } from 'react-router-dom';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import EVENT_NAMES from '../../../eventTracking';
 import LearnerAccess from '../LearnerDetailPage/LearnerAccess';
 

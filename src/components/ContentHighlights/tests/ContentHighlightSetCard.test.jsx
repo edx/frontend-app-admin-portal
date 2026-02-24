@@ -4,7 +4,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
-import { renderWithRouter, sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { renderWithRouter, sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import algoliasearch from 'algoliasearch/lite';
 import userEvent from '@testing-library/user-event';
 import { v4 as uuidv4 } from 'uuid';

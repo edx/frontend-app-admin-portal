@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 
 import {
   LEARNER_DETAIL_PAGE_COOKIE_NAME,

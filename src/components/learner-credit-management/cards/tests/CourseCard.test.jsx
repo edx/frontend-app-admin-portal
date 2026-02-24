@@ -9,7 +9,7 @@ import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { getConfig } from '@edx/frontend-platform';
 import { AppContext } from '@edx/frontend-platform/react';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { renderWithRouter, sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { renderWithRouter, sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import dayjs from 'dayjs';
 import CourseCard from '../CourseCard';
 import {

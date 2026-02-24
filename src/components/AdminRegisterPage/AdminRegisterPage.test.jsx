@@ -4,7 +4,7 @@ import {
   MemoryRouter, Routes, Route,
 } from 'react-router-dom';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
-import { isEnterpriseUser } from '@edx/frontend-enterprise-utils';
+import { isEnterpriseUser } from '@2u/frontend-enterprise-utils';
 import '@testing-library/jest-dom';
 import AdminRegisterPage from './index';
 import LmsApiService from '../../data/services/LmsApiService';

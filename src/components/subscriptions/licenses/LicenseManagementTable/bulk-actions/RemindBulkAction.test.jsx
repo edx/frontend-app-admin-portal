@@ -10,7 +10,7 @@ import dayjs from 'dayjs';
 import '@testing-library/jest-dom/extend-expect';
 
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import { SUBSCRIPTION_TABLE_EVENTS } from '../../../../../eventTracking';
 
 import {
