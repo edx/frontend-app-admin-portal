@@ -10,7 +10,7 @@ import {
 import { disableAll } from './data/utils';
 
 // Mock dependencies
-jest.mock('@edx/frontend-enterprise-utils', () => ({
+jest.mock('@2u/frontend-enterprise-utils', () => ({
   sendEnterpriseTrackEvent: jest.fn(),
 }));
 

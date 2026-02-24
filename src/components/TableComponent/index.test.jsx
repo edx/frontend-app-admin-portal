@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import TableComponent from './index';
 
-jest.mock('@edx/frontend-enterprise-utils', () => ({
+jest.mock('@2u/frontend-enterprise-utils', () => ({
   sendEnterpriseTrackEvent: jest.fn(),
 }));
 jest.mock('../../utils', () => ({

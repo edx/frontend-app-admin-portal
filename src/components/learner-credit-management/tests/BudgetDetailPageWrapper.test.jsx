@@ -26,8 +26,8 @@ const defaultStoreState = {
   },
 };
 
-jest.mock('@edx/frontend-enterprise-utils', () => ({
-  ...jest.requireActual('@edx/frontend-enterprise-utils'),
+jest.mock('@2u/frontend-enterprise-utils', () => ({
+  ...jest.requireActual('@2u/frontend-enterprise-utils'),
   sendEnterpriseTrackEvent: jest.fn(),
 }));
 

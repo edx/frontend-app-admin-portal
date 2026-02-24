@@ -10,7 +10,7 @@ import AdminRegisterPage from './index';
 import LmsApiService from '../../data/services/LmsApiService';
 
 jest.mock('../../data/services/LmsApiService');
-jest.mock('@edx/frontend-enterprise-utils');
+jest.mock('@2u/frontend-enterprise-utils');
 
 const TEST_ENTERPRISE_SLUG = 'test-enterprise';
 

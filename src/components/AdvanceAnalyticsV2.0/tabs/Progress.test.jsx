@@ -45,8 +45,8 @@ const mockAnalyticsSkillsData = {
 jest.spyOn(EnterpriseDataApiService, 'fetchAdminAnalyticsData');
 getAuthenticatedHttpClient.mockReturnValue(axios);
 
-jest.mock('@edx/frontend-enterprise-utils', () => {
-  const originalModule = jest.requireActual('@edx/frontend-enterprise-utils');
+jest.mock('@2u/frontend-enterprise-utils', () => {
+  const originalModule = jest.requireActual('@2u/frontend-enterprise-utils');
   return ({
     ...originalModule,
     sendEnterpriseTrackEvent: jest.fn(),

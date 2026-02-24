@@ -14,8 +14,8 @@ import { ACTIVATED, ASSIGNED, REVOKED } from '../../../data/constants';
 import { SUBSCRIPTION_TABLE_EVENTS } from '../../../../../eventTracking';
 import { TEST_ENTERPRISE_CUSTOMER_UUID, TEST_SUBSCRIPTION_PLAN_UUID } from '../../../tests/TestUtilities';
 
-jest.mock('@edx/frontend-enterprise-utils', () => {
-  const originalModule = jest.requireActual('@edx/frontend-enterprise-utils');
+jest.mock('@2u/frontend-enterprise-utils', () => {
+  const originalModule = jest.requireActual('@2u/frontend-enterprise-utils');
   return ({
     ...originalModule,
     sendEnterpriseTrackEvent: jest.fn(),
