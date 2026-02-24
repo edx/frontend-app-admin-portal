@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { screen, waitFor } from '@testing-library/dom';
-import { renderWithRouter, sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { renderWithRouter, sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import React, { useState } from 'react';
 import thunk from 'redux-thunk';
 import { IntlProvider } from '@edx/frontend-platform/i18n';

@@ -4,7 +4,7 @@ import {
 } from '@testing-library/react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import '@testing-library/jest-dom';
 import MockAdapter from 'axios-mock-adapter';
 // eslint-disable-next-line import/no-extraneous-dependencies

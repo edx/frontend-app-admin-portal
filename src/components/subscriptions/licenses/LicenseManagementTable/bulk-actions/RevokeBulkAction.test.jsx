@@ -6,7 +6,7 @@ import { Provider } from 'react-redux';
 import dayjs from 'dayjs';
 import '@testing-library/jest-dom/extend-expect';
 
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { SUBSCRIPTION_TABLE_EVENTS } from '../../../../../eventTracking';
 

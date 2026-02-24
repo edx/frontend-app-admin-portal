@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 
 import useBudgetContentAssignments from '../useBudgetContentAssignments';
 import EnterpriseAccessApiService from '../../../../../data/services/EnterpriseAccessApiService';

@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { act, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 
 import AdminOnboardingTour from '../flows/AdminOnboardingTour';
 import { ADMIN_TOUR_EVENT_NAMES } from '../constants';

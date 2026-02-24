@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { renderWithRouter } from '@edx/frontend-enterprise-utils';
+import { renderWithRouter } from '@2u/frontend-enterprise-utils';
 import { screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import EnterpriseList from './index';

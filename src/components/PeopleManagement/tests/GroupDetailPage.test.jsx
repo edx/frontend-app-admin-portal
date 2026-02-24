@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import userEvent from '@testing-library/user-event';
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 
-import { renderWithRouter, sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { renderWithRouter, sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { useEnterpriseGroupUuid, useEnterpriseGroupLearnersTableData } from '../data/hooks';
 import GroupDetailPage from '../GroupDetailPage/GroupDetailPage';

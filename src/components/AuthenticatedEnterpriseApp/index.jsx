@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoginRedirect } from '@edx/frontend-enterprise-logistration';
+import { LoginRedirect } from '@2u/frontend-enterprise-logistration';
 
 import EnterpriseApp from '../../containers/EnterpriseApp';
 import EnterpriseAppSkeleton from '../EnterpriseApp/EnterpriseAppSkeleton';

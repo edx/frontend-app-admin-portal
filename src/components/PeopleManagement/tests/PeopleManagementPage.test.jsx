@@ -8,7 +8,7 @@ import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import userEvent from '@testing-library/user-event';
 
 import { useAllFlexEnterpriseGroups } from '../../learner-credit-management/data';

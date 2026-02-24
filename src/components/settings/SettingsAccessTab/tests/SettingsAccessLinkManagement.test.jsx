@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+import { sendEnterpriseTrackEvent } from '@2u/frontend-enterprise-utils';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
 import LmsApiService from '../../../../data/services/LmsApiService';
