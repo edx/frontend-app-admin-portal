@@ -429,6 +429,60 @@ describe('<CreateGroupModal />', () => {
       );
     });
   });
+  it('displays duplicate group name error message in error modal', async () => {
+    const user = userEvent.setup();
+    const duplicateError = {
+      response: {
+        status: 400,
+        data: {
+          non_field_errors: [
+            'A group with this name already exists. Please enter a unique name to create a new group.',
+          ],
+        },
+      },
+    };
+    LmsApiService.createEnterpriseGroup.mockRejectedValueOnce(duplicateError);
+
+    render(<CreateGroupModalWrapper />);
+    const fakeFile = new File(['tomhaverford@pawnee.org'], 'emails.csv', { type: 'text/csv' });
+    const dropzone = await screen.findByTestId('csv-upload-input');
+
+    fireEvent.drop(dropzone, {
+      dataTransfer: {
+        files: [fakeFile],
+        types: ['Files'],
+      },
+    });
+    await waitFor(() => {
+      expect(screen.getByText('Summary (1)')).toBeInTheDocument();
+    }, { timeout: EMAIL_ADDRESSES_INPUT_VALUE_DEBOUNCE_DELAY + 1000 });
+
+    const groupNameInput = screen.getByTestId('group-name');
+    await user.type(groupNameInput, 'test group name');
+
+    const createButton = screen.getByRole('button', { name: 'Create' });
+    await user.click(createButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+      expect(screen.getByText(
+        'A group with this name already exists. Please enter a unique name to create a new group.',
+      )).toBeInTheDocument();
+    });
+
+    // Generic message should NOT be shown for duplicate name errors
+    expect(screen.queryByText(
+      'We\'re sorry. Something went wrong behind the scenes. Please try again, or reach out to customer support for help.',
+    )).not.toBeInTheDocument();
+
+    // Clicking "Try again" closes the error modal and returns to the group creation form
+    const tryAgainButtons = screen.getAllByText('Try again');
+    await user.click(tryAgainButtons[tryAgainButtons.length - 1]);
+    await waitFor(() => {
+      expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument();
+      expect(screen.getByText('Create a custom group')).toBeInTheDocument();
+    });
+  });
   it('displays system error modal', async () => {
     const user = userEvent.setup();
     const mockCreateGroup = jest.spyOn(LmsApiService, 'createEnterpriseGroup');

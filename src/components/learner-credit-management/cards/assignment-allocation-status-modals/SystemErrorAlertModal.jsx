@@ -10,6 +10,7 @@ const SystemErrorAlertModal = ({
   closeErrorModal,
   closeAssignmentModal,
   retry,
+  message,
 }) => {
   const handleClose = () => {
     closeErrorModal();
@@ -33,8 +34,7 @@ const SystemErrorAlertModal = ({
       isOverflowVisible={false}
     >
       <p>
-        We&apos;re sorry. Something went wrong behind the scenes. Please
-        try again, or reach out to customer support for help.
+        {message || 'We\'re sorry. Something went wrong behind the scenes. Please try again, or reach out to customer support for help.'}
       </p>
     </AlertModal>
   );
@@ -43,6 +43,7 @@ const SystemErrorAlertModal = ({
 SystemErrorAlertModal.propTypes = {
   ...commonErrorAlertModalPropTypes,
   retry: PropTypes.func.isRequired,
+  message: PropTypes.string,
 };
 
 export default SystemErrorAlertModal;
