@@ -1,13 +1,17 @@
 import React, { useState, useCallback } from 'react';
-import { CardView, DataTable, Toast } from '@openedx/paragon';
+import {
+  CardView, DataTable, Toast, Button,
+} from '@openedx/paragon';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
+import { Add } from '@openedx/paragon/icons';
 
 import TableTextFilter from '../learner-credit-management/TableTextFilter';
 import CustomDataTableEmptyState from '../learner-credit-management/CustomDataTableEmptyState';
 import OrgInviteAdminCard from './OrgInviteAdminCard';
+import AddAdminModal from './AddAdminModal';
 import useEnterpriseAdminsTableData from './data/hooks/useEnterpriseAdminsTableData';
 import LmsApiService from '../../data/services/LmsApiService';
 
@@ -25,6 +29,7 @@ const InviteAdminsTable = ({ enterpriseId }) => {
 
   const [isRemovingAdmin, setIsRemovingAdmin] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [isAddAdminModalOpen, setIsAddAdminModalOpen] = useState(false);
 
   const handleRemoveAdmin = useCallback(async (admin) => {
     try {
@@ -47,6 +52,16 @@ const InviteAdminsTable = ({ enterpriseId }) => {
     }
   }, [enterpriseId, fetchEnterpriseAdminsTableData]);
 
+  const handleAddAdminSuccess = useCallback(() => {
+    // Refresh the table data after successful addition
+    fetchEnterpriseAdminsTableData({
+      pageIndex: 0,
+      pageSize: 10,
+      filters: [],
+      sortBy: [{ id: 'name', desc: true }],
+    });
+  }, [fetchEnterpriseAdminsTableData]);
+
   const CardComponentWithProps = useCallback((props) => (
     <OrgInviteAdminCard
       {...props}
@@ -61,20 +76,35 @@ const InviteAdminsTable = ({ enterpriseId }) => {
   return (
     <>
       {/* ================= Header ================= */}
-      <h3 className="mt-3">
-        <FormattedMessage
-          id="adminPortal.peopleManagement.inviteAdmin.title"
-          defaultMessage="Your organization's admins"
-          description="Title for people management invite admin data table."
-        />
-      </h3>
-      <p className="mb-2">
-        <FormattedMessage
-          id="adminPortal.peopleManagement.inviteAdmin.subtitle"
-          defaultMessage="View all admins of your organization."
-          description="Subtitle for people management admins data table."
-        />
-      </p>
+      <div className="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          <h3>
+            <FormattedMessage
+              id="adminPortal.peopleManagement.inviteAdmin.title"
+              defaultMessage="Your organization's admins"
+              description="Title for people management invite admin data table."
+            />
+          </h3>
+          <p className="mb-2">
+            <FormattedMessage
+              id="adminPortal.peopleManagement.inviteAdmin.subtitle"
+              defaultMessage="View all admins of your organization."
+              description="Subtitle for people management admins data table."
+            />
+          </p>
+        </div>
+        <Button
+          variant="primary"
+          iconBefore={Add}
+          onClick={() => setIsAddAdminModalOpen(true)}
+        >
+          <FormattedMessage
+            id="adminPortal.peopleManagement.inviteAdmin.addButton"
+            defaultMessage="Add admins"
+            description="Button text to add new admin"
+          />
+        </Button>
+      </div>
 
       {/* ================= Table ================= */}
       <DataTable
@@ -110,6 +140,15 @@ const InviteAdminsTable = ({ enterpriseId }) => {
         />
         <DataTable.TableFooter />
       </DataTable>
+
+      {/* ================= Add Admin Modal ================= */}
+      <AddAdminModal
+        isOpen={isAddAdminModalOpen}
+        onClose={() => setIsAddAdminModalOpen(false)}
+        enterpriseId={enterpriseId}
+        onSuccess={handleAddAdminSuccess}
+      />
+
       {/* ================= Toast ================= */}
       <Toast
         show={showToast}
