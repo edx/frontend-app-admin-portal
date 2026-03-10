@@ -5,10 +5,10 @@ import { ADMIN_ROLES_SURVEY_DISMISSED_COOKIE_NAME } from '../EnterpriseApp/data/
 import { configuration } from '../../config';
 
 const AdminRolesSurveyBanner = () => {
-  const surveyUrl = configuration;
+  const surveyUrl = configuration.ENTERPRISE_ADMIN_ROLES_SURVEY_URL;
 
   const [show, setShow] = useState(
-    global.localStorage.getItem(ADMIN_ROLES_SURVEY_DISMISSED_COOKIE_NAME),
+    !global.localStorage.getItem(ADMIN_ROLES_SURVEY_DISMISSED_COOKIE_NAME),
   );
 
   const handleDismiss = () => {

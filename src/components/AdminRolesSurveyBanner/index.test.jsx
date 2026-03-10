@@ -29,7 +29,8 @@ describe('<AdminRolesSurveyBanner />', () => {
     expect(screen.getByRole('alert')).toBeInTheDocument();
 
     const dismissButton = screen.getByRole('button', { name: /dismiss/i });
-    await userEvent.click(dismissButton);
+    const user = userEvent.setup();
+    await user.click(dismissButton);
 
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     expect(global.localStorage.getItem(ADMIN_ROLES_SURVEY_DISMISSED_COOKIE_NAME)).toBe('true');
