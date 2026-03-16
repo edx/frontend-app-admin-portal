@@ -25,7 +25,7 @@ const AddAdminModal = ({
   };
 
   const parseEmails = (input) => input
-    .split(/[\n,]+/)
+    .split(/\n+/)
     .map(email => email.trim())
     .filter(email => email.length > 0);
 

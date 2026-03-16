@@ -664,6 +664,11 @@ class LmsApiService {
     const url = `${LmsApiService.enterpriseCustomerUrl}${enterpriseUUID}/admins/${adminPk}`;
     return LmsApiService.apiClient().delete(url, { data });
   }
+
+  static inviteEnterpriseAdmin(enterpriseUUID: string, formData: any): Promise<AxiosResponse> {
+    const url = `${LmsApiService.baseUrl}/enterprise/api/v1/enterprise-customer-admin/${enterpriseUUID}/admin_invites/`;
+    return LmsApiService.apiClient().post(url, formData);
+  }
 }
 
 export default LmsApiService;
