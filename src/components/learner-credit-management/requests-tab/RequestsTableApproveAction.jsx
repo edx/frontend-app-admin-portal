@@ -40,7 +40,7 @@ const RequestsTableApproveAction = ({
 
   const {
     approveButtonState, approveBnrRequests, close, isOpen, open,
-  } = useApproveBnrRequests(enterpriseId, requestUuids);
+  } = useApproveBnrRequests(enterpriseId);
 
   const selectedApprovableRowCount = calculateTotalToApprove({
     requestUuids,

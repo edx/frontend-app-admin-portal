@@ -272,17 +272,41 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
-  test('approveBnrSubsidyRequest calls enterprise-access to approve BNR subsidy request', () => {
-    const mockBnrSubsidyRequestUUIDs = ['test-bnr-subsidy-request-uuid'];
+  test('approveBnrSubsidyRequest calls enterprise-access to approve a single BNR subsidy request', () => {
+    const mockBnrSubsidyRequestUUID = 'test-bnr-subsidy-request-uuid';
 
     EnterpriseAccessApiService.approveBnrSubsidyRequest({
       enterpriseId: mockEnterpriseUUID,
-      subsidyRequestUUIDs: mockBnrSubsidyRequestUUIDs,
+      subsidyRequestUUID: mockBnrSubsidyRequestUUID,
       subsidyAccessPolicyId: mockSubsidyAccessPolicyUUID,
     });
 
-    expect(axios.post).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/learner-credit-requests/bulk-approve/`, {
-      subsidy_request_uuids: mockBnrSubsidyRequestUUIDs,
+    expect(axios.post).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/learner-credit-requests/approve/`, {
+      subsidy_request_uuid: mockBnrSubsidyRequestUUID,
+      enterprise_customer_uuid: mockEnterpriseUUID,
+      policy_uuid: mockSubsidyAccessPolicyUUID,
+    });
+  });
+
+  test('approveAllBnrSubsidyRequests calls enterprise-access to approve all BNR subsidy requests', () => {
+    EnterpriseAccessApiService.approveAllBnrSubsidyRequests({
+      enterpriseId: mockEnterpriseUUID,
+      subsidyAccessPolicyId: mockSubsidyAccessPolicyUUID,
+    });
+
+    expect(axios.post).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/learner-credit-requests/approve-all/`, {
+      enterprise_customer_uuid: mockEnterpriseUUID,
+      policy_uuid: mockSubsidyAccessPolicyUUID,
+    });
+  });
+
+  test('declineAllBnrSubsidyRequests calls enterprise-access to decline all BNR subsidy requests', () => {
+    EnterpriseAccessApiService.declineAllBnrSubsidyRequests({
+      enterpriseId: mockEnterpriseUUID,
+      policyUuid: mockSubsidyAccessPolicyUUID,
+    });
+
+    expect(axios.post).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/learner-credit-requests/decline-all/`, {
       enterprise_customer_uuid: mockEnterpriseUUID,
       policy_uuid: mockSubsidyAccessPolicyUUID,
     });

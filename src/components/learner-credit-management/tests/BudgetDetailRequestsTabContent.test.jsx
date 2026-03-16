@@ -289,7 +289,7 @@ describe('BudgetDetailRequestsTabContent', () => {
         expect(mockApproveRequest).toHaveBeenCalledWith({
           enterpriseId: 'test-enterprise-id',
           subsidyAccessPolicyId: 'test-policy-id',
-          subsidyRequestUUIDs: ['request-1'],
+          subsidyRequestUUID: 'request-1',
         });
         expect(mockRefreshRequests).toHaveBeenCalledTimes(1);
         expect(screen.queryByText('Approve enrollment request?')).not.toBeInTheDocument();

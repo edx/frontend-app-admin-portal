@@ -10,8 +10,6 @@ import { queryClient } from '../../../../test/testUtils';
 
 const TEST_ENTERPRISE_ID = 'test-enterprise-id';
 const TEST_SUBSIDY_ACCESS_POLICY_ID = 'a52e6548-649f-4576-b73f-c5c2bee25e9c';
-const TEST_REQUEST_UUID_1 = 'test-request-uuid-1';
-const TEST_REQUEST_UUID_2 = 'test-request-uuid-2';
 
 const wrapper = ({ children }) => (
   <QueryClientProvider client={queryClient()}>{children}</QueryClientProvider>
@@ -40,7 +38,7 @@ describe('useApproveBnrRequests', () => {
 
   it('should return default state on initial render', () => {
     const { result } = renderHook(
-      () => useApproveBnrRequests(TEST_ENTERPRISE_ID, [TEST_REQUEST_UUID_1]),
+      () => useApproveBnrRequests(TEST_ENTERPRISE_ID),
       { wrapper },
     );
 
@@ -53,66 +51,26 @@ describe('useApproveBnrRequests', () => {
     });
   });
 
-  it('should send a post request to approve a single request', async () => {
-    EnterpriseAccessApiService.approveBnrSubsidyRequest.mockResolvedValueOnce({
-      status: 200,
+  it('should call approveAllBnrSubsidyRequests to approve all requests for a policy', async () => {
+    EnterpriseAccessApiService.approveAllBnrSubsidyRequests.mockResolvedValueOnce({
+      status: 202,
       data: {
-        approved: [{ uuid: TEST_REQUEST_UUID_1, state: 'approved' }],
+        approved: ['uuid-1', 'uuid-2'],
         failed: [],
       },
     });
     const { result } = renderHook(
-      () => useApproveBnrRequests(TEST_ENTERPRISE_ID, [TEST_REQUEST_UUID_1]),
+      () => useApproveBnrRequests(TEST_ENTERPRISE_ID),
       { wrapper },
     );
 
     await waitFor(() => result.current.approveBnrRequests());
 
     expect(
-      EnterpriseAccessApiService.approveBnrSubsidyRequest,
+      EnterpriseAccessApiService.approveAllBnrSubsidyRequests,
     ).toHaveBeenCalledWith({
       enterpriseId: TEST_ENTERPRISE_ID,
       subsidyAccessPolicyId: TEST_SUBSIDY_ACCESS_POLICY_ID,
-      subsidyRequestUUIDs: [TEST_REQUEST_UUID_1],
-    });
-    expect(logError).toBeCalledTimes(0);
-
-    expect(result.current).toEqual({
-      approveButtonState: 'complete',
-      approveBnrRequests: expect.any(Function),
-      close: expect.any(Function),
-      isOpen: false,
-      open: expect.any(Function),
-    });
-  });
-
-  it('should send a post request to approve multiple requests', async () => {
-    EnterpriseAccessApiService.approveBnrSubsidyRequest.mockResolvedValueOnce({
-      status: 200,
-      data: {
-        approved: [
-          { uuid: TEST_REQUEST_UUID_1, state: 'approved' },
-          { uuid: TEST_REQUEST_UUID_2, state: 'approved' },
-        ],
-        failed: [],
-      },
-    });
-    const { result } = renderHook(
-      () => useApproveBnrRequests(TEST_ENTERPRISE_ID, [
-        TEST_REQUEST_UUID_1,
-        TEST_REQUEST_UUID_2,
-      ]),
-      { wrapper },
-    );
-
-    await waitFor(() => result.current.approveBnrRequests());
-
-    expect(
-      EnterpriseAccessApiService.approveBnrSubsidyRequest,
-    ).toHaveBeenCalledWith({
-      enterpriseId: TEST_ENTERPRISE_ID,
-      subsidyAccessPolicyId: TEST_SUBSIDY_ACCESS_POLICY_ID,
-      subsidyRequestUUIDs: [TEST_REQUEST_UUID_1, TEST_REQUEST_UUID_2],
     });
     expect(logError).toBeCalledTimes(0);
 
@@ -127,11 +85,11 @@ describe('useApproveBnrRequests', () => {
 
   it('should handle approval error', async () => {
     const error = new Error('An error occurred');
-    EnterpriseAccessApiService.approveBnrSubsidyRequest.mockRejectedValueOnce(
+    EnterpriseAccessApiService.approveAllBnrSubsidyRequests.mockRejectedValueOnce(
       error,
     );
     const { result } = renderHook(
-      () => useApproveBnrRequests(TEST_ENTERPRISE_ID, [TEST_REQUEST_UUID_1]),
+      () => useApproveBnrRequests(TEST_ENTERPRISE_ID),
       { wrapper },
     );
 
@@ -144,7 +102,7 @@ describe('useApproveBnrRequests', () => {
     });
 
     expect(
-      EnterpriseAccessApiService.approveBnrSubsidyRequest,
+      EnterpriseAccessApiService.approveAllBnrSubsidyRequests,
     ).toHaveBeenCalled();
     expect(logError).toBeCalledTimes(1);
 
@@ -157,28 +115,20 @@ describe('useApproveBnrRequests', () => {
     });
   });
 
-  it('should handle partial failure when some requests fail to approve', async () => {
+  it('should handle partial failure with error_message from response', async () => {
     const partialFailureResponse = {
-      status: 200,
+      status: 422,
       data: {
-        approved: [{ uuid: TEST_REQUEST_UUID_1, state: 'approved' }],
-        failed: [
-          {
-            uuid: TEST_REQUEST_UUID_2,
-            state: 'requested',
-            error: 'Allocation failed',
-          },
-        ],
+        approved: ['uuid-1'],
+        failed: ['uuid-2'],
+        error_message: 'Allocation failed for some requests',
       },
     };
-    EnterpriseAccessApiService.approveBnrSubsidyRequest.mockResolvedValueOnce(
+    EnterpriseAccessApiService.approveAllBnrSubsidyRequests.mockResolvedValueOnce(
       partialFailureResponse,
     );
     const { result } = renderHook(
-      () => useApproveBnrRequests(TEST_ENTERPRISE_ID, [
-        TEST_REQUEST_UUID_1,
-        TEST_REQUEST_UUID_2,
-      ]),
+      () => useApproveBnrRequests(TEST_ENTERPRISE_ID),
       { wrapper },
     );
 
@@ -187,16 +137,15 @@ describe('useApproveBnrRequests', () => {
         await result.current.approveBnrRequests();
       } catch (e) {
         // Expected to throw due to partial failure
-        expect(e.message).toBe('1 request(s) failed to approve');
+        expect(e.message).toBe('Allocation failed for some requests');
       }
     });
 
     expect(
-      EnterpriseAccessApiService.approveBnrSubsidyRequest,
+      EnterpriseAccessApiService.approveAllBnrSubsidyRequests,
     ).toHaveBeenCalledWith({
       enterpriseId: TEST_ENTERPRISE_ID,
       subsidyAccessPolicyId: TEST_SUBSIDY_ACCESS_POLICY_ID,
-      subsidyRequestUUIDs: [TEST_REQUEST_UUID_1, TEST_REQUEST_UUID_2],
     });
     expect(logError).toHaveBeenCalledTimes(1);
 
@@ -211,7 +160,7 @@ describe('useApproveBnrRequests', () => {
 
   it('should toggle modal open state', async () => {
     const { result } = renderHook(
-      () => useApproveBnrRequests(TEST_ENTERPRISE_ID, [TEST_REQUEST_UUID_1]),
+      () => useApproveBnrRequests(TEST_ENTERPRISE_ID),
       { wrapper },
     );
 
