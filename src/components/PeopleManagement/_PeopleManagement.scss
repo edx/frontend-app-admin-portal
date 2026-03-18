@@ -10,7 +10,7 @@
 
 .learner-detail-card {
   align-items: center;
-  padding-top: 2rem; 
+  padding-top: 2rem;
   width: 25rem;
   background-color: $light-200;
 }
@@ -28,4 +28,39 @@
   padding-bottom: 1px;
   width: 25rem;
   border-radius: 10px;
+}
+
+.admins-tab-new-feature-notification {
+  .pgn__checkpoint-page-index,
+  .pgn__checkpoint-action-row,
+  .pgn__checkpoint-button-advance {
+    display: none !important;
+  }
+
+  .pgn__checkpoint {
+    padding: 20px !important;
+    max-width: 380px !important;
+  }
+
+  .pgn__checkpoint-header {
+    position: absolute !important;
+    top: 20px !important;
+    right: 20px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #pgn__checkpoint-title {
+    padding-right: 1.5rem !important;
+    margin: 0px 12px 8px 0px !important;
+    font-size: 22px !important;
+    font-weight: 700 !important;
+  }
+
+  .pgn__checkpoint-body {
+    padding-top: 0 !important;
+    margin: 0px 0px 0px !important;
+    font-size: 18px !important;
+    padding-bottom: 0 !important;
+  }
 }

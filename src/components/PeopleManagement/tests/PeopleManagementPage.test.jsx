@@ -8,6 +8,7 @@ import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
 import { Provider } from 'react-redux';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import userEvent from '@testing-library/user-event';
 
@@ -44,6 +45,10 @@ jest.mock('@edx/frontend-enterprise-utils', () => {
     sendEnterpriseTrackEvent: jest.fn(),
   });
 });
+
+jest.mock('@edx/frontend-platform/auth', () => ({
+  getAuthenticatedUser: jest.fn(),
+}));
 
 jest.mock('@tanstack/react-query', () => ({
   ...jest.requireActual('@tanstack/react-query'),
@@ -107,6 +112,11 @@ const PeopleManagementPageWrapper = ({
 };
 
 describe('<PeopleManagementPage >', () => {
+  beforeEach(() => {
+    global.localStorage.clear();
+    getAuthenticatedUser.mockReturnValue({ username: 'test-user' });
+  });
+
   it('renders the PeopleManagementPage zero state', async () => {
     const user = userEvent.setup();
     useAllFlexEnterpriseGroups.mockReturnValue({ data: { results: {} } });
@@ -304,6 +314,39 @@ describe('<PeopleManagementPage >', () => {
       expect(
         screen.getByText("Your organization's groups"),
       ).toBeInTheDocument();
+    });
+
+    it('hides admins red-dot after selecting Admins tab and persists seen state', async () => {
+      const user = userEvent.setup();
+      useAllFlexEnterpriseGroups.mockReturnValue({ data: mockGroupsResponse });
+
+      const storeState = {
+        portalConfiguration: {
+          enterpriseId: enterpriseUUID,
+          enterpriseSlug,
+          enterpriseFeatures: {
+            enterpriseInviteAdminsEnabled: true,
+          },
+        },
+      };
+
+      const { unmount } = render(
+        <PeopleManagementPageWrapper initialState={storeState} />,
+      );
+
+      expect(screen.getByText('New feature notification')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('tab', { name: /admins/i }));
+
+      expect(global.localStorage.getItem(`admins-tab-seen-${enterpriseUUID}-test-user`)).toBe('true');
+
+      unmount();
+
+      render(
+        <PeopleManagementPageWrapper initialState={storeState} />,
+      );
+
+      expect(screen.queryByText('New feature notification')).not.toBeInTheDocument();
     });
   });
 });
