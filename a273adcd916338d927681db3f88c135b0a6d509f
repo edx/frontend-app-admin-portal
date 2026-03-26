@@ -1,0 +1,59 @@
+src/components/billing/AddPaymentMethodModal.tsx
+  968135748bd3c252 11,15,51-52,81-85,91,96,100,231-232,255,282,284-300,319,321-329,343-347,349,366-374,393,395-403,438,440-448,468,470-478,496,498-506,526,534-542
+  9c4e9356fc03f49e 45,49-50,86,90,92-95,97-99,101-103,144-155,229-230,281
+src/utils.js
+  968135748bd3c252 768
+src/components/PeopleManagement/utils.ts
+  968135748bd3c252 216-217
+src/components/billing/tests/AddPaymentMethodModal.test.tsx
+  68b31f2841f4b02b 11-13,300-308,311-330,333-351,354-430
+  9c4e9356fc03f49e 1-2,4-10,14-22,26-28,34-60,80-82,84-117,119-124,126-138,140-151,431
+  968135748bd3c252 23-25,29-33,63-79,83,118,125,139,152-297,309-310,331-332,352-353
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.20",
+  "base_commit_sha": "a273adcd916338d927681db3f88c135b0a6d509f",
+  "prompts": {
+    "68b31f2841f4b02b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6002290-94a7-463b-8424-f93d14ac6d81",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 130,
+      "total_deletions": 0,
+      "accepted_lines": 128,
+      "overriden_lines": 0
+    },
+    "968135748bd3c252": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "196d999c-7d3e-4e6a-91f5-32b21efca797",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 399,
+      "total_deletions": 201,
+      "accepted_lines": 292,
+      "overriden_lines": 0
+    },
+    "9c4e9356fc03f49e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a8d83fd9-9ef3-46d4-abb2-862821c8526f",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>",
+      "messages": [],
+      "total_additions": 251,
+      "total_deletions": 25,
+      "accepted_lines": 147,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/573d5f6aedfe8161d931e8416fa9678a17b1009ab81a78f0479e1185801c951d"
+    }
+  }
+}
