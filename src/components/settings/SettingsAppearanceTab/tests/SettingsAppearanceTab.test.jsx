@@ -8,9 +8,11 @@ import thunk from 'redux-thunk';
 
 import { Provider } from 'react-redux';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+// import { axe } from 'jest-axe';
 import { SettingsAppearanceTab } from '..';
 import { SAGE_THEME, SCHOLAR_THEME } from '../../data/constants';
 import LmsApiService from '../../../../data/services/LmsApiService';
+// import { accessibilitySettings } from '../../../../../tests/accessibility-settings';
 
 const enterpriseId = 'an-id-1';
 
@@ -59,6 +61,22 @@ describe('Portal Appearance Tab', () => {
     expect(screen.getByText('Logo')).toBeInTheDocument();
     expect(screen.getByText('Drag and drop your file here or click to upload.')).toBeInTheDocument();
   });
+
+  // test('has no accessibility violations', async () => {
+  //   const { container } = render(
+  //     <IntlProvider locale="en">
+  //       <Provider store={store}>
+  //         <SettingsAppearanceTab
+  //           enterpriseId={enterpriseId}
+  //           enterpriseBranding={enterpriseBranding}
+  //           updatePortalConfiguration={mockPortalUpdate}
+  //         />
+  //       </Provider>
+  //     </IntlProvider>,
+  //   );
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
 
   test('info hover on logo', async () => {
     const user = userEvent.setup();

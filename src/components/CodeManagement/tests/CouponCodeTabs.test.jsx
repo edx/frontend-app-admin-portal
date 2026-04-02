@@ -12,6 +12,7 @@ import configureMockStore from 'redux-mock-store';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+// import { axe } from 'jest-axe';
 import { SubsidyRequestsContext } from '../../subsidy-requests';
 import CouponCodeTabs from '../CouponCodeTabs';
 import {
@@ -19,6 +20,7 @@ import {
   MANAGE_REQUESTS_TAB,
   COUPON_CODE_TABS_LABELS,
 } from '../data/constants';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const MANAGE_CODES_MOCK_CONTENT = 'codes';
 const MANAGE_REQUESTS_MOCK_CONTENT = 'requests';
@@ -105,6 +107,12 @@ describe('<CouponCodeTabs />', () => {
     cleanup();
     jest.clearAllMocks();
   });
+
+  // it('has no accessibility violations', async () => {
+  //   const { container } = render(<CouponCodeTabsWrapper />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
 
   it('Renders not found page', async () => {
     render(<CouponCodeTabsWrapper route={`/${enterpriseSlug}/admin/coupons/fake-route`} />);

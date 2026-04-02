@@ -2,7 +2,7 @@
  * Shared axe-core configuration for accessibility testing.
  *
  * Sourced from apps/accessibility-skills/tests/accessibility-settings.ts
- * in the xpert-labs repository. Update this file when the upstream source changes.
+ * in the xpert-labs repository.
  *
  * IMPORTANT: Only disable rules with a documented ticket reference (ENT-XXXXX).
  * Never disable rules to make a failing test pass without a documented exception.
@@ -23,15 +23,14 @@ export const accessibilitySettings: RunOptions = {
     values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa', 'best-practice'],
   },
 
-  rules: [
-    // ENT-11679: Paragon <Tabs> renders overflow/hidden tab anchors with
-    // aria-controls pointing to a tabpane whose id ends in "-null" when no
+  rules: {
+    // Paragon <Tabs> renders overflow/hidden tab anchors with
+    // aria-controls pointing to a tab pane whose id ends in "-null" when no
     // explicit eventKey is supplied. This is a Paragon library bug; the
     // aria-valid-attr-value rule fires on those invisible sentinel elements,
-    // not on any application-authored markup. Suppress globally until Paragon
-    // ships a fix and we upgrade.
-    { id: 'aria-valid-attr-value', enabled: false },
-  ],
+    // not on any application-authored markup. Suppress globally.
+    'aria-valid-attr-value': { enabled: false },
+  },
 };
 
 /**

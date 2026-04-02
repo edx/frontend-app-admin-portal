@@ -2,7 +2,10 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import React from 'react';
 import renderer from 'react-test-renderer';
 
+// import { render } from '@testing-library/react';
+// import { axe } from 'jest-axe';
 import SubsidyRequestManagementTable from '..';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const defaultProps = {
   fetchData: jest.fn(),
@@ -58,6 +61,12 @@ const SubsidyRequestManagementTableWrapper = (props) => (
 );
 
 describe('SubsidyRequestManagementTable', () => {
+  // it('has no accessibility violations', async () => {
+  //   const { container } = render(<SubsidyRequestManagementTableWrapper {...defaultProps} />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
+
   test('renders data in a table as expected', () => {
     const tree = renderer
       .create(<SubsidyRequestManagementTableWrapper {...defaultProps} />)

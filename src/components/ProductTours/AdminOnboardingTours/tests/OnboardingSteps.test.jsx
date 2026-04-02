@@ -1,9 +1,17 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TrendingUp } from '@openedx/paragon/icons';
+// import { axe } from 'jest-axe';
 import { Step } from '../OnboardingSteps';
+// import { accessibilitySettings } from '../../../../../tests/accessibility-settings';
 
 describe('OnboardingSteps', () => {
+  // it('has no accessibility violations', async () => {
+  //   const { container } = renderStep();
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
+
   const defaultProps = {
     completed: false,
     icon: TrendingUp,

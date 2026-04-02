@@ -4,8 +4,10 @@ import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { MemoryRouter } from 'react-router-dom';
 import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
+// import { axe } from 'jest-axe';
 import EVENT_NAMES from '../../../eventTracking';
 import LearnerAccess from '../LearnerDetailPage/LearnerAccess';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 jest.mock('@edx/frontend-enterprise-utils', () => {
   const originalModule = jest.requireActual('@edx/frontend-enterprise-utils');
@@ -64,6 +66,12 @@ describe('LearnerAccess', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  // it('has no accessibility violations', async () => {
+  //   const { container } = renderComponent();
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
 
   it('renders the access header', () => {
     renderComponent();

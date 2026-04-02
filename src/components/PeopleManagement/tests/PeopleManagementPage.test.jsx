@@ -11,10 +11,12 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import userEvent from '@testing-library/user-event';
 
+// import { axe } from 'jest-axe';
 import { useAllFlexEnterpriseGroups } from '../../learner-credit-management/data';
 import { EnterpriseSubsidiesContext } from '../../EnterpriseSubsidiesContext';
 import PeopleManagementPage from '..';
 import EVENT_NAMES from '../../../eventTracking';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const mockStore = configureMockStore([thunk]);
 const getMockStore = (store) => mockStore(store);
@@ -110,6 +112,13 @@ describe('<PeopleManagementPage >', () => {
   beforeEach(() => {
     global.localStorage.clear();
   });
+
+  // it('has no accessibility violations', async () => {
+  //   useAllFlexEnterpriseGroups.mockReturnValue({ data: { results: {} } });
+  //   const { container } = render(<PeopleManagementPageWrapper />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
 
   it('renders the PeopleManagementPage zero state', async () => {
     const user = userEvent.setup();

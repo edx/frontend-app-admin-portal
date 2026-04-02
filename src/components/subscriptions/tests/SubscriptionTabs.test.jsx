@@ -12,6 +12,7 @@ import configureMockStore from 'redux-mock-store';
 import { Routes, Route, MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
+// import { axe } from 'jest-axe';
 import SubscriptionTabs from '../SubscriptionTabs';
 import { SubsidyRequestsContext } from '../../subsidy-requests';
 import {
@@ -19,6 +20,7 @@ import {
   MANAGE_REQUESTS_TAB,
   SUBSCRIPTION_TABS_LABELS,
 } from '../data/constants';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const MANAGE_LEARNERS_MOCK_CONTENT = 'learners';
 const MANAGE_REQUESTS_MOCK_CONTENT = 'requests';
@@ -105,6 +107,12 @@ describe('<SubscriptionTabs />', () => {
     cleanup();
     jest.clearAllMocks();
   });
+
+  // it('has no accessibility violations', async () => {
+  //   const { container } = render(<SubscriptionTabsWrapper />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
 
   it('Renders not found page', async () => {
     render(<SubscriptionTabsWrapper route={`/${enterpriseSlug}/admin/subscriptions/fake-route`} />);

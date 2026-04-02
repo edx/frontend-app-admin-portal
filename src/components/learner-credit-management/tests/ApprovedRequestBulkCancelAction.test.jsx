@@ -5,9 +5,11 @@ import {
 import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
+import { axe } from 'jest-axe';
 import ApprovedRequestBulkCancelAction from '../ApprovedRequestBulkCancelAction';
 import useBulkCancelApprovedRequests from '../data/hooks/useBulkCancelApprovedRequests';
 import { transformSelectedApprovedRequestRows } from '../data/utils';
+import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 jest.mock('react-redux', () => ({
   connect: () => (Component) => Component,
@@ -66,6 +68,12 @@ describe('ApprovedRequestBulkCancelAction', () => {
       totalSelectedRows: rows.length,
       uniqueLearnerRequestState: ['approved'],
     }));
+  });
+
+  it('has no accessibility violations', async () => {
+    const { container } = renderWithIntl(<ApprovedRequestBulkCancelAction selectedFlatRows={[]} />);
+    const results = await axe(container, accessibilitySettings);
+    expect(results).toHaveNoViolations();
   });
 
   it('passes only cancelable selected rows to the bulk cancel hook', () => {

@@ -5,6 +5,8 @@ import React from 'react';
 import ReviewItem from './ReviewItem';
 import '@testing-library/jest-dom';
 import { deleteSelectedRowAction } from '../data/actions';
+// import { axe } from 'jest-axe';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const defaultProps = {
   row: {
@@ -22,6 +24,12 @@ describe('AddLearnersStep', () => {
   beforeEach(() => {
     defaultProps.dispatch.mockClear();
   });
+
+  // it('has no accessibility violations', async () => {
+  //   const { container } = render(<ReviewItem {...defaultProps} />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
   it('displays an item via the accessor', () => {
     render(<ReviewItem {...defaultProps} />);
     expect(screen.getByText(defaultProps.row.values.foo)).toBeInTheDocument();

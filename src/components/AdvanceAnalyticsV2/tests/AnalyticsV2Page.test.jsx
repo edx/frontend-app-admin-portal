@@ -10,6 +10,8 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import AnalyticsV2Page from '../AnalyticsV2Page';
 import { queryClient } from '../../test/testUtils';
 import '@testing-library/jest-dom';
+// import { axe } from 'jest-axe';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const mockStore = configureMockStore([thunk]);
 const store = mockStore({
@@ -46,6 +48,12 @@ const renderWithProviders = (component) => render(
 );
 
 describe('AnalyticsV2Page', () => {
+  // it('has no accessibility violations', async () => {
+  //   const { container } = renderWithProviders(<AnalyticsV2Page enterpriseId="test_id" />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // }, 30000);
+
   test('verifies the granularity select label, options, and values', () => {
     const { container } = renderWithProviders(<AnalyticsV2Page enterpriseId="test_id" />);
 

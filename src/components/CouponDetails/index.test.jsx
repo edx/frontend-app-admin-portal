@@ -8,10 +8,12 @@ import thunk from 'redux-thunk';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
+// import { axe } from 'jest-axe';
 import CouponDetails from './index';
 import { COUPON_FILTERS, DEFAULT_TABLE_COLUMNS } from './constants';
 import { EMAIL_TEMPLATE_SOURCE_NEW_EMAIL } from '../../data/constants/emailTemplate';
 import { MULTI_USE } from '../../data/constants/coupons';
+// import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
 const mockStore = configureMockStore([thunk]);
 
@@ -148,6 +150,11 @@ const CouponDetailsWrapper = props => (
 // NOTE: Further integration testing can be found in src/containers/CouponDetails.test.jsx
 
 describe('CouponDetails component', () => {
+  // it('has no accessibility violations', async () => {
+  //   const { container } = render(<CouponDetailsWrapper {...defaultProps} />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
   it('does not display contents when not expanded', () => {
     render(<CouponDetailsWrapper {...defaultProps} isExpanded={false} />);
     expect(screen.queryByText('Coupon Details')).not.toBeInTheDocument();

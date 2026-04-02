@@ -3,9 +3,11 @@ import React from 'react';
 import { screen, render } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
+// import { axe } from 'jest-axe';
 import {
   BaseSelectWithContext, SELECT_ONE_TEST_ID,
 } from './BulkEnrollSelect';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const mockOnChange = jest.fn();
 const defaultToggleRowSelectedProps = {
@@ -30,6 +32,12 @@ describe('BaseSelectWithContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
+
+  // it('has no accessibility violations', async () => {
+  //   const { container } = render(<BaseSelectWithContext contextKey="emails" row={defaultRow} />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
   it('renders a checkbox', () => {
     render(<BaseSelectWithContext contextKey="emails" row={defaultRow} />);
     const checkbox = screen.getByTestId(SELECT_ONE_TEST_ID);

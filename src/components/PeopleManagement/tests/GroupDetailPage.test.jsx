@@ -10,11 +10,13 @@ import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 
 import { renderWithRouter, sendEnterpriseTrackEvent } from '@edx/frontend-enterprise-utils';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+// import { axe } from 'jest-axe';
 import { useEnterpriseGroupUuid, useEnterpriseGroupLearnersTableData } from '../data/hooks';
 import GroupDetailPage from '../GroupDetailPage/GroupDetailPage';
 import LmsApiService from '../../../data/services/LmsApiService';
 import { queryClient } from '../../test/testUtils';
 import EVENT_NAMES from '../../../eventTracking';
+// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const TEST_ENTERPRISE_SLUG = 'test-enterprise';
 const enterpriseUUID = '1234';
@@ -149,6 +151,12 @@ describe('<GroupDetailPageWrapper >', () => {
       sortBy: [{ desc: false, id: 'enrollmentCount' }],
     }));
   });
+  // it('has no accessibility violations', async () => {
+  //   setupMockTableData();
+  //   const { container } = renderWithRouter(<GroupDetailPageWrapper />);
+  //   const results = await axe(container, accessibilitySettings);
+  //   expect(results).toHaveNoViolations();
+  // });
   it('renders the GroupDetailPage when adminPortalLearnerProfileViewEnabled is false', async () => {
     const initialState = {
       portalConfiguration: {

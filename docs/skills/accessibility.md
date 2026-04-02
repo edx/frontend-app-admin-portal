@@ -7,7 +7,7 @@ Our corporate policies and contracts with our partners MANDATE WCAG 2.1 AA compl
 1. All pages MUST be WCAG 2.1 AA compliant.
 2. All pages SHOULD be WCAG 2.2 AA compliant.
 
-The following sections are not comprehensive. Enforce all of these requirements, but also the rest of WCAG 2.1 AA.
+The following sections are not comprehensive. Enforce all of these requirements, but also the rest of WCAG 2.2 AA.
 
 ## Rules
 
