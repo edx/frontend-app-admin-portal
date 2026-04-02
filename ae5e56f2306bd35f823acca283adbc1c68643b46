@@ -1,0 +1,26 @@
+src/components/billing/tests/AddPaymentMethodModal.test.tsx
+  ad9e334cfa6ad15e 23,25,30-33,35,88-100
+src/components/billing/AddPaymentMethodModal.tsx
+  ad9e334cfa6ad15e 351
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.3",
+  "base_commit_sha": "ae5e56f2306bd35f823acca283adbc1c68643b46",
+  "prompts": {
+    "ad9e334cfa6ad15e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a287ed97-e1a7-459c-b29f-6b34476cb25c",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "Alexander Dusenbery",
+      "messages": [],
+      "total_additions": 22,
+      "total_deletions": 4,
+      "accepted_lines": 21,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/237eb8fc052567c9ab9263bdaa647f1949aaae7548fab06724bffdc0ee3677d8"
+    }
+  }
+}
