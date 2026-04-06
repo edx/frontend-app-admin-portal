@@ -202,7 +202,7 @@ describe('SubscriptionCard', () => {
     // Trial expiration date
     expect(screen.getByText('April 13, 2025'));
     // Future invoice cost
-    expect(screen.getByText('2000 USD'));
+    expect(screen.getByText('$2,000 USD'));
 
     const billingLink = screen.getByText('Manage subscription');
     expect(billingLink).toBeInTheDocument();
