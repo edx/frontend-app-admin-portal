@@ -239,9 +239,9 @@ export const useSubscriptionsStripeInfo = ({ subscriptions, setErrors }) => {
       );
       const infoMap = {};
       settled.forEach((result, idx) => {
-        if (result.status === 'fulfilled' && result.value?.data) {
-          infoMap[uuids[idx]] = camelCaseObject(result.value.data);
-        }
+        infoMap[uuids[idx]] = (result.status === 'fulfilled' && result.value?.data)
+          ? camelCaseObject(result.value.data)
+          : null;
       });
       setStripeInfoByUuid(infoMap);
       setLoadingStripeInfo(false);
@@ -272,7 +272,7 @@ export const useSubscriptionData = ({ enterpriseId }) => {
   const suppressedSubscriptionUuids = useMemo(() => {
     const suppressed = new Set();
     Object.values(stripeInfoByUuid).forEach(info => {
-      if (info.renewedSubscriptionPlanUuid) {
+      if (info?.renewedSubscriptionPlanUuid) {
         const futureCancellation = info.canceledDate && dayjs(info.canceledDate).isAfter(dayjs());
         if (info.isCanceled || futureCancellation) {
           suppressed.add(info.renewedSubscriptionPlanUuid);

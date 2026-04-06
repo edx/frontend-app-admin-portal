@@ -261,8 +261,9 @@ describe('useSubscriptionsStripeInfo', () => {
     }));
 
     const setErrors = jest.fn();
+    const subscriptions = makeSubscriptions([uuid1, uuid2]);
     const { result } = renderHook(() => useSubscriptionsStripeInfo({
-      subscriptions: makeSubscriptions([uuid1, uuid2]),
+      subscriptions,
       setErrors,
     }));
 
@@ -302,33 +303,36 @@ describe('useSubscriptionsStripeInfo', () => {
     });
 
     const setErrors = jest.fn();
+    const subscriptions = makeSubscriptions([trialUuid]);
     const { result } = renderHook(() => useSubscriptionsStripeInfo({
-      subscriptions: makeSubscriptions([trialUuid]),
+      subscriptions,
       setErrors,
     }));
 
     await waitFor(() => {
       expect(result.current.stripeInfoByUuid[trialUuid]).toMatchObject({
-        is_canceled: true,
-        renewed_subscription_plan_uuid: renewedUuid,
+        isCanceled: true,
+        renewedSubscriptionPlanUuid: renewedUuid,
       });
       expect(result.current.loadingStripeInfo).toBe(false);
     });
   });
 
-  test('does not include fulfilled entries when API returns no data', async () => {
+  test('stores null for subscriptions when API returns no data (e.g. 404)', async () => {
     const uuid1 = 'uuid-no-data';
     EnterpriseAccessApiService.fetchStripeEvent.mockResolvedValue({ status: 404 });
 
     const setErrors = jest.fn();
+    const subscriptions = makeSubscriptions([uuid1]);
     const { result } = renderHook(() => useSubscriptionsStripeInfo({
-      subscriptions: makeSubscriptions([uuid1]),
+      subscriptions,
       setErrors,
     }));
 
     await waitFor(() => {
-      // 404 response has no .data, so uuid1 is not added to infoMap
-      expect(result.current.stripeInfoByUuid).not.toHaveProperty(uuid1);
+      // 404 response has no .data, so uuid1 is stored as null (key present, value null)
+      // This allows SubscriptionCard to detect the fetch completed (not still loading)
+      expect(result.current.stripeInfoByUuid).toHaveProperty(uuid1, null);
       expect(result.current.loadingStripeInfo).toBe(false);
     });
   });

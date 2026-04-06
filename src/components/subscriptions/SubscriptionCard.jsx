@@ -33,7 +33,7 @@ const SubscriptionCard = ({
   } = subscription;
   const { stripeInfoByUuid } = useContext(SubscriptionContext);
   const rawStripeInfo = stripeInfoByUuid?.[subPlanUuid];
-  const loadingStripeSummary = !rawStripeInfo;
+  const loadingStripeSummary = !(subPlanUuid in (stripeInfoByUuid ?? {}));
   const invoiceAmount = rawStripeInfo?.upcomingInvoiceAmountDue != null
     ? rawStripeInfo.upcomingInvoiceAmountDue / 100
     : null;
