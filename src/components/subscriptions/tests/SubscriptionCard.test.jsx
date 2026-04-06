@@ -16,7 +16,7 @@ import SubscriptionCard from '../SubscriptionCard';
 import {
   CANCELED, ENDED, FREE_TRIAL_BADGE, SELF_SERVICE_TRIAL,
 } from '../data/constants';
-import { useStripeSubscriptionPlanInfo } from '../data/hooks';
+import { SubscriptionContext } from '../SubscriptionData';
 
 const defaultSubscription = {
   uuid: 'ided',
@@ -72,18 +72,21 @@ const endedTrialProps = {
   },
 };
 
-const mockSubPlanInfoActive = {
-  invoiceAmount: '2000',
+// camelCase context shape (as produced by camelCaseObject on the API response)
+const mockStripeInfoActive = {
+  upcomingInvoiceAmountDue: 200000, // divided by 100 → 2000
   currency: 'usd',
   canceledDate: null,
-  loadingStripeSummary: false,
+  isCanceled: false,
+  renewedSubscriptionPlanUuid: null,
 };
 
-const mockSubPlanInfoCanceled = {
-  invoiceAmount: null,
+const mockStripeInfoCanceled = {
+  upcomingInvoiceAmountDue: null,
   currency: null,
   canceledDate: '2027-01-29T14:24:33Z',
-  loadingStripeSummary: false,
+  isCanceled: false,
+  renewedSubscriptionPlanUuid: null,
 };
 
 const responsiveContextValue = { width: breakpoints.extraSmall.maxWidth };
@@ -102,7 +105,6 @@ jest.mock('@edx/frontend-platform/i18n', () => ({
 
 jest.mock('../data/hooks', () => ({
   ...jest.requireActual('../data/hooks'),
-  useStripeSubscriptionPlanInfo: jest.fn(),
   useStripeBillingPortalSession: jest.fn().mockReturnValue({
     stripeUrl: 'https://docs.stripe.com/',
     loadingSession: false,
@@ -117,12 +119,23 @@ const initialStoreState = {
   },
 };
 
-const SubscriptionCardWrapper = ({ initialState = initialStoreState, ...props }) => {
+const SubscriptionCardWrapper = ({
+  initialState = initialStoreState,
+  stripeInfoByUuid = {},
+  ...props
+}) => {
   const store = getMockStore({ ...initialState });
+  const contextValue = {
+    setErrors: jest.fn(),
+    stripeInfoByUuid,
+    suppressedSubscriptionUuids: new Set(),
+  };
   return (
     <IntlProvider locale="en">
       <Provider store={store}>
-        <SubscriptionCard {...props} />
+        <SubscriptionContext.Provider value={contextValue}>
+          <SubscriptionCard {...props} />
+        </SubscriptionContext.Provider>
       </Provider>
     </IntlProvider>
   );
@@ -130,8 +143,12 @@ const SubscriptionCardWrapper = ({ initialState = initialStoreState, ...props })
 
 describe('SubscriptionCard', () => {
   it('displays subscription information', () => {
-    useStripeSubscriptionPlanInfo.mockReturnValue(mockSubPlanInfoActive);
-    renderWithRouter(<SubscriptionCardWrapper {...defaultProps} />);
+    renderWithRouter(
+      <SubscriptionCardWrapper
+        {...defaultProps}
+        stripeInfoByUuid={{ [defaultSubscription.uuid]: mockStripeInfoActive }}
+      />,
+    );
     const { title } = defaultSubscription;
     expect(screen.getByText(title));
   });
@@ -142,11 +159,11 @@ describe('SubscriptionCard', () => {
     [dayjs().add(1, 'hours').toISOString(), '1 hour'],
     [dayjs().add(3, 'hours').toISOString(), '3 hours'],
   ])('displays days until plan starts text if there are no actions and the plan is scheduled', (startDate, expectedText) => {
-    useStripeSubscriptionPlanInfo.mockReturnValue(mockSubPlanInfoActive);
     renderWithRouter(
       <ResponsiveContext.Provider value={responsiveContextValue}>
         <SubscriptionCardWrapper
           {...defaultProps}
+          stripeInfoByUuid={{ [defaultSubscription.uuid]: mockStripeInfoActive }}
           subscription={{
             ...defaultSubscription,
             startDate,
@@ -158,7 +175,6 @@ describe('SubscriptionCard', () => {
   });
 
   it('displays actions', () => {
-    useStripeSubscriptionPlanInfo.mockReturnValue(mockSubPlanInfoActive);
     const mockCreateActions = jest.fn(() => ([{
       variant: 'primary',
       to: '/',
@@ -167,6 +183,7 @@ describe('SubscriptionCard', () => {
     renderWithRouter(
       <SubscriptionCardWrapper
         {...defaultProps}
+        stripeInfoByUuid={{ [defaultSubscription.uuid]: mockStripeInfoActive }}
         createActions={mockCreateActions}
       />,
     );
@@ -175,9 +192,11 @@ describe('SubscriptionCard', () => {
   });
 
   it('displays trial subscription with additional subtitle and button', () => {
-    useStripeSubscriptionPlanInfo.mockReturnValue(mockSubPlanInfoActive);
     renderWithRouter(
-      <SubscriptionCardWrapper {...trialProps} />,
+      <SubscriptionCardWrapper
+        {...trialProps}
+        stripeInfoByUuid={{ [trialSubscription.uuid]: mockStripeInfoActive }}
+      />,
     );
     expect(screen.getByText(FREE_TRIAL_BADGE));
     // Trial expiration date
@@ -192,9 +211,11 @@ describe('SubscriptionCard', () => {
   });
 
   it('does not render trial subtitle for an expired trial ', () => {
-    useStripeSubscriptionPlanInfo.mockReturnValue(mockSubPlanInfoActive);
     renderWithRouter(
-      <SubscriptionCardWrapper {...endedTrialProps} />,
+      <SubscriptionCardWrapper
+        {...endedTrialProps}
+        stripeInfoByUuid={{ [endedTrialSubscription.uuid]: mockStripeInfoActive }}
+      />,
     );
     expect(screen.getByText(FREE_TRIAL_BADGE));
     expect(screen.getByText(ENDED));
@@ -202,9 +223,11 @@ describe('SubscriptionCard', () => {
   });
 
   it('renders canceled trial messaging when subscription is canceled', () => {
-    useStripeSubscriptionPlanInfo.mockReturnValue(mockSubPlanInfoCanceled);
     renderWithRouter(
-      <SubscriptionCardWrapper {...trialProps} />,
+      <SubscriptionCardWrapper
+        {...trialProps}
+        stripeInfoByUuid={{ [trialSubscription.uuid]: mockStripeInfoCanceled }}
+      />,
     );
 
     // Check for Canceled and Free Trial badge

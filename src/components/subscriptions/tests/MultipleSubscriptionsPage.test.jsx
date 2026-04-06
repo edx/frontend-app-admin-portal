@@ -78,6 +78,8 @@ const defaultSubscriptions = {
   },
   setErrors: () => {},
   errors: null,
+  suppressedSubscriptionUuids: new Set(),
+  stripeInfoByUuid: {},
 };
 
 const mockStore = configureMockStore([thunk]);
@@ -106,7 +108,7 @@ describe('MultipleSubscriptionsPage', () => {
     expect(screen.getByText('Plans')).toBeInTheDocument();
   });
   it('returns null if there are no subscriptions', () => {
-    const subscriptions = { data: { results: [] } };
+    const subscriptions = { data: { results: [] }, suppressedSubscriptionUuids: new Set(), stripeInfoByUuid: {} };
     render(<MultipleSubscriptionsPageWrapper subscriptions={subscriptions} {...defaultProps} />);
     expect(screen.queryByText('Plans')).not.toBeInTheDocument();
   });
@@ -125,6 +127,8 @@ describe('MultipleSubscriptionsPage', () => {
           },
         }],
       },
+      suppressedSubscriptionUuids: new Set(),
+      stripeInfoByUuid: {},
     };
     render(<MultipleSubscriptionsPageWrapper subscriptions={subscriptions} {...defaultProps} />);
     expect(mockNavigate).toHaveBeenLastCalledWith(`/${fakeSlug}/admin/${ROUTE_NAMES.subscriptionManagement}/${subsUuid}`);
@@ -145,10 +149,60 @@ describe('MultipleSubscriptionsPage', () => {
           },
         }],
       },
+      suppressedSubscriptionUuids: new Set(),
+      stripeInfoByUuid: {},
     };
     render(
       <MultipleSubscriptionsPageWrapper subscriptions={subscriptions} {...defaultProps} redirectPage={redirectPage} />,
     );
     expect(mockNavigate).toHaveBeenCalledWith(`/${fakeSlug}/admin/${redirectPage}/${subsUuid}`);
+  });
+
+  it('hides the scheduled paid subscription card when the associated trial is canceled', () => {
+    const trialUuid = 'trial-uuid';
+    const renewedUuid = 'renewed-uuid';
+    const otherUuid = 'other-uuid';
+    // Three subscriptions: trial, its scheduled renewal (suppressed), and one other active plan.
+    // After suppression, two remain → picker is rendered (no redirect).
+    const subscriptions = {
+      data: {
+        results: [
+          {
+            uuid: trialUuid,
+            title: 'Trial Plan',
+            startDate: '2024-01-01',
+            expirationDate: '2025-01-01',
+            licenses: { allocated: 5, total: 10 },
+            showExpirationNotifications: true,
+          },
+          {
+            uuid: renewedUuid,
+            title: 'Paid Renewal Plan',
+            startDate: '2025-01-01',
+            expirationDate: '2026-01-01',
+            licenses: { allocated: 0, total: 10 },
+            showExpirationNotifications: true,
+          },
+          {
+            uuid: otherUuid,
+            title: 'Other Active Plan',
+            startDate: '2024-01-01',
+            expirationDate: '2025-06-01',
+            licenses: { allocated: 3, total: 10 },
+            showExpirationNotifications: true,
+          },
+        ],
+      },
+      setErrors: () => {},
+      errors: null,
+      suppressedSubscriptionUuids: new Set([renewedUuid]),
+      stripeInfoByUuid: {},
+    };
+    render(<MultipleSubscriptionsPageWrapper subscriptions={subscriptions} {...defaultProps} />);
+    // The suppressed renewal should not be rendered
+    expect(screen.queryByText('Paid Renewal Plan')).not.toBeInTheDocument();
+    // The trial and other plan cards are still shown
+    expect(screen.getByText('Trial Plan')).toBeInTheDocument();
+    expect(screen.getByText('Other Active Plan')).toBeInTheDocument();
   });
 });
