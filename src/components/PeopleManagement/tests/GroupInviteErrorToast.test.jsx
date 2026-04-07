@@ -23,7 +23,7 @@ const GroupInviteErrorToastWrapper = props => (
 
 describe('GroupInviteErrorToast', () => {
   it('has no accessibility violations', async () => {
-    const { container } = render(<GroupInviteErrorToastWrapper />);
+    const { container } = render(<GroupInviteErrorToastWrapper {...DEFAULT_PROPS} />);
     const results = await axe(container, accessibilitySettings);
     expect(results).toHaveNoViolations();
   });

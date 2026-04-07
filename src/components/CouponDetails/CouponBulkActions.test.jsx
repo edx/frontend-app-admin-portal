@@ -23,7 +23,7 @@ describe('CouponBulkActions', () => {
   });
 
   it('has no accessibility violations', async () => {
-    const { container } = render(<CouponBulkActions />);
+    const { container } = render(<CouponBulkActions {...props} />);
     const results = await axe(container, accessibilitySettings);
     expect(results).toHaveNoViolations();
   });

@@ -16,7 +16,7 @@ const DEFAULT_PROPS = {
 
 describe('<IconWithTooltip />', () => {
   it('has no accessibility violations', async () => {
-    const { container } = render(<IconWithTooltip />);
+    const { container } = render(<IconWithTooltip {...DEFAULT_PROPS} />);
     const results = await axe(container, accessibilitySettings);
     expect(results).toHaveNoViolations();
   });

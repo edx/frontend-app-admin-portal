@@ -29,14 +29,14 @@ describe('CheckpointOverlay', () => {
     getBoundingClientRectSpy = jest.spyOn(mockTargetElement, 'getBoundingClientRect');
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('has no accessibility violations', async () => {
     const { container } = render(<CheckpointOverlay target={mockIdTarget} />);
     const results = await axe(container, accessibilitySettings);
     expect(results).toHaveNoViolations();
-  });
-
-  afterEach(() => {
-    jest.clearAllMocks();
   });
 
   it('renders nothing when target element is not found', () => {

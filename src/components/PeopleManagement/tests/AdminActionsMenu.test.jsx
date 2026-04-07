@@ -28,7 +28,7 @@ describe('AdminActionsMenu', () => {
   });
 
   it('has no accessibility violations', async () => {
-    const { container } = render(<AdminActionsMenu {...defaultProps} />);
+    const { container } = renderWithIntl(<AdminActionsMenu {...defaultProps} />);
     const results = await axe(container, accessibilitySettings);
     expect(results).toHaveNoViolations();
   });
