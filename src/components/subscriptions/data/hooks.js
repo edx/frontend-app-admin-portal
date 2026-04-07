@@ -219,11 +219,13 @@ export const useSubscriptionUsers = ({
 };
 
 /**
- * Fetches Stripe info for all subscriptions in parallel and computes the suppression set.
+ * Fetches Stripe payment event for each subscription simultaneously.
+ * Builds a lookup table mapping each subscription UUID to its Stripe data,
+ * or null if the request failed. Returns that lookup table and a loading flag.
  * @param {Object} subscriptions - The subscriptions object with a `results` array.
  * @param {Function} setErrors - Error setter from SubscriptionContext.
  */
-export const useSubscriptionsStripeInfo = ({ subscriptions, setErrors }) => {
+export const useStripeEventsBySubscription = ({ subscriptions, setErrors }) => {
   const [stripeInfoByUuid, setStripeInfoByUuid] = useState({});
   const [loadingStripeInfo, setLoadingStripeInfo] = useState(true);
 
@@ -267,7 +269,7 @@ export const useSubscriptionData = ({ enterpriseId }) => {
     forceRefresh,
     loading,
   } = useSubscriptions({ enterpriseId, setErrors });
-  const { stripeInfoByUuid, loadingStripeInfo } = useSubscriptionsStripeInfo({ subscriptions, setErrors });
+  const { stripeInfoByUuid, loadingStripeInfo } = useStripeEventsBySubscription({ subscriptions, setErrors });
 
   const suppressedSubscriptionUuids = useMemo(() => {
     const suppressed = new Set();

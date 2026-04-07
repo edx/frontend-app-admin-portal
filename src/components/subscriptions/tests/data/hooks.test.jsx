@@ -7,7 +7,7 @@ import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAcce
 import {
   useStripeSubscriptionPlanInfo,
   useSubscriptionUsersOverview,
-  useSubscriptionsStripeInfo,
+  useStripeEventsBySubscription,
 } from '../../data/hooks';
 
 const TEST_SUBSCRIPTION_PLAN_UUID = 'test-plan-uuid-1';
@@ -234,7 +234,7 @@ describe('useStripeSubscriptionPlanInfo', () => {
   });
 });
 
-describe('useSubscriptionsStripeInfo', () => {
+describe('useStripeEventsBySubscription', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -263,7 +263,7 @@ describe('useSubscriptionsStripeInfo', () => {
 
     const setErrors = jest.fn();
     const subscriptions = makeSubscriptions([uuid1, uuid2]);
-    const { result } = renderHook(() => useSubscriptionsStripeInfo({
+    const { result } = renderHook(() => useStripeEventsBySubscription({
       subscriptions,
       setErrors,
     }));
@@ -278,7 +278,7 @@ describe('useSubscriptionsStripeInfo', () => {
 
   test('sets loadingStripeInfo=false immediately when subscriptions is empty', async () => {
     const setErrors = jest.fn();
-    const { result } = renderHook(() => useSubscriptionsStripeInfo({
+    const { result } = renderHook(() => useStripeEventsBySubscription({
       subscriptions: { results: [] },
       setErrors,
     }));
@@ -305,7 +305,7 @@ describe('useSubscriptionsStripeInfo', () => {
 
     const setErrors = jest.fn();
     const subscriptions = makeSubscriptions([trialUuid]);
-    const { result } = renderHook(() => useSubscriptionsStripeInfo({
+    const { result } = renderHook(() => useStripeEventsBySubscription({
       subscriptions,
       setErrors,
     }));
@@ -326,7 +326,7 @@ describe('useSubscriptionsStripeInfo', () => {
 
     const setErrors = jest.fn();
     const subscriptions = makeSubscriptions(['uuid-1']);
-    const { result } = renderHook(() => useSubscriptionsStripeInfo({
+    const { result } = renderHook(() => useStripeEventsBySubscription({
       subscriptions,
       setErrors,
     }));
@@ -344,7 +344,7 @@ describe('useSubscriptionsStripeInfo', () => {
 
     const setErrors = jest.fn();
     const subscriptions = makeSubscriptions([uuid1]);
-    const { result } = renderHook(() => useSubscriptionsStripeInfo({
+    const { result } = renderHook(() => useStripeEventsBySubscription({
       subscriptions,
       setErrors,
     }));
