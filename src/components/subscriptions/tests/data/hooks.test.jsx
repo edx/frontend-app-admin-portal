@@ -1,5 +1,6 @@
 import { renderHook, waitFor, cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
+import { logError } from '@edx/frontend-platform/logging';
 
 import LicenseManagerApiService from '../../../../data/services/LicenseManagerAPIService';
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
@@ -314,6 +315,25 @@ describe('useSubscriptionsStripeInfo', () => {
         isCanceled: true,
         renewedSubscriptionPlanUuid: renewedUuid,
       });
+      expect(result.current.loadingStripeInfo).toBe(false);
+    });
+  });
+
+  test('sets STRIPE_EVENT_SUMMARY error and loadingStripeInfo=false when fetchAll rejects', async () => {
+    const syncError = new Error('Unexpected sync error');
+    // Throwing synchronously inside the map causes fetchAll() to reject, triggering .catch
+    EnterpriseAccessApiService.fetchStripeEvent.mockImplementation(() => { throw syncError; });
+
+    const setErrors = jest.fn();
+    const subscriptions = makeSubscriptions(['uuid-1']);
+    const { result } = renderHook(() => useSubscriptionsStripeInfo({
+      subscriptions,
+      setErrors,
+    }));
+
+    await waitFor(() => {
+      expect(logError).toHaveBeenCalledWith(syncError);
+      expect(setErrors).toHaveBeenCalledTimes(1);
       expect(result.current.loadingStripeInfo).toBe(false);
     });
   });
