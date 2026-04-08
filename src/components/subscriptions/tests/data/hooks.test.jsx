@@ -276,7 +276,7 @@ describe('useStripeEventsBySubscription', () => {
     });
   });
 
-  test('sets loadingStripeInfo=false immediately when subscriptions is empty', async () => {
+  test('sets loadingStripeInfo=false and clears stripeInfoByUuid when subscriptions is empty', async () => {
     const setErrors = jest.fn();
     const { result } = renderHook(() => useStripeEventsBySubscription({
       subscriptions: { results: [] },
@@ -285,8 +285,60 @@ describe('useStripeEventsBySubscription', () => {
 
     await waitFor(() => {
       expect(result.current.loadingStripeInfo).toBe(false);
+      expect(result.current.stripeInfoByUuid).toEqual({});
       expect(EnterpriseAccessApiService.fetchStripeEvent).not.toHaveBeenCalled();
     });
+  });
+
+  test('resets loadingStripeInfo to true when subscriptions changes and a new fetch begins', async () => {
+    const uuid1 = 'uuid-reload-1';
+    const uuid2 = 'uuid-reload-2';
+    const stripeResponseUuid2 = {
+      data: {
+        upcoming_invoice_amount_due: 0,
+        currency: 'usd',
+        canceled_date: null,
+        is_canceled: false,
+        renewed_subscription_plan_uuid: null,
+        uuid: uuid2,
+      },
+    };
+    const stripeResponseUuid1 = {
+      data: {
+        upcoming_invoice_amount_due: 100,
+        currency: 'usd',
+        canceled_date: null,
+        is_canceled: false,
+        renewed_subscription_plan_uuid: null,
+        uuid: uuid1,
+      },
+    };
+
+    let resolveFirst;
+    EnterpriseAccessApiService.fetchStripeEvent
+      .mockImplementationOnce(() => new Promise(resolve => { resolveFirst = resolve; }))
+      .mockResolvedValue(stripeResponseUuid2);
+
+    const setErrors = jest.fn();
+    let subscriptions = { results: [{ uuid: uuid1 }] };
+    const { result, rerender } = renderHook(
+      ({ subs }) => useStripeEventsBySubscription({ subscriptions: subs, setErrors }),
+      { initialProps: { subs: subscriptions } },
+    );
+
+    // While first fetch is in-flight, loadingStripeInfo should be true
+    expect(result.current.loadingStripeInfo).toBe(true);
+
+    // Resolve first fetch so the hook settles
+    resolveFirst(stripeResponseUuid1);
+    await waitFor(() => expect(result.current.loadingStripeInfo).toBe(false));
+
+    // Re-render with new subscriptions — loadingStripeInfo must go back to true
+    subscriptions = { results: [{ uuid: uuid2 }] };
+    rerender({ subs: subscriptions });
+    expect(result.current.loadingStripeInfo).toBe(true);
+
+    await waitFor(() => expect(result.current.loadingStripeInfo).toBe(false));
   });
 
   test('computes suppressedSubscriptionUuids when isCanceled=true (tested via useSubscriptionData integration)', async () => {

@@ -231,9 +231,11 @@ export const useStripeEventsBySubscription = ({ subscriptions, setErrors }) => {
 
   useEffect(() => {
     if (!subscriptions?.results?.length) {
+      setStripeInfoByUuid(prev => (Object.keys(prev).length > 0 ? {} : prev));
       setLoadingStripeInfo(false);
       return;
     }
+    setLoadingStripeInfo(true);
     const fetchAll = async () => {
       const uuids = subscriptions.results.map(s => s.uuid);
       const settled = await Promise.allSettled(
