@@ -242,11 +242,21 @@ export const useStripeEventsBySubscription = ({ subscriptions, setErrors }) => {
         uuids.map(uuid => EnterpriseAccessApiService.fetchStripeEvent(uuid)),
       );
       const infoMap = {};
+      let hasError = false;
       settled.forEach((result, idx) => {
-        infoMap[uuids[idx]] = (result.status === 'fulfilled' && result.value?.data)
-          ? camelCaseObject(result.value.data)
-          : null;
+        if (result.status === 'fulfilled' && result.value?.data) {
+          infoMap[uuids[idx]] = camelCaseObject(result.value.data);
+        } else {
+          if (result.status === 'rejected') {
+            logError(result.reason);
+            hasError = true;
+          }
+          infoMap[uuids[idx]] = null;
+        }
       });
+      if (hasError) {
+        setErrors(s => ({ ...s, [STRIPE_EVENT_SUMMARY]: NETWORK_ERROR_MESSAGE }));
+      }
       setStripeInfoByUuid(infoMap);
       setLoadingStripeInfo(false);
     };

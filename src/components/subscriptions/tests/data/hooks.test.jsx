@@ -390,6 +390,43 @@ describe('useStripeEventsBySubscription', () => {
     });
   });
 
+  test('logs error and sets STRIPE_EVENT_SUMMARY when one fetchStripeEvent rejects asynchronously (partial success)', async () => {
+    const networkError = new Error('Network error');
+    const uuid1 = 'uuid-success';
+    const uuid2 = 'uuid-fail';
+    const successResponse = {
+      data: {
+        upcoming_invoice_amount_due: 5000,
+        currency: 'usd',
+        canceled_date: null,
+        is_canceled: false,
+        renewed_subscription_plan_uuid: null,
+      },
+    };
+    EnterpriseAccessApiService.fetchStripeEvent
+      .mockResolvedValueOnce(successResponse)
+      .mockRejectedValueOnce(networkError);
+
+    const setErrors = jest.fn();
+    const subscriptions = makeSubscriptions([uuid1, uuid2]);
+    const { result } = renderHook(() => useStripeEventsBySubscription({
+      subscriptions,
+      setErrors,
+    }));
+
+    await waitFor(() => {
+      // The successful fetch is preserved
+      expect(result.current.stripeInfoByUuid[uuid1]).not.toBeNull();
+      // The failed fetch is stored as null
+      expect(result.current.stripeInfoByUuid).toHaveProperty(uuid2, null);
+      // The rejection is logged
+      expect(logError).toHaveBeenCalledWith(networkError);
+      // The error state is set exactly once
+      expect(setErrors).toHaveBeenCalledTimes(1);
+      expect(result.current.loadingStripeInfo).toBe(false);
+    });
+  });
+
   test('stores null for subscriptions when API returns no data (e.g. 404)', async () => {
     const uuid1 = 'uuid-no-data';
     EnterpriseAccessApiService.fetchStripeEvent.mockResolvedValue({ status: 404 });
