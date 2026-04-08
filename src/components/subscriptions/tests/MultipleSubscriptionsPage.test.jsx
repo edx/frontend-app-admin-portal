@@ -158,6 +158,42 @@ describe('MultipleSubscriptionsPage', () => {
     expect(mockNavigate).toHaveBeenCalledWith(`/${fakeSlug}/admin/${redirectPage}/${subsUuid}`);
   });
 
+  it('does not redirect when the only visible subscription is a canceled trial and the paid renewal is suppressed', () => {
+    const trialUuid = 'trial-only-uuid';
+    const renewedUuid = 'suppressed-paid-uuid';
+    const subscriptions = {
+      data: {
+        results: [
+          {
+            uuid: trialUuid,
+            title: 'Canceled Trial Plan',
+            startDate: '2024-01-01',
+            expirationDate: '2025-01-01',
+            licenses: { allocated: 5, total: 10 },
+            showExpirationNotifications: true,
+          },
+          {
+            uuid: renewedUuid,
+            title: 'Suppressed Paid Plan',
+            startDate: '2025-01-01',
+            expirationDate: '2026-01-01',
+            licenses: { allocated: 0, total: 10 },
+            showExpirationNotifications: true,
+          },
+        ],
+      },
+      setErrors: () => {},
+      errors: null,
+      suppressedSubscriptionUuids: new Set([renewedUuid]),
+      stripeInfoByUuid: {},
+    };
+    render(<MultipleSubscriptionsPageWrapper subscriptions={subscriptions} {...defaultProps} />);
+    // No redirect should happen even though only one subscription is visible after suppression
+    expect(mockNavigate).not.toHaveBeenCalled();
+    // The suppressed paid plan should not appear
+    expect(screen.queryByText('Suppressed Paid Plan')).not.toBeInTheDocument();
+  });
+
   it('hides the scheduled paid subscription card when the associated trial is canceled', () => {
     const trialUuid = 'trial-uuid';
     const renewedUuid = 'renewed-uuid';

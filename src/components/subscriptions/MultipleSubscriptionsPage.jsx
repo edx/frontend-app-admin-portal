@@ -72,7 +72,7 @@ const MultipleSubscriptionsPage = ({
     );
   }
 
-  if (subscriptions.length === 1) {
+  if (subscriptions.length === 1 && !suppressedSubscriptionUuids?.size) {
     return (
       <Navigate to={`/${enterpriseSlug}/admin/${redirectPage}/${subscriptions[0].uuid}`} replace />
     );
