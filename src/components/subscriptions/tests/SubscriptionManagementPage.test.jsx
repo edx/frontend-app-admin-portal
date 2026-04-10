@@ -7,7 +7,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
-// import { axe } from 'jest-axe';
+import { axe } from 'jest-axe';
 import {
   TEST_ENTERPRISE_CUSTOMER_SLUG, createMockStore,
 } from './TestUtilities';
@@ -16,7 +16,7 @@ import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import * as hooks from '../data/hooks';
 import { SubsidyRequestsContext } from '../../subsidy-requests';
 import { SUBSIDY_REQUESTS_TYPES } from '../../SubsidyRequestManagementTable/data/constants';
-// import { accessibilitySettings } from '../../../../tests/accessibility-settings';
+import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 describe('SubscriptionManagementPage', () => {
   describe('multiple subscriptions', () => {
@@ -94,11 +94,12 @@ describe('SubscriptionManagementPage', () => {
       );
     };
 
-    // it('has no accessibility violations', async () => {
-    //   const { container } = render(<SubscriptionManagementPageWrapper />);
-    //   const results = await axe(container, accessibilitySettings);
-    //   expect(results).toHaveNoViolations();
-    // });
+    // Skipped because this test fails a11y checks; to be addressed in ENT-11719
+    it.skip('has no accessibility violations', async () => {
+      const { container } = render(<SubscriptionManagementPageWrapper />);
+      const results = await axe(container, accessibilitySettings);
+      expect(results).toHaveNoViolations();
+    });
 
     it('renders the correct button text on subscription cards', async () => {
       render(<SubscriptionManagementPageWrapper />);

@@ -6,9 +6,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
-// import { axe } from 'jest-axe';
+import { axe } from 'jest-axe';
 import AdminPage from '.';
-// import { accessibilitySettings } from '../../../tests/accessibility-settings';
+import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
 jest.mock('../../components/EnterpriseSubsidiesContext/data/hooks', () => ({
   ...jest.requireActual('../../components/EnterpriseSubsidiesContext/data/hooks'),
@@ -85,11 +85,12 @@ describe('<AdminPage />', () => {
     expect(activeLearnersCount).toBe('1');
   });
 
-  // it('has no accessibility violations', async () => {
-  //   const { container } = render(<AdminPageWrapper />);
-  //   const results = await axe(container, accessibilitySettings);
-  //   expect(results).toHaveNoViolations();
-  // });
+  // Skipped because this test fails a11y checks; to be addressed in ENT-11719
+  it.skip('has no accessibility violations', async () => {
+    const { container } = render(<AdminPageWrapper />);
+    const results = await axe(container, accessibilitySettings);
+    expect(results).toHaveNoViolations();
+  });
 
   // it('fetchDashboardAnalytics dispatches fetchDashboardAnalytics action', () => {
   //   wrapper.props().fetchDashboardAnalytics('ee5e6b3a-069a-4947-bb8d-d2dbc323396c');

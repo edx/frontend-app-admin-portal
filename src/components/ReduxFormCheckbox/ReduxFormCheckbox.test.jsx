@@ -1,17 +1,18 @@
 import React from 'react';
 import renderer from 'react-test-renderer';
 
-// import { render } from '@testing-library/react';
-// import { axe } from 'jest-axe';
+import { render } from '@testing-library/react';
+import { axe } from 'jest-axe';
 import ReduxFormCheckbox from './index';
-// import { accessibilitySettings } from '../../../tests/accessibility-settings';
+import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
 describe('<ReduxFormCheckbox />', () => {
-  // it('has no accessibility violations', async () => {
-  //   const { container } = render(<ReduxFormCheckbox id="id" input={{ checked: true }} />);
-  //   const results = await axe(container, accessibilitySettings);
-  //   expect(results).toHaveNoViolations();
-  // });
+  // Skipped because this test fails a11y checks; to be addressed in ENT-11719
+  it.skip('has no accessibility violations', async () => {
+    const { container } = render(<ReduxFormCheckbox id="id" input={{ checked: true }} />);
+    const results = await axe(container, accessibilitySettings);
+    expect(results).toHaveNoViolations();
+  });
 
   it('renders checked correctly', () => {
     const inputProp = { checked: true };

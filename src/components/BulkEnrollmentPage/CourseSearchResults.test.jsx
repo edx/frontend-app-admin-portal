@@ -10,12 +10,12 @@ import '@testing-library/jest-dom/extend-expect';
 import { SearchContext } from '@edx/frontend-enterprise-catalog-search';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
-// import { axe } from 'jest-axe';
+import { axe } from 'jest-axe';
 import BulkEnrollContextProvider from './BulkEnrollmentContext';
 import { BaseCourseSearchResults, NO_DATA_MESSAGE, TABLE_HEADERS } from './CourseSearchResults';
 import { renderWithRouter } from '../test/testUtils';
 import '../../../__mocks__/react-instantsearch-dom';
-// import { accessibilitySettings } from '../../../tests/accessibility-settings';
+import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
 const mockStore = configureMockStore([thunk]);
 
@@ -93,11 +93,12 @@ const CourseSearchWrapper = ({ value = { refinements }, props = defaultProps }) 
 );
 
 describe('<CourseSearchResults />', () => {
-  // it('has no accessibility violations', async () => {
-  //   const { container } = renderWithRouter(<CourseSearchWrapper />);
-  //   const results = await axe(container, accessibilitySettings);
-  //   expect(results).toHaveNoViolations();
-  // });
+  // Skipped because this test fails a11y checks; to be addressed in ENT-11719
+  it.skip('has no accessibility violations', async () => {
+    const { container } = renderWithRouter(<CourseSearchWrapper />);
+    const results = await axe(container, accessibilitySettings);
+    expect(results).toHaveNoViolations();
+  });
 
   it('renders search results', () => {
     render(<CourseSearchWrapper />);
