@@ -6,6 +6,7 @@ import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import Router, { Route } from 'react-router-dom';
 import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { ContentHighlightsContext } from '../ContentHighlightsContext';
@@ -19,7 +20,7 @@ import { configuration } from '../../../config';
 
 jest.mock('../../../data/services/EnterpriseCatalogApiService');
 
-const mockHighlightSetResponse = camelCaseObject(TEST_COURSE_HIGHLIGHTS_DATA);
+const mockHighlightSetResponse = camelCaseObject(TEST_COURSE_HIGHLIGHTS_DATA[0]);
 const mockStore = configureMockStore([thunk]);
 const highlightSetUUID = 'fake-uuid';
 const searchClient = algoliasearch(
@@ -85,10 +86,23 @@ const ContentHighlightSetWrapper = (
 describe('<ContentHighlightSet>', () => {
   it('Displays the title of the highlight set', async () => {
     jest.spyOn(Router, 'useParams').mockReturnValue({ highlightSetUUID });
-    EnterpriseCatalogApiService.fetchHighlightSet.mockResolvedValueOnce({
-      data: mockHighlightSetResponse,
+    EnterpriseCatalogApiService.fetchHighlightSet.mockResolvedValueOnce(mockHighlightSetResponse);
+
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
     });
-    const { result } = renderHook(() => useHighlightSet(highlightSetUUID));
+
+    const Wrapper = ({ children }) => (
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useHighlightSet(highlightSetUUID), { wrapper: Wrapper });
     expect(result.current).toEqual({
       isLoading: true,
       error: null,
@@ -102,11 +116,11 @@ describe('<ContentHighlightSet>', () => {
     expect(result.current).toEqual({
       isLoading: false,
       error: null,
-      highlightSet: camelCaseObject(TEST_COURSE_HIGHLIGHTS_DATA),
+      highlightSet: mockHighlightSetResponse,
       updateHighlightSet: expect.any(Function),
     });
     expect(
       EnterpriseCatalogApiService.fetchHighlightSet,
-    ).toHaveBeenCalled();
+    ).toHaveBeenCalledWith(highlightSetUUID);
   });
 });

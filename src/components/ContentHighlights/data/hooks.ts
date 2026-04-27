@@ -1,20 +1,34 @@
-import { camelCaseObject } from '@edx/frontend-platform';
-import { logError } from '@edx/frontend-platform/logging';
-import { useCallback, useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
 import { useContextSelector } from 'use-context-selector';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
+import type { HighlightSet, HighlightedContentItem } from '../../../data/services/types';
 import { ContentHighlightsContext } from '../ContentHighlightsContext';
 
-export function useHighlightSetsForCuration(enterpriseCuration) {
-  const [highlightSets, setHighlightSets] = useState({
+type HighlightSetForCuration = {
+  isPublished: boolean;
+  [key: string]: unknown;
+};
+
+type EnterpriseCurationWithHighlightSets = {
+  highlightSets?: HighlightSetForCuration[];
+};
+
+const getHighlightSetQueryKey = (highlightSetUUID: string | undefined) => ['highlightSet', highlightSetUUID] as const;
+
+export function useHighlightSetsForCuration(enterpriseCuration?: EnterpriseCurationWithHighlightSets | null) {
+  const [highlightSets, setHighlightSets] = useState<{
+    draft: HighlightSetForCuration[];
+    published: HighlightSetForCuration[];
+  }>({
     draft: [],
     published: [],
   });
 
   useEffect(() => {
     const highlightSetsForCuration = enterpriseCuration?.highlightSets;
-    const draftHighlightSets = [];
-    const publishedHighlightSets = [];
+    const draftHighlightSets: HighlightSetForCuration[] = [];
+    const publishedHighlightSets: HighlightSetForCuration[] = [];
 
     highlightSetsForCuration?.forEach((highlightSet) => {
       if (highlightSet.isPublished) {
@@ -33,38 +47,42 @@ export function useHighlightSetsForCuration(enterpriseCuration) {
   return highlightSets;
 }
 
-export function useHighlightSet(highlightSetUUID) {
-  const [highlightSet, setHighlightSet] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+export function useHighlightSet(highlightSetUUID: string | undefined) {
+  const queryClient = useQueryClient();
 
-  const getHighlightSet = useCallback(async () => {
-    try {
-      const { data } = await EnterpriseCatalogApiService.fetchHighlightSet(highlightSetUUID);
-      const result = camelCaseObject(data);
-      setHighlightSet(result);
-    } catch (e) {
-      setError(e);
-      logError(e);
-    } finally {
-      setIsLoading(false);
+  const {
+    data: highlightSet,
+    isLoading,
+    error,
+  } = useQuery<HighlightSet | null>({
+    queryKey: getHighlightSetQueryKey(highlightSetUUID),
+    queryFn: () => EnterpriseCatalogApiService.fetchHighlightSet(highlightSetUUID as string),
+    enabled: !!highlightSetUUID,
+  });
+
+  const updateHighlightSet = useCallback((highlightSetContentItems: HighlightedContentItem[]) => {
+    if (!highlightSetUUID) {
+      return;
     }
-  }, [highlightSetUUID]);
 
-  const updateHighlightSet = (highlightSetContentItems) => {
-    setHighlightSet((prevHighlightSet) => ({
-      ...prevHighlightSet,
-      highlightedContent: highlightSetContentItems,
-    }));
-  };
+    queryClient.setQueryData<HighlightSet | null>(
+      getHighlightSetQueryKey(highlightSetUUID),
+      (previousHighlightSet) => {
+        if (!previousHighlightSet) {
+          return previousHighlightSet;
+        }
 
-  useEffect(() => {
-    getHighlightSet();
-  }, [getHighlightSet]);
+        return {
+          ...previousHighlightSet,
+          highlightedContent: highlightSetContentItems,
+        };
+      },
+    );
+  }, [highlightSetUUID, queryClient]);
 
   return {
     updateHighlightSet,
-    highlightSet,
+    highlightSet: highlightSet || [],
     isLoading,
     error,
   };
