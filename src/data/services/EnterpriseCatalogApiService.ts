@@ -34,7 +34,7 @@ class EnterpriseCatalogApiService {
     const queryParams = new URLSearchParams({
       get_catalogs_containing_specified_content_ids: 'true',
     });
-    if (courseRunIds?.length > 0) {
+    if (Array.isArray(courseRunIds) && courseRunIds.length > 0) {
       queryParams.set('course_run_ids', courseRunIds.join(','));
     }
     const url = `${EnterpriseCatalogApiService.baseUrl}/enterprise-customer/${enterpriseId}/contains_content_items/?${queryParams.toString()}`;
