@@ -12,7 +12,7 @@ import LmsApiService from '../../../../data/services/LmsApiService';
  */
 const getEnterpriseCustomer = async (enterpriseCustomerUuid) => {
   const response = await LmsApiService.fetchEnterpriseCustomer(enterpriseCustomerUuid);
-  const enterpriseCustomer = camelCaseObject(response?.data);
+  const enterpriseCustomer = camelCaseObject(response.data);
   return enterpriseCustomer;
 };
 

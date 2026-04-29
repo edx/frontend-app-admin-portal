@@ -9,8 +9,8 @@ const axiosMock = new MockAdapter(axios);
 getAuthenticatedHttpClient.mockReturnValue(axios);
 
 axiosMock.onAny().reply(200);
-axios.get = jest.fn();
-axios.delete = jest.fn();
+axios.get = jest.fn().mockResolvedValue({ data: {} });
+axios.delete = jest.fn().mockResolvedValue({ data: {} });
 const enterpriseCatalogBaseUrl = `${process.env.ENTERPRISE_CATALOG_BASE_URL}/api/v1`;
 
 const mockHighlightSetUUID = 'test-highlight-set-uuid';
@@ -20,8 +20,8 @@ describe('EnterpriseCatalogApiService', () => {
     jest.clearAllMocks();
   });
 
-  test('fetchHighlightSet calls enterprise-catalog', () => {
-    EnterpriseCatalogApiService.fetchHighlightSet(mockHighlightSetUUID);
+  test('fetchHighlightSet calls enterprise-catalog', async () => {
+    await EnterpriseCatalogApiService.fetchHighlightSet(mockHighlightSetUUID);
     expect(axios.get).toBeCalledWith(`${enterpriseCatalogBaseUrl}/highlight-sets-admin/${mockHighlightSetUUID}`);
   });
   test('deleteHighlightSet calls enterprise-catalog', () => {
