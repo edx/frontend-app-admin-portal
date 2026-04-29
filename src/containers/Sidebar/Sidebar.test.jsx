@@ -50,7 +50,6 @@ const initialState = {
   },
   portalConfiguration: {
     enableLearnerPortal: true,
-    enableCodeManagementScreen: true,
     enableSubscriptionManagementScreen: true,
     enableAnalyticsScreen: true,
     enableReportingConfigScreenLink: true,
@@ -70,7 +69,6 @@ const initialEnterpriseAppContextValue = {
 const initialSubsidyRequestsContextValue = {
   subsidyRequestsCounts: {
     subscriptionLicenses: null,
-    couponCodes: null,
   },
 };
 
@@ -147,7 +145,6 @@ describe('<Sidebar />', () => {
         ...initialState.sidebar,
       },
       portalConfiguration: {
-        enableCodeManagementScreen: false,
       },
     });
 

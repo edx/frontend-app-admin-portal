@@ -77,7 +77,6 @@ const SettingsAccessTabWrapper = ({
       netDaysUntilExpiration: 0,
       subscriptions: [],
     },
-    coupons: [],
     enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.license],
   },
   props = {},
@@ -178,7 +177,6 @@ describe('<SettingsAccessTab />', () => {
               netDaysUntilExpiration: 0,
               subscriptions: [],
             },
-            coupons: [],
             enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.license, SUPPORTED_SUBSIDY_TYPES.license],
           }
         }
@@ -204,7 +202,6 @@ describe('<SettingsAccessTab />', () => {
             netDaysUntilExpiration: 0,
             subscriptions: [],
           },
-          coupons: [],
           enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.license, SUPPORTED_SUBSIDY_TYPES.license],
         }
         }

@@ -130,7 +130,7 @@ export const useSubsidyRequestConfiguration = ({
 };
 
 /**
- * Fetches overview of subsidy requests for both subscriptions and coupon codes in order to
+ * Fetches overview of subscription license requests in order to
  * determine counts for notification bubbles.
  *
  */
@@ -138,7 +138,6 @@ export const useSubsidyRequestsOverview = (enterpriseId) => {
   const [isLoading, setIsLoading] = useState(false);
   const [subsidyRequestsCounts, setSubsidyRequestsCounts] = useState({
     subscriptionLicenses: 0,
-    couponCodes: 0,
   });
 
   const fetchSubsidyRequestsCounts = useCallback(async () => {
@@ -147,15 +146,10 @@ export const useSubsidyRequestsOverview = (enterpriseId) => {
     }
     setIsLoading(true);
     try {
-      const responses = await Promise.all([
-        EnterpriseAccessApiService.getLicenseRequestOverview(enterpriseId),
-        EnterpriseAccessApiService.getCouponCodeRequestOverview(enterpriseId),
-      ]);
-      const licenseRequestCount = responses[0].data.find(obj => obj.state === 'requested')?.count;
-      const codeRequestCount = responses[1].data.find(obj => obj.state === 'requested')?.count;
+      const response = await EnterpriseAccessApiService.getLicenseRequestOverview(enterpriseId);
+      const licenseRequestCount = response.data.find(obj => obj.state === 'requested')?.count;
       setSubsidyRequestsCounts({
         subscriptionLicenses: licenseRequestCount,
-        couponCodes: codeRequestCount,
       });
     } catch (err) {
       logError(err);
@@ -175,18 +169,10 @@ export const useSubsidyRequestsOverview = (enterpriseId) => {
     }));
   }, []);
 
-  const decrementCouponCodeRequestCount = useCallback(() => {
-    setSubsidyRequestsCounts(prevState => ({
-      ...prevState,
-      couponCodes: prevState.couponCodes - 1,
-    }));
-  }, []);
-
   return {
     isLoading,
     subsidyRequestsCounts,
     refreshsubsidyRequestsCounts: fetchSubsidyRequestsCounts,
     decrementLicenseRequestCount,
-    decrementCouponCodeRequestCount,
   };
 };

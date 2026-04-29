@@ -48,7 +48,6 @@ describe('EnterpriseAppRoutes', () => {
     email: 'test@example.com',
     enterpriseId: 'test-enterprise-id',
     enterpriseName: 'Test Enterprise',
-    enableCodeManagementPage: false,
     enableReportingPage: false,
     enableSubscriptionManagementPage: false,
     enableAnalyticsPage: true,

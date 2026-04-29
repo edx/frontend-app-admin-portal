@@ -114,7 +114,6 @@ export const DEFAULT_STORE_STATE = {
     enterpriseSlug: TEST_ENTERPRISE_CUSTOMER_SLUG,
     enterpriseId: TEST_ENTERPRISE_CUSTOMER_UUID,
     enableSubscriptionManagementScreen: true,
-    enableCodeManagementScreen: true,
   },
 };
 

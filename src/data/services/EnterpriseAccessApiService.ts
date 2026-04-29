@@ -168,39 +168,6 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().post(url, options);
   }
 
-  static approveCouponCodeRequests({
-    enterpriseId,
-    couponCodeRequestUUIDs,
-    couponId,
-  }) {
-    const options = {
-      subsidy_request_uuids: couponCodeRequestUUIDs,
-      coupon_id: couponId,
-      enterprise_customer_uuid: enterpriseId,
-      send_notification: true,
-    };
-
-    const url = `${EnterpriseAccessApiService.baseUrl}/coupon-code-requests/approve/`;
-    return EnterpriseAccessApiService.apiClient().post(url, options);
-  }
-
-  static declineCouponCodeRequests({
-    enterpriseId,
-    subsidyRequestUUIDS,
-    sendNotification,
-    unlinkUsersFromEnterprise,
-  }) {
-    const options = {
-      subsidy_request_uuids: subsidyRequestUUIDS,
-      enterprise_customer_uuid: enterpriseId,
-      send_notification: sendNotification,
-      unlink_users_from_enterprise: unlinkUsersFromEnterprise,
-    };
-
-    const url = `${EnterpriseAccessApiService.baseUrl}/coupon-code-requests/decline/`;
-    return EnterpriseAccessApiService.apiClient().post(url, options);
-  }
-
   static getLicenseRequests(enterpriseId, requestStatusFilters, options = {}) {
     const params = new URLSearchParams({
       enterprise_customer_uuid: enterpriseId,
@@ -219,27 +186,6 @@ class EnterpriseAccessApiService {
       ...options,
     });
     const url = `${EnterpriseAccessApiService.baseUrl}/license-requests/overview/?${params.toString()}`;
-    return EnterpriseAccessApiService.apiClient().get(url);
-  }
-
-  static getCouponCodeRequests(enterpriseId, requestStatusFilters, options = {}) {
-    const params = new URLSearchParams({
-      enterprise_customer_uuid: enterpriseId,
-      ...options,
-    });
-    if (requestStatusFilters?.length > 0) {
-      params.set('state', requestStatusFilters.join(','));
-    }
-    const url = `${EnterpriseAccessApiService.baseUrl}/coupon-code-requests/?${params.toString()}`;
-    return EnterpriseAccessApiService.apiClient().get(url);
-  }
-
-  static getCouponCodeRequestOverview(enterpriseId, options = {}) {
-    const params = new URLSearchParams({
-      enterprise_customer_uuid: enterpriseId,
-      ...options,
-    });
-    const url = `${EnterpriseAccessApiService.baseUrl}/coupon-code-requests/overview/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 

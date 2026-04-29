@@ -32,7 +32,6 @@ export const useSubsidyRequestsContext = ({
     subsidyRequestsCounts,
     refreshsubsidyRequestsCounts,
     decrementLicenseRequestCount,
-    decrementCouponCodeRequestCount,
   } = useSubsidyRequestsOverview(enterpriseId);
 
   const context = useMemo(() => ({
@@ -41,7 +40,6 @@ export const useSubsidyRequestsContext = ({
     subsidyRequestsCounts,
     refreshsubsidyRequestsCounts,
     decrementLicenseRequestCount,
-    decrementCouponCodeRequestCount,
     enterpriseSubsidyTypesForRequests,
     isLoading: isLoadingSubsidyRequestConfiguration || isLoadingSubsidyRequestOverview,
   }), [
@@ -50,7 +48,6 @@ export const useSubsidyRequestsContext = ({
     subsidyRequestsCounts,
     refreshsubsidyRequestsCounts,
     decrementLicenseRequestCount,
-    decrementCouponCodeRequestCount,
     enterpriseSubsidyTypesForRequests,
     isLoadingSubsidyRequestConfiguration,
     isLoadingSubsidyRequestOverview]);

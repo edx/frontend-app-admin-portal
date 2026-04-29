@@ -24,21 +24,16 @@ const basicStore = {
 
 /**
  * Generates Store from `basicStore`
- * @param {portalConfiguration: Object, coupons: Object} Object custom store data
+ * @param {portalConfiguration: Object} Object custom store data
  * @returns {Object} Generated store
  */
 export const generateStore = ({
   portalConfiguration,
-  coupons,
 }) => (mockStore({
   ...basicStore,
   portalConfiguration: {
     ...basicStore.portalConfiguration,
     ...portalConfiguration,
-  },
-  coupons: {
-    loading: false,
-    ...coupons,
   },
 }));
 

@@ -80,7 +80,6 @@ const initialState = {
     enterpriseId: 'test-enterprise-id',
     enterpriseSlug: 'test-enterprise-slug',
     enterpriseName: 'test-enterprise',
-    enableCodeManagementScreen: true,
     enableSubscriptionManagementScreen: true,
     enableAnalyticsScreen: true,
     loading: false,

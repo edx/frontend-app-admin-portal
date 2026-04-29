@@ -70,14 +70,14 @@ const ToursWithContext = ({
   enableInviteAdmins = false,
   EnterpriseSubsidiesContextValue = {
     canManageLearnerCredit,
-    enterpriseSubsidyTypes: [SUBSIDY_TYPES.coupon],
+    enterpriseSubsidyTypes: [SUBSIDY_TYPES.budget],
   },
   subsidyRequestContextValue = {
     subsidyRequestConfiguration: {
       subsidyType,
       subsidyRequestsEnabled,
     },
-    enterpriseSubsidyTypesForRequests: [SUBSIDY_TYPES.coupon],
+    enterpriseSubsidyTypesForRequests: [SUBSIDY_TYPES.budget],
   },
   store = mockStore({
     portalConfiguration: {

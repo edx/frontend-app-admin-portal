@@ -11,7 +11,7 @@ import { BUDGET_TYPES } from '../EnterpriseApp/data/constants';
  * it will also render a single card.
  *
  * @param {Object} budget Represents either:
- *  - Enterprise Offer (ecommerce)
+ *  - Enterprise Offer
  *  - Subsidy (enterprise-subsidy)
  *  - Policy (enterprise-access)
  *

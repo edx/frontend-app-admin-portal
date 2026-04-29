@@ -47,7 +47,6 @@ const defaultProps = {
 const fakeStore = {
   portalConfiguration: {
     enterpriseSlug: fakeSlug,
-    enableCodeManagementScreen: false,
   },
 };
 
