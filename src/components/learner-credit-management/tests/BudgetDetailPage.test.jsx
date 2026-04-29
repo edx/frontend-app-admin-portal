@@ -43,13 +43,10 @@ import {
   mockAssignableSubsidyAccessPolicyWithNoUtilization,
   mockAssignableSubsidyAccessPolicyWithSpendNoAllocations,
   mockAssignableSubsidyAccessPolicyWithSpendNoRedeemed,
-  mockEnterpriseOfferId,
-  mockEnterpriseOfferMetadata, // TODO: remove when ecommerce is decommisioned.
   mockPerLearnerSpendLimitSubsidyAccessPolicy,
   mockPerLearnerSpendLimitSubsidyAccessPolicyWithBnrEnabled,
   mockSpendLimitNoGroupsSubsidyAccessPolicy,
   mockSubsidyAccessPolicyUUID,
-  mockSubsidySummary,
 } from '../data/tests/constants';
 import { getButtonElement, queryClient } from '../../test/testUtils';
 import { useAlgoliaSearch } from '../../algolia-search';
@@ -520,20 +517,6 @@ describe('<BudgetDetailPage />', () => {
         limit: formatPrice(mockPerLearnerSpendLimitSubsidyAccessPolicy.spendLimit / 100),
         allocated: formatPrice(mockPerLearnerSpendLimitSubsidyAccessPolicy.aggregates.amountAllocatedUsd),
         redeemed: formatPrice(mockPerLearnerSpendLimitSubsidyAccessPolicy.aggregates.amountRedeemedUsd),
-      },
-      isLoading: false,
-    },
-    // TODO: remove when ecommerce is decommisioned.
-    {
-      subsidyAccessPolicy: null,
-      subsidySummary: mockSubsidySummary,
-      expected: {
-        displayName: mockEnterpriseOfferMetadata.displayName,
-        spend: formatPrice(mockSubsidySummary.remainingFunds),
-        utilized: formatPrice(mockSubsidySummary.redeemedFunds),
-        limit: formatPrice(mockSubsidySummary.totalFunds),
-        allocated: formatPrice(0),
-        redeemed: formatPrice(mockSubsidySummary.redeemedFunds),
       },
       isLoading: false,
     },
