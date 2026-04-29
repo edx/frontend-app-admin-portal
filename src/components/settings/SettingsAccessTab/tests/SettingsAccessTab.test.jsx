@@ -41,8 +41,6 @@ jest.mock('../../../subsidy-request-management-alerts/NoAvailableLicensesBanner'
   __esModule: true,
   default: jest.fn(() => 'NoAvailableLicensesBanner'),
 }));
-  __esModule: true,
-}));
 jest.mock('../data/hooks', () => ({
   useLearnerCreditBrowseAndRequest: jest.fn(() => ({
     isLoadingPolicies: false,
@@ -132,37 +130,6 @@ describe('<SettingsAccessTab />', () => {
     expect(screen.queryByText('SettingsAccessLinkManagement')).not.toBeInTheDocument();
     expect(screen.getByText('SettingsAccessSubsidyRequestManagement'));
     expect(screen.getByText('disabled'));
-  });
-
-    const subsidyRequestConfigurationContextValue = {
-      subsidyRequestConfiguration: {
-        subsidyRequestsEnabled: true,
-        subsidyType: SUPPORTED_SUBSIDY_TYPES.license,
-      },
-      enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.license],
-    };
-    renderWithRouter(
-      <SettingsAccessTabWrapper
-        subsidyRequestConfigurationContextValue={subsidyRequestConfigurationContextValue}
-        props={{ enableUniversalLink: false, identityProvider: null }}
-      />,
-    );
-  });
-
-    const subsidyRequestConfigurationContextValue = {
-      subsidyRequestConfiguration: {
-        subsidyRequestsEnabled: false,
-        subsidyType: SUPPORTED_SUBSIDY_TYPES.license,
-      },
-      updateSubsidyRequestConfiguration: jest.fn(),
-      enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.license],
-    };
-    renderWithRouter(
-      <SettingsAccessTabWrapper
-        subsidyRequestConfigurationContextValue={subsidyRequestConfigurationContextValue}
-        props={{ enableUniversalLink: false, identityProvider: null }}
-      />,
-    );
   });
 
   it('should render NoAvailableLicensesBanner when subsidy type is SUPPORTED_SUBSIDY_TYPES.license', () => {

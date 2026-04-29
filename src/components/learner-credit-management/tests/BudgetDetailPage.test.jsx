@@ -937,17 +937,6 @@ describe('<BudgetDetailPage />', () => {
   });
 
   it.each([
-    // TODO: remove when ecommerce is decommisioned.
-    {
-      subsidyAccessPolicy: null,
-      budgetId: mockEnterpriseOfferId,
-      expectedUseOfferRedemptionsArgs: [enterpriseUUID, mockEnterpriseOfferId, null],
-    },
-    {
-      subsidyAccessPolicy: null,
-      budgetId: mockEnterpriseOfferId,
-      expectedUseOfferRedemptionsArgs: [enterpriseUUID, mockEnterpriseOfferId, null],
-    },
     {
       subsidyAccessPolicy: mockPerLearnerSpendLimitSubsidyAccessPolicy,
       budgetId: mockSubsidyAccessPolicyUUID,

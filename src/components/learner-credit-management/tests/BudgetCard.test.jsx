@@ -107,7 +107,6 @@ describe('<BudgetCard />', () => {
     expect(results).toHaveNoViolations();
   });
 
-
   it('displays correctly for a scheduled Subsidy (enterprise-subsidy)', () => {
     const mockBudgetAggregates = {
       total: 5000,
@@ -199,7 +198,6 @@ describe('<BudgetCard />', () => {
     const firstElementWithTestId = elementsWithTestId[0];
     expect(firstElementWithTestId).toHaveTextContent(formattedString);
   });
-
 
   it('displays correctly for an expired Subsidy (enterprise-subsidy)', () => {
     const mockBudgetAggregates = {
@@ -304,7 +302,6 @@ describe('<BudgetCard />', () => {
     expect(viewBudgetCTA).toBeInTheDocument();
     expect(viewBudgetCTA).toHaveAttribute('href', `/${enterpriseSlug}/admin/learner-credit/${mockBudgetUuid}`);
   });
-
 
   it('displays correctly for a current Subsidy (enterprise-subsidy)', () => {
     const mockBudgetAggregates = {
