@@ -2,7 +2,6 @@ import { createContext, useMemo } from 'react';
 import { SUBSIDY_TYPES } from '../../data/constants/subsidyTypes';
 import {
   useBillingSubscriptionAvailable,
-  useCoupons,
   useCustomerAgreement,
   useEnterpriseBudgets,
 } from './data/hooks';
@@ -32,11 +31,6 @@ export const useEnterpriseSubsidiesContext = ({
   } = useCustomerAgreement({ enterpriseId });
 
   const {
-    coupons,
-    isLoading: isLoadingCoupons,
-  } = useCoupons();
-
-  const {
     hasBillingSubscription,
     isLoading: isLoadingBillingSubscription,
   } = useBillingSubscriptionAvailable({ enterpriseId });
@@ -48,28 +42,22 @@ export const useEnterpriseSubsidiesContext = ({
       subsidyTypes.push(SUBSIDY_TYPES.budget);
     }
 
-    if (coupons.length > 0) {
-      subsidyTypes.push(SUBSIDY_TYPES.coupon);
-    }
-
     if (customerAgreement?.subscriptions.length > 0) {
       subsidyTypes.push(SUBSIDY_TYPES.license);
     }
     return subsidyTypes;
-  }, [budgets.length, coupons.length, customerAgreement]);
+  }, [budgets.length, customerAgreement]);
 
-  const isLoading = isLoadingBudgets || isLoadingCustomerAgreement || isLoadingCoupons || isLoadingBillingSubscription;
+  const isLoading = isLoadingBudgets || isLoadingCustomerAgreement || isLoadingBillingSubscription;
 
   const context = useMemo(() => ({
     customerAgreement,
-    coupons,
     canManageLearnerCredit,
     enterpriseSubsidyTypes,
     hasBillingSubscription,
     isLoading,
   }), [
     customerAgreement,
-    coupons,
     canManageLearnerCredit,
     enterpriseSubsidyTypes,
     hasBillingSubscription,

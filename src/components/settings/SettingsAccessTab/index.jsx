@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import ContactCustomerSupportButton from '../../ContactCustomerSupportButton';
-import { NoAvailableCodesBanner, NoAvailableLicensesBanner } from '../../subsidy-request-management-alerts';
+import { NoAvailableLicensesBanner } from '../../subsidy-request-management-alerts';
 import SettingsAccessLinkManagement from './SettingsAccessLinkManagement';
 import SettingsAccessSSOManagement from './SettingsAccessSSOManagement';
 import SettingsAccessSubsidyRequestManagement from './SettingsAccessSubsidyRequestManagement';
@@ -35,7 +35,6 @@ const SettingsAccessTab = ({
   const { isLoadingPolicies, hasBnrEnabledPolicy } = useLearnerCreditBrowseAndRequest(enterpriseId);
 
   const {
-    coupons,
     customerAgreement,
   } = useContext(EnterpriseSubsidiesContext);
   const subscriptions = customerAgreement?.subscriptions ?? [];
@@ -47,10 +46,6 @@ const SettingsAccessTab = ({
   const hasActiveAccessChannel = enableUniversalLink || isLearnerPortalSearchEnabled;
   const isUniversalLinkEnabled = enableLearnerPortal;
 
-  const isNoAvailableCodesBannerVisible = (
-    configuredRequestSubsidyType === SUPPORTED_SUBSIDY_TYPES.coupon
-    && subsidyRequestConfiguration?.subsidyRequestsEnabled
-  );
   const isNoAvailableLicensesBannerVisible = (
     configuredRequestSubsidyType === SUPPORTED_SUBSIDY_TYPES.license
     && subsidyRequestConfiguration?.subsidyRequestsEnabled
@@ -85,7 +80,6 @@ const SettingsAccessTab = ({
 
   return (
     <div className="settings-access-tab mt-4">
-      {isNoAvailableCodesBannerVisible && <NoAvailableCodesBanner coupons={coupons} />}
       {isNoAvailableLicensesBannerVisible && <NoAvailableLicensesBanner subscriptions={subscriptions} />}
       <Row>
         <Col>

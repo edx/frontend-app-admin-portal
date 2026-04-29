@@ -7,7 +7,6 @@ import table from './table';
 import csv from './csv';
 import sidebar from './sidebar';
 import licenseRevoke from './licenseRevoke';
-import emailTemplate from './emailTemplate';
 import licenseRemind from './licenseRemind';
 import userSubscription from './userSubscription';
 import dashboardInsights from './dashboardInsights';
@@ -31,7 +30,6 @@ const rootReducer = combineReducers({
   csv,
   sidebar,
   licenseRevoke,
-  emailTemplate,
   licenseRemind,
   userSubscription,
   dashboardInsights,

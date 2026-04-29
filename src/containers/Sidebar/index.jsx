@@ -10,7 +10,6 @@ import {
 const mapStateToProps = state => ({
   isExpanded: state.sidebar.isExpanded,
   isExpandedByToggle: state.sidebar.isExpandedByToggle,
-  enableCodeManagementScreen: state.portalConfiguration.enableCodeManagementScreen,
   enableReportingConfigScreen: state.portalConfiguration.enableReportingConfigScreen,
   enableSubscriptionManagementScreen: state.portalConfiguration.enableSubscriptionManagementScreen,
   enableSamlConfigurationScreen: state.portalConfiguration.enableSamlConfigurationScreen,

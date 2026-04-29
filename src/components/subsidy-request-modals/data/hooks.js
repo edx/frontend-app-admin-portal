@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import dayjs from 'dayjs';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
 import { logError } from '@edx/frontend-platform/logging';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
@@ -69,42 +68,6 @@ export const useApplicableSubscriptions = ({
   return {
     applicableCatalogs,
     applicableSubscriptions,
-    isLoading,
-    error,
-  };
-};
-
-/**
- * This hook returns available coupons that can be applied for the given course runs.
- */
-export const useApplicableCoupons = ({
-  enterpriseId,
-  courseRunIds,
-  coupons,
-}) => {
-  const {
-    applicableCatalogs,
-    isLoading,
-    error,
-  } = useApplicableCatalogs({ enterpriseId, courseRunIds });
-  const [applicableCoupons, setApplicableCoupons] = useState([]);
-
-  useEffect(() => {
-    if (applicableCatalogs.length > 0 && coupons.results.length > 0) {
-      const now = dayjs();
-      const applicableCoups = coupons.results.filter(
-        coupon => applicableCatalogs.includes(
-          coupon.enterpriseCatalogUuid,
-        ) && dayjs(coupon.endDate) > now && coupon.numUnassigned > 0,
-      );
-
-      setApplicableCoupons(applicableCoups);
-    }
-  }, [applicableCatalogs, coupons.results]);
-
-  return {
-    applicableCatalogs,
-    applicableCoupons,
     isLoading,
     error,
   };

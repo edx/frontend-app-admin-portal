@@ -1,5 +1,4 @@
 export const SUPPORTED_SUBSIDY_TYPES = {
-  coupon: 'coupon',
   license: 'license',
   budget: 'budget',
 };

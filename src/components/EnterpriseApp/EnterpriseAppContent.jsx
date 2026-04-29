@@ -9,7 +9,6 @@ const EnterpriseAppContent = ({
   email,
   enterpriseId,
   enterpriseName,
-  enableCodeManagementPage,
   enableReportingPage,
   enableSubscriptionManagementPage,
   enableAnalyticsPage,
@@ -27,7 +26,6 @@ const EnterpriseAppContent = ({
       email={email}
       enterpriseId={enterpriseId}
       enterpriseName={enterpriseName}
-      enableCodeManagementPage={enableCodeManagementPage}
       enableReportingPage={enableReportingPage}
       enableSubscriptionManagementPage={enableSubscriptionManagementPage}
       enableAnalyticsPage={enableAnalyticsPage}
@@ -40,7 +38,6 @@ EnterpriseAppContent.propTypes = {
   email: PropTypes.string.isRequired,
   enterpriseId: PropTypes.string.isRequired,
   enterpriseName: PropTypes.string.isRequired,
-  enableCodeManagementPage: PropTypes.bool.isRequired,
   enableReportingPage: PropTypes.bool.isRequired,
   enableSubscriptionManagementPage: PropTypes.bool.isRequired,
   enableAnalyticsPage: PropTypes.bool.isRequired,

@@ -11,9 +11,8 @@ const useSubsidySummaryAnalyticsApi = (enterpriseUUID, budgetId, budgetSource) =
   const [subsidySummary, setSubsidySummary] = useState();
 
   useEffect(() => {
-    // If there is no budget, or the budget is NOT an ecommerce offer or subsidy, fetch the
-    // subsidy summary data from the analytics API.
-    if (![BUDGET_TYPES.ecommerce, BUDGET_TYPES.subsidy].includes(budgetSource)) {
+    // Only fetch for subsidy-type budgets (not policies, which have their own aggregates)
+    if (budgetSource !== BUDGET_TYPES.subsidy) {
       setIsLoading(false);
       return;
     }

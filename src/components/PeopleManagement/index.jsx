@@ -61,8 +61,7 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
   const { data, isLoading: isGroupsLoading } = useAllFlexEnterpriseGroups(enterpriseId);
 
   const hasLearnerCredit = enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.budget);
-  const hasOtherSubsidyTypes = enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.license)
-    || enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.coupon);
+  const hasOtherSubsidyTypes = enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.license);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isModalOpen, openModal, closeModal] = useToggle(false);

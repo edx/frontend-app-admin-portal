@@ -11,7 +11,6 @@ const mapStateToProps = (state) => {
     adminPortalLearnerProfileViewEnabled: state.portalConfiguration.adminPortalLearnerProfileViewEnabled,
     disableExpiryMessagingForLearnerCredit: state.portalConfiguration.disableExpiryMessagingForLearnerCredit,
     enableAnalyticsScreen: state.portalConfiguration.enableAnalyticsScreen,
-    enableCodeManagementScreen: state.portalConfiguration.enableCodeManagementScreen,
     enableLearnerPortal: state.portalConfiguration.enableLearnerPortal,
     enableLmsConfigurationsScreen: state.portalConfiguration.enableLmsConfigurationsScreen,
     enablePortalLearnerCreditManagementScreen: state.portalConfiguration.enablePortalLearnerCreditManagementScreen,

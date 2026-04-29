@@ -78,7 +78,6 @@ class EnterpriseApp extends React.Component {
     const {
       error,
       enterpriseSlug,
-      enableCodeManagementScreen,
       enableSubscriptionManagementScreen,
       enableAnalyticsScreen,
       enableReportingConfigurationsScreen,
@@ -156,7 +155,6 @@ class EnterpriseApp extends React.Component {
                     email={email}
                     enterpriseId={enterpriseId}
                     enterpriseName={enterpriseName}
-                    enableCodeManagementPage={features.CODE_MANAGEMENT && enableCodeManagementScreen}
                     enableReportingPage={features.REPORTING_CONFIGURATIONS && enableReportingConfigurationsScreen}
                     enableSubscriptionManagementPage={enableSubscriptionManagementScreen}
                     enableAnalyticsPage={features.ANALYTICS && enableAnalyticsScreen}
@@ -183,7 +181,6 @@ EnterpriseApp.defaultProps = {
     tertiary_color: SCHOLAR_THEME.accent,
   },
   error: null,
-  enableCodeManagementScreen: false,
   enableSubscriptionManagementScreen: false,
   enableAnalyticsScreen: false,
   enableReportingConfigurationsScreen: false,
@@ -208,7 +205,6 @@ EnterpriseApp.propTypes = {
     pathname: PropTypes.string,
   }).isRequired,
   toggleSidebarToggle: PropTypes.func.isRequired,
-  enableCodeManagementScreen: PropTypes.bool,
   enableSubscriptionManagementScreen: PropTypes.bool,
   enableAnalyticsScreen: PropTypes.bool,
   enableReportingConfigurationsScreen: PropTypes.bool,

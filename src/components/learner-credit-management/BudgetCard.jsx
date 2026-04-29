@@ -59,22 +59,6 @@ const BudgetCard = ({ original }) => {
     );
   }
 
-  // Enterprise Offers (ecommerce) will always have a single budget, so we can render a single card.
-  if (source === BUDGET_TYPES.ecommerce) {
-    return (
-      <SubBudgetCard
-        id={subsidySummaryAnalyticsApi?.offerId}
-        isLoading={isLoadingSubsidySummaryAnalyticsApi}
-        start={start}
-        end={end}
-        available={subsidySummaryAnalyticsApi?.remainingFunds}
-        spent={subsidySummaryAnalyticsApi?.redeemedFunds}
-        displayName={name}
-        enterpriseSlug={enterpriseSlug}
-      />
-    );
-  }
-
   // We're now dealing with a Subsidy (enterprise-subsidy), but the analytics API isn't aware of any
   // associated budgets; nothing should display.
   if (!subsidySummaryAnalyticsApi?.budgetsSummary) {

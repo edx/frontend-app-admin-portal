@@ -4,8 +4,6 @@ import PropTypes from 'prop-types';
 import { features } from '../../config';
 
 import AdminPageV2 from '../../containers/AdminPageV2';
-import CodeManagementPage from '../CodeManagement';
-import RequestCodesPage from '../RequestCodesPage';
 import ReportingConfig from '../ReportingConfig';
 import NotFoundPage from '../NotFoundPage';
 import LoadingMessage from '../LoadingMessage';
@@ -29,7 +27,6 @@ const EnterpriseAppRoutes = ({
   email,
   enterpriseId,
   enterpriseName,
-  enableCodeManagementPage,
   enableReportingPage,
   enableSubscriptionManagementPage,
   enableAnalyticsPage,
@@ -49,24 +46,6 @@ const EnterpriseAppRoutes = ({
           element={features.ANALYTICS_SUPPORTED ? <AdminPageV2 /> : <FeatureNotSupportedPage />}
         />
       )}
-
-      {enableCodeManagementPage && enterpriseAppPage === ROUTE_NAMES.codeManagement && [
-        <Route
-          key="request-codes"
-          path="/request-codes"
-          element={(
-            <RequestCodesPage
-              emailAddress={email}
-              enterpriseName={enterpriseName}
-            />
-          )}
-        />,
-        <Route
-          key="code-management"
-          path="/*"
-          element={<CodeManagementPage />}
-        />,
-      ]}
 
       {enableReportingPage && enterpriseAppPage === ROUTE_NAMES.reporting && (
         <Route
@@ -176,7 +155,6 @@ EnterpriseAppRoutes.propTypes = {
   email: PropTypes.string.isRequired,
   enterpriseId: PropTypes.string.isRequired,
   enterpriseName: PropTypes.string.isRequired,
-  enableCodeManagementPage: PropTypes.bool.isRequired,
   enableReportingPage: PropTypes.bool.isRequired,
   enableSubscriptionManagementPage: PropTypes.bool.isRequired,
   enableAnalyticsPage: PropTypes.bool.isRequired,
