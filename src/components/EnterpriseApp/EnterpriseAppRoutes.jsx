@@ -24,9 +24,7 @@ import { isBillingEnabled } from '../billing/data/utils';
 import BillingPage from '../billing/BillingPage';
 
 const EnterpriseAppRoutes = ({
-  email,
   enterpriseId,
-  enterpriseName,
   enableReportingPage,
   enableSubscriptionManagementPage,
   enableAnalyticsPage,
@@ -152,9 +150,7 @@ const EnterpriseAppRoutes = ({
 };
 
 EnterpriseAppRoutes.propTypes = {
-  email: PropTypes.string.isRequired,
   enterpriseId: PropTypes.string.isRequired,
-  enterpriseName: PropTypes.string.isRequired,
   enableReportingPage: PropTypes.bool.isRequired,
   enableSubscriptionManagementPage: PropTypes.bool.isRequired,
   enableAnalyticsPage: PropTypes.bool.isRequired,

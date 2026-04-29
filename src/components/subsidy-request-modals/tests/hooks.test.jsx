@@ -1,6 +1,5 @@
-import dayjs from 'dayjs';
 import { renderHook, waitFor } from '@testing-library/react';
-import { useApplicableCatalogs, useApplicableSubscriptions, useApplicableCoupons } from '../data/hooks';
+import { useApplicableCatalogs, useApplicableSubscriptions } from '../data/hooks';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
 
 const TEST_ENTERPRISE_UUID = 'test-enterprise-uuid';
@@ -114,70 +113,5 @@ describe('useApplicableSubscriptions', () => {
       expect(result.current.error).toEqual(error);
     });
     expect(result.current.error).toEqual(error);
-  });
-});
-
-describe('useApplicableCoupons', () => {
-  const couponOrders = {
-    results: [{
-      id: 1,
-      numUnassigned: 1,
-      enterpriseCatalogUuid: TEST_CATALOG_UUID,
-      endDate: dayjs().add(1, 'days').toISOString(),
-      maxUses: 3,
-    },
-    {
-      id: 2,
-      numUnassigned: 1,
-      enterpriseCatalogUuid: 'abc',
-      endDate: dayjs().add(1, 'days').toISOString(),
-      maxUses: 3,
-    },
-    {
-      id: 3,
-      numUnassigned: 3,
-      enterpriseCatalogUuid: TEST_CATALOG_UUID,
-      endDate: dayjs().subtract(1, 'days').toISOString(),
-      maxUses: 3,
-    }],
-  };
-
-  afterEach(() => jest.clearAllMocks());
-
-  it('should return all coupons with a catalog containing the given course runs', async () => {
-    const { result } = renderHook(() => useApplicableCoupons({
-      enterpriseId: TEST_ENTERPRISE_UUID,
-      courseRunIds: TEST_COURSE_RUN_IDS,
-      coupons: couponOrders,
-    }));
-
-    await waitFor(() => {
-      expect(result.current.applicableCoupons).toBeDefined();
-    });
-    expect(EnterpriseCatalogApiService.fetchApplicableCatalogs).toHaveBeenCalledWith(
-      {
-        enterpriseId: TEST_ENTERPRISE_UUID,
-        courseRunIds: TEST_COURSE_RUN_IDS,
-      },
-    );
-
-    const { applicableCoupons } = result.current;
-    expect(applicableCoupons.length).toEqual(1);
-    expect(applicableCoupons[0].id).toEqual(couponOrders.results[0].id);
-  });
-
-  it('should handle errors fetching applicable catalogs', async () => {
-    const error = new Error('something went wrong fetching applicable catalogs');
-    EnterpriseCatalogApiService.fetchApplicableCatalogs.mockRejectedValueOnce(error);
-
-    const { result } = renderHook(() => useApplicableCoupons({
-      enterpriseId: TEST_ENTERPRISE_UUID,
-      courseRunIds: TEST_COURSE_RUN_IDS,
-      coupons: couponOrders,
-    }));
-
-    await waitFor(() => {
-      expect(result.current.error).toEqual(error);
-    });
   });
 });

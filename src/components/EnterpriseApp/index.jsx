@@ -92,7 +92,7 @@ class EnterpriseApp extends React.Component {
     const url = this.props.location.pathname;
     const baseUrl = url.split('/').slice(0, 2).join('/');
     const defaultContentPadding = 10; // 10px for appropriate padding
-    const { isActive, roles, email } = getAuthenticatedUser() || {};
+    const { isActive, roles } = getAuthenticatedUser() || {};
     // checking for undefined tells if if the user's info is hydrated
     const isUserLoadedAndInactive = isActive !== undefined && !isActive;
     const isUserMissingJWTRoles = !roles?.length;
@@ -152,9 +152,7 @@ class EnterpriseApp extends React.Component {
                 >
                   <AdminRolesSurveyBanner />
                   <EnterpriseAppContent
-                    email={email}
                     enterpriseId={enterpriseId}
-                    enterpriseName={enterpriseName}
                     enableReportingPage={features.REPORTING_CONFIGURATIONS && enableReportingConfigurationsScreen}
                     enableSubscriptionManagementPage={enableSubscriptionManagementScreen}
                     enableAnalyticsPage={features.ANALYTICS && enableAnalyticsScreen}

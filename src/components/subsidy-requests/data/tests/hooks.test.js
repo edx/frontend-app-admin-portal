@@ -5,12 +5,10 @@ import {
   useSubsidyRequestConfiguration,
   useSubsidyRequestsOverview,
 } from '../hooks';
-import EcommerceApiService from '../../../../data/services/EcommerceApiService';
 import LicenseManagerApiService from '../../../../data/services/LicenseManagerAPIService';
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
 import { SUPPORTED_SUBSIDY_TYPES } from '../../../../data/constants/subsidyRequests';
 
-jest.mock('../../../../data/services/EcommerceApiService');
 jest.mock('../../../../data/services/LicenseManagerAPIService');
 jest.mock('../../../../data/services/EnterpriseAccessApiService');
 
@@ -94,34 +92,6 @@ describe('useSubsidyRequestConfiguration', () => {
       );
     });
 
-    it('should create a configuration with subsidyType set to null if the enterprise has both subsidy types', async () => {
-      const expectedConfigurationResponse = createSubsidyRequestConfigurationResponse(
-        {
-          subsidyType: null,
-        },
-      );
-
-      EcommerceApiService.fetchCouponOrders.mockResolvedValue({ data: { results: [{ uuid: 'test-coup-uuid' }] } });
-      LicenseManagerApiService.fetchSubscriptions.mockResolvedValue({ data: { results: [{ uuid: 'test-sub-uuid' }] } });
-      EnterpriseAccessApiService.createSubsidyRequestConfiguration.mockResolvedValue(expectedConfigurationResponse);
-
-      const { result } = renderHook(() => useSubsidyRequestConfiguration({
-        enterpriseId: TEST_ENTERPRISE_UUID,
-        enterpriseSubsidyTypesForRequests: [],
-      }));
-
-      await waitFor(() => {
-        expect(EnterpriseAccessApiService.createSubsidyRequestConfiguration).toHaveBeenCalledWith({
-          enterpriseId: TEST_ENTERPRISE_UUID,
-          subsidyType: null,
-        });
-
-        expect(result.current.subsidyRequestConfiguration).toEqual(
-          camelCaseObject(expectedConfigurationResponse.data),
-        );
-      });
-    });
-
     it('should create a configuration with subsidyType set to license if the enterprise has subscriptions', async () => {
       const expectedConfigurationResponse = createSubsidyRequestConfigurationResponse(
         {
@@ -129,7 +99,6 @@ describe('useSubsidyRequestConfiguration', () => {
         },
       );
 
-      EcommerceApiService.fetchCouponOrders.mockResolvedValue({ data: { results: [] } });
       LicenseManagerApiService.fetchSubscriptions.mockResolvedValue({ data: { results: [{ uuid: 'test-sub-uuid' }] } });
       EnterpriseAccessApiService.createSubsidyRequestConfiguration.mockResolvedValue(expectedConfigurationResponse);
 
@@ -150,16 +119,14 @@ describe('useSubsidyRequestConfiguration', () => {
       });
     });
 
-    it('should create a configuration with subsidyType set to license (coupons no longer supported)', async () => {
+    it('should create a configuration with subsidyType null if no subscriptions', async () => {
       const expectedConfigurationResponse = createSubsidyRequestConfigurationResponse(
         {
-          subsidyType: SUPPORTED_SUBSIDY_TYPES.license,
+          subsidyType: null,
         },
       );
 
-      // Coupons are no longer supported - always return empty results
-      EcommerceApiService.fetchCouponOrders.mockResolvedValue({ data: { results: [] } });
-      LicenseManagerApiService.fetchSubscriptions.mockResolvedValue({ data: { results: [{ uuid: 'test-sub-uuid' }] } });
+      LicenseManagerApiService.fetchSubscriptions.mockResolvedValue({ data: { results: [] } });
       EnterpriseAccessApiService.createSubsidyRequestConfiguration.mockResolvedValue(expectedConfigurationResponse);
 
       const { result } = renderHook(() => useSubsidyRequestConfiguration({
@@ -170,7 +137,7 @@ describe('useSubsidyRequestConfiguration', () => {
       await waitFor(() => {
         expect(EnterpriseAccessApiService.createSubsidyRequestConfiguration).toHaveBeenCalledWith({
           enterpriseId: TEST_ENTERPRISE_UUID,
-          subsidyType: SUPPORTED_SUBSIDY_TYPES.license,
+          subsidyType: null,
         });
 
         expect(result.current.subsidyRequestConfiguration).toEqual(
@@ -179,9 +146,9 @@ describe('useSubsidyRequestConfiguration', () => {
       });
     });
 
-    it('should handle errors', async () => {
-      const error = new Error('Error fetching coupon orders');
-      EcommerceApiService.fetchCouponOrders.mockRejectedValue(error);
+    it('should handle errors during configuration creation', async () => {
+      const error = new Error('Error fetching subscriptions');
+      LicenseManagerApiService.fetchSubscriptions.mockRejectedValue(error);
 
       renderHook(() => useSubsidyRequestConfiguration({
         enterpriseId: TEST_ENTERPRISE_UUID,

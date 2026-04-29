@@ -6,9 +6,7 @@ import { EnterpriseAppContext } from './EnterpriseAppContextProvider';
 import EnterpriseAppRoutes from './EnterpriseAppRoutes';
 
 const EnterpriseAppContent = ({
-  email,
   enterpriseId,
-  enterpriseName,
   enableReportingPage,
   enableSubscriptionManagementPage,
   enableAnalyticsPage,
@@ -23,9 +21,7 @@ const EnterpriseAppContent = ({
 
   return (
     <EnterpriseAppRoutes
-      email={email}
       enterpriseId={enterpriseId}
-      enterpriseName={enterpriseName}
       enableReportingPage={enableReportingPage}
       enableSubscriptionManagementPage={enableSubscriptionManagementPage}
       enableAnalyticsPage={enableAnalyticsPage}
@@ -35,9 +31,7 @@ const EnterpriseAppContent = ({
 };
 
 EnterpriseAppContent.propTypes = {
-  email: PropTypes.string.isRequired,
   enterpriseId: PropTypes.string.isRequired,
-  enterpriseName: PropTypes.string.isRequired,
   enableReportingPage: PropTypes.bool.isRequired,
   enableSubscriptionManagementPage: PropTypes.bool.isRequired,
   enableAnalyticsPage: PropTypes.bool.isRequired,
