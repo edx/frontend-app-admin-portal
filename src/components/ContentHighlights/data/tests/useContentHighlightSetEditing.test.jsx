@@ -292,7 +292,7 @@ describe('useContentHighlightSetEditing', () => {
   });
 
   // ─── handleAddContentClick ──────────────────────────────────────────────────
-  it('handleAddContentClick exits edit mode and opens stepper modal', () => {
+  it('handleAddContentClick keeps edit mode and opens stepper modal', () => {
     const { result } = renderEditingHook();
 
     act(() => {
@@ -304,7 +304,7 @@ describe('useContentHighlightSetEditing', () => {
       result.current.handleAddContentClick();
     });
 
-    expect(result.current.isEditing).toBe(false);
+    expect(result.current.isEditing).toBe(true);
     expect(result.current.selectedContentKeys.size).toBe(0);
     expect(mockOpenEditStepperModal).toHaveBeenCalledWith({
       highlightTitle: mockHighlightSet.title,

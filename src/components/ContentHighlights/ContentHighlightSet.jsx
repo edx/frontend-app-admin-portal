@@ -38,14 +38,15 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
     executeRemoveContent,
   } = useContentHighlightSetEditing({ highlightSet, updateHighlightSet, openToast });
 
-  // Refetch data when stepper saves successfully (detected via location state)
+  // Refetch data and exit edit mode when stepper saves successfully (detected via location state)
   useEffect(() => {
     if (location.state?.highlightSetEdited) {
       refetch();
+      handleCancelClick();
       // Replace the state so it doesn't trigger again on re-render
       window.history.replaceState({}, '');
     }
-  }, [location.state, refetch]);
+  }, [location.state, refetch, handleCancelClick]);
 
   return (
     <Container className="mt-5">

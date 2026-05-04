@@ -111,7 +111,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('renders the edit highlight modal with correct title', () => {
     renderWithRouter(<EditHighlightStepperWrapper />);
-    expect(screen.getByText('Edit highlight')).toBeInTheDocument();
+    expect(screen.getByText('Add courses')).toBeInTheDocument();
   });
 
   it('displays select content as the first step', () => {
@@ -181,9 +181,8 @@ describe('<EditHighlightStepper>', () => {
     expect(screen.getByText('Lose Progress?')).toBeInTheDocument();
   });
 
-  it('calls updateHighlightSet with empty payload when no changes', async () => {
-    // All existing keys are still selected, no new keys added
-    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({ data: {} });
+  it('calls setHighlightSetContent with all existing keys when no changes', async () => {
+    EnterpriseCatalogApiService.setHighlightSetContent.mockResolvedValueOnce({ data: {} });
     const user = userEvent.setup();
     renderWithRouter(<EditHighlightStepperWrapper />);
 
@@ -191,20 +190,19 @@ describe('<EditHighlightStepper>', () => {
     await user.click(screen.getByText('Save'));
 
     await waitFor(() => {
-      expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalledWith(
+      expect(EnterpriseCatalogApiService.setHighlightSetContent).toHaveBeenCalledWith(
         'test-highlight-uuid',
-        {},
+        expect.arrayContaining(['HarvardX+CS50W', 'HarvardX+CS50AI', 'HarvardX+CS50P', 'HarvardX+CS50x']),
       );
     });
   });
 
-  it('sends remove_content_keys when existing content is deselected', async () => {
-    // Start with all 4 existing keys but only 2 remain selected
+  it('calls setHighlightSetContent with remaining keys when existing content is deselected', async () => {
     const partialSelectedRowIds = {
       'course:HarvardX+CS50W': true,
       'course:HarvardX+CS50AI': true,
     };
-    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({ data: {} });
+    EnterpriseCatalogApiService.setHighlightSetContent.mockResolvedValueOnce({ data: {} });
     const user = userEvent.setup();
     renderWithRouter(
       <EditHighlightStepperWrapper
@@ -216,23 +214,20 @@ describe('<EditHighlightStepper>', () => {
     await user.click(screen.getByText('Save'));
 
     await waitFor(() => {
-      expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalledWith(
+      expect(EnterpriseCatalogApiService.setHighlightSetContent).toHaveBeenCalledWith(
         'test-highlight-uuid',
-        {
-          remove_content_keys: expect.arrayContaining(['HarvardX+CS50P', 'HarvardX+CS50x']),
-        },
+        expect.arrayContaining(['HarvardX+CS50W', 'HarvardX+CS50AI']),
       );
     });
   });
 
-  it('sends both add_content_keys and remove_content_keys when content is added and removed', async () => {
-    // Existing: all 4, selected: 2 existing + 1 new
+  it('calls setHighlightSetContent with full final list when content is added and removed', async () => {
     const mixedSelectedRowIds = {
       'course:HarvardX+CS50W': true,
       'course:HarvardX+CS50AI': true,
       'course:MITx+NewCourse': true,
     };
-    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({ data: {} });
+    EnterpriseCatalogApiService.setHighlightSetContent.mockResolvedValueOnce({ data: {} });
     const user = userEvent.setup();
     renderWithRouter(
       <EditHighlightStepperWrapper
@@ -244,19 +239,16 @@ describe('<EditHighlightStepper>', () => {
     await user.click(screen.getByText('Save'));
 
     await waitFor(() => {
-      expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalledWith(
+      expect(EnterpriseCatalogApiService.setHighlightSetContent).toHaveBeenCalledWith(
         'test-highlight-uuid',
-        {
-          add_content_keys: ['MITx+NewCourse'],
-          remove_content_keys: expect.arrayContaining(['HarvardX+CS50P', 'HarvardX+CS50x']),
-        },
+        expect.arrayContaining(['HarvardX+CS50W', 'HarvardX+CS50AI', 'MITx+NewCourse']),
       );
     });
   });
 
   it('does not render when isOpen is false', () => {
     renderWithRouter(<EditHighlightStepperWrapper isOpen={false} />);
-    expect(screen.queryByText('Edit highlight')).not.toBeInTheDocument();
+    expect(screen.queryByText('Add courses')).not.toBeInTheDocument();
   });
 
   it('shows edit-specific subtitle text with highlight name', () => {

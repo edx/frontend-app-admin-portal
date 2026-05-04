@@ -89,6 +89,13 @@ class EnterpriseCatalogApiService {
     );
   }
 
+  static setHighlightSetContent(highlightSetUUID, contentKeys) {
+    return EnterpriseCatalogApiService.apiClient().post(
+      `${EnterpriseCatalogApiService.highlightSetUrl}${highlightSetUUID}/set-content/`,
+      { content_keys: contentKeys },
+    );
+  }
+
   static deleteHighlightSet(highlightSetUUID) {
     return EnterpriseCatalogApiService.apiClient().delete(`${EnterpriseCatalogApiService.highlightSetUrl}${highlightSetUUID}/`);
   }

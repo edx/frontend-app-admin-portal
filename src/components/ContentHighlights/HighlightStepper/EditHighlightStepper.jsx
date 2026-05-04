@@ -48,11 +48,6 @@ const EditHighlightStepper = ({ enterpriseId }) => {
     ContentHighlightsContext,
     v => v[0].stepperModal.currentSelectedRowIds,
   );
-  const existingContentKeys = useContextSelector(
-    ContentHighlightsContext,
-    v => v[0].stepperModal.existingContentKeys,
-  );
-  // Removed unused highlightTitle variable
 
   const closeStepperModal = useCallback(() => {
     if (isCloseAlertOpen) {
@@ -65,27 +60,8 @@ const EditHighlightStepper = ({ enterpriseId }) => {
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Determine selected aggregation keys
-      const selectedKeys = Object.keys(currentSelectedRowIds);
-      // New selections = keys not in existingContentKeys
-      const newKeys = selectedKeys
-        .filter(k => !existingContentKeys.includes(k))
-        .map(key => key.split(':')[1]);
-      // Removed existing content = existingContentKeys not in selectedKeys
-      const removedKeys = existingContentKeys
-        .filter(k => !selectedKeys.includes(k))
-        .map(key => key.split(':')[1]);
-
-      const payload = {};
-      if (newKeys.length > 0) {
-        payload.add_content_keys = newKeys;
-      }
-      if (removedKeys.length > 0) {
-        payload.remove_content_keys = removedKeys;
-      }
-
-      await EnterpriseCatalogApiService.updateHighlightSet(highlightSetUuid, payload);
-
+      const contentKeys = Object.keys(currentSelectedRowIds).map(key => key.split(':')[1]);
+      await EnterpriseCatalogApiService.setHighlightSetContent(highlightSetUuid, contentKeys);
       navigate(location.pathname, {
         state: { highlightSetEdited: true },
       });
@@ -131,7 +107,7 @@ const EditHighlightStepper = ({ enterpriseId }) => {
     <>
       <Stepper activeKey={currentStep}>
         <FullscreenModal
-          title="Edit highlight"
+          title="Add courses"
           className="stepper-modal bg-light-200"
           isOpen={isStepperModalOpen}
           onClose={openCloseConfirmationModal}
