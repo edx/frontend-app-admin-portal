@@ -214,11 +214,11 @@ describe('<EditHighlightStepper>', () => {
     await user.click(screen.getByText('Save'));
 
     await waitFor(() => {
-      expect(EnterpriseCatalogApiService.setHighlightSetContent).toHaveBeenCalledWith(
-        'test-highlight-uuid',
-        expect.arrayContaining(['HarvardX+CS50W', 'HarvardX+CS50AI']),
-      );
+      expect(EnterpriseCatalogApiService.setHighlightSetContent).toHaveBeenCalledTimes(1);
     });
+    const [calledUuid, calledKeys] = EnterpriseCatalogApiService.setHighlightSetContent.mock.calls[0];
+    expect(calledUuid).toBe('test-highlight-uuid');
+    expect([...calledKeys].sort()).toEqual(['HarvardX+CS50AI', 'HarvardX+CS50W']);
   });
 
   it('calls setHighlightSetContent with full final list when content is added and removed', async () => {
@@ -239,11 +239,11 @@ describe('<EditHighlightStepper>', () => {
     await user.click(screen.getByText('Save'));
 
     await waitFor(() => {
-      expect(EnterpriseCatalogApiService.setHighlightSetContent).toHaveBeenCalledWith(
-        'test-highlight-uuid',
-        expect.arrayContaining(['HarvardX+CS50W', 'HarvardX+CS50AI', 'MITx+NewCourse']),
-      );
+      expect(EnterpriseCatalogApiService.setHighlightSetContent).toHaveBeenCalledTimes(1);
     });
+    const [calledUuid, calledKeys] = EnterpriseCatalogApiService.setHighlightSetContent.mock.calls[0];
+    expect(calledUuid).toBe('test-highlight-uuid');
+    expect([...calledKeys].sort()).toEqual(['HarvardX+CS50AI', 'HarvardX+CS50W', 'MITx+NewCourse']);
   });
 
   it('does not render when isOpen is false', () => {
