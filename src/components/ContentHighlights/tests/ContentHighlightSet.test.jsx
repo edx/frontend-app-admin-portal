@@ -366,6 +366,43 @@ describe('<ContentHighlightSet>', () => {
         });
       });
     });
+
+    it('refetches and exits edit mode when location.state.highlightSetEdited is set', async () => {
+      EnterpriseCatalogApiService.fetchHighlightSet
+        .mockResolvedValueOnce({ data: mockHighlightSetWithFeatured })
+        .mockResolvedValueOnce({ data: mockHighlightSetWithFeatured });
+
+      const contextValue = [initialContextState, jest.fn()];
+      render(
+        <IntlProvider locale="en">
+          <EnterpriseAppContext.Provider value={initialEnterpriseAppContextValue}>
+            <ContentHighlightsContext.Provider value={contextValue}>
+              <Provider store={mockStore(initialState)}>
+                <MemoryRouter initialEntries={[{
+                  pathname: `/test-enterprise/admin/${ROUTE_NAMES.contentHighlights}/${highlightSetUUID}`,
+                  state: { highlightSetEdited: true },
+                }]}
+                >
+                  <Routes>
+                    <Route
+                      path={`/:enterpriseSlug/admin/${ROUTE_NAMES.contentHighlights}/:highlightSetUUID`}
+                      element={<ContentHighlightSet />}
+                    />
+                  </Routes>
+                </MemoryRouter>
+              </Provider>
+            </ContentHighlightsContext.Provider>
+          </EnterpriseAppContext.Provider>
+        </IntlProvider>,
+      );
+
+      await waitFor(() => {
+        expect(EnterpriseCatalogApiService.fetchHighlightSet).toHaveBeenCalledTimes(2);
+      });
+      // After save, the page is in non-edit mode → "Edit content" CTA is visible, not "Add content"
+      expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
+      expect(screen.queryByTestId('add-content-button')).not.toBeInTheDocument();
+    });
   });
 });
 

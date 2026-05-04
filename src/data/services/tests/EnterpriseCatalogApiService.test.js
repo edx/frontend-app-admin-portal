@@ -12,6 +12,7 @@ axiosMock.onAny().reply(200);
 axios.get = jest.fn();
 axios.delete = jest.fn();
 axios.patch = jest.fn();
+axios.post = jest.fn();
 const enterpriseCatalogBaseUrl = `${process.env.ENTERPRISE_CATALOG_BASE_URL}/api/v1`;
 
 const mockHighlightSetUUID = 'test-highlight-set-uuid';
@@ -43,6 +44,14 @@ describe('EnterpriseCatalogApiService', () => {
     expect(axios.patch).toBeCalledWith(
       `${enterpriseCatalogBaseUrl}/highlight-sets-admin/${mockHighlightSetUUID}/`,
       expect.any(Object),
+    );
+  });
+  test('setHighlightSetContent POSTs the full content_keys list to /set-content/', () => {
+    const contentKeys = ['edX+Course1', 'edX+Course2', 'edX+Course3'];
+    EnterpriseCatalogApiService.setHighlightSetContent(mockHighlightSetUUID, contentKeys);
+    expect(axios.post).toBeCalledWith(
+      `${enterpriseCatalogBaseUrl}/highlight-sets-admin/${mockHighlightSetUUID}/set-content/`,
+      { content_keys: contentKeys },
     );
   });
 });
