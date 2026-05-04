@@ -313,6 +313,25 @@ describe('useContentHighlightSetEditing', () => {
     });
   });
 
+  it('handleAddContentClick preserves in-progress selectedContentKeys', () => {
+    const { result } = renderEditingHook();
+
+    act(() => {
+      result.current.handleEditClick();
+      result.current.handleToggleSelect('edX+Course1');
+      result.current.handleToggleSelect('edX+Course2');
+    });
+    expect(result.current.selectedContentKeys.size).toBe(2);
+
+    act(() => {
+      result.current.handleAddContentClick();
+    });
+
+    expect(result.current.isEditing).toBe(true);
+    expect(result.current.selectedContentKeys.has('edX+Course1')).toBe(true);
+    expect(result.current.selectedContentKeys.has('edX+Course2')).toBe(true);
+  });
+
   it('handleAddContentClick passes empty array when highlightedContent is null', () => {
     const { result } = renderEditingHook({
       title: 'Empty Highlight',

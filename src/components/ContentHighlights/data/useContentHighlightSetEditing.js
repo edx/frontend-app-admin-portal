@@ -89,7 +89,6 @@ const useContentHighlightSetEditing = ({ highlightSet, updateHighlightSet, openT
   }, [selectedFeaturedItems, executeRemoveContent]);
 
   const handleAddContentClick = useCallback(() => {
-    setSelectedContentKeys(new Set());
     openEditStepperModal({
       highlightTitle: highlightSet?.title,
       highlightSetUuid: highlightSetUUID,
