@@ -85,10 +85,18 @@ const EnrollmentsTable = () => {
     },
     {
       label: intl.formatMessage({
-        id: 'adminPortal.enrollmentsTable.passedDate',
-        defaultMessage: 'Passed Date',
+        id: 'adminPortal.enrollmentsTable.courseProgress',
+        defaultMessage: 'Course Progress',
       }),
-      key: 'passed_date',
+      key: 'course_progress',
+      columnSortable: true,
+    },
+    {
+      label: intl.formatMessage({
+        id: 'adminPortal.enrollmentsTable.coursePassingGrade',
+        defaultMessage: 'Course Passing Grade',
+      }),
+      key: 'course_passing_grade',
       columnSortable: true,
     },
     {
@@ -97,14 +105,6 @@ const EnrollmentsTable = () => {
         defaultMessage: 'Current Grade',
       }),
       key: 'current_grade',
-      columnSortable: true,
-    },
-    {
-      label: intl.formatMessage({
-        id: 'adminPortal.enrollmentsTable.progressStatus',
-        defaultMessage: 'Progress Status',
-      }),
-      key: 'progress_status',
       columnSortable: true,
     },
     {
@@ -133,6 +133,8 @@ const EnrollmentsTable = () => {
     progress_status: i18nFormatProgressStatus({ intl, progressStatus: enrollment.progress_status }),
     course_list_price: enrollment.course_list_price ? `$${enrollment.course_list_price}` : '',
     current_grade: formatPercentage({ decimal: enrollment.current_grade }),
+    course_progress: formatPercentage({ decimal: enrollment.course_progress }),
+    course_passing_grade: formatPercentage({ decimal: enrollment.course_passing_grade }),
   }));
 
   return (
