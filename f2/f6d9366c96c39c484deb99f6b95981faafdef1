@@ -1,0 +1,24 @@
+src/components/UserActivationPage/index.jsx
+  s_a18bf3d0a19f67::t_24f48e28100acf 28-34,36-38,41
+  s_a18bf3d0a19f67::t_30cf992f4b51f1 17,23-27,35,42
+  s_a18bf3d0a19f67::t_5cc59f882cdc61 21
+src/components/UserActivationPage/UserActivationPage.test.jsx
+  s_a18bf3d0a19f67::t_a75079b618f75a 85,89,92-95
+  s_a18bf3d0a19f67::t_33d99bbf909348 98,105-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "f2f6d9366c96c39c484deb99f6b95981faafdef1",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}
