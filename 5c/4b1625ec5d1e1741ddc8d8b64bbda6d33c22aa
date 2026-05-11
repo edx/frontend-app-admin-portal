@@ -1,0 +1,24 @@
+src/components/AdminRegisterPage/AdminRegisterPage.test.jsx
+  s_a18bf3d0a19f67::t_386fbb2689ed5e 94,101
+  s_a18bf3d0a19f67::t_f3471bc176edb8 7-9
+  s_a18bf3d0a19f67::t_3f5444172ceba5 114,124
+  s_a18bf3d0a19f67::t_da660c188b825b 18-21
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_3f3750f405dd7e 44-46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "5c4b1625ec5d1e1741ddc8d8b64bbda6d33c22aa",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}
