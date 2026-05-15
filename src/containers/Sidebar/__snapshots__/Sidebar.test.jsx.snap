@@ -65,48 +65,6 @@ exports[`<Sidebar /> renders correctly 1`] = `
       >
         <a
           className="nav-link text-left rounded-0 d-flex align-items-center"
-          href="/test-enterprise-slug/admin/coupons"
-          onClick={[Function]}
-        >
-          <div
-            className="position-relative d-flex align-items-center"
-          >
-            <span
-              className="d-flex align-items-center"
-            >
-              <span
-                className="pgn__icon"
-              >
-                <svg
-                  aria-hidden={true}
-                  fill="none"
-                  focusable={false}
-                  height={24}
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width={24}
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M22.83 12.99 11.83 2H2v9.83l10.99 10.99 9.84-9.83ZM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-            </span>
-            <span
-              className="sr-only"
-            >
-              Code Management
-            </span>
-          </div>
-        </a>
-      </li>
-      <li
-        className="nav-item"
-      >
-        <a
-          className="nav-link text-left rounded-0 d-flex align-items-center"
           href="/test-enterprise-slug/admin/subscriptions"
           id="subscriptions-sidebar"
           onClick={[Function]}
@@ -536,46 +494,6 @@ exports[`<Sidebar /> renders correctly when expanded 1`] = `
       >
         <a
           className="nav-link text-left rounded-0 d-flex align-items-center"
-          href="/test-enterprise-slug/admin/coupons"
-          onClick={[Function]}
-        >
-          <div
-            className="position-relative d-flex align-items-center"
-          >
-            <span
-              className="d-flex align-items-center"
-            >
-              <span
-                className="pgn__icon mr-2"
-              >
-                <svg
-                  aria-hidden={true}
-                  fill="none"
-                  focusable={false}
-                  height={24}
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width={24}
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M22.83 12.99 11.83 2H2v9.83l10.99 10.99 9.84-9.83ZM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-            </span>
-            <span>
-              Code Management
-            </span>
-          </div>
-        </a>
-      </li>
-      <li
-        className="nav-item"
-      >
-        <a
-          className="nav-link text-left rounded-0 d-flex align-items-center"
           href="/test-enterprise-slug/admin/subscriptions"
           id="subscriptions-sidebar"
           onClick={[Function]}
@@ -794,46 +712,6 @@ exports[`<Sidebar /> renders correctly when expanded by toggle 1`] = `
             </span>
             <span>
               Learner Progress Report
-            </span>
-          </div>
-        </a>
-      </li>
-      <li
-        className="nav-item"
-      >
-        <a
-          className="nav-link text-left rounded-0 d-flex align-items-center"
-          href="/test-enterprise-slug/admin/coupons"
-          onClick={[Function]}
-        >
-          <div
-            className="position-relative d-flex align-items-center"
-          >
-            <span
-              className="d-flex align-items-center"
-            >
-              <span
-                className="pgn__icon mr-2"
-              >
-                <svg
-                  aria-hidden={true}
-                  fill="none"
-                  focusable={false}
-                  height={24}
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width={24}
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M22.83 12.99 11.83 2H2v9.83l10.99 10.99 9.84-9.83ZM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-            </span>
-            <span>
-              Code Management
             </span>
           </div>
         </a>

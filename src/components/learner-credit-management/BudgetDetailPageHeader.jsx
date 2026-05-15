@@ -6,7 +6,6 @@ import {
 import {
   useBudgetId,
   useSubsidyAccessPolicy,
-  useEnterpriseOffer,
 } from './data';
 
 import BudgetDetailPageBreadcrumbs from './BudgetDetailPageBreadcrumbs';
@@ -14,14 +13,10 @@ import BudgetOverviewContent from './BudgetOverviewContent';
 import BudgetExpiryAlertAndModal from '../BudgetExpiryAlertAndModal';
 
 const BudgetDetailPageHeader = () => {
-  const { subsidyAccessPolicyId, enterpriseOfferId } = useBudgetId();
-
-  // Fetch enterprise offer with graceful error handling
-  const { data: enterpriseOfferMetadata } = useEnterpriseOffer(enterpriseOfferId);
+  const { subsidyAccessPolicyId } = useBudgetId();
   const { data: subsidyAccessPolicy } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
 
-  // Use enterprise offer display name if available, fall back to subsidy access policy, then 'Overview'
-  const displayName = subsidyAccessPolicy?.displayName || enterpriseOfferMetadata?.displayName || 'Overview';
+  const displayName = subsidyAccessPolicy?.displayName || 'Overview';
 
   return (
     <Stack gap={2}>

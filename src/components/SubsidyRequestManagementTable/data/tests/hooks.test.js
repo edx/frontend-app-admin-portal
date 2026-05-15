@@ -13,11 +13,11 @@ const TEST_ENTERPRISE_UUID = 'test-enterprise-uuid';
 const TEST_LICENSE_REQUEST = {
   uuid: 'test-license-request-uuid',
 };
-const TEST_COUPON_CODE_REQUEST_1 = {
-  uuid: 'test-coupon-code-request-uuid',
+const TEST_LICENSE_REQUEST_1 = {
+  uuid: 'test-license-request-1-uuid',
 };
-const TEST_COUPON_CODE_REQUEST_2 = {
-  uuid: 'test-coupon-code-request-2-uuid',
+const TEST_LICENSE_REQUEST_2 = {
+  uuid: 'test-license-request-2-uuid',
 };
 
 jest.mock('../../../../data/services/DiscoveryApiService');
@@ -63,23 +63,23 @@ describe('useSubsidyRequests', () => {
       expect(requests.requests[0]).toEqual({ ...TEST_LICENSE_REQUEST });
     });
 
-    it('should fetch overview and requests for coupons', async () => {
-      EnterpriseAccessApiService.getCouponCodeRequestOverview.mockResolvedValue({
+    it('should fetch overview and requests for licenses', async () => {
+      EnterpriseAccessApiService.getLicenseRequestOverview.mockResolvedValue({
         data: [{
           state: SUBSIDY_REQUEST_STATUS.APPROVED,
           count: 2,
         }],
       });
-      EnterpriseAccessApiService.getCouponCodeRequests.mockResolvedValue({
+      EnterpriseAccessApiService.getLicenseRequests.mockResolvedValue({
         data: {
-          results: [TEST_COUPON_CODE_REQUEST_1, TEST_COUPON_CODE_REQUEST_2],
+          results: [TEST_LICENSE_REQUEST_1, TEST_LICENSE_REQUEST_2],
           numPages: 1,
           count: 2,
         },
       });
       const { result } = renderHook(() => useSubsidyRequests(
         TEST_ENTERPRISE_UUID,
-        SUPPORTED_SUBSIDY_TYPES.coupon,
+        SUPPORTED_SUBSIDY_TYPES.license,
       ));
 
       const { handleFetchRequests } = result.current;
@@ -90,43 +90,43 @@ describe('useSubsidyRequests', () => {
       });
 
       await waitFor(() => {
-        expect(EnterpriseAccessApiService.getCouponCodeRequestOverview).toHaveBeenCalled();
-        expect(EnterpriseAccessApiService.getCouponCodeRequests).toHaveBeenCalled();
+        expect(EnterpriseAccessApiService.getLicenseRequestOverview).toHaveBeenCalled();
+        expect(EnterpriseAccessApiService.getLicenseRequests).toHaveBeenCalled();
       });
 
       const { requests, requestsOverview } = result.current;
       expect(requestsOverview.find(overview => overview.value === SUBSIDY_REQUEST_STATUS.APPROVED).number).toEqual(2);
-      expect(requests.requests[0]).toEqual(TEST_COUPON_CODE_REQUEST_1);
-      expect(requests.requests[1]).toEqual(TEST_COUPON_CODE_REQUEST_2);
+      expect(requests.requests[0]).toEqual(TEST_LICENSE_REQUEST_1);
+      expect(requests.requests[1]).toEqual(TEST_LICENSE_REQUEST_2);
     });
   });
 
   describe('updateRequestStatus', () => {
     it('should update request status', async () => {
-      const mockCouponCodeRequests = [{
+      const mockLicenseRequests = [{
         state: 'requested',
-        ...TEST_COUPON_CODE_REQUEST_1,
+        ...TEST_LICENSE_REQUEST_1,
       }, {
-        ...TEST_COUPON_CODE_REQUEST_2,
+        ...TEST_LICENSE_REQUEST_2,
         state: 'requested',
       }];
 
-      EnterpriseAccessApiService.getCouponCodeRequestOverview.mockResolvedValue({
+      EnterpriseAccessApiService.getLicenseRequestOverview.mockResolvedValue({
         data: [{
           state: SUBSIDY_REQUEST_STATUS.REQUESTED,
           count: 2,
         }],
       });
-      EnterpriseAccessApiService.getCouponCodeRequests.mockResolvedValue({
+      EnterpriseAccessApiService.getLicenseRequests.mockResolvedValue({
         data: {
-          results: mockCouponCodeRequests,
+          results: mockLicenseRequests,
           numPages: 1,
           count: 2,
         },
       });
       const { result } = renderHook(() => useSubsidyRequests(
         TEST_ENTERPRISE_UUID,
-        SUPPORTED_SUBSIDY_TYPES.coupon,
+        SUPPORTED_SUBSIDY_TYPES.license,
       ));
 
       const { handleFetchRequests } = result.current;
@@ -137,14 +137,14 @@ describe('useSubsidyRequests', () => {
       });
 
       await waitFor(() => {
-        expect(EnterpriseAccessApiService.getCouponCodeRequestOverview).toHaveBeenCalled();
-        expect(EnterpriseAccessApiService.getCouponCodeRequests).toHaveBeenCalled();
+        expect(EnterpriseAccessApiService.getLicenseRequestOverview).toHaveBeenCalled();
+        expect(EnterpriseAccessApiService.getLicenseRequests).toHaveBeenCalled();
       });
 
       const { requests, requestsOverview, updateRequestStatus } = result.current;
 
       await waitFor(() => {
-        expect(requests.requests[0].uuid).toEqual(TEST_COUPON_CODE_REQUEST_1.uuid);
+        expect(requests.requests[0].uuid).toEqual(TEST_LICENSE_REQUEST_1.uuid);
         expect(requests.requests[0].requestStatus).toEqual(SUBSIDY_REQUEST_STATUS.REQUESTED);
         expect(requestsOverview.find(
           overview => overview.value === SUBSIDY_REQUEST_STATUS.REQUESTED,
@@ -155,7 +155,7 @@ describe('useSubsidyRequests', () => {
       });
 
       act(() => updateRequestStatus({
-        request: { ...mockCouponCodeRequests[0], requestStatus: SUBSIDY_REQUEST_STATUS.REQUESTED },
+        request: { ...mockLicenseRequests[0], requestStatus: SUBSIDY_REQUEST_STATUS.REQUESTED },
         newStatus: SUBSIDY_REQUEST_STATUS.APPROVED,
       }));
 

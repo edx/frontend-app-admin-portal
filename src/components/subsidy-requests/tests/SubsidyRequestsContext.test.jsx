@@ -13,7 +13,7 @@ describe('useSubsidyRequestsContext', () => {
       uuid: 'uuid',
     };
 
-    const mockSubsidyRequestsCounts = { subscriptionLicenses: 5, couponCodes: undefined };
+    const mockSubsidyRequestsCounts = { subscriptionLicenses: 5 };
 
     hooks.useSubsidyRequestConfiguration.mockReturnValue({
       subsidyRequestConfiguration: mockSubsidyRequestConfiguration,
@@ -26,7 +26,6 @@ describe('useSubsidyRequestsContext', () => {
       subsidyRequestsCounts: mockSubsidyRequestsCounts,
       refreshsubsidyRequestsCounts: noop,
       decrementLicenseRequestCount: noop,
-      decrementCouponCodeRequestCount: noop,
     });
 
     const { result } = renderHook(

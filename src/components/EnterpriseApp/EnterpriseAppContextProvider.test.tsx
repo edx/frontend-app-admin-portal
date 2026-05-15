@@ -62,7 +62,6 @@ describe('<EnterpriseAppContextProvider />', () => {
       isLoading: isLoadingEnterpriseSubsidies,
       customerAgreement: undefined,
       canManageLearnerCredit: false,
-      coupons: [],
       enterpriseSubsidyTypes: [],
       hasBillingSubscription: false,
       isLoadingCustomerAgreement: false,
@@ -74,12 +73,10 @@ describe('<EnterpriseAppContextProvider />', () => {
         subsidyRequestConfiguration: {
           enterpriseSubsidyTypes: [],
         },
-        decrementCouponCodeRequestCount: jest.fn(),
         decrementLicenseRequestCount: jest.fn(),
         enterpriseSubsidyTypesForRequests: [],
         refreshsubsidyRequestsCounts: jest.fn(),
         subsidyRequestsCounts: {
-          couponCodes: 0,
           subscriptionLicenses: 0,
         },
       },

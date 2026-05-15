@@ -17,7 +17,6 @@ const enterpriseAccessBaseUrl = `${process.env.ENTERPRISE_ACCESS_BASE_URL}`;
 const mockEnterpriseUUID = 'test-enterprise-id';
 const mockPolicyId = 'test-policy-id';
 const mockLicenseRequestUUID = 'test-license-request-uuid';
-const mockCouponCodeRequestUUID = 'test-coupon-code-request-uuid';
 const mockAssignmentConfigurationUUID = 'test-assignment-configuration-uuid';
 const mockSubsidyAccessPolicyUUID = 'test-subsidy-access-policy-uuid';
 const mockSubscriptionPlanUUID = 'test-subscription-plan-uuid';
@@ -66,44 +65,6 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
-  test('approveCouponCodeRequests calls enterprise-access to approve requests', () => {
-    EnterpriseAccessApiService.approveCouponCodeRequests({
-      enterpriseId: mockEnterpriseUUID,
-      couponCodeRequestUUIDs: [mockCouponCodeRequestUUID],
-      couponId: 'test-coupon-id',
-    });
-    expect(axios.post).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/coupon-code-requests/approve/`, {
-      enterprise_customer_uuid: 'test-enterprise-id',
-      send_notification: true,
-      coupon_id: 'test-coupon-id',
-      subsidy_request_uuids: [mockCouponCodeRequestUUID],
-    });
-  });
-
-  test('declineCouponCodeRequests calls enterprise-access to decline requests', () => {
-    EnterpriseAccessApiService.declineCouponCodeRequests({
-      enterpriseId: mockEnterpriseUUID,
-      subsidyRequestUUIDS: [mockCouponCodeRequestUUID],
-      sendNotification: true,
-      unlinkUsersFromEnterprise: true,
-    });
-    expect(axios.post).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/coupon-code-requests/decline/`, {
-      subsidy_request_uuids: [mockCouponCodeRequestUUID],
-      enterprise_customer_uuid: mockEnterpriseUUID,
-      send_notification: true,
-      unlink_users_from_enterprise: true,
-    });
-  });
-
-  test('getCouponCodeRequestOverview calls enterprise-access to fetch coupon code requests overview', () => {
-    EnterpriseAccessApiService.getCouponCodeRequestOverview(mockEnterpriseUUID, {
-      search: 'edx',
-    });
-    expect(axios.get).toBeCalledWith(
-      `${enterpriseAccessBaseUrl}/api/v1/coupon-code-requests/overview/?enterprise_customer_uuid=${mockEnterpriseUUID}&search=edx`,
-    );
-  });
-
   test('getSubsidyRequestConfiguration calls enterprise-access to fetch subsidy request configuration', () => {
     EnterpriseAccessApiService.getSubsidyRequestConfiguration({ enterpriseId: mockEnterpriseUUID });
     expect(axios.get).toBeCalledWith(
@@ -128,12 +89,12 @@ describe('EnterpriseAccessApiService', () => {
       mockEnterpriseUUID,
       {
         subsidy_requests_enabled: true,
-        subsidy_type: SUPPORTED_SUBSIDY_TYPES.coupon,
+        subsidy_type: SUPPORTED_SUBSIDY_TYPES.license,
       },
     );
     expect(axios.patch).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/customer-configurations/${mockEnterpriseUUID}/`, {
       subsidy_requests_enabled: true,
-      subsidy_type: SUPPORTED_SUBSIDY_TYPES.coupon,
+      subsidy_type: SUPPORTED_SUBSIDY_TYPES.license,
     });
   });
 

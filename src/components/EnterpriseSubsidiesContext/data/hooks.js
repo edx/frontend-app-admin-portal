@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import { logError } from '@edx/frontend-platform/logging';
@@ -7,7 +7,6 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { useQuery } from '@tanstack/react-query';
 import { useIntl } from '@edx/frontend-platform/i18n';
 
-import EcommerceApiService from '../../../data/services/EcommerceApiService';
 import LicenseManagerApiService from '../../../data/services/LicenseManagerAPIService';
 import { BUDGET_TYPES } from '../../EnterpriseApp/data/constants';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
@@ -32,41 +31,25 @@ async function fetchEnterpriseBudgets({
     };
   }
 
-  // Call the appropriate API based on the feature flag
-  // Fetch subsidy access policies (top-down learner credit management is enabled by default)
+  // Fetch subsidy access policies
   const budgetPromisesToFulfill = [
-    undefined,
     EnterpriseAccessApiService.listSubsidyAccessPolicies(enterpriseId),
   ];
-  // Attempt to fetch enterprise offers with graceful error handling
-  budgetPromisesToFulfill.unshift(EcommerceApiService.fetchEnterpriseOffers());
 
   // Attempt to resolve all promises
   const [
-    ecommerceApiResponse,
-    enterpriseSubsidyResponse,
     enterprisePolicyResponse,
   ] = await Promise.allSettled(budgetPromisesToFulfill);
 
   // Log any errors
-  if (ecommerceApiResponse.status === 'rejected') {
-    logError(ecommerceApiResponse.reason);
-  }
-  if (enterpriseSubsidyResponse.status === 'rejected') {
-    logError(enterpriseSubsidyResponse.reason);
-  }
   if (enterprisePolicyResponse.status === 'rejected') {
     logError(enterprisePolicyResponse.reason);
   }
 
-  // Transform the API responses - handle ecommerce API gracefully if it fails
-  const ecommerceOffersResults = ecommerceApiResponse.status === 'fulfilled'
-    ? camelCaseObject(ecommerceApiResponse.value?.data.results)
-    : []; // Return empty array if ecommerce API fails
-  const enterpriseSubsidyResults = camelCaseObject(enterpriseSubsidyResponse.value?.data.results);
+  // Transform the API responses
   const enterprisePolicyResults = camelCaseObject(enterprisePolicyResponse.value?.data.results);
 
-  // Iterate through each API response (if applicable) and concatenate the results into a single array of budgets.
+  // Iterate through each API response and concatenate the results into a single array of budgets.
   const budgetsList = [];
   enterprisePolicyResults?.forEach((result) => {
     budgetsList.push({
@@ -85,27 +68,6 @@ async function fetchEnterpriseBudgets({
       isBnREnabled: result.bnrEnabled,
       isRetired: result.retired,
       retiredAt: result.retiredAt,
-    });
-  });
-  enterpriseSubsidyResults?.forEach((result) => {
-    budgetsList.push({
-      source: BUDGET_TYPES.subsidy,
-      id: result.uuid,
-      name: result.title,
-      start: result.activeDatetime,
-      end: result.expirationDatetime,
-      isCurrent: result.isActive,
-    });
-  });
-  // Add ecommerce offers if available (graceful degradation if API fails)
-  ecommerceOffersResults?.forEach((result) => {
-    budgetsList.push({
-      source: BUDGET_TYPES.ecommerce,
-      id: (result.id).toString(),
-      name: result.displayName,
-      start: result.startDatetime,
-      end: result.endDatetime,
-      isCurrent: result.isCurrent,
     });
   });
 
@@ -190,33 +152,6 @@ export const useCustomerAgreement = ({ enterpriseId }) => {
 
   return {
     customerAgreement,
-    isLoading,
-  };
-};
-
-export const useCoupons = (options) => {
-  const [coupons, setCoupons] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchCoupons = async () => {
-      try {
-        // We are more interested in the existence of coupons here rather than fetching all of them.
-        const response = await EcommerceApiService.fetchCouponOrders(options);
-        const { results } = camelCaseObject(response.data);
-        setCoupons(results);
-      } catch (error) {
-        logError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCoupons();
-  }, [options]);
-
-  return {
-    coupons,
     isLoading,
   };
 };

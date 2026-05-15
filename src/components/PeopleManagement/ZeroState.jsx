@@ -12,8 +12,7 @@ const ZeroState = () => {
   const hasLearnerCredit = enterpriseSubsidyTypes.includes(
     SUBSIDY_TYPES.budget,
   );
-  const hasOtherSubsidyTypes = enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.license)
-    || enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.coupon);
+  const hasOtherSubsidyTypes = enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.license);
 
   return (
     <Card>

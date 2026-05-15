@@ -7,12 +7,10 @@ import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import {
   useBudgetDetailHeaderData,
   useBudgetId,
-  useEnterpriseOffer, useSubsidyAccessPolicy,
-  useSubsidySummaryAnalyticsApi,
+  useSubsidyAccessPolicy,
 } from './data';
 import BudgetDetailPageOverviewAvailability from './BudgetDetailPageOverviewAvailability';
 import BudgetDetailPageOverviewUtilization from './BudgetDetailPageOverviewUtilization';
-import { BUDGET_TYPES } from '../EnterpriseApp/data/constants';
 import BudgetStatusSubtitle from './BudgetStatusSubtitle';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
 
@@ -20,22 +18,12 @@ const BudgetOverviewContent = ({
   enterpriseUUID,
 }) => {
   const intl = useIntl();
-  const { subsidyAccessPolicyId, enterpriseOfferId } = useBudgetId();
-  const budgetType = (enterpriseOfferId !== null) ? BUDGET_TYPES.ecommerce : BUDGET_TYPES.policy;
+  const { subsidyAccessPolicyId } = useBudgetId();
 
-  const { isLoading: isLoadingSubsidySummary, subsidySummary } = useSubsidySummaryAnalyticsApi(
-    enterpriseUUID,
-    enterpriseOfferId,
-    budgetType,
-  );
-
-  // Fetch enterprise offer data with graceful error handling
-  const { isLoading: isLoadingEnterpriseOffer, data: enterpriseOfferMetadata } = useEnterpriseOffer(enterpriseOfferId);
   const { data: subsidyAccessPolicy } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
 
   const isBnREnabledPolicy = subsidyAccessPolicy?.bnrEnabled || false;
 
-  const policyOrOfferId = subsidyAccessPolicyId || enterpriseOfferId;
   const {
     budgetId,
     budgetDisplayName,
@@ -50,12 +38,10 @@ const BudgetOverviewContent = ({
   } = useBudgetDetailHeaderData({
     intl,
     subsidyAccessPolicy,
-    subsidySummary,
-    budgetId: policyOrOfferId,
-    enterpriseOfferMetadata,
+    budgetId: subsidyAccessPolicyId,
   });
 
-  if (!subsidyAccessPolicy && (isLoadingSubsidySummary || isLoadingEnterpriseOffer)) {
+  if (!subsidyAccessPolicy) {
     return (
       <div data-testid="budget-detail-skeleton">
         <Skeleton height={180} id={ALLOCATE_LEARNING_BUDGETS_TARGETS.BUDGET_DETAIL_CARD} />

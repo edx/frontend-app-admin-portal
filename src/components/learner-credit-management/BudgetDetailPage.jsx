@@ -3,7 +3,7 @@ import { Skeleton, Stack } from '@openedx/paragon';
 
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import {
-  useBudgetId, useEnterpriseGroup, useEnterpriseGroupLearners, useEnterpriseOffer, useSubsidyAccessPolicy,
+  useBudgetId, useEnterpriseGroup, useEnterpriseGroupLearners, useSubsidyAccessPolicy,
 } from './data';
 import BudgetDetailTabsAndRoutes from './BudgetDetailTabsAndRoutes';
 import BudgetDetailPageWrapper from './BudgetDetailPageWrapper';
@@ -11,18 +11,13 @@ import BudgetDetailPageHeader from './BudgetDetailPageHeader';
 import NotFoundPage from '../NotFoundPage';
 
 const BudgetDetailPage = () => {
-  const { enterpriseOfferId, subsidyAccessPolicyId } = useBudgetId();
+  const { subsidyAccessPolicyId } = useBudgetId();
   const {
     data: subsidyAccessPolicy,
     isInitialLoading: isSubsidyAccessPolicyInitialLoading,
     isError: isSubsidyAccessPolicyError,
     error,
   } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
-  // Fetch enterprise offer with graceful error handling
-  const {
-    data: enterpriseOffer,
-    isInitialLoading: isEnterpriseOfferInitialLoading,
-  } = useEnterpriseOffer(enterpriseOfferId);
   let groupUuid;
   if (subsidyAccessPolicy?.groupAssociations?.length) {
     [groupUuid] = subsidyAccessPolicy.groupAssociations;
@@ -36,7 +31,7 @@ const BudgetDetailPage = () => {
     isInitialLoading: isEnterpriseGroupInitialLoading,
   } = useEnterpriseGroup(subsidyAccessPolicy);
 
-  const isLoading = isSubsidyAccessPolicyInitialLoading || isEnterpriseOfferInitialLoading
+  const isLoading = isSubsidyAccessPolicyInitialLoading
     || isEnterpriseGroupLearnersInitialLoading || isEnterpriseGroupInitialLoading;
 
   if (isLoading) {
@@ -66,7 +61,6 @@ const BudgetDetailPage = () => {
   return (
     <BudgetDetailPageWrapper
       subsidyAccessPolicy={subsidyAccessPolicy}
-      enterpriseOffer={enterpriseOffer}
     >
       <Stack gap={4}>
         <BudgetDetailPageHeader />

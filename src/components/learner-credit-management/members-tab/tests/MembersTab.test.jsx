@@ -18,7 +18,7 @@ import {
   useBudgetDetailActivityOverview,
   useEnterpriseGroupLearners,
   useEnterpriseGroupMembersTableData,
-  useEnterpriseOffer,
+
   useEnterpriseRemovedGroupMembers,
   useSubsidySummaryAnalyticsApi,
   useEnterpriseFlexGroups,
@@ -51,7 +51,6 @@ jest.mock('../../data/hooks', () => ({
   useEnterpriseGroupMembersTableData: jest.fn(),
   useSubsidyAccessPolicy: jest.fn(),
   useSubsidySummaryAnalyticsApi: jest.fn(),
-  useEnterpriseOffer: jest.fn(),
   useBudgetDetailActivityOverview: jest.fn(),
   useIsLargeOrGreater: jest.fn().mockReturnValue(true),
   useCancelContentAssignments: jest.fn(),
@@ -120,11 +119,6 @@ describe('MembersTab', () => {
     useSubsidySummaryAnalyticsApi.mockReturnValue({
       isLoading: false,
       subsidySummary: {},
-    });
-
-    useEnterpriseOffer.mockReturnValue({
-      isLoading: false,
-      data: {},
     });
 
     useEnterpriseRemovedGroupMembers.mockReturnValue({

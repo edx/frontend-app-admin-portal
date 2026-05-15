@@ -64,7 +64,7 @@ describe('<LicenseAllocationHeader />', () => {
     },
     {
       subsidyRequestConfiguration: {
-        subsidyType: SUPPORTED_SUBSIDY_TYPES.coupon,
+        subsidyType: SUPPORTED_SUBSIDY_TYPES.budget,
         subsidyRequestsEnabled: false,
       },
       shouldShowAlert: false,

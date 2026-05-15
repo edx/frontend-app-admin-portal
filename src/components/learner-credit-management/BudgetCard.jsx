@@ -11,7 +11,7 @@ import { BUDGET_TYPES } from '../EnterpriseApp/data/constants';
  * it will also render a single card.
  *
  * @param {Object} budget Represents either:
- *  - Enterprise Offer (ecommerce)
+ *  - Enterprise Offer
  *  - Subsidy (enterprise-subsidy)
  *  - Policy (enterprise-access)
  *
@@ -55,22 +55,6 @@ const BudgetCard = ({ original }) => {
         isBnREnabled={isBnREnabled}
         isRetired={isRetired}
         retiredAt={retiredAt}
-      />
-    );
-  }
-
-  // Enterprise Offers (ecommerce) will always have a single budget, so we can render a single card.
-  if (source === BUDGET_TYPES.ecommerce) {
-    return (
-      <SubBudgetCard
-        id={subsidySummaryAnalyticsApi?.offerId}
-        isLoading={isLoadingSubsidySummaryAnalyticsApi}
-        start={start}
-        end={end}
-        available={subsidySummaryAnalyticsApi?.remainingFunds}
-        spent={subsidySummaryAnalyticsApi?.redeemedFunds}
-        displayName={name}
-        enterpriseSlug={enterpriseSlug}
       />
     );
   }

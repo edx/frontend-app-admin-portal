@@ -41,10 +41,6 @@ jest.mock('../../../subsidy-request-management-alerts/NoAvailableLicensesBanner'
   __esModule: true,
   default: jest.fn(() => 'NoAvailableLicensesBanner'),
 }));
-jest.mock('../../../subsidy-request-management-alerts/NoAvailableCodesBanner', () => ({
-  __esModule: true,
-  default: jest.fn(() => 'NoAvailableCodesBanner'),
-}));
 jest.mock('../data/hooks', () => ({
   useLearnerCreditBrowseAndRequest: jest.fn(() => ({
     isLoadingPolicies: false,
@@ -73,7 +69,7 @@ const SettingsAccessTabWrapper = ({
   subsidyRequestConfigurationContextValue = {
     subsidyRequestConfiguration: mockSubsidyRequestConfiguration,
     updateSubsidyRequestConfiguration: jest.fn(),
-    enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.coupon],
+    enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.license],
   },
   enterpriseSubsidiesContextValue = {
     offers: [],
@@ -81,8 +77,7 @@ const SettingsAccessTabWrapper = ({
       netDaysUntilExpiration: 0,
       subscriptions: [],
     },
-    coupons: [],
-    enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.coupon],
+    enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.license],
   },
   props = {},
 }) => (
@@ -136,41 +131,6 @@ describe('<SettingsAccessTab />', () => {
     expect(screen.getByText('disabled'));
   });
 
-  it('should render NoAvailableCodesBanner when subsidy type is SUPPORTED_SUBSIDY_TYPES.coupon', () => {
-    const subsidyRequestConfigurationContextValue = {
-      subsidyRequestConfiguration: {
-        subsidyRequestsEnabled: true,
-        subsidyType: SUPPORTED_SUBSIDY_TYPES.coupon,
-      },
-      enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.coupon],
-    };
-    renderWithRouter(
-      <SettingsAccessTabWrapper
-        subsidyRequestConfigurationContextValue={subsidyRequestConfigurationContextValue}
-        props={{ enableUniversalLink: false, identityProvider: null }}
-      />,
-    );
-    expect(screen.getByText('NoAvailableCodesBanner')).toBeInTheDocument();
-  });
-
-  it('should not render NoAvailableCodesBanner when when B&R is disabled', () => {
-    const subsidyRequestConfigurationContextValue = {
-      subsidyRequestConfiguration: {
-        subsidyRequestsEnabled: false,
-        subsidyType: SUPPORTED_SUBSIDY_TYPES.coupon,
-      },
-      updateSubsidyRequestConfiguration: jest.fn(),
-      enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.coupon],
-    };
-    renderWithRouter(
-      <SettingsAccessTabWrapper
-        subsidyRequestConfigurationContextValue={subsidyRequestConfigurationContextValue}
-        props={{ enableUniversalLink: false, identityProvider: null }}
-      />,
-    );
-    expect(screen.queryByText('NoAvailableCodesBanner')).not.toBeInTheDocument();
-  });
-
   it('should render NoAvailableLicensesBanner when subsidy type is SUPPORTED_SUBSIDY_TYPES.license', () => {
     const subsidyRequestConfigurationContextValue = {
       subsidyRequestConfiguration: {
@@ -217,14 +177,13 @@ describe('<SettingsAccessTab />', () => {
               netDaysUntilExpiration: 0,
               subscriptions: [],
             },
-            coupons: [],
-            enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.coupon, SUPPORTED_SUBSIDY_TYPES.license],
+            enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.license, SUPPORTED_SUBSIDY_TYPES.license],
           }
         }
         subsidyRequestConfigurationContextValue={
           {
             subsidyType: null,
-            enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.coupon, SUPPORTED_SUBSIDY_TYPES.license],
+            enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.license, SUPPORTED_SUBSIDY_TYPES.license],
           }
         }
       />,
@@ -243,8 +202,7 @@ describe('<SettingsAccessTab />', () => {
             netDaysUntilExpiration: 0,
             subscriptions: [],
           },
-          coupons: [],
-          enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.coupon, SUPPORTED_SUBSIDY_TYPES.license],
+          enterpriseSubsidyTypes: [SUPPORTED_SUBSIDY_TYPES.license, SUPPORTED_SUBSIDY_TYPES.license],
         }
         }
         subsidyRequestConfigurationContextValue={
@@ -253,7 +211,7 @@ describe('<SettingsAccessTab />', () => {
               ...mockSubsidyRequestConfiguration,
               subsidyType: SUPPORTED_SUBSIDY_TYPES.license,
             },
-            enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.coupon, SUPPORTED_SUBSIDY_TYPES.license],
+            enterpriseSubsidyTypesForRequests: [SUPPORTED_SUBSIDY_TYPES.license, SUPPORTED_SUBSIDY_TYPES.license],
           }
         }
       />,

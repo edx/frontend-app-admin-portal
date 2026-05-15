@@ -11,34 +11,21 @@ import {
   useBudgetDetailHeaderData,
   useBudgetId,
   useEnterpriseGroupLearners,
-  useEnterpriseOffer, useSubsidyAccessPolicy,
-  useSubsidySummaryAnalyticsApi,
+  useSubsidyAccessPolicy,
 } from '../data';
 import BudgetDetail from '../BudgetDetail';
-import { BUDGET_TYPES } from '../../EnterpriseApp/data/constants';
 import BudgetStatusSubtitle from '../BudgetStatusSubtitle';
 
 const InviteModalBudgetCard = ({
   enterpriseUUID,
 }) => {
   const intl = useIntl();
-  const { subsidyAccessPolicyId, enterpriseOfferId } = useBudgetId();
+  const { subsidyAccessPolicyId } = useBudgetId();
   const { data: subsidyAccessPolicy } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
   const { data } = useEnterpriseGroupLearners(subsidyAccessPolicy?.groupAssociations[0]);
 
   const memberSubtitle = data?.count ? `${makePlural(data?.count, 'current member')}` : '';
-  const budgetType = (enterpriseOfferId !== null) ? BUDGET_TYPES.ecommerce : BUDGET_TYPES.policy;
 
-  const { isLoading: isLoadingSubsidySummary, subsidySummary } = useSubsidySummaryAnalyticsApi(
-    enterpriseUUID,
-    enterpriseOfferId,
-    budgetType,
-  );
-
-  // Fetch enterprise offer with graceful error handling
-  const { isLoading: isLoadingEnterpriseOffer, data: enterpriseOfferMetadata } = useEnterpriseOffer(enterpriseOfferId);
-
-  const policyOrOfferId = subsidyAccessPolicyId || enterpriseOfferId;
   const {
     budgetDisplayName,
     budgetTotalSummary,
@@ -50,12 +37,10 @@ const InviteModalBudgetCard = ({
   } = useBudgetDetailHeaderData({
     intl,
     subsidyAccessPolicy,
-    subsidySummary,
-    budgetId: policyOrOfferId,
-    enterpriseOfferMetadata,
+    budgetId: subsidyAccessPolicyId,
   });
 
-  if (!subsidyAccessPolicy && (isLoadingSubsidySummary || isLoadingEnterpriseOffer)) {
+  if (!subsidyAccessPolicy) {
     return (
       <div data-testid="budget-detail-skeleton">
         <Skeleton height={180} />

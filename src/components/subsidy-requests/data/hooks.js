@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
 import { logError } from '@edx/frontend-platform/logging';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
-import EcommerceApiService from '../../../data/services/EcommerceApiService';
 import LicenseManagerApiService from '../../../data/services/LicenseManagerAPIService';
 import { SUPPORTED_SUBSIDY_TYPES } from '../../../data/constants/subsidyRequests';
 
@@ -22,26 +21,17 @@ export const useSubsidyRequestConfiguration = ({
 
   const createSubsidyRequestConfiguration = useCallback(async () => {
     try {
-      // TODO: these calls can be removed
-      const [couponsData, subscriptionsData] = await Promise.all([
-        EcommerceApiService.fetchCouponOrders(),
-        LicenseManagerApiService.fetchSubscriptions({
-          enterprise_customer_uuid: enterpriseId,
-        }),
-      ]);
-      const hasCoupons = couponsData.data.results.length > 0;
+      const subscriptionsData = await LicenseManagerApiService.fetchSubscriptions({
+        enterprise_customer_uuid: enterpriseId,
+      });
       const hasSubscriptions = subscriptionsData.data.results.length > 0;
 
       // A subsidy type of null on the customer configuration indicates that the customer will have to select a subsidy
       // type before enabling requests
       let subsidyType = null;
 
-      if (!(hasCoupons && hasSubscriptions)) {
-        if (hasCoupons) {
-          subsidyType = SUPPORTED_SUBSIDY_TYPES.coupon;
-        } else if (hasSubscriptions) {
-          subsidyType = SUPPORTED_SUBSIDY_TYPES.license;
-        }
+      if (hasSubscriptions) {
+        subsidyType = SUPPORTED_SUBSIDY_TYPES.license;
       }
 
       const response = await EnterpriseAccessApiService.createSubsidyRequestConfiguration({
@@ -140,7 +130,7 @@ export const useSubsidyRequestConfiguration = ({
 };
 
 /**
- * Fetches overview of subsidy requests for both subscriptions and coupon codes in order to
+ * Fetches overview of subscription license requests in order to
  * determine counts for notification bubbles.
  *
  */
@@ -148,7 +138,6 @@ export const useSubsidyRequestsOverview = (enterpriseId) => {
   const [isLoading, setIsLoading] = useState(false);
   const [subsidyRequestsCounts, setSubsidyRequestsCounts] = useState({
     subscriptionLicenses: 0,
-    couponCodes: 0,
   });
 
   const fetchSubsidyRequestsCounts = useCallback(async () => {
@@ -157,15 +146,10 @@ export const useSubsidyRequestsOverview = (enterpriseId) => {
     }
     setIsLoading(true);
     try {
-      const responses = await Promise.all([
-        EnterpriseAccessApiService.getLicenseRequestOverview(enterpriseId),
-        EnterpriseAccessApiService.getCouponCodeRequestOverview(enterpriseId),
-      ]);
-      const licenseRequestCount = responses[0].data.find(obj => obj.state === 'requested')?.count;
-      const codeRequestCount = responses[1].data.find(obj => obj.state === 'requested')?.count;
+      const response = await EnterpriseAccessApiService.getLicenseRequestOverview(enterpriseId);
+      const licenseRequestCount = response.data.find(obj => obj.state === 'requested')?.count;
       setSubsidyRequestsCounts({
         subscriptionLicenses: licenseRequestCount,
-        couponCodes: codeRequestCount,
       });
     } catch (err) {
       logError(err);
@@ -185,18 +169,10 @@ export const useSubsidyRequestsOverview = (enterpriseId) => {
     }));
   }, []);
 
-  const decrementCouponCodeRequestCount = useCallback(() => {
-    setSubsidyRequestsCounts(prevState => ({
-      ...prevState,
-      couponCodes: prevState.couponCodes - 1,
-    }));
-  }, []);
-
   return {
     isLoading,
     subsidyRequestsCounts,
     refreshsubsidyRequestsCounts: fetchSubsidyRequestsCounts,
     decrementLicenseRequestCount,
-    decrementCouponCodeRequestCount,
   };
 };

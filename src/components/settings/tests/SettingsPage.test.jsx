@@ -19,9 +19,6 @@ const store = mockStore({
   portalConfiguration: {
     enterpriseId: 'test-enterprise-id',
   },
-  coupons: {
-    loading: false,
-  },
 });
 
 const settingsPageWithRouter = (route) => (

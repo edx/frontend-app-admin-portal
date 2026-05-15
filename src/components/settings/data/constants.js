@@ -111,7 +111,6 @@ export const SSO_CONFIG_POLLING_TIMEOUT = 240000;
 export const SSO_CONFIG_POLLING_INTERVAL = 1000;
 
 export const SUBSIDY_TYPE_LABELS = {
-  [SUPPORTED_SUBSIDY_TYPES.coupon]: messages.subsidyTypeCodes,
   [SUPPORTED_SUBSIDY_TYPES.license]: messages.subsidyTypeLicenses,
   [SUPPORTED_SUBSIDY_TYPES.budget]: messages.subsidyTypeBudget,
 };

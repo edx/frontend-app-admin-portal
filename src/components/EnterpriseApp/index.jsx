@@ -78,7 +78,6 @@ class EnterpriseApp extends React.Component {
     const {
       error,
       enterpriseSlug,
-      enableCodeManagementScreen,
       enableSubscriptionManagementScreen,
       enableAnalyticsScreen,
       enableReportingConfigurationsScreen,
@@ -93,7 +92,7 @@ class EnterpriseApp extends React.Component {
     const url = this.props.location.pathname;
     const baseUrl = url.split('/').slice(0, 2).join('/');
     const defaultContentPadding = 10; // 10px for appropriate padding
-    const { isActive, roles, email } = getAuthenticatedUser() || {};
+    const { isActive, roles } = getAuthenticatedUser() || {};
     // checking for undefined tells if if the user's info is hydrated
     const isUserLoadedAndInactive = isActive !== undefined && !isActive;
     const isUserMissingJWTRoles = !roles?.length;
@@ -153,10 +152,7 @@ class EnterpriseApp extends React.Component {
                 >
                   <AdminRolesSurveyBanner />
                   <EnterpriseAppContent
-                    email={email}
                     enterpriseId={enterpriseId}
-                    enterpriseName={enterpriseName}
-                    enableCodeManagementPage={features.CODE_MANAGEMENT && enableCodeManagementScreen}
                     enableReportingPage={features.REPORTING_CONFIGURATIONS && enableReportingConfigurationsScreen}
                     enableSubscriptionManagementPage={enableSubscriptionManagementScreen}
                     enableAnalyticsPage={features.ANALYTICS && enableAnalyticsScreen}
@@ -183,7 +179,6 @@ EnterpriseApp.defaultProps = {
     tertiary_color: SCHOLAR_THEME.accent,
   },
   error: null,
-  enableCodeManagementScreen: false,
   enableSubscriptionManagementScreen: false,
   enableAnalyticsScreen: false,
   enableReportingConfigurationsScreen: false,
@@ -208,7 +203,6 @@ EnterpriseApp.propTypes = {
     pathname: PropTypes.string,
   }).isRequired,
   toggleSidebarToggle: PropTypes.func.isRequired,
-  enableCodeManagementScreen: PropTypes.bool,
   enableSubscriptionManagementScreen: PropTypes.bool,
   enableAnalyticsScreen: PropTypes.bool,
   enableReportingConfigurationsScreen: PropTypes.bool,

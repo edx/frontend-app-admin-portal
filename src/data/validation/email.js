@@ -2,12 +2,11 @@ import { SubmissionError } from 'redux-form';
 import isEmail from 'validator/lib/isEmail';
 import { union } from 'lodash-es';
 import { EMAIL_ADDRESS_CSV_FORM_DATA, EMAIL_ADDRESS_TEXT_FORM_DATA } from '../constants/addUsers';
-import {
-  EMAIL_TEMPLATE_FIELD_MAX_LIMIT,
-  EMAIL_TEMPLATE_SUBJECT_KEY,
-  OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT,
-} from '../constants/emailTemplate';
 import { mergeErrors } from '../../utils';
+
+const EMAIL_TEMPLATE_FIELD_MAX_LIMIT = 50000;
+const EMAIL_TEMPLATE_SUBJECT_KEY = 'email-template-subject';
+const OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT = 1000;
 
 /* eslint-disable no-underscore-dangle */
 const validateEmailTemplateFields = (formData, templateKey, isSubjectRequired = true) => {
