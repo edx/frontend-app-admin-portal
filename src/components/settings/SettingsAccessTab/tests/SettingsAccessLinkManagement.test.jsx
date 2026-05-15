@@ -13,11 +13,8 @@ import MockSettingsContext, { MOCK_CONSTANTS, generateStore } from './TestUtils'
 import SettingsAccessLinkManagement from '../SettingsAccessLinkManagement';
 import * as hooks from '../../data/hooks';
 import { SETTINGS_ACCESS_EVENTS } from '../../../../eventTracking';
-import * as couponActions from '../../../../data/actions/coupons';
 import { MAX_UNIVERSAL_LINKS } from '../../data/constants';
 import { accessibilitySettings } from '../../../../../tests/accessibility-settings';
-
-jest.mock('../../../../data/actions/coupons');
 
 jest.mock('../../../../data/services/LmsApiService', () => ({
   __esModule: true,
@@ -41,7 +38,7 @@ const SettingsAccessLinkManagementWrapper = ({
   links = [],
   loadingLinks = false,
   enterpriseSubsidiesContextValue = {
-    coupons: [],
+
     customerAgreement: undefined,
   },
 }) => {
@@ -66,10 +63,6 @@ const SettingsAccessLinkManagementWrapper = ({
 };
 
 describe('<SettingsAccessLinkManagement/>', () => {
-  beforeEach(() => couponActions.fetchCouponOrders.mockReturnValue({
-    type: 'fetch coupons',
-  }));
-
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -120,14 +113,13 @@ describe('<SettingsAccessLinkManagement/>', () => {
     const user = userEvent.setup();
     LmsApiService.toggleEnterpriseCustomerUniversalLink.mockReturnValue({ data: {} });
     const subExpirationDate = dayjs().add(1, 'days').format();
-    const couponExpirationDate = dayjs().add(3, 'days').format();
     render(
       <SettingsAccessLinkManagementWrapper
         store={generateStore({
           portalConfiguration: { enableUniversalLink: false },
         })}
         enterpriseSubsidiesContextValue={{
-          coupons: [{ endDate: couponExpirationDate }],
+
           customerAgreement: {
             subscriptions: [{ expirationDate: subExpirationDate }],
           },
@@ -168,7 +160,7 @@ describe('<SettingsAccessLinkManagement/>', () => {
           usageLimit: 1,
         }))}
         enterpriseSubsidiesContextValue={{
-          coupons: [],
+
           customerAgreement: {
             subscriptions: [],
           },
@@ -192,7 +184,7 @@ describe('<SettingsAccessLinkManagement/>', () => {
           usageLimit: 1,
         }))}
         enterpriseSubsidiesContextValue={{
-          coupons: [],
+
           customerAgreement: {
             subscriptions: [],
           },

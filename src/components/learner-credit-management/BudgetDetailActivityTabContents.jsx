@@ -14,7 +14,7 @@ import NoBnEBudgetActivity from './empty-state/NoBnEBudgetActivity';
 import NoBnRBudgetActivity from './empty-state/NoBnRBudgetActivity';
 
 const BudgetDetailActivityTabContents = ({ enterpriseUUID, appliesToAllContexts }) => {
-  const { enterpriseOfferId, subsidyAccessPolicyId } = useBudgetId();
+  const { subsidyAccessPolicyId } = useBudgetId();
   const { data: subsidyAccessPolicy } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
   const isEnterpriseGroupsEnabled = !isEmpty(subsidyAccessPolicy?.groupAssociations);
   const { openInviteModal } = useContext(BudgetDetailPageContext);
@@ -41,8 +41,8 @@ const BudgetDetailActivityTabContents = ({ enterpriseUUID, appliesToAllContexts 
   const hasContentAssignments = budgetActivityOverview.contentAssignments?.count > 0;
   const hasApprovedBnrRequests = budgetActivityOverview.approvedBnrRequests?.count > 0;
 
-  // If enterprise groups is turned on, it's learner credit NOT enterprise offers w/ no spend
-  const renderBnEActivity = isEnterpriseGroupsEnabled && (enterpriseOfferId == null) && !hasSpentTransactions;
+  // If enterprise groups is turned on, it's learner credit with no spend
+  const renderBnEActivity = isEnterpriseGroupsEnabled && !hasSpentTransactions;
 
   if (subsidyAccessPolicy?.bnrEnabled) {
     // If we don't have a request in the approved state and there are no spent transactions,

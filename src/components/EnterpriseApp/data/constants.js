@@ -8,7 +8,6 @@ export const ROUTE_NAMES = {
   billing: 'billing',
   bulkEnrollment: 'enrollment',
   bulkEnrollmentResults: 'bulk-enrollment-results',
-  codeManagement: 'coupons',
   contentHighlights: 'content-highlights',
   learners: 'learners',
   learners_v2: 'learners-v2',
@@ -28,7 +27,6 @@ export const BUDGET_STATUSES = {
 };
 
 export const BUDGET_TYPES = {
-  ecommerce: 'ecommerce',
   subsidy: 'subsidy',
   policy: 'policy',
 };

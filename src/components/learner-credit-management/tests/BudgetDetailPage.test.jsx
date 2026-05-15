@@ -31,7 +31,6 @@ import {
   useEnterpriseFlexGroups,
   useEnterpriseGroup,
   useEnterpriseGroupLearners,
-  useEnterpriseOffer,
   useEnterpriseRemovedGroupMembers,
   useIsLargeOrGreater,
   useSubsidyAccessPolicy,
@@ -44,13 +43,10 @@ import {
   mockAssignableSubsidyAccessPolicyWithNoUtilization,
   mockAssignableSubsidyAccessPolicyWithSpendNoAllocations,
   mockAssignableSubsidyAccessPolicyWithSpendNoRedeemed,
-  mockEnterpriseOfferId,
-  mockEnterpriseOfferMetadata, // TODO: remove when ecommerce is decommisioned.
   mockPerLearnerSpendLimitSubsidyAccessPolicy,
   mockPerLearnerSpendLimitSubsidyAccessPolicyWithBnrEnabled,
   mockSpendLimitNoGroupsSubsidyAccessPolicy,
   mockSubsidyAccessPolicyUUID,
-  mockSubsidySummary,
 } from '../data/tests/constants';
 import { getButtonElement, queryClient } from '../../test/testUtils';
 import { useAlgoliaSearch } from '../../algolia-search';
@@ -93,7 +89,6 @@ jest.mock('../data', () => ({
   useEnterpriseGroupLearners: jest.fn(),
   useEnterpriseGroupMembersTableData: jest.fn(),
   useEnterpriseRemovedGroupMembers: jest.fn(),
-  useEnterpriseOffer: jest.fn(),
   useIsLargeOrGreater: jest.fn().mockReturnValue(true),
   useSubsidyAccessPolicy: jest.fn(),
   useSubsidySummaryAnalyticsApi: jest.fn(),
@@ -276,11 +271,9 @@ describe('<BudgetDetailPage />', () => {
     // Mock useBudgetId to be dynamic based on useParams
     useBudgetId.mockImplementation(() => {
       const { budgetId } = useParams();
-      const enterpriseOfferId = uuidValidate(budgetId) ? null : budgetId;
       const subsidyAccessPolicyId = uuidValidate(budgetId) ? budgetId : null;
       return {
         budgetId,
-        enterpriseOfferId,
         subsidyAccessPolicyId,
       };
     });
@@ -298,11 +291,6 @@ describe('<BudgetDetailPage />', () => {
     useSubsidySummaryAnalyticsApi.mockReturnValue({
       isLoading: false,
       subsidySummary: {},
-    });
-
-    useEnterpriseOffer.mockReturnValue({
-      isLoading: false,
-      data: {},
     });
 
     useEnterpriseGroup.mockReturnValue({
@@ -532,25 +520,9 @@ describe('<BudgetDetailPage />', () => {
       },
       isLoading: false,
     },
-    // TODO: remove when ecommerce is decommisioned.
-    {
-      subsidyAccessPolicy: null,
-      subsidySummary: mockSubsidySummary,
-      enterpriseOfferMetadata: mockEnterpriseOfferMetadata,
-      expected: {
-        displayName: mockEnterpriseOfferMetadata.displayName,
-        spend: formatPrice(mockSubsidySummary.remainingFunds),
-        utilized: formatPrice(mockSubsidySummary.redeemedFunds),
-        limit: formatPrice(mockSubsidySummary.totalFunds),
-        allocated: formatPrice(0),
-        redeemed: formatPrice(mockSubsidySummary.redeemedFunds),
-      },
-      isLoading: false,
-    },
   ])('render budget banner data (%s)', async ({
     subsidyAccessPolicy,
     subsidySummary,
-    enterpriseOfferMetadata,
     expected,
     isLoading,
   }) => {
@@ -586,10 +558,6 @@ describe('<BudgetDetailPage />', () => {
         contentAssignments: undefined,
         spentTransactions: { count: 0 },
       },
-    });
-    useEnterpriseOffer.mockReturnValue({
-      isLoading: false,
-      data: enterpriseOfferMetadata,
     });
     useBudgetRedemptions.mockReturnValue({
       isLoading: false,
@@ -969,34 +937,18 @@ describe('<BudgetDetailPage />', () => {
   });
 
   it.each([
-    // TODO: remove when ecommerce is decommisioned.
-    {
-      subsidyAccessPolicy: null,
-      enterpriseOfferMetadata: mockEnterpriseOfferMetadata,
-      budgetId: mockEnterpriseOfferId,
-      expectedUseOfferRedemptionsArgs: [enterpriseUUID, mockEnterpriseOfferId, null],
-    },
-    {
-      subsidyAccessPolicy: null,
-      enterpriseOfferMetadata: mockEnterpriseOfferMetadata,
-      budgetId: mockEnterpriseOfferId,
-      expectedUseOfferRedemptionsArgs: [enterpriseUUID, mockEnterpriseOfferId, null],
-    },
     {
       subsidyAccessPolicy: mockPerLearnerSpendLimitSubsidyAccessPolicy,
-      // enterpriseOfferMetadata: null, // Enterprise offers no longer supported
       budgetId: mockSubsidyAccessPolicyUUID,
       expectedUseOfferRedemptionsArgs: [enterpriseUUID, null, mockSubsidyAccessPolicyUUID],
     },
     {
       subsidyAccessPolicy: mockAssignableSubsidyAccessPolicy,
-      enterpriseOfferMetadata: null,
       budgetId: mockSubsidyAccessPolicyUUID,
       expectedUseOfferRedemptionsArgs: [enterpriseUUID, null, mockSubsidyAccessPolicyUUID],
     },
   ])('displays spend table in "Activity" tab with empty results (%s)', async ({
     subsidyAccessPolicy,
-    enterpriseOfferMetadata,
     budgetId,
   }) => {
     useParams.mockReturnValue({
@@ -1007,15 +959,10 @@ describe('<BudgetDetailPage />', () => {
     });
     useSubsidySummaryAnalyticsApi.mockReturnValue({
       isLoading: false,
-      subsidySummary: (enterpriseOfferMetadata) ? mockSubsidySummary : undefined,
     });
     useSubsidyAccessPolicy.mockReturnValue({
       isInitialLoading: false,
       data: (subsidyAccessPolicy) || undefined,
-    });
-    useEnterpriseOffer.mockReturnValue({
-      isLoading: false,
-      data: (enterpriseOfferMetadata) || undefined,
     });
     useEnterpriseGroupLearners.mockReturnValue({
       data: {

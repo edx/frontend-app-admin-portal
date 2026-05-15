@@ -15,7 +15,6 @@ const initialState = {
   enterpriseBranding: null,
   identityProvider: null,
   disableExpiryMessagingForLearnerCredit: false,
-  enableCodeManagementScreen: false,
   enableReportingConfigScreen: false,
   enableSubscriptionManagementScreen: false,
   enableIntegratedCustomerLearnerPortalSearch: false,
@@ -80,7 +79,6 @@ describe('portalConfiguration reducer', () => {
       enterpriseBranding: enterpriseData.branding_configuration,
       identityProvider: enterpriseData.identity_provider,
       disableExpiryMessagingForLearnerCredit: enterpriseData.disable_expiry_messaging_for_learner_credit,
-      enableCodeManagementScreen: enterpriseData.enable_portal_code_management_screen,
       enableReportingConfigScreen: enterpriseData.enable_portal_reporting_config_screen,
       enableSubscriptionManagementScreen: enterpriseData.enable_portal_subscription_management_screen, // eslint-disable-line max-len
       enableSamlConfigurationScreen: enterpriseData.enable_portal_saml_configuration_screen,

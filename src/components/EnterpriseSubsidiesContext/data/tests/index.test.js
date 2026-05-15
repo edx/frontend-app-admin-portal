@@ -20,10 +20,8 @@ describe('useEnterpriseSubsidiesContext', () => {
       isLoadingBudgets: false,
       budgets: [{ uuid: 'offer-id' }],
       customerAgreement: { subscriptions: [{ uuid: 'subscription-id' }] },
-      coupons: [{ uuid: 'coupon-id' }],
       expectedEnterpriseSubsidyTypes: [
         SUBSIDY_TYPES.budget,
-        SUBSIDY_TYPES.coupon,
         SUBSIDY_TYPES.license,
       ],
     },
@@ -31,9 +29,7 @@ describe('useEnterpriseSubsidiesContext', () => {
       isLoadingBudgets: true,
       budgets: undefined,
       customerAgreement: { subscriptions: [{ uuid: 'subscription-id' }] },
-      coupons: [{ uuid: 'coupon-id' }],
       expectedEnterpriseSubsidyTypes: [
-        SUBSIDY_TYPES.coupon,
         SUBSIDY_TYPES.license,
       ],
     },
@@ -41,21 +37,18 @@ describe('useEnterpriseSubsidiesContext', () => {
       isLoadingBudgets: false,
       budgets: [],
       customerAgreement: { subscriptions: [{ uuid: 'subscription-id' }] },
-      coupons: [{ uuid: 'coupon-id' }],
       expectedEnterpriseSubsidyTypes: [
-        SUBSIDY_TYPES.coupon,
         SUBSIDY_TYPES.license,
       ],
     },
     {
       isLoadingBudgets: false,
       budgets: [],
-      customerAgreement: { subscriptions: [{ uuid: 'subscription-id' }] },
-      coupons: [],
-      expectedEnterpriseSubsidyTypes: [SUBSIDY_TYPES.license],
+      customerAgreement: { subscriptions: [] },
+      expectedEnterpriseSubsidyTypes: [],
     },
   ])('returns the correct enterpriseSubsidyTypes (%s)', ({
-    isLoadingBudgets, budgets, customerAgreement, coupons, expectedEnterpriseSubsidyTypes,
+    isLoadingBudgets, budgets, customerAgreement, expectedEnterpriseSubsidyTypes,
   }) => {
     hooks.useEnterpriseBudgets.mockReturnValue({
       data: isLoadingBudgets ? undefined : {
@@ -65,9 +58,6 @@ describe('useEnterpriseSubsidiesContext', () => {
     });
     hooks.useCustomerAgreement.mockReturnValue({
       customerAgreement,
-    });
-    hooks.useCoupons.mockReturnValue({
-      coupons,
     });
     hooks.useBillingSubscriptionAvailable.mockReturnValue({
       hasBillingSubscription: false,
@@ -80,7 +70,6 @@ describe('useEnterpriseSubsidiesContext', () => {
 
   describe('hasBillingSubscription propagation', () => {
     beforeEach(() => {
-      // Setup default mocks for other hooks
       hooks.useEnterpriseBudgets.mockReturnValue({
         data: {
           budgets: [],
@@ -90,10 +79,6 @@ describe('useEnterpriseSubsidiesContext', () => {
       });
       hooks.useCustomerAgreement.mockReturnValue({
         customerAgreement: { subscriptions: [] },
-        isLoading: false,
-      });
-      hooks.useCoupons.mockReturnValue({
-        coupons: [],
         isLoading: false,
       });
     });
@@ -136,19 +121,6 @@ describe('useEnterpriseSubsidiesContext', () => {
 
       const { result } = renderHook(() => useEnterpriseSubsidiesContext(basicProps));
       expect(result.current.isLoading).toBe(false);
-    });
-
-    it('passes enterpriseId to useBillingSubscriptionAvailable hook', () => {
-      hooks.useBillingSubscriptionAvailable.mockReturnValue({
-        hasBillingSubscription: false,
-        isLoading: false,
-      });
-
-      renderHook(() => useEnterpriseSubsidiesContext(basicProps));
-
-      expect(hooks.useBillingSubscriptionAvailable).toHaveBeenCalledWith({
-        enterpriseId: TEST_ENTERPRISE_UUID,
-      });
     });
   });
 });

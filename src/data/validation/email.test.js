@@ -9,7 +9,9 @@ import {
   validateEmailTemplateForm,
 } from './email';
 import { EMAIL_ADDRESS_CSV_FORM_DATA, EMAIL_ADDRESS_TEXT_FORM_DATA } from '../constants/addUsers';
-import { EMAIL_TEMPLATE_SUBJECT_KEY, OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT } from '../constants/emailTemplate';
+
+const EMAIL_TEMPLATE_SUBJECT_KEY = 'email-template-subject';
+const OFFER_ASSIGNMENT_EMAIL_SUBJECT_LIMIT = 1000;
 
 const hasFormatChar = (str) => [...str].some(char => {
   const code = char.charCodeAt(0);

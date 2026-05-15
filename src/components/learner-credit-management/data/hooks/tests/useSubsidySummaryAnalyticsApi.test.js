@@ -49,12 +49,6 @@ describe('useSubsidySummaryAnalyticsApi', () => {
 
   it.each([
     {
-      budgetId: TEST_ENTERPRISE_OFFER_ID,
-      budgetType: BUDGET_TYPES.ecommerce,
-      shouldCallApi: true,
-      shouldThrowApiException: false,
-    },
-    {
       budgetId: TEST_ENTERPRISE_BUDGET_UUID,
       budgetType: BUDGET_TYPES.subsidy,
       shouldCallApi: true,

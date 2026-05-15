@@ -20,14 +20,6 @@ export const getSubsidyTypeLabelAndRoute = (configuredRequestSubsidyType, enterp
         label: 'Subscription Management',
       },
     };
-  } else if (configuredRequestSubsidyType === SUPPORTED_SUBSIDY_TYPES.coupon) {
-    subsidyTypeLabelAndRoute = {
-      label: 'code',
-      route: {
-        path: `/${enterpriseSlug}/admin/coupons/manage-requests`,
-        label: 'Code Management',
-      },
-    };
   } else {
     logInfo(`Invalid request subsidy type provided: ${configuredRequestSubsidyType}`);
   }

@@ -7,7 +7,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import LearnerCreditAllocationTable from './LearnerCreditAllocationTable';
 import {
-  getBudgetStatus, useBudgetId, useBudgetRedemptions, useEnterpriseOffer, useSubsidyAccessPolicy,
+  getBudgetStatus, useBudgetId, useBudgetRedemptions, useSubsidyAccessPolicy,
 } from './data';
 import { BUDGET_STATUSES } from '../EnterpriseApp/data/constants';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
@@ -15,7 +15,7 @@ import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardi
 const BudgetDetailRedemptionsDescription = ({
   status,
 }) => {
-  const { enterpriseOfferId, subsidyAccessPolicyId } = useBudgetId();
+  const { subsidyAccessPolicyId } = useBudgetId();
 
   if (status === BUDGET_STATUSES.expired) {
     return (
@@ -36,7 +36,7 @@ const BudgetDetailRedemptionsDescription = ({
         defaultMessage="Spent activity is driven by completed enrollments. "
         description="Description for the spent section of the budget detail page"
       />
-      {(enterpriseOfferId || (subsidyAccessPolicyId)) ? (
+      {subsidyAccessPolicyId ? (
         <FormattedMessage
           id="lcm.budget.detail.page.spent.description.enterprise"
           defaultMessage="Enrollment data is automatically updated every 12 hours. Come back later to view more recent enrollments."
@@ -72,7 +72,7 @@ const BudgetDetailRedemptions = ({ enterpriseFeatures, enterpriseUUID }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { state: locationState } = location;
-  const { enterpriseOfferId, subsidyAccessPolicyId } = useBudgetId();
+  const { subsidyAccessPolicyId } = useBudgetId();
   const spentHeadingRef = useRef();
   const {
     isLoading,
@@ -80,12 +80,10 @@ const BudgetDetailRedemptions = ({ enterpriseFeatures, enterpriseUUID }) => {
     fetchBudgetRedemptions,
   } = useBudgetRedemptions(
     enterpriseUUID,
-    enterpriseOfferId,
+    null,
     subsidyAccessPolicyId,
   );
 
-  // Fetch enterprise offer data with graceful error handling - will be null if API fails
-  const { data: enterpriseOfferMetadata } = useEnterpriseOffer(enterpriseOfferId);
   const { data: subsidyAccessPolicy } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
 
   useEffect(() => {
@@ -99,9 +97,8 @@ const BudgetDetailRedemptions = ({ enterpriseFeatures, enterpriseUUID }) => {
 
   const { status } = getBudgetStatus({
     intl,
-    // Use enterprise offer dates if available, fall back to subsidy access policy dates
-    startDateStr: enterpriseOfferMetadata?.startDatetime || subsidyAccessPolicy?.subsidyActiveDatetime,
-    endDateStr: enterpriseOfferMetadata?.endDatetime || subsidyAccessPolicy?.subsidyExpirationDatetime,
+    startDateStr: subsidyAccessPolicy?.subsidyActiveDatetime,
+    endDateStr: subsidyAccessPolicy?.subsidyExpirationDatetime,
     isBudgetRetired: !!subsidyAccessPolicy?.retired,
   });
 

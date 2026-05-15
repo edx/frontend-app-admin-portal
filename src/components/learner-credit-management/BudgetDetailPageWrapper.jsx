@@ -18,21 +18,16 @@ export const BudgetDetailPageContext = React.createContext();
 
 function getBudgetDisplayName({
   subsidyAccessPolicy,
-  enterpriseOffer,
 }) {
   let displayName = 'Overview';
   if (subsidyAccessPolicy?.displayName) {
     displayName = subsidyAccessPolicy.displayName;
-  } else if (enterpriseOffer?.displayName) {
-    // Use enterprise offer display name if subsidy access policy doesn't have one
-    displayName = enterpriseOffer.displayName;
   }
   return displayName;
 }
 
 const BudgetDetailPageWrapper = ({
   subsidyAccessPolicy,
-  enterpriseOffer, // Will be null/undefined if ecommerce API fails
   includeHero,
   children,
 }) => {
@@ -44,7 +39,7 @@ const BudgetDetailPageWrapper = ({
   });
   // display name is an optional field, and may not be set for all budgets so fallback to "Overview"
   // similar to the display name logic for budgets on the overview page route.
-  const budgetDisplayName = getBudgetDisplayName({ subsidyAccessPolicy, enterpriseOffer });
+  const budgetDisplayName = getBudgetDisplayName({ subsidyAccessPolicy });
   const helmetPageTitle = budgetDisplayName ? `${budgetDisplayName} - ${PAGE_TITLE}` : PAGE_TITLE;
 
   const successfulAssignmentToast = useSuccessfulAssignmentToastContextValue();
@@ -171,16 +166,12 @@ BudgetDetailPageWrapper.propTypes = {
   subsidyAccessPolicy: PropTypes.shape({
     displayName: PropTypes.string,
   }),
-  enterpriseOffer: PropTypes.shape({
-    displayName: PropTypes.string,
-  }),
   includeHero: PropTypes.bool,
 };
 
 BudgetDetailPageWrapper.defaultProps = {
   includeHero: true,
   subsidyAccessPolicy: undefined,
-  enterpriseOffer: undefined,
 };
 
 export default BudgetDetailPageWrapper;

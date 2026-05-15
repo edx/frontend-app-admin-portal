@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
 import { logError } from '@edx/frontend-platform/logging';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
-import EcommerceApiService from '../../../data/services/EcommerceApiService';
 import LicenseManagerApiService from '../../../data/services/LicenseManagerAPIService';
 import { SUPPORTED_SUBSIDY_TYPES } from '../../../data/constants/subsidyRequests';
 
@@ -22,26 +21,17 @@ export const useSubsidyRequestConfiguration = ({
 
   const createSubsidyRequestConfiguration = useCallback(async () => {
     try {
-      // TODO: these calls can be removed
-      const [couponsData, subscriptionsData] = await Promise.all([
-        EcommerceApiService.fetchCouponOrders(),
-        LicenseManagerApiService.fetchSubscriptions({
-          enterprise_customer_uuid: enterpriseId,
-        }),
-      ]);
-      const hasCoupons = couponsData.data.results.length > 0;
+      const subscriptionsData = await LicenseManagerApiService.fetchSubscriptions({
+        enterprise_customer_uuid: enterpriseId,
+      });
       const hasSubscriptions = subscriptionsData.data.results.length > 0;
 
       // A subsidy type of null on the customer configuration indicates that the customer will have to select a subsidy
       // type before enabling requests
       let subsidyType = null;
 
-      if (!(hasCoupons && hasSubscriptions)) {
-        if (hasCoupons) {
-          subsidyType = SUPPORTED_SUBSIDY_TYPES.coupon;
-        } else if (hasSubscriptions) {
-          subsidyType = SUPPORTED_SUBSIDY_TYPES.license;
-        }
+      if (hasSubscriptions) {
+        subsidyType = SUPPORTED_SUBSIDY_TYPES.license;
       }
 
       const response = await EnterpriseAccessApiService.createSubsidyRequestConfiguration({

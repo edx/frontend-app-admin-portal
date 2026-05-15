@@ -7,7 +7,7 @@ import { Icon } from '@openedx/paragon';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import {
   BookOpen, CreditCard, Description, InsertChartOutlined, MoneyOutline,
-  Person, ReceiptLong, Settings, Support, Tag, TrendingUp,
+  Person, ReceiptLong, Settings, Support, TrendingUp,
 } from '@openedx/paragon/icons';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { getConfig } from '@edx/frontend-platform/config';
@@ -37,7 +37,6 @@ const Sidebar = ({
   collapseSidebar,
   isExpanded,
   isExpandedByToggle,
-  enableCodeManagementScreen,
   enableReportingConfigScreen,
   enableSubscriptionManagementScreen,
   enableAnalyticsScreen,
@@ -136,13 +135,6 @@ const Sidebar = ({
       icon: <Icon src={InsertChartOutlined} />,
       hidden: !features.ANALYTICS || !enableAnalyticsScreen,
       id: ANALYTICS_INSIGHTS_TARGETS.SIDEBAR,
-    },
-    {
-      title: 'Code Management',
-      to: `${baseUrl}/admin/${ROUTE_NAMES.codeManagement}`,
-      icon: <Icon src={Tag} />,
-      hidden: !features.CODE_MANAGEMENT || !enableCodeManagementScreen,
-      notification: !!subsidyRequestsCounts.couponCodes,
     },
     {
       title: 'Subscription Management',
@@ -263,7 +255,6 @@ const Sidebar = ({
 };
 
 Sidebar.defaultProps = {
-  enableCodeManagementScreen: false,
   enableReportingConfigScreen: false,
   enableSubscriptionManagementScreen: false,
   enableAnalyticsScreen: false,
@@ -277,7 +268,6 @@ Sidebar.propTypes = {
   collapseSidebar: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   isExpandedByToggle: PropTypes.bool.isRequired,
-  enableCodeManagementScreen: PropTypes.bool,
   enableReportingConfigScreen: PropTypes.bool,
   enableSubscriptionManagementScreen: PropTypes.bool,
   enableAnalyticsScreen: PropTypes.bool,

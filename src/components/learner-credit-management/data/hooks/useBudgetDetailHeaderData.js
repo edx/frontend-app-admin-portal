@@ -1,28 +1,5 @@
 import { getBudgetStatus } from '../utils';
 
-const transformSubsidySummaryToPolicy = (subsidySummary, enterpriseOfferMetadata) => {
-  // If no enterprise offer metadata available (API failure or service down), return null for graceful degradation
-  if (!enterpriseOfferMetadata) {
-    return null;
-  }
-
-  const transformedData = {
-    displayName: enterpriseOfferMetadata.displayName,
-    subsidyActiveDatetime: enterpriseOfferMetadata.startDatetime,
-    subsidyExpirationDatetime: enterpriseOfferMetadata.endDatetime,
-    isAssignable: false,
-  };
-  if (subsidySummary) {
-    transformedData.spendLimit = subsidySummary.totalFunds * 100;
-    transformedData.aggregates = {
-      spendAvailableUsd: subsidySummary.remainingFunds,
-      amountAllocatedUsd: 0,
-      amountRedeemedUsd: subsidySummary.redeemedFunds,
-    };
-  }
-  return transformedData;
-};
-
 const assignBudgetStatus = (intl, policy) => {
   const {
     status, badgeVariant, term, date,
@@ -67,11 +44,9 @@ const assignBudgetDetails = (policy) => {
 const useBudgetDetailHeaderData = ({
   intl,
   subsidyAccessPolicy,
-  subsidySummary,
   budgetId,
-  enterpriseOfferMetadata,
 }) => {
-  const policy = subsidyAccessPolicy || transformSubsidySummaryToPolicy(subsidySummary, enterpriseOfferMetadata);
+  const policy = subsidyAccessPolicy;
 
   const transformedPolicyData = {
     budgetId,
