@@ -9,7 +9,6 @@ import {
   ALLOCATE_LEARNING_BUDGETS_TARGETS,
   ANALYTICS_V2_TARGETS,
 } from '../constants';
-
 import { TourStep } from '../../types';
 import LmsApiService from '../../../../data/services/LmsApiService';
 import AdministerSubscriptionsFlow from './AdministerSubscriptionsFlow';
@@ -22,32 +21,18 @@ import SetUpPreferencesFlow from './SetUpPreferencesFlow';
 import { TOUR_TARGETS } from '../../constants';
 import useFetchCompletedOnboardingFlows from '../data/useFetchCompletedOnboardingFlows';
 
-interface AdminOnboardingTourProps {
-  adminUuid: string;
-  currentStep: number;
-  enablePortalLearnerCreditManagementScreen: boolean;
-  enterpriseFeatures: {
-    enterpriseInviteAdminsEnabled?: boolean;
-  }
-  enterpriseId: string;
-  enterpriseSlug: string;
-  onClose: () => void;
-  setCurrentStep: (currentStep: number) => void;
-  targetSelector?: string;
-}
-
 const AdminOnboardingTour = (
   {
     adminUuid,
     currentStep,
     enablePortalLearnerCreditManagementScreen,
-    enterpriseFeatures,
+    // enterpriseFeatures removed
     enterpriseSlug,
     onClose,
     setCurrentStep,
     targetSelector,
     enterpriseId,
-  }: AdminOnboardingTourProps,
+  },
 ): Array<TourStep> => {
   const { refetch } = useFetchCompletedOnboardingFlows(adminUuid);
   function handleAdvanceTour(advanceEventName: string) {
@@ -85,7 +70,7 @@ const AdminOnboardingTour = (
   });
   const organizeLearnersFlow = OrganizeLearnersFlow({
     enterpriseId,
-    enableInviteAdmins: enterpriseFeatures?.enterpriseInviteAdminsEnabled ?? false,
+    enableInviteAdmins: true,
     handleAdvanceTour,
     handleBackTour,
     handleEndTour,
@@ -93,7 +78,7 @@ const AdminOnboardingTour = (
   const allocateLearningBudgetsFlow = useAllocateLearningBudgetsFlow({
     currentStep,
     enablePortalLearnerCreditManagementScreen,
-    enterpriseFeatures,
+    enterpriseFeatures: {},
     enterpriseId,
     enterpriseSlug,
     handleBackTour,

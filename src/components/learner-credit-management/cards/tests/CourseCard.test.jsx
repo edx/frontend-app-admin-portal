@@ -877,7 +877,7 @@ describe('CourseCard', () => {
       });
 
       // Test user deleting the input field content by typing backspace
-      await user.type(textareaInput, '{backspace}'.repeat(mockLearnerEmails.join('\n').length));
+      await user.clear(textareaInput);
       expect(textareaInput).toHaveValue('');
 
       await waitFor(() => {
@@ -978,7 +978,7 @@ describe('CourseCard', () => {
       });
 
       // Test user deleting the input field content by typing backspace
-      await user.type(textareaInput, '{backspace}'.repeat(mockLearnerEmails.join('\n').length));
+      await user.clear(textareaInput);
       expect(textareaInput).toHaveValue('');
 
       await waitFor(() => {

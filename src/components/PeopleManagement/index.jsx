@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Skeleton, Tab, Tabs, Toast, useToggle,
@@ -31,7 +30,6 @@ export const setPeopleManagementTabFromTour = (tabKey) => {
     setTabFromTourHandler(tabKey);
   }
 };
-
 export const getPeopleManagementActiveTabForTour = () => {
   if (typeof getActiveTabFromTourHandler === 'function') {
     return getActiveTabFromTourHandler();
@@ -39,7 +37,7 @@ export const getPeopleManagementActiveTabForTour = () => {
   return null;
 };
 
-const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
+const PeopleManagementPage = ({ enterpriseId }) => {
   const intl = useIntl();
   const PAGE_TITLE = intl.formatMessage({
     id: 'admin.portal.people.management.page',
@@ -67,7 +65,7 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isModalOpen, openModal, closeModal] = useToggle(false);
   const [groups, setGroups] = useState();
-  const [activeTab, setActiveTab] = useState(learnersTabEnabled ? 'learners' : null);
+  const [activeTab, setActiveTab] = useState('learners');
 
   const {
     adminsTabNotificationBubble,
@@ -154,66 +152,53 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
         closeToast={closeGroupInviteErrorModal}
       />
       <div className="mx-3 mt-4">
-        {learnersTabEnabled ? (
-        // NOTE:  this Tabs wrapper is intentional as we’ll be adding additional tabs soon.
-          <Tabs
-            activeKey={activeTab}
-            onSelect={handleTabSelect}
+        {/* Always show both tabs */}
+        <Tabs
+          activeKey={activeTab}
+          onSelect={handleTabSelect}
+        >
+          <Tab
+            eventKey="learners"
+            title={(
+              <span id={ORGANIZE_LEARNER_TARGETS.LEARNERS_TAB}>
+                {intl.formatMessage({
+                  id: 'adminPortal.peopleManagement.tabs.learners',
+                  defaultMessage: 'Learners',
+                  description: 'Learners tab title for people management page.',
+                })}
+              </span>
+            )}
           >
-            <Tab
-              eventKey="learners"
-              title={(
-                <span id={ORGANIZE_LEARNER_TARGETS.LEARNERS_TAB}>
-                  {intl.formatMessage({
-                    id: 'adminPortal.peopleManagement.tabs.learners',
-                    defaultMessage: 'Learners',
-                    description: 'Learners tab title for people management page.',
-                  })}
-                </span>
-              )}
-            >
-              <div className="pt-4">
-                <LearnerTabContent
-                  hasLearnerCredit={hasLearnerCredit}
-                  hasOtherSubsidyTypes={hasOtherSubsidyTypes}
-                  handleOnClickCreateGroup={handleOnClickCreateGroup}
-                  isModalOpen={isModalOpen}
-                  openModal={openModal}
-                  closeModal={closeModal}
-                  handleInviteError={handleInviteError}
-                  groupsCardSection={groupsCardSection}
-                />
-              </div>
-            </Tab>
-            <Tab
-              id={ORGANIZE_LEARNER_TARGETS.ADMINS_TAB}
-              eventKey="admins"
-              tabClassName={ORGANIZE_LEARNER_TARGETS.ADMINS_TAB}
-              title={(
-                <span className="position-relative">
-                  {intl.formatMessage({
-                    id: 'adminPortal.peopleManagement.tabs.admins',
-                    defaultMessage: 'Admins',
-                  })}
-                  {adminsTabNotificationBubble}
-                </span>
-              )}
-            >
-              <InviteAdminsTable />
-            </Tab>
-          </Tabs>
-        ) : (
-          <LearnerTabContent
-            hasLearnerCredit={hasLearnerCredit}
-            hasOtherSubsidyTypes={hasOtherSubsidyTypes}
-            handleOnClickCreateGroup={handleOnClickCreateGroup}
-            isModalOpen={isModalOpen}
-            openModal={openModal}
-            closeModal={closeModal}
-            handleInviteError={handleInviteError}
-            groupsCardSection={groupsCardSection}
-          />
-        )}
+            <div className="pt-4">
+              <LearnerTabContent
+                hasLearnerCredit={hasLearnerCredit}
+                hasOtherSubsidyTypes={hasOtherSubsidyTypes}
+                handleOnClickCreateGroup={handleOnClickCreateGroup}
+                isModalOpen={isModalOpen}
+                openModal={openModal}
+                closeModal={closeModal}
+                handleInviteError={handleInviteError}
+                groupsCardSection={groupsCardSection}
+              />
+            </div>
+          </Tab>
+          <Tab
+            id={ORGANIZE_LEARNER_TARGETS.ADMINS_TAB}
+            eventKey="admins"
+            tabClassName={ORGANIZE_LEARNER_TARGETS.ADMINS_TAB}
+            title={(
+              <span className="position-relative">
+                {intl.formatMessage({
+                  id: 'adminPortal.peopleManagement.tabs.admins',
+                  defaultMessage: 'Admins',
+                })}
+                {adminsTabNotificationBubble}
+              </span>
+            )}
+          >
+            <InviteAdminsTable />
+          </Tab>
+        </Tabs>
       </div>
     </>
   );
@@ -221,16 +206,15 @@ const PeopleManagementPage = ({ enterpriseId, learnersTabEnabled }) => {
 
 const mapStateToProps = (state) => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
-  learnersTabEnabled: state.portalConfiguration.enterpriseFeatures?.enterpriseInviteAdminsEnabled ?? false,
 });
 
 PeopleManagementPage.propTypes = {
-  enterpriseId: PropTypes.string.isRequired,
-  learnersTabEnabled: PropTypes.bool,
-};
-
-PeopleManagementPage.defaultProps = {
-  learnersTabEnabled: false,
+  enterpriseId: (props, propName, componentName) => {
+    if (!props[propName]) {
+      return new Error(`Missing prop \\"${propName}\\" in \\"${componentName}\\".`);
+    }
+    return null;
+  },
 };
 
 export default connect(mapStateToProps)(PeopleManagementPage);
