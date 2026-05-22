@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import {
   Skeleton, Tab, Tabs, Toast, useToggle,
@@ -62,7 +63,6 @@ const PeopleManagementPage = ({ enterpriseId }) => {
   const hasOtherSubsidyTypes = enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.license)
     || enterpriseSubsidyTypes.includes(SUBSIDY_TYPES.coupon);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isModalOpen, openModal, closeModal] = useToggle(false);
   const [groups, setGroups] = useState();
   const [activeTab, setActiveTab] = useState('learners');
@@ -209,12 +209,7 @@ const mapStateToProps = (state) => ({
 });
 
 PeopleManagementPage.propTypes = {
-  enterpriseId: (props, propName, componentName) => {
-    if (!props[propName]) {
-      return new Error(`Missing prop \\"${propName}\\" in \\"${componentName}\\".`);
-    }
-    return null;
-  },
+  enterpriseId: PropTypes.string.isRequired,
 };
 
 export default connect(mapStateToProps)(PeopleManagementPage);

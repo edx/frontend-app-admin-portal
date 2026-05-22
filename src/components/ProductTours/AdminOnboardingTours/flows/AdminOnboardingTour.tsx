@@ -21,6 +21,17 @@ import SetUpPreferencesFlow from './SetUpPreferencesFlow';
 import { TOUR_TARGETS } from '../../constants';
 import useFetchCompletedOnboardingFlows from '../data/useFetchCompletedOnboardingFlows';
 
+interface AdminOnboardingTourProps {
+  adminUuid: string;
+  currentStep: number;
+  enablePortalLearnerCreditManagementScreen: boolean;
+  enterpriseId: string;
+  enterpriseSlug: string;
+  onClose: () => void;
+  setCurrentStep: (currentStep: number) => void;
+  targetSelector?: string;
+}
+
 const AdminOnboardingTour = (
   {
     adminUuid,
@@ -32,7 +43,7 @@ const AdminOnboardingTour = (
     setCurrentStep,
     targetSelector,
     enterpriseId,
-  },
+  }: AdminOnboardingTourProps,
 ): Array<TourStep> => {
   const { refetch } = useFetchCompletedOnboardingFlows(adminUuid);
   function handleAdvanceTour(advanceEventName: string) {

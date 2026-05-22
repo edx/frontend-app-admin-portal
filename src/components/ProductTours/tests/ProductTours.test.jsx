@@ -259,7 +259,7 @@ describe('<ProductTours/>', () => {
       expect(tourConfig).toHaveProperty('onEnd');
     });
 
-    it('is shown when invite admins feature is enabled and alert cookie is not set', () => {
+    it('is shown when invite admins alert cookie is not set', () => {
       render(<ToursWithContext />);
       expect(screen.queryByText("We've recently added the ability for you to invite and manage your admins.", { exact: false })).toBeTruthy();
     });
