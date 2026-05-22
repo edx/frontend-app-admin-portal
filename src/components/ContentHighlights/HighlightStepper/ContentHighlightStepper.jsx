@@ -285,7 +285,7 @@ const ContentHighlightStepper = ({ enterpriseId, editHighlightsEnabled }) => {
       <Stepper activeKey={currentStep}>
         <FullscreenModal
           title={intl.formatMessage({
-            id: 'highlights.catalog.visibility.tab.create.new.highlight.button.text',
+            id: 'highlights.catalog.visibility.tab.create.new.highlight.modal.title',
             defaultMessage: 'New highlight',
             description: 'Modal title for creating a new highlight',
           })}

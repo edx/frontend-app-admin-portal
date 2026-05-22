@@ -86,7 +86,7 @@ const ContentHighlightCatalogVisibilityAlert = () => {
               <FormattedMessage
                 id="highlights.catalog.visibility.tab.create.new.highlight.button.text"
                 defaultMessage="New highlight"
-                description="Modal title for creating a new highlight"
+                description="Button text shown to admin to create a new highlight."
               />
             </Button>,
           ]}
