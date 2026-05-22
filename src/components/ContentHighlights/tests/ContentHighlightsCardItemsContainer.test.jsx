@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 import { Provider } from 'react-redux';
@@ -17,6 +17,18 @@ import { features } from '../../../config';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const mockStore = configureMockStore([thunk]);
+
+jest.mock('../../../data/services/EnterpriseCatalogApiService', () => ({
+  __esModule: true,
+  default: {
+    toggleFavoriteHighlight: jest.fn().mockResolvedValue({}),
+  },
+}));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({ highlightSetUUID: 'test-highlight-uuid' }),
+}));
 
 jest.mock('@2uinc/frontend-enterprise-utils', () => {
   const originalModule = jest.requireActual('@2uinc/frontend-enterprise-utils');
@@ -37,15 +49,28 @@ const testHighlightSet = camelCaseObject(TEST_COURSE_HIGHLIGHTS_DATA)[0]?.highli
 const initialState = {
   portalConfiguration: {
     enterpriseSlug: 'test-enterprise',
+    enterpriseId: 'test-enterprise-id',
+    enterpriseFeatures: {},
+  },
+};
+
+const editHighlightsEnabledState = {
+  portalConfiguration: {
+    enterpriseSlug: 'test-enterprise',
+    enterpriseId: 'test-enterprise-id',
+    enterpriseFeatures: {
+      enterpriseEditHighlightsEnabled: true,
+    },
   },
 };
 
 const ContentHighlightsCardItemsContainerWrapper = ({
   enterpriseAppContextValue = initialEnterpriseAppContextValue,
+  storeState = initialState,
   ...props
 }) => (
   <IntlProvider locale="en">
-    <Provider store={mockStore(initialState)}>
+    <Provider store={mockStore(storeState)}>
       <EnterpriseAppContext.Provider value={enterpriseAppContextValue}>
         <ContentHighlightsCardItemsContainer {...props} />
       </EnterpriseAppContext.Provider>
@@ -194,6 +219,128 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
         isEditing={false}
       />);
       expect(screen.queryByTestId('edit-mode-card-grid')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('editHighlightsEnabled mode', () => {
+    const highlightedContentWithFavorites = testHighlightSet.map((item, idx) => ({
+      ...item,
+      contentKey: `test-content-key-${idx}`, // ensure unique contentKeys across all items
+      isFavorite: idx === 0,
+    }));
+
+    it('renders FeaturedContentSection when editHighlightsEnabled is true', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Test Highlight"
+        storeState={editHighlightsEnabledState}
+      />);
+      expect(screen.getByTestId('featured-courses-section')).toBeInTheDocument();
+      expect(screen.getByText('Featured courses and programs')).toBeInTheDocument();
+    });
+
+    it('does not render FeaturedContentSection when editHighlightsEnabled is false', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={testHighlightSet}
+        highlightTitle="Test Highlight"
+        storeState={initialState}
+      />);
+      expect(screen.queryByTestId('featured-courses-section')).not.toBeInTheDocument();
+    });
+
+    it('renders highlight title heading when editHighlightsEnabled is true', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Recommended for Marketing"
+        storeState={editHighlightsEnabledState}
+      />);
+      expect(screen.getByText(/All courses and programs in "Recommended for Marketing" highlight/)).toBeInTheDocument();
+    });
+
+    it('does not render highlight title heading when editHighlightsEnabled is false', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={testHighlightSet}
+        highlightTitle="Recommended for Marketing"
+        storeState={initialState}
+      />);
+      expect(screen.queryByText(/All courses and programs in/)).not.toBeInTheDocument();
+    });
+
+    it('renders StarButton for each active card when editHighlightsEnabled is true', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+      highlightedContentWithFavorites.forEach((item) => {
+        expect(screen.getByTestId(`star-btn-${item.uuid}`)).toBeInTheDocument();
+      });
+    });
+
+    it('renders card wrappers with position-relative and overflow visible', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+      const firstItem = highlightedContentWithFavorites[0];
+      const wrapper = screen.getByTestId(`card-wrapper-${firstItem.uuid}`);
+      expect(wrapper).toHaveClass('position-relative');
+      expect(wrapper).toHaveStyle({ overflow: 'visible' });
+    });
+
+    it('starred item appears in featured section', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+      // First item is starred (isFavorite: true), should appear in featured section
+      const firstTitle = highlightedContentWithFavorites[0].title;
+      const featuredSection = screen.getByTestId('featured-courses-section');
+      expect(featuredSection).toHaveTextContent(firstTitle);
+    });
+
+    it('clicking star button on unstarred item toggles starred state', async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+      // Second item is not starred
+      const secondItem = highlightedContentWithFavorites[1];
+      const starBtn = screen.getByTestId(`star-btn-${secondItem.uuid}`);
+      await user.click(starBtn);
+      // After API resolves, loadingContentKey clears and the item shows in featured section
+      const featuredSection = screen.getByTestId('featured-courses-section');
+      await waitFor(() => expect(featuredSection).toHaveTextContent(secondItem.title));
+    });
+
+    it('renders StarButton for each archived card when editHighlightsEnabled is true', () => {
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = true;
+      // First item in testHighlightSet has course_run_statuses: [archived]
+      const archivedItem = highlightedContentWithFavorites.find(
+        (item) => item.courseRunStatuses?.includes('archived'),
+      );
+      if (!archivedItem) { return; } // skip if no archived content in test data
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+      expect(screen.getByTestId(`card-wrapper-archived-${archivedItem.uuid}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`star-btn-${archivedItem.uuid}`)).toBeInTheDocument();
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = false;
     });
   });
 });

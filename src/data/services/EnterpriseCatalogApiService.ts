@@ -114,6 +114,13 @@ class EnterpriseCatalogApiService {
       payload,
     );
   }
+
+  static toggleFavoriteHighlight(highlightSetUUID: string, contentUuid: string, shouldFavorite: boolean) {
+    return EnterpriseCatalogApiService.apiClient().post(
+      `${EnterpriseCatalogApiService.highlightSetUrl}${highlightSetUUID}/toggle-favorite-highlight/`,
+      { content_uuid: contentUuid, favorite: String(shouldFavorite) },
+    );
+  }
 }
 
 export default EnterpriseCatalogApiService;

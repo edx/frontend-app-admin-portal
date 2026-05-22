@@ -9,6 +9,7 @@ import cardImageCapFallbackSrc from '@edx/brand/paragon/images/card-imagecap-fal
 
 import { features } from '../../config';
 import { getContentHighlightCardFooter } from './data/utils';
+import StarButton from './StarButton';
 
 const ContentHighlightCardItem = ({
   isLoading,
@@ -19,6 +20,11 @@ const ContentHighlightCardItem = ({
   cardImageUrl,
   price,
   archived,
+  editHighlightsEnabled,
+  uuid,
+  isStarred,
+  onToggleStar,
+  cardWrapperTestId,
 }) => {
   const {
     FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING,
@@ -58,7 +64,7 @@ const ContentHighlightCardItem = ({
       </Hyperlink>
     );
   }
-  return (
+  const card = (
     <Card
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
@@ -96,6 +102,22 @@ const ContentHighlightCardItem = ({
       )}
     </Card>
   );
+
+  if (editHighlightsEnabled && uuid) {
+    return (
+      <div className="position-relative" style={{ overflow: 'visible' }} data-testid={cardWrapperTestId || `card-wrapper-${uuid}`}>
+        <StarButton
+          title={title}
+          uuid={uuid}
+          isStarred={Boolean(isStarred)}
+          onToggleStar={onToggleStar}
+        />
+        {card}
+      </div>
+    );
+  }
+
+  return card;
 };
 
 ContentHighlightCardItem.propTypes = {
@@ -115,6 +137,11 @@ ContentHighlightCardItem.propTypes = {
   })).isRequired,
   price: PropTypes.number,
   archived: PropTypes.bool,
+  editHighlightsEnabled: PropTypes.bool,
+  uuid: PropTypes.string,
+  isStarred: PropTypes.bool,
+  onToggleStar: PropTypes.func,
+  cardWrapperTestId: PropTypes.string,
 };
 
 ContentHighlightCardItem.defaultProps = {
@@ -123,6 +150,11 @@ ContentHighlightCardItem.defaultProps = {
   cardImageUrl: undefined,
   price: undefined,
   archived: false,
+  editHighlightsEnabled: false,
+  uuid: undefined,
+  isStarred: false,
+  onToggleStar: undefined,
+  cardWrapperTestId: undefined,
 };
 
 export default ContentHighlightCardItem;

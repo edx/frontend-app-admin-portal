@@ -75,6 +75,7 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
       <ContentHighlightsCardItemContainer
         isLoading={isLoading}
         highlightedContent={highlightSet?.highlightedContent}
+        highlightTitle={highlightSet?.title || ''}
         updateHighlightSet={updateHighlightSet}
         isEditing={isEditing}
         selectedContentKeys={selectedContentKeys}
