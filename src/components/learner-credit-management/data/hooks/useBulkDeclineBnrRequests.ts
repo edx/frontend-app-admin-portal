@@ -6,8 +6,14 @@ import { useToggle } from '@openedx/paragon';
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
 import { learnerCreditManagementQueryKeys } from '../constants';
 import useBudgetId from './useBudgetId';
+import { applyFiltersToOptions } from './useBnrSubsidyRequests';
 
 type DeclineButtonState = 'default' | 'pending' | 'complete' | 'error';
+
+interface TableFilter {
+  id: string;
+  value: unknown;
+}
 
 interface UseBulkDeclineBnrRequestsReturn {
   declineButtonState: DeclineButtonState;
@@ -21,6 +27,7 @@ const useBulkDeclineBnrRequests = (
   enterpriseId: string,
   requestUuids: string[] = [],
   isEntireTableSelected: boolean = false,
+  tableFilters: TableFilter[] = [],
 ): UseBulkDeclineBnrRequestsReturn => {
   const [isOpen, open, close] = useToggle(false);
   const [declineButtonState, setDeclineButtonState] = useState<DeclineButtonState>('default');
@@ -34,18 +41,24 @@ const useBulkDeclineBnrRequests = (
     setDeclineButtonState('pending');
     let partialFailureError: Error | null = null;
     try {
-      const response = isEntireTableSelected
-        ? await EnterpriseAccessApiService.declineAllBnrSubsidyRequests({
+      let response;
+      if (isEntireTableSelected) {
+        const options: Record<string, unknown> = {};
+        applyFiltersToOptions(tableFilters, options);
+        response = await EnterpriseAccessApiService.declineAllBnrSubsidyRequests({
           enterpriseId,
           subsidyAccessPolicyId,
           declineReason,
-        })
-        : await EnterpriseAccessApiService.bulkDeclineBnrSubsidyRequests({
+          options,
+        });
+      } else {
+        response = await EnterpriseAccessApiService.bulkDeclineBnrSubsidyRequests({
           enterpriseId,
           subsidyAccessPolicyId,
           subsidyRequestUUIDs: requestUuids,
           declineReason,
         });
+      }
       const nonDeclinable = response.data?.non_declinable;
       if (nonDeclinable && nonDeclinable.length > 0) {
         partialFailureError = new Error(`${nonDeclinable.length} request(s) could not be declined`);
@@ -65,7 +78,7 @@ const useBulkDeclineBnrRequests = (
       throw partialFailureError;
     }
     setDeclineButtonState('complete');
-  }, [enterpriseId, subsidyAccessPolicyId, requestUuids, isEntireTableSelected, queryClient]);
+  }, [enterpriseId, subsidyAccessPolicyId, requestUuids, isEntireTableSelected, tableFilters, queryClient]);
 
   return {
     declineButtonState,
