@@ -414,6 +414,7 @@ describe('CourseCard', () => {
     const setupAssignments = ({
       hasAllocationException,
       allocationExceptionReason,
+      allocationExceptionMessage,
       courseImportantDates,
     }) => {
       const mockUpdatedLearnerAssignments = [mockLearnerEmails[0]];
@@ -437,7 +438,10 @@ describe('CourseCard', () => {
         mockAllocateContentAssignments.mockRejectedValue({
           customAttributes: {
             httpErrorStatus: allocationExceptionReason ? 422 : 500,
-            httpErrorResponseData: JSON.stringify([{ reason: allocationExceptionReason }]),
+            httpErrorResponseData: JSON.stringify([{
+              reason: allocationExceptionReason,
+              user_message: allocationExceptionMessage,
+            }]),
           },
         });
       } else {
@@ -558,6 +562,17 @@ describe('CourseCard', () => {
       },
       {
         shouldSubmitAssignments: true,
+        hasAllocationException: true,
+        allocationExceptionReason: 'late_enrollment_exact_course_run_required',
+        allocationExceptionMessage: 'Late/custom one-off presentations must be allocated with the exact course run key.',
+        shouldRetryAllocationAfterException: false,
+        courseImportantDates: {
+          courseStartDate: pastStartDate,
+          expectedCourseStartText: 'Course started:',
+        },
+      },
+      {
+        shouldSubmitAssignments: true,
         hasAllocationException: false,
         courseImportantDates: {
           courseStartDate: null,
@@ -576,6 +591,7 @@ describe('CourseCard', () => {
       shouldSubmitAssignments,
       hasAllocationException,
       allocationExceptionReason,
+      allocationExceptionMessage,
       shouldRetryAllocationAfterException,
       courseImportantDates,
     }) => {
@@ -588,6 +604,7 @@ describe('CourseCard', () => {
       } = setupAssignments({
         hasAllocationException,
         allocationExceptionReason,
+        allocationExceptionMessage,
         courseImportantDates,
       });
 
@@ -740,6 +757,9 @@ describe('CourseCard', () => {
             const assignmentErrorModal = getAssignmentErrorModal();
             const errorModalTitle = 'Something went wrong';
             expect(assignmentErrorModal.getByText(errorModalTitle)).toBeInTheDocument();
+            if (allocationExceptionMessage) {
+              expect(assignmentErrorModal.getByText(allocationExceptionMessage)).toBeInTheDocument();
+            }
             if (shouldRetryAllocationAfterException) {
               await simulateClickErrorModalTryAgain(errorModalTitle, assignmentErrorModal);
               expect(sendEnterpriseTrackEvent).toHaveBeenCalled();
