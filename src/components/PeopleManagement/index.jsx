@@ -152,7 +152,6 @@ const PeopleManagementPage = ({ enterpriseId }) => {
         closeToast={closeGroupInviteErrorModal}
       />
       <div className="mx-3 mt-4">
-        {/* Always show both tabs */}
         <Tabs
           activeKey={activeTab}
           onSelect={handleTabSelect}
