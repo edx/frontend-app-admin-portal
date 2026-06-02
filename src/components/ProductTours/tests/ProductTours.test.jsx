@@ -67,7 +67,6 @@ const ToursWithContext = ({
   subsidyRequestsEnabled = false,
   canManageLearnerCredit = false,
   enableLearnerPortal = false,
-  // enableInviteAdmins removed (no longer used)
   EnterpriseSubsidiesContextValue = {
     canManageLearnerCredit,
     enterpriseSubsidyTypes: [SUBSIDY_TYPES.coupon],

@@ -141,6 +141,5 @@ const mapStateToProps = (state: RootState) => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
   enterpriseSlug: state.portalConfiguration.enterpriseSlug,
   enablePortalLearnerCreditManagementScreen: state.portalConfiguration.enablePortalLearnerCreditManagementScreen,
-  // enterpriseFeatures removed
 });
 export default connect(mapStateToProps)(AdminOnboardingTours);

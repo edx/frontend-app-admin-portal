@@ -37,7 +37,6 @@ const AdminOnboardingTour = (
     adminUuid,
     currentStep,
     enablePortalLearnerCreditManagementScreen,
-    // enterpriseFeatures removed
     enterpriseSlug,
     onClose,
     setCurrentStep,
@@ -89,7 +88,6 @@ const AdminOnboardingTour = (
   const allocateLearningBudgetsFlow = useAllocateLearningBudgetsFlow({
     currentStep,
     enablePortalLearnerCreditManagementScreen,
-    enterpriseFeatures: {},
     enterpriseId,
     enterpriseSlug,
     handleBackTour,
