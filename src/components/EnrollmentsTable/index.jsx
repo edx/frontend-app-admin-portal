@@ -4,7 +4,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 
 import TableContainer from '../../containers/TableContainer';
 import {
-  i18nFormatTimestamp, i18nFormatPassedTimestamp, i18nFormatProgressStatus, formatPercentage,
+  i18nFormatTimestamp, formatPercentage,
 } from '../../utils';
 import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiService';
 
@@ -126,11 +126,9 @@ const EnrollmentsTable = () => {
     enrollment_date: i18nFormatTimestamp({
       intl, timestamp: enrollment.enrollment_date,
     }),
-    passed_date: i18nFormatPassedTimestamp({ intl, timestamp: enrollment.passed_date }),
     user_account_creation_date: i18nFormatTimestamp({
       intl, timestamp: enrollment.user_account_creation_date,
     }),
-    progress_status: i18nFormatProgressStatus({ intl, progressStatus: enrollment.progress_status }),
     course_list_price: enrollment.course_list_price ? `$${enrollment.course_list_price}` : '',
     current_grade: formatPercentage({ decimal: enrollment.current_grade }),
     course_progress: formatPercentage({ decimal: enrollment.course_progress }),
