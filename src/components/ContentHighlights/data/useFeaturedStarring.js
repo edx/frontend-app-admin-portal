@@ -1,10 +1,12 @@
 import {
   useState, useCallback, useEffect, useMemo, useRef,
 } from 'react';
+import { getConfig } from '@edx/frontend-platform';
 import { useToggle } from '@openedx/paragon';
 import { logError } from '@edx/frontend-platform/logging';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
-import { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET } from './constants';
+
+const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
 
 /**
  * Custom hook that encapsulates all starring state and logic.

@@ -24,7 +24,6 @@ const ContentHighlightCardItem = ({
   uuid,
   isStarred,
   onToggleStar,
-  cardWrapperTestId,
 }) => {
   const {
     FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING,
@@ -64,11 +63,27 @@ const ContentHighlightCardItem = ({
       </Hyperlink>
     );
   }
+
+  let cardWrapperTestId;
+  if (editHighlightsEnabled && uuid) {
+    cardWrapperTestId = archived ? `card-wrapper-archived-${uuid}` : `card-wrapper-${uuid}`;
+  }
+
   const card = (
     <Card
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
+      className={editHighlightsEnabled && uuid ? 'position-relative w-100' : undefined}
+      data-testid={cardWrapperTestId}
     >
+      {editHighlightsEnabled && uuid && (
+        <StarButton
+          title={title}
+          uuid={uuid}
+          isStarred={Boolean(isStarred)}
+          onToggleStar={onToggleStar}
+        />
+      )}
       <Card.ImageCap
         src={cardInfo.cardImgSrc}
         fallbackSrc={cardImageCapFallbackSrc}
@@ -103,20 +118,6 @@ const ContentHighlightCardItem = ({
     </Card>
   );
 
-  if (editHighlightsEnabled && uuid) {
-    return (
-      <div className="position-relative" style={{ overflow: 'visible' }} data-testid={cardWrapperTestId || `card-wrapper-${uuid}`}>
-        <StarButton
-          title={title}
-          uuid={uuid}
-          isStarred={Boolean(isStarred)}
-          onToggleStar={onToggleStar}
-        />
-        {card}
-      </div>
-    );
-  }
-
   return card;
 };
 
@@ -141,7 +142,6 @@ ContentHighlightCardItem.propTypes = {
   uuid: PropTypes.string,
   isStarred: PropTypes.bool,
   onToggleStar: PropTypes.func,
-  cardWrapperTestId: PropTypes.string,
 };
 
 ContentHighlightCardItem.defaultProps = {
@@ -154,7 +154,6 @@ ContentHighlightCardItem.defaultProps = {
   uuid: undefined,
   isStarred: false,
   onToggleStar: undefined,
-  cardWrapperTestId: undefined,
 };
 
 export default ContentHighlightCardItem;

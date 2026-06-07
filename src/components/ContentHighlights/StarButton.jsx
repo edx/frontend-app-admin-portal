@@ -36,7 +36,14 @@ const StarButton = ({
         onToggleStar();
       }}
       data-testid={`star-btn-${uuid}`}
-      className="star-btn"
+      className="star-btn p-0 border-0 bg-transparent shadow-none"
+      style={{
+        position: 'absolute',
+        top: '1px',
+        right: '-25px',
+        width: '24px',
+        height: '24px',
+      }}
     >
       <Icon src={isStarred ? StarFilled : StarOutline} />
     </button>

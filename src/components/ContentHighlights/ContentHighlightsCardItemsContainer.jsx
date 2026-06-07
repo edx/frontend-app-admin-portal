@@ -156,7 +156,6 @@ const ContentHighlightsCardItemsContainer = ({
             key={uuid}
             uuid={uuid}
             editHighlightsEnabled={editHighlightsEnabled}
-            cardWrapperTestId={`card-wrapper-${uuid}`}
             isStarred={starredContentKeys.has(contentKey)}
             onToggleStar={() => handleToggleStar(contentKey)}
             cardImageUrl={cardImageUrl}
@@ -220,7 +219,6 @@ const ContentHighlightsCardItemsContainer = ({
                 key={uuid}
                 uuid={uuid}
                 editHighlightsEnabled={editHighlightsEnabled}
-                cardWrapperTestId={`card-wrapper-archived-${uuid}`}
                 isStarred={starredContentKeys.has(contentKey)}
                 onToggleStar={() => handleToggleStar(contentKey)}
                 cardImageUrl={cardImageUrl}

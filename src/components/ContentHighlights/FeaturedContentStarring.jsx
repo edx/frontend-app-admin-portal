@@ -1,12 +1,14 @@
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { getConfig } from '@edx/frontend-platform';
 import {
   ActionRow, AlertModal, Button, DataTable, Icon, Spinner,
 } from '@openedx/paragon';
 import { StarFilled, StarOutline } from '@openedx/paragon/icons';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET } from './data/constants';
 import './Highlights.scss';
+
+const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
 
 const renderTitleHeader = (courseTitleLabel) => (
   <div className="featured-table-header d-flex align-items-center">

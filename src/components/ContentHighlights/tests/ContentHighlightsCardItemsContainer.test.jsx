@@ -292,7 +292,7 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
       const firstItem = highlightedContentWithFavorites[0];
       const wrapper = screen.getByTestId(`card-wrapper-${firstItem.uuid}`);
       expect(wrapper).toHaveClass('position-relative');
-      expect(wrapper).toHaveStyle({ overflow: 'visible' });
+      expect(wrapper).toHaveClass('w-100');
     });
 
     it('starred item appears in featured section', () => {
