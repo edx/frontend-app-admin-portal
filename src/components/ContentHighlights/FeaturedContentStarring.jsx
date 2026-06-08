@@ -1,11 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { getConfig } from '@edx/frontend-platform';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import {
   ActionRow, AlertModal, Button, DataTable, Icon, Spinner,
 } from '@openedx/paragon';
 import { StarFilled, StarOutline } from '@openedx/paragon/icons';
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import './highlights.scss';
 
 const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
 
@@ -63,7 +64,7 @@ const renderPartnerCell = ({ row }) => {
               className="ml-2"
               src={org.logoImageUrl}
               alt={org.name}
-              style={{ height: '32px', width: '72px' }}
+              style={{ height: '32px', width: '82px' }}
             />
           )
         ))}
@@ -257,6 +258,7 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
       {tableData.length > 0 ? (
         <div className="w-100">
           <DataTable
+            className="featured-courses-table"
             data={tableData}
             columns={columns}
             itemCount={tableData.length}
@@ -267,6 +269,7 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
       ) : (
         <div className="w-100">
           <DataTable
+            className="featured-courses-table"
             data={[{
               uuid: 'empty', title: '', contentKey: '', authoringOrganizations: [], isLoading: false,
             }]}
