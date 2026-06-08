@@ -44,6 +44,16 @@ const RegisteredLearnersWrapper = props => (
   </MemoryRouter>
 );
 
+const createDeferred = () => {
+  let resolve;
+  let reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  return { promise, resolve, reject };
+};
+
 describe('RegisteredLearnersTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -125,5 +135,35 @@ describe('RegisteredLearnersTable', () => {
         expect.objectContaining({ page: 2 }),
       );
     });
+  });
+
+  it('does not render empty state while loading', async () => {
+    const deferred = createDeferred();
+    EnterpriseDataApiService.fetchUnenrolledRegisteredLearners.mockReturnValue(deferred.promise);
+
+    render(<RegisteredLearnersWrapper />);
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchUnenrolledRegisteredLearners).toHaveBeenCalled();
+    });
+    expect(screen.queryByText('There are no results.')).not.toBeInTheDocument();
+
+    deferred.resolve({
+      data: {
+        count: 0,
+        num_pages: 0,
+        results: [],
+      },
+    });
+  });
+
+  it('renders error state when data fetch fails', async () => {
+    EnterpriseDataApiService.fetchUnenrolledRegisteredLearners.mockRejectedValueOnce(new Error('Bad request'));
+
+    render(<RegisteredLearnersWrapper />);
+
+    expect(await screen.findByText('Unable to load data')).toBeInTheDocument();
+    expect(screen.getByText('Try refreshing your screen Bad request')).toBeInTheDocument();
+    expect(screen.queryByText('There are no results.')).not.toBeInTheDocument();
   });
 });
