@@ -118,7 +118,7 @@ exports[`RegisteredLearnersTable renders empty state correctly 1`] = `
               aria-relevant="text"
               class="sr-only"
             >
-              Page 1, Current Page, of -1
+              Page 1, Current Page, of 1
             </div>
             <ul
               class="pagination"
@@ -159,11 +159,13 @@ exports[`RegisteredLearnersTable renders empty state correctly 1`] = `
                 </button>
               </li>
               <li
-                class="page-item"
+                class="page-item disabled"
               >
                 <button
-                  aria-label="Next, Page 2"
+                  aria-label="Next"
                   class="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                  disabled=""
+                  tabindex="-1"
                   type="button"
                 >
                   <span

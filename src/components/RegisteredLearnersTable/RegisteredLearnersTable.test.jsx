@@ -6,7 +6,12 @@ import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import '@testing-library/jest-dom/extend-expect';
 
-import { render, screen } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { axe } from 'jest-axe';
 import RegisteredLearnersTable from '.';
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
@@ -64,5 +69,61 @@ describe('RegisteredLearnersTable', () => {
 
     expect(await screen.findByText('There are no results.')).toBeInTheDocument();
     expect(asFragment()).toMatchSnapshot();
+  });
+
+  it('fetches sorted data when sorting changes', async () => {
+    EnterpriseDataApiService.fetchUnenrolledRegisteredLearners.mockResolvedValue({
+      data: {
+        count: 1,
+        num_pages: 2,
+        results: [
+          {
+            user_email: 'learner@example.com',
+            lms_user_created: '2024-01-01T00:00:00Z',
+          },
+        ],
+      },
+    });
+
+    render(<RegisteredLearnersWrapper />);
+
+    await screen.findByText('learner@example.com');
+    fireEvent.click(screen.getByRole('columnheader', { name: /Account Created/i }));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchUnenrolledRegisteredLearners).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({
+          ordering: expect.stringMatching(/lms_user_created/),
+        }),
+      );
+    });
+  });
+
+  it('fetches next page when pagination changes', async () => {
+    EnterpriseDataApiService.fetchUnenrolledRegisteredLearners.mockResolvedValue({
+      data: {
+        count: 60,
+        num_pages: 2,
+        results: [
+          {
+            user_email: 'learner@example.com',
+            lms_user_created: '2024-01-01T00:00:00Z',
+          },
+        ],
+      },
+    });
+
+    render(<RegisteredLearnersWrapper />);
+
+    await screen.findByText('learner@example.com');
+    fireEvent.click(screen.getByRole('button', { name: /Next/i }));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchUnenrolledRegisteredLearners).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({ page: 2 }),
+      );
+    });
   });
 });

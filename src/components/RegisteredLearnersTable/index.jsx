@@ -18,7 +18,7 @@ import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiServi
 
 const defaultPaginationData = {
   itemCount: 0,
-  pageCount: 0,
+  pageCount: 1,
   data: [],
 };
 
@@ -41,7 +41,7 @@ const RegisteredLearnersTable = ({ enterpriseId }) => {
       .then((response) => {
         setPaginationData({
           itemCount: response.data.count,
-          pageCount: response.data.num_pages,
+          pageCount: response.data.num_pages || 1,
           data: response.data.results,
         });
       })
