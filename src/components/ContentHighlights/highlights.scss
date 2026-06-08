@@ -1,9 +1,11 @@
-  th:first-child,
-  td:first-child {
-    width: 20%;
-  }
+  .featured-courses-section {
+    th:first-child,
+    td:first-child {
+      width: 20%;
+    }
 
-  th:last-child,
-  td:last-child {
-    width: 45%;
+    th:last-child,
+    td:last-child {
+      width: 45%;
+    }
   }

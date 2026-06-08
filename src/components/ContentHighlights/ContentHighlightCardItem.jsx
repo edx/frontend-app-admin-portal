@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import {
   Card, Hyperlink, Icon, Truncate,
 } from '@openedx/paragon';
@@ -73,7 +74,9 @@ const ContentHighlightCardItem = ({
     <Card
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
-      className={editHighlightsEnabled && uuid ? 'position-relative w-100' : undefined}
+      className={classNames({
+        'position-relative w-100': editHighlightsEnabled && uuid,
+      })}
       data-testid={cardWrapperTestId}
     >
       {editHighlightsEnabled && uuid && (

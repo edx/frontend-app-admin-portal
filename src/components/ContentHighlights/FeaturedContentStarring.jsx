@@ -12,7 +12,7 @@ const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
 
 const renderTitleHeader = (courseTitleLabel) => (
   <div className="d-flex align-items-center">
-    <Icon src={StarOutline} className="mr-2" />
+    <Icon src={StarOutline} className="mr-2 text-muted" />
     <span className="font-weight-bold text-dark">{courseTitleLabel}</span>
   </div>
 );
@@ -236,7 +236,7 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
 
   return (
     <div
-      className="mb-4 p-4 rounded bg-light-200"
+      className="featured-courses-section mb-4 p-4 rounded bg-light-200"
       data-testid="featured-courses-section"
     >
       <h4 className="mb-1 font-weight-bold">
@@ -246,7 +246,7 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
           description="Section title for featured courses"
         />
       </h4>
-      <p className="text-muted mb-3">
+      <p className="mb-3">
         <FormattedMessage
           id="highlights.featured.section.subtitle"
           defaultMessage="Selected courses or programs will be displayed at the top of this highlight in the Learner Portal. Star up to {max} courses."
