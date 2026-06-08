@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Icon } from '@openedx/paragon';
+import { Button, Icon } from '@openedx/paragon';
 import { StarFilled, StarOutline } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 
@@ -27,8 +27,8 @@ const StarButton = ({
     );
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="none"
       aria-label={ariaLabel}
       onClick={(e) => {
         e.preventDefault();
@@ -46,7 +46,7 @@ const StarButton = ({
       }}
     >
       <Icon src={isStarred ? StarFilled : StarOutline} />
-    </button>
+    </Button>
   );
 };
 

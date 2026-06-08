@@ -6,20 +6,19 @@ import {
 } from '@openedx/paragon';
 import { StarFilled, StarOutline } from '@openedx/paragon/icons';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import './Highlights.scss';
 
 const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
 
 const renderTitleHeader = (courseTitleLabel) => (
-  <div className="featured-table-header d-flex align-items-center">
-    <Icon src={StarOutline} className="featured-table-header-icon mr-2" />
-    <span className="featured-table-header-label">{courseTitleLabel}</span>
+  <div className="d-flex align-items-center">
+    <Icon src={StarOutline} className="mr-2" />
+    <span className="font-weight-bold text-dark">{courseTitleLabel}</span>
   </div>
 );
 
 const renderLoadingTitleCell = () => (
-  <div className="featured-loading-row d-flex align-items-center text-muted" data-testid="featured-loading-row">
-    <Spinner animation="border" size="sm" variant="secondary" />
+  <div className="d-flex align-items-center text-muted" data-testid="featured-loading-row">
+    <Spinner animation="border" size="sm" variant="secondary" className="mr-2" />
     <span className="small">
       <FormattedMessage
         id="highlights.featured.table.loading"
@@ -37,15 +36,15 @@ const renderTitleCell = ({ row, onUnstar, getUnstarAriaLabel }) => {
 
   const unstarAriaLabel = getUnstarAriaLabel(row.original.title);
   return (
-    <div className="featured-title-cell d-flex align-items-center">
-      <button
-        type="button"
-        className="featured-title-cell-button"
+    <div className="d-flex align-items-center">
+      <Button
+        variant="none"
+        className="p-0 mr-2 border-0 bg-transparent shadow-none"
         aria-label={unstarAriaLabel}
         onClick={() => onUnstar(row.original.contentKey)}
       >
-        <Icon src={StarFilled} className="featured-title-cell-icon mr-2" />
-      </button>
+        <Icon src={StarFilled} />
+      </Button>
       <span>{row.original.title}</span>
     </div>
   );
@@ -54,12 +53,18 @@ const renderTitleCell = ({ row, onUnstar, getUnstarAriaLabel }) => {
 const renderPartnerCell = ({ row }) => {
   const orgs = row.original.authoringOrganizations;
   return (
-    <div className="featured-partner-cell d-flex align-items-center justify-content-between">
+    <div className="d-flex align-items-center justify-content-between">
       <span>{orgs.map((org) => org.name).join(', ')}</span>
-      <div className="featured-partner-logos d-flex align-items-center">
+      <div className="d-flex align-items-center">
         {orgs.map((org) => (
           org.logoImageUrl && (
-            <img key={org.uuid} className="featured-partner-logo" src={org.logoImageUrl} alt={org.name} />
+            <img
+              key={org.uuid}
+              className="ml-2"
+              src={org.logoImageUrl}
+              alt={org.name}
+              style={{ height: '32px', width: '72px' }}
+            />
           )
         ))}
       </div>
@@ -68,8 +73,8 @@ const renderPartnerCell = ({ row }) => {
 };
 
 const renderEmptyPlaceholderCell = (emptyPlaceholderLabel) => (
-  <div className="featured-empty-cell d-flex align-items-center text-muted">
-    <Icon src={StarOutline} className="featured-empty-cell-icon mr-2" />
+  <div className="d-flex align-items-center text-muted">
+    <Icon src={StarOutline} className="mr-2" />
     <span>{emptyPlaceholderLabel}</span>
   </div>
 );
@@ -85,7 +90,7 @@ const getFeaturedColumns = ({
     Cell: TitleCell,
   },
   {
-    Header: <span className="featured-table-header-label">{educationalPartnerLabel}</span>,
+    Header: <span className="font-weight-bold text-dark">{educationalPartnerLabel}</span>,
     accessor: 'authoringOrganizations',
     Cell: renderPartnerCell,
   },
@@ -230,17 +235,17 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
 
   return (
     <div
-      className="featured-courses-section mb-4 p-4 rounded bg-light-200"
+      className="mb-4 p-4 rounded bg-light-200"
       data-testid="featured-courses-section"
     >
-      <h4 className="featured-courses-section-title mb-1 font-weight-bold">
+      <h4 className="mb-1 font-weight-bold">
         <FormattedMessage
           id="highlights.featured.section.title"
           defaultMessage="Featured courses and programs"
           description="Section title for featured courses"
         />
       </h4>
-      <p className="featured-courses-section-subtitle text-muted mb-3">
+      <p className="text-muted mb-3">
         <FormattedMessage
           id="highlights.featured.section.subtitle"
           defaultMessage="Selected courses or programs will be displayed at the top of this highlight in the Learner Portal. Star up to {max} courses."
@@ -250,7 +255,7 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
       </p>
 
       {tableData.length > 0 ? (
-        <div className="featured-courses-table">
+        <div className="w-100">
           <DataTable
             data={tableData}
             columns={columns}
@@ -260,7 +265,7 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
           </DataTable>
         </div>
       ) : (
-        <div className="featured-courses-table featured-courses-table-empty">
+        <div className="w-100">
           <DataTable
             data={[{
               uuid: 'empty', title: '', contentKey: '', authoringOrganizations: [], isLoading: false,

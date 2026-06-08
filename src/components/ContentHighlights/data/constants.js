@@ -51,6 +51,9 @@ export const MAX_HIGHLIGHT_SETS_PER_ENTERPRISE_CURATION = (
 // Max number of content items per highlight set
 export const MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 24;
 
+// Max number of starred (featured) content items per highlight set
+export const MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4;
+
 // Max number of content items displayed from search results
 export const MAX_PAGE_SIZE = 24;
 
