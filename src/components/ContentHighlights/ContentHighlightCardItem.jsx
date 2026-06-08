@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import {
   Card, Hyperlink, Icon, Truncate,
 } from '@openedx/paragon';
@@ -9,6 +10,7 @@ import cardImageCapFallbackSrc from '@edx/brand/paragon/images/card-imagecap-fal
 
 import { features } from '../../config';
 import { getContentHighlightCardFooter } from './data/utils';
+import StarButton from './StarButton';
 
 const ContentHighlightCardItem = ({
   isLoading,
@@ -19,6 +21,10 @@ const ContentHighlightCardItem = ({
   cardImageUrl,
   price,
   archived,
+  editHighlightsEnabled,
+  uuid,
+  isStarred,
+  onToggleStar,
 }) => {
   const {
     FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING,
@@ -58,11 +64,29 @@ const ContentHighlightCardItem = ({
       </Hyperlink>
     );
   }
-  return (
+
+  let cardWrapperTestId;
+  if (editHighlightsEnabled && uuid) {
+    cardWrapperTestId = archived ? `card-wrapper-archived-${uuid}` : `card-wrapper-${uuid}`;
+  }
+
+  const card = (
     <Card
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
+      className={classNames({
+        'position-relative w-100': editHighlightsEnabled && uuid,
+      })}
+      data-testid={cardWrapperTestId}
     >
+      {editHighlightsEnabled && uuid && (
+        <StarButton
+          title={title}
+          uuid={uuid}
+          isStarred={Boolean(isStarred)}
+          onToggleStar={onToggleStar}
+        />
+      )}
       <Card.ImageCap
         src={cardInfo.cardImgSrc}
         fallbackSrc={cardImageCapFallbackSrc}
@@ -96,6 +120,8 @@ const ContentHighlightCardItem = ({
       )}
     </Card>
   );
+
+  return card;
 };
 
 ContentHighlightCardItem.propTypes = {
@@ -115,6 +141,10 @@ ContentHighlightCardItem.propTypes = {
   })).isRequired,
   price: PropTypes.number,
   archived: PropTypes.bool,
+  editHighlightsEnabled: PropTypes.bool,
+  uuid: PropTypes.string,
+  isStarred: PropTypes.bool,
+  onToggleStar: PropTypes.func,
 };
 
 ContentHighlightCardItem.defaultProps = {
@@ -123,6 +153,10 @@ ContentHighlightCardItem.defaultProps = {
   cardImageUrl: undefined,
   price: undefined,
   archived: false,
+  editHighlightsEnabled: false,
+  uuid: undefined,
+  isStarred: false,
+  onToggleStar: undefined,
 };
 
 export default ContentHighlightCardItem;

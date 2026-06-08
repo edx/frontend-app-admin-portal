@@ -5,8 +5,11 @@ import {
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { connect } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 import ContentHighlightCardItem from './ContentHighlightCardItem';
+import useFeaturedStarring from './data/useFeaturedStarring';
+import { FeaturedContentSection, MaxStarredModal } from './FeaturedContentStarring';
 import {
   DEFAULT_ERROR_MESSAGE,
   HIGHLIGHTS_CARD_GRID_COLUMN_SIZES,
@@ -20,10 +23,20 @@ import DeleteArchivedHighlightsDialogs from './DeleteArchivedHighlightsDialogs';
 import { isArchivedContent } from '../../utils';
 
 const ContentHighlightsCardItemsContainer = ({
-  enterpriseId, enterpriseSlug, isLoading, highlightedContent, updateHighlightSet,
-  isEditing, selectedContentKeys, onToggleSelect,
+  enterpriseId, enterpriseSlug, isLoading, highlightedContent, highlightTitle, updateHighlightSet,
+  isEditing, selectedContentKeys, onToggleSelect, editHighlightsEnabled,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useToggle(false);
+  const { highlightSetUUID } = useParams();
+
+  const {
+    starredContentKeys,
+    starredItems,
+    loadingContentKey,
+    isMaxStarredModalOpen,
+    closeMaxStarredModal,
+    handleToggleStar,
+  } = useFeaturedStarring(highlightSetUUID, highlightedContent);
 
   const {
     FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING,
@@ -116,6 +129,24 @@ const ContentHighlightsCardItemsContainer = ({
   };
   return (
     <>
+      {editHighlightsEnabled && (
+        <>
+          <MaxStarredModal isOpen={isMaxStarredModalOpen} onClose={closeMaxStarredModal} />
+          <FeaturedContentSection
+            starredItems={starredItems}
+            loadingContentKey={loadingContentKey}
+            onUnstar={handleToggleStar}
+          />
+          <h4 className="mb-3">
+            <FormattedMessage
+              id="highlights.all.courses.section.heading"
+              defaultMessage='All courses and programs in "{highlightTitle}" highlight'
+              description="Heading above the full courses grid"
+              values={{ highlightTitle }}
+            />
+          </h4>
+        </>
+      )}
       <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
         {activeContent.map(({
           uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
@@ -123,20 +154,24 @@ const ContentHighlightsCardItemsContainer = ({
           <ContentHighlightCardItem
             isLoading={isLoading}
             key={uuid}
+            uuid={uuid}
+            editHighlightsEnabled={editHighlightsEnabled}
+            isStarred={starredContentKeys.has(contentKey)}
+            onToggleStar={() => handleToggleStar(contentKey)}
             cardImageUrl={cardImageUrl}
             title={title}
             archived={false}
             hyperlinkAttrs={
-            {
-              href: generateAboutPageUrl({
-                enterpriseSlug,
-                contentType: contentType.toLowerCase(),
-                contentKey,
-              }),
-              target: '_blank',
-              onClick: () => trackClickEvent({ aggregationKey }),
+              {
+                href: generateAboutPageUrl({
+                  enterpriseSlug,
+                  contentType: contentType.toLowerCase(),
+                  contentKey,
+                }),
+                target: '_blank',
+                onClick: () => trackClickEvent({ aggregationKey }),
+              }
             }
-        }
             contentType={contentType.toLowerCase()}
             partners={authoringOrganizations}
           />
@@ -182,20 +217,24 @@ const ContentHighlightsCardItemsContainer = ({
               <ContentHighlightCardItem
                 isLoading={isLoading}
                 key={uuid}
+                uuid={uuid}
+                editHighlightsEnabled={editHighlightsEnabled}
+                isStarred={starredContentKeys.has(contentKey)}
+                onToggleStar={() => handleToggleStar(contentKey)}
                 cardImageUrl={cardImageUrl}
                 title={title}
                 archived
                 hyperlinkAttrs={
-          {
-            href: generateAboutPageUrl({
-              enterpriseSlug,
-              contentType: contentType.toLowerCase(),
-              contentKey,
-            }),
-            target: '_blank',
-            onClick: () => trackClickEvent({ aggregationKey }),
-          }
-      }
+                  {
+                    href: generateAboutPageUrl({
+                      enterpriseSlug,
+                      contentType: contentType.toLowerCase(),
+                      contentKey,
+                    }),
+                    target: '_blank',
+                    onClick: () => trackClickEvent({ aggregationKey }),
+                  }
+                }
                 contentType={contentType.toLowerCase()}
                 partners={authoringOrganizations}
               />
@@ -213,6 +252,7 @@ ContentHighlightsCardItemsContainer.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   highlightedContent: PropTypes.arrayOf(PropTypes.shape({
     uuid: PropTypes.string,
+    contentKey: PropTypes.string,
     contentType: PropTypes.oneOf(['course', 'program', 'learnerpathway']),
     title: PropTypes.string,
     cardImageUrl: PropTypes.string,
@@ -223,21 +263,26 @@ ContentHighlightsCardItemsContainer.propTypes = {
     })),
     courseRunStatuses: PropTypes.arrayOf(PropTypes.string),
   })).isRequired,
+  highlightTitle: PropTypes.string,
   updateHighlightSet: PropTypes.func.isRequired,
   isEditing: PropTypes.bool,
   selectedContentKeys: PropTypes.instanceOf(Set),
   onToggleSelect: PropTypes.func,
+  editHighlightsEnabled: PropTypes.bool,
 };
 
 ContentHighlightsCardItemsContainer.defaultProps = {
+  highlightTitle: '',
   isEditing: false,
   selectedContentKeys: new Set(),
   onToggleSelect: () => {},
+  editHighlightsEnabled: false,
 };
 
 const mapStateToProps = state => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
   enterpriseSlug: state.portalConfiguration.enterpriseSlug,
+  editHighlightsEnabled: state.portalConfiguration.enterpriseFeatures?.enterpriseEditHighlightsEnabled ?? false,
 });
 
 export default connect(mapStateToProps)(ContentHighlightsCardItemsContainer);
