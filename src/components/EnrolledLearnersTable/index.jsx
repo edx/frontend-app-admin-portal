@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import { DataTable } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import PropTypes from 'prop-types';
 
 import { i18nFormatTimestamp } from '../../utils';
@@ -18,14 +19,14 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
     async (args) => {
       setIsLoading(true);
       try {
+        const primarySort = args.sortBy?.[0];
+        const ordering = primarySort ? `${primarySort.desc ? '-' : ''}${primarySort.id}` : null;
         const response = await EnterpriseDataApiService.fetchEnrolledLearners(
           enterpriseId,
           {
             page: args.pageIndex + 1,
             page_size: args.pageSize,
-            ordering: args.sortBy?.length > 0
-              ? `${args.sortBy[0].desc ? '-' : ''}${args.sortBy[0].id}`
-              : undefined,
+            ...(ordering && { ordering }),
           },
         );
         const { results, count, num_pages: numPages } = response.data;
@@ -35,8 +36,13 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
           lms_user_created: i18nFormatTimestamp({ intl, timestamp: learner.lms_user_created }),
         }));
         setTableData(formattedRows);
-        setItemCount(count);
-        setPageCount(numPages);
+        setItemCount(count || 0);
+        setPageCount(numPages || 0);
+      } catch (error) {
+        logError(error);
+        setTableData([]);
+        setItemCount(0);
+        setPageCount(0);
       } finally {
         setIsLoading(false);
       }
