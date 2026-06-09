@@ -31,6 +31,8 @@ const RegisteredLearnersTable = ({ enterpriseId }) => {
   const [paginationData, setPaginationData] = useState(defaultPaginationData);
 
   useEffect(() => {
+    let isCurrent = true;
+
     setIsLoading(true);
     setError(null);
 
@@ -39,6 +41,10 @@ const RegisteredLearnersTable = ({ enterpriseId }) => {
       ordering,
     })
       .then((response) => {
+        if (!isCurrent) {
+          return;
+        }
+
         setPaginationData({
           itemCount: response.data.count,
           pageCount: response.data.num_pages || 1,
@@ -46,12 +52,22 @@ const RegisteredLearnersTable = ({ enterpriseId }) => {
         });
       })
       .catch((err) => {
+        if (!isCurrent) {
+          return;
+        }
+
         logError(err);
         setError(err);
       })
       .finally(() => {
-        setIsLoading(false);
+        if (isCurrent) {
+          setIsLoading(false);
+        }
       });
+
+    return () => {
+      isCurrent = false;
+    };
   }, [enterpriseId, currentPage, ordering]);
 
   const fetchData = useCallback(({ pageIndex, sortBy = [] }) => {

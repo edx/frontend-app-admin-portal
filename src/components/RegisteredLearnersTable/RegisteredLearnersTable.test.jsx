@@ -155,6 +155,8 @@ describe('RegisteredLearnersTable', () => {
         results: [],
       },
     });
+
+    expect(await screen.findByText('There are no results.')).toBeInTheDocument();
   });
 
   it('renders error state when data fetch fails', async () => {
