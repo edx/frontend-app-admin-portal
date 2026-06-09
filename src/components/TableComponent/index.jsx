@@ -2,8 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 
-import { Alert, Pagination, Table } from '@openedx/paragon';
-import { Error } from '@openedx/paragon/icons';
+import { Alert, DataTable } from '@openedx/paragon';
+import { Error as ErrorIcon } from '@openedx/paragon/icons';
 
 import 'font-awesome/css/font-awesome.css';
 
@@ -14,34 +14,70 @@ import { withLocation, withNavigate } from '../../hoc';
 
 class TableComponent extends React.Component {
   componentDidMount() {
-    // Get initial data
-    this.props.paginateTable();
-  }
-
-  componentDidUpdate(prevProps) {
-    const { location } = this.props;
-
-    // Handle the case where the query params have changed. This is used when sorting & paging, but
-    // also when the back button is used. We need to determine if this is a pagination or sorting
-    // request as we handle these as slightly different actions in the action handlers.
-    if (location.search !== prevProps.location.search) {
-      const prevQueryParams = new URLSearchParams(prevProps.location.search);
-      const prevPage = prevQueryParams.get('page');
-      const prevOrdering = prevQueryParams.get('ordering');
-      const currentQueryParams = new URLSearchParams(location.search);
-      const page = currentQueryParams.get('page');
-      const ordering = currentQueryParams.get('ordering');
-      if (ordering && ordering !== prevOrdering) {
-        this.props.sortTable(ordering);
-      } else if (page !== prevPage) {
-        this.props.paginateTable(parseInt(page, 10));
-      }
-    }
+    // Get initial data for legacy table container consumers.
+    this.props.paginateTable(1);
   }
 
   componentWillUnmount() {
     this.props.clearTable();
   }
+
+  fetchData = ({ pageIndex = 0, sortBy = [] } = {}) => {
+    const {
+      defaultSortIndex,
+      defaultSortType,
+      enterpriseId,
+      id,
+      columns,
+      location,
+      navigate,
+      ordering,
+      paginateTable,
+      sortTable,
+      tableSortable,
+    } = this.props;
+
+    const currentPage = pageIndex + 1;
+    const sortConfig = sortBy[sortBy.length - 1];
+
+    let nextOrdering = ordering;
+    if (tableSortable && sortConfig?.id) {
+      nextOrdering = `${sortConfig.desc ? '-' : ''}${sortConfig.id}`;
+    } else if (tableSortable && !ordering && defaultSortIndex !== undefined) {
+      const defaultColumnKey = columns[defaultSortIndex]?.key;
+      if (defaultColumnKey && defaultSortType) {
+        nextOrdering = defaultSortType === 'desc' ? `-${defaultColumnKey}` : defaultColumnKey;
+      }
+    }
+
+    if (tableSortable && nextOrdering !== ordering && nextOrdering) {
+      updateUrl(navigate, location.pathname, {
+        page: 1,
+        ordering: nextOrdering,
+      });
+      sortTable(nextOrdering);
+
+      const sortDirection = nextOrdering.startsWith('-') ? 'desc' : 'asc';
+      const sortColumnKey = nextOrdering.replace('-', '');
+      const column = columns.find(col => col.key === sortColumnKey);
+      sendEnterpriseTrackEvent(enterpriseId, 'edx.ui.enterprise.admin_portal.table.sorted', {
+        tableId: id,
+        column: column?.label,
+        direction: sortDirection,
+      });
+      return;
+    }
+
+    updateUrl(navigate, location.pathname, {
+      page: currentPage,
+      ordering: nextOrdering || undefined,
+    });
+    paginateTable(currentPage);
+    sendEnterpriseTrackEvent(enterpriseId, 'edx.ui.enterprise.admin_portal.table.paginated', {
+      tableId: id,
+      page: currentPage,
+    });
+  };
 
   renderTableContent() {
     const {
@@ -50,76 +86,55 @@ class TableComponent extends React.Component {
       data,
       defaultSortIndex,
       defaultSortType,
-      enterpriseId,
       formatData,
-      id,
       loading,
-      location,
-      navigate,
       ordering,
+      itemCount,
       pageCount,
       tableSortable,
+      customEmptyMessage,
     } = this.props;
 
-    const sortByColumn = (column, direction) => {
-      updateUrl(navigate, location.pathname, {
-        page: 1,
-        ordering: direction === 'desc' ? `-${column.key}` : column.key,
-      });
-      sendEnterpriseTrackEvent(enterpriseId, 'edx.ui.enterprise.admin_portal.table.sorted', {
-        tableId: id,
-        column: column.label,
-        direction,
-      });
-    };
+    const initialSortBy = tableSortable
+      ? [{
+        id: (ordering && ordering.replace('-', '')) || this.props.columns[defaultSortIndex].key,
+        desc: ordering ? ordering.startsWith('-') : defaultSortType === 'desc',
+      }]
+      : [];
 
     const columnConfig = this.props.columns.map(column => ({
-      ...column,
-      onSort: column.columnSortable ? (direction) => sortByColumn(column, direction) : null,
+      Header: column.label,
+      accessor: column.key,
+      disableSortBy: !column.columnSortable,
     }));
 
-    let sortDirection;
-    let sortColumn;
-
-    if (tableSortable) {
-      sortDirection = defaultSortType || (ordering && ordering.indexOf('-') !== -1 ? 'desc' : 'asc');
-      sortColumn = (ordering && ordering.replace('-', '')) || columnConfig[defaultSortIndex].key;
-    }
+    const emptyStateContent = customEmptyMessage || 'There are no results.';
 
     return (
       <div className={className}>
-        <div className="row">
-          <div className="col">
-            {loading && <TableLoadingOverlay />}
-            <div className="table-responsive">
-              <Table
-                id={id}
-                className="table-sm table-striped"
-                columns={columnConfig}
-                data={formatData(data)}
-                tableSortable={tableSortable}
-                defaultSortedColumn={sortColumn}
-                defaultSortDirection={sortDirection}
-              />
-            </div>
-          </div>
-        </div>
-        <div className="row mt-2">
-          <div className="col d-flex justify-content-center">
-            <Pagination
-              paginationLabel={`${id}-pagination`}
-              pageCount={pageCount}
-              currentPage={currentPage}
-              onPageSelect={(page) => {
-                updateUrl(this.props.navigate, this.props.location.pathname, { page });
-                sendEnterpriseTrackEvent(enterpriseId, 'edx.ui.enterprise.admin_portal.table.paginated', {
-                  tableId: id,
-                  page,
-                });
-              }}
-            />
-          </div>
-        </div>
+        {loading && <TableLoadingOverlay />}
+        <DataTable
+          isLoading={loading}
+          isPaginated
+          manualPagination
+          isSortable={tableSortable}
+          manualSortBy={tableSortable}
+          initialState={{
+            pageSize: 50,
+            pageIndex: Math.max((currentPage || 1) - 1, 0),
+            sortBy: initialSortBy,
+          }}
+          data={formatData(data || [])}
+          itemCount={itemCount || 0}
+          pageCount={pageCount || 1}
+          fetchData={this.fetchData}
+          columns={columnConfig}
+        >
+          <DataTable.TableControlBar />
+          <DataTable.Table />
+          <DataTable.EmptyTable content={emptyStateContent} />
+          <DataTable.TableFooter />
+        </DataTable>
       </div>
     );
   }
@@ -130,18 +145,9 @@ class TableComponent extends React.Component {
 
   renderErrorMessage() {
     return (
-      <Alert variant="danger" icon={Error}>
+      <Alert variant="danger" icon={ErrorIcon}>
         <Alert.Heading>Unable to load data</Alert.Heading>
         <p>Try refreshing your screen {this.props.error.message}</p>
-      </Alert>
-    );
-  }
-
-  renderEmptyDataMessage() {
-    const { customEmptyMessage } = this.props;
-    return (
-      <Alert variant="warning" icon={Error}>
-        {!customEmptyMessage ? 'There are no results.' : customEmptyMessage}
       </Alert>
     );
   }
@@ -153,9 +159,7 @@ class TableComponent extends React.Component {
       <>
         {error && this.renderErrorMessage()}
         {loading && !data && this.renderLoadingMessage()}
-        {!loading && !error && data && data.length === 0
-          && this.renderEmptyDataMessage()}
-        {data && data.length > 0 && this.renderTableContent()}
+        {!error && data && this.renderTableContent()}
       </>
     );
   }
@@ -165,7 +169,11 @@ TableComponent.propTypes = {
   // Props expected from consumer
   id: PropTypes.string.isRequired,
   className: PropTypes.string,
-  columns: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
+  columns: PropTypes.arrayOf(PropTypes.shape({
+    key: PropTypes.string.isRequired,
+    label: PropTypes.node.isRequired,
+    columnSortable: PropTypes.bool,
+  })).isRequired,
   formatData: PropTypes.func.isRequired,
   tableSortable: PropTypes.bool,
   defaultSortIndex: PropTypes.number,
@@ -177,9 +185,10 @@ TableComponent.propTypes = {
   data: PropTypes.arrayOf(PropTypes.shape({})),
   currentPage: PropTypes.number,
   pageCount: PropTypes.number,
+  itemCount: PropTypes.number,
   ordering: PropTypes.string,
   loading: PropTypes.bool,
-  error: PropTypes.instanceOf(Error),
+  error: PropTypes.instanceOf(global.Error),
   paginateTable: PropTypes.func.isRequired,
   sortTable: PropTypes.func.isRequired,
   clearTable: PropTypes.func.isRequired,
@@ -199,6 +208,7 @@ TableComponent.defaultProps = {
   ordering: undefined,
   currentPage: undefined,
   pageCount: undefined,
+  itemCount: undefined,
   error: null,
   loading: false,
   customEmptyMessage: null,
