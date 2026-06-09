@@ -17,6 +17,7 @@ export type BackendHighlightedContentItemResponse = {
   content_key: string;
   title: string;
   card_image_url: string | null;
+  is_favorite?: boolean;
   aggregation_key?: string | null;
   course_run_statuses?: string[] | null;
   authoring_organizations: BackendAuthoringOrganizationResponse[];

@@ -95,4 +95,41 @@ describe('<ContentHighlightCardItem>', () => {
     />);
     expect(screen.getByText('Archived')).toBeInTheDocument();
   });
+
+  it('renders StarButton and wrapper when editHighlightsEnabled is true', async () => {
+    const user = userEvent.setup();
+    const onToggleStar = jest.fn();
+
+    renderWithRouter(<ContentHighlightCardItemContainerWrapper
+      isLoading={false}
+      uuid={testHighlightedContent.uuid}
+      editHighlightsEnabled
+      isStarred={false}
+      onToggleStar={onToggleStar}
+      title={testHighlightedContent.title}
+      contentType={testHighlightedContent.contentType.toLowerCase()}
+      partners={testHighlightedContent.authoringOrganizations}
+    />);
+
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).toBeInTheDocument();
+    const starButton = screen.getByTestId(`star-btn-${testHighlightedContent.uuid}`);
+    expect(starButton).toBeInTheDocument();
+
+    await user.click(starButton);
+    expect(onToggleStar).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render StarButton when editHighlightsEnabled is false', () => {
+    renderWithRouter(<ContentHighlightCardItemContainerWrapper
+      isLoading={false}
+      uuid={testHighlightedContent.uuid}
+      editHighlightsEnabled={false}
+      title={testHighlightedContent.title}
+      contentType={testHighlightedContent.contentType.toLowerCase()}
+      partners={testHighlightedContent.authoringOrganizations}
+    />);
+
+    expect(screen.queryByTestId(`star-btn-${testHighlightedContent.uuid}`)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).not.toBeInTheDocument();
+  });
 });
