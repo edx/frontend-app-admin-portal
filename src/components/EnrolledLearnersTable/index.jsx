@@ -106,7 +106,6 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
     }
   }, [enterpriseId]);
 
-
   return (
     <>
       {error && (
