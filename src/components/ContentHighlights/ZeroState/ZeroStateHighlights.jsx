@@ -14,6 +14,7 @@ import ZeroStateCardFooter from './ZeroStateCardFooter';
 import { useContentHighlightsContext } from '../data/hooks';
 import { BUTTON_TEXT } from '../data/constants';
 import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextProvider';
+import { EDIT_HIGHLIGHTS_TARGETS } from '../../ProductTours/AdminOnboardingTours/constants';
 import EVENT_NAMES from '../../../eventTracking';
 
 const ZeroStateHighlights = ({ enterpriseId, cardClassName }) => {
@@ -41,7 +42,7 @@ const ZeroStateHighlights = ({ enterpriseId, cardClassName }) => {
   return (
     <Row className="mt-5">
       <Col xs={12} sm={10} md={9} lg={8} xl={5}>
-        <Card className={cardClassName}>
+        <Card id={EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_ZERO_STATE_CARD} className={cardClassName}>
           <ZeroStateCardImage imageContainerClassName="bg-light-400 p-4" cardImage={cardImage} />
           <ZeroStateCardText textContainerClassName="text-center align-self-center">
             <h2 className="h3 mb-3">
@@ -59,8 +60,9 @@ const ZeroStateHighlights = ({ enterpriseId, cardClassName }) => {
               />
             </p>
           </ZeroStateCardText>
-          <ZeroStateCardFooter>
+          <ZeroStateCardFooter footerClassName={EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_ZERO_STATE_FOOTER}>
             <Button
+              id={EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_NEW_BUTTON}
               onClick={handleNewHighlightClick}
               iconBefore={Add}
               block

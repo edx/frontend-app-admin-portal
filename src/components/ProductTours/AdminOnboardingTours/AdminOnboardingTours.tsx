@@ -120,7 +120,16 @@ const AdminOnboardingTours: FC<AdminOnboardingToursProps> = ({
 
   return (
     <>
-      <CheckpointOverlay target={adminOnboardingSteps[currentStep]?.target || targetSelector} />
+      <CheckpointOverlay
+        target={
+          adminOnboardingSteps[currentStep]?.overlayTarget
+          || adminOnboardingSteps[currentStep]?.target
+          || targetSelector
+        }
+        widthRatio={adminOnboardingSteps[currentStep]?.overlayWidthRatio}
+        topTarget={adminOnboardingSteps[currentStep]?.overlayTopTarget}
+        padding={adminOnboardingSteps[currentStep]?.overlayPadding}
+      />
       <ProductTour
         tours={tours}
       />

@@ -116,8 +116,8 @@ const messages = defineMessages({
   },
   organizeLearnersStepOneTitle: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.title.1',
-    defaultMessage: 'Organize learners',
-    description: 'Title for the organize learners flow step one',
+    defaultMessage: 'Organize members',
+    description: 'Title for the organize members flow step one',
   },
   organizeLearnersStepOneBody: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.body.1',
@@ -152,8 +152,8 @@ const messages = defineMessages({
   },
   organizeLearnersStepFourBody: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.body.4',
-    defaultMessage: 'Organize learners by creating groups for tracking and assignments.',
-    description: 'Description for the organize learners flow step four',
+    defaultMessage: 'Organize members by creating groups for tracking and assignments.',
+    description: 'Description for the organize members flow step four',
   },
   organizeLearnersStepFiveBody: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.body.5',
