@@ -7,9 +7,11 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
+import { axe } from 'jest-axe';
 
 import EnrolledLearnersTable from '.';
 import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiService';
+import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
 const mockStore = configureMockStore([thunk]);
 const enterpriseId = 'test-enterprise';
@@ -48,8 +50,6 @@ describe('EnrolledLearnersTable', () => {
 
   it('has no accessibility violations', async () => {
     const { container } = render(<EnrolledLearnersWrapper />);
-    const { axe } = require('jest-axe');
-    const { accessibilitySettings } = require('../../../tests/accessibility-settings');
     const results = await axe(container, accessibilitySettings);
     expect(results).toHaveNoViolations();
   });
