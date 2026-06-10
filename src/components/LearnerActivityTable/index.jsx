@@ -45,7 +45,7 @@ const LearnerActivityTable = ({
       setPaginationData(defaultPaginationData);
       setError(null);
       setIsLoading(true);
-      return undefined;
+      return () => {};
     }
 
     let isCurrent = true;
