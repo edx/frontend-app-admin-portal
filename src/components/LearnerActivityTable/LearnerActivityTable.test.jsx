@@ -133,7 +133,7 @@ describe('LearnerActivityTable', () => {
     ['active-week', 'active_past_week'],
     ['inactive-week', 'inactive_past_week'],
     ['inactive-month', 'inactive_past_month'],
-  ])('fetches data with learnerActivity=%s', async (tableId, activity) => {
+  ])('fetches data for tableId=%s with learnerActivity=%s', async (tableId, activity) => {
     await renderLearnerActivityTable(tableId, activity);
 
     expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
