@@ -4,6 +4,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { Provider } from 'react-redux';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { renderWithRouter, sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
@@ -14,6 +15,7 @@ import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextPr
 import ContentHighlightsCardItemsContainer from '../ContentHighlightsCardItemsContainer';
 import { DEFAULT_ERROR_MESSAGE, TEST_COURSE_HIGHLIGHTS_DATA } from '../data/constants';
 import { features } from '../../../config';
+import { queryClient } from '../../test/testUtils';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 const mockStore = configureMockStore([thunk]);
@@ -69,13 +71,15 @@ const ContentHighlightsCardItemsContainerWrapper = ({
   storeState = initialState,
   ...props
 }) => (
-  <IntlProvider locale="en">
-    <Provider store={mockStore(storeState)}>
-      <EnterpriseAppContext.Provider value={enterpriseAppContextValue}>
-        <ContentHighlightsCardItemsContainer {...props} />
-      </EnterpriseAppContext.Provider>
-    </Provider>
-  </IntlProvider>
+  <QueryClientProvider client={queryClient()}>
+    <IntlProvider locale="en">
+      <Provider store={mockStore(storeState)}>
+        <EnterpriseAppContext.Provider value={enterpriseAppContextValue}>
+          <ContentHighlightsCardItemsContainer {...props} />
+        </EnterpriseAppContext.Provider>
+      </Provider>
+    </IntlProvider>
+  </QueryClientProvider>
 );
 
 describe('<ContentHighlightsCardItemsContainer>', () => {
@@ -293,6 +297,20 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
       const wrapper = screen.getByTestId(`card-wrapper-${firstItem.uuid}`);
       expect(wrapper).toHaveClass('position-relative');
       expect(wrapper).toHaveClass('w-100');
+    });
+
+    it('renders starred cards before unstarred cards in the main grid', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithFavorites}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+
+      const cardTitles = screen.getAllByTestId('hyperlink-title');
+
+      expect(cardTitles[0]).toHaveTextContent(highlightedContentWithFavorites[0].title);
+      expect(cardTitles[1]).toHaveTextContent(highlightedContentWithFavorites[1].title);
     });
 
     it('starred item appears in featured section', () => {
