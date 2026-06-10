@@ -60,6 +60,8 @@ export const EDIT_HIGHLIGHTS_LEARN_MORE_URL = 'https://enterprise-support.edx.or
 export const EDIT_HIGHLIGHTS_TARGETS = {
   HIGHLIGHTS_SIDEBAR: 'highlights-link',
   HIGHLIGHTS_SECTION: 'highlights-section',
+  HIGHLIGHTS_ZERO_STATE_CARD: 'highlights-zero-state-card',
+  HIGHLIGHTS_ZERO_STATE_FOOTER: 'highlights-zero-state-footer',
   HIGHLIGHT_SET_CARD: 'highlight-set-card-tour-target',
   HIGHLIGHTS_NEW_BUTTON: 'highlights-new-button',
   HIGHLIGHTS_TAB: 'highlights-tab',
@@ -121,6 +123,7 @@ export const ADMIN_TOUR_EVENT_NAMES = {
   ANALYTICS_BACK_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.analytics.back',
   ANALYTICS_COMPLETED_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.analytics.completed',
   ANALYTICS_DISMISS_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.analytics.dismiss',
+  EDIT_HIGHLIGHTS_VIEWED_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.edit-highlights.viewed',
   EDIT_HIGHLIGHTS_ADVANCE_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.edit-highlights.advance',
   EDIT_HIGHLIGHTS_BACK_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.edit-highlights.back',
   EDIT_HIGHLIGHTS_COMPLETED_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.edit-highlights.completed',

@@ -10,10 +10,22 @@ interface Rect {
 
 interface CheckpointOverlayProps {
   target: string;
+  // When set (0–1), caps the spotlight width to the left portion of the target.
+  widthRatio?: number;
+  // Selector whose top edge extends the spotlight upward.
+  topTarget?: string;
+  // Spotlight padding (px) around the target; defaults to SPOTLIGHT_PADDING.
+  padding?: number;
 }
 
-const CheckpointOverlay: FC<CheckpointOverlayProps> = ({ target }) => {
+// Default spotlight padding (px) around the target.
+const SPOTLIGHT_PADDING = 10;
+
+const CheckpointOverlay: FC<CheckpointOverlayProps> = ({
+  target, widthRatio, topTarget, padding,
+}) => {
   const [rect, setRect] = useState<Rect | null>(null);
+  const pad = padding ?? SPOTLIGHT_PADDING;
 
   useLayoutEffect(() => {
     const updatePosition = () => {
@@ -57,11 +69,25 @@ const CheckpointOverlay: FC<CheckpointOverlayProps> = ({ target }) => {
           const targetElement = document.querySelector(selector);
           if (targetElement) {
             const boundingRect = targetElement.getBoundingClientRect();
+            const spotlightWidth = widthRatio != null
+              ? boundingRect.width * widthRatio
+              : boundingRect.width;
+            // Optionally stretch the spotlight's top up to another element's top.
+            let { top } = boundingRect;
+            let spotlightHeight = boundingRect.height;
+            if (topTarget) {
+              const topElement = document.querySelector(topTarget);
+              if (topElement) {
+                const topRect = topElement.getBoundingClientRect();
+                spotlightHeight = (top + spotlightHeight) - topRect.top;
+                top = topRect.top;
+              }
+            }
             setRect({
-              top: boundingRect.top - 10,
-              left: boundingRect.left - 10,
-              width: boundingRect.width + 20,
-              height: boundingRect.height + 20,
+              top: top - pad,
+              left: boundingRect.left - pad,
+              width: spotlightWidth + pad * 2,
+              height: spotlightHeight + pad * 2,
             });
           }
         };
@@ -83,7 +109,7 @@ const CheckpointOverlay: FC<CheckpointOverlayProps> = ({ target }) => {
       window.removeEventListener('scroll', updatePosition);
       window.removeEventListener('resize', updatePosition);
     };
-  }, [target]);
+  }, [target, widthRatio, pad, topTarget]);
 
   if (!rect) {
     return null;

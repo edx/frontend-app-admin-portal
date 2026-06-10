@@ -145,44 +145,74 @@ describe('CheckpointOverlay', () => {
     const overlay = screen.getByTestId('checkpoint-overlay');
     const sections = overlay.children;
 
+    // Default spotlight padding (see SPOTLIGHT_PADDING in CheckpointOverlay)
+    const pad = 10;
+
     // Check top section
     expect(sections[0]).toHaveStyle({
       position: 'absolute',
       top: '0px',
       left: '0px',
       right: '0px',
-      height: `${mockRect.top - 10}px`,
+      height: `${mockRect.top - pad}px`,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     });
 
     // Check left section
     expect(sections[1]).toHaveStyle({
       position: 'absolute',
-      top: `${mockRect.top - 10}px`,
+      top: `${mockRect.top - pad}px`,
       left: '0px',
-      width: `${mockRect.left - 10}px`,
-      height: `${mockRect.height + 20}px`,
+      width: `${mockRect.left - pad}px`,
+      height: `${mockRect.height + pad * 2}px`,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     });
 
     // Check right section
     expect(sections[2]).toHaveStyle({
       position: 'absolute',
-      top: `${mockRect.top - 10}px`,
-      left: `${mockRect.left + mockRect.width + 10}px`,
+      top: `${mockRect.top - pad}px`,
+      left: `${mockRect.left + mockRect.width + pad}px`,
       right: '0px',
-      height: `${mockRect.height + 20}px`,
+      height: `${mockRect.height + pad * 2}px`,
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     });
 
     // Check bottom section
     expect(sections[3]).toHaveStyle({
       position: 'absolute',
-      top: `${mockRect.top + mockRect.height + 10}px`,
+      top: `${mockRect.top + mockRect.height + pad}px`,
       left: '0px',
       right: '0px',
       bottom: '0px',
       backgroundColor: 'rgba(0, 0, 0, 0.5)',
     });
+  });
+
+  it('caps the spotlight width to the left portion when widthRatio is set', () => {
+    render(<CheckpointOverlay target={mockIdTarget} widthRatio={0.5} padding={0} />);
+    const sections = screen.getByTestId('checkpoint-overlay').children;
+    // right overlay begins at left + (width * 0.5)
+    expect(sections[2]).toHaveStyle({ left: `${mockRect.left + mockRect.width * 0.5}px` });
+  });
+
+  it('treats widthRatio={0} as a real value (zero-width spotlight), not "unset"', () => {
+    render(<CheckpointOverlay target={mockIdTarget} widthRatio={0} padding={0} />);
+    const sections = screen.getByTestId('checkpoint-overlay').children;
+    // right overlay begins at the target's left — the spotlight has no width
+    expect(sections[2]).toHaveStyle({ left: `${mockRect.left}px` });
+  });
+
+  it('extends the spotlight top up to the topTarget element', () => {
+    const topElement = {
+      getBoundingClientRect: () => ({
+        top: 40, left: 200, width: 300, height: 20,
+      }),
+    };
+    document.querySelector = jest.fn((selector) => (selector === '#top-el' ? topElement : mockTargetElement));
+    render(<CheckpointOverlay target={mockIdTarget} topTarget="#top-el" padding={0} />);
+    const sections = screen.getByTestId('checkpoint-overlay').children;
+    // top overlay shrinks so the spotlight reaches the topTarget's top (padding 0)
+    expect(sections[0]).toHaveStyle({ height: '40px' });
   });
 });
