@@ -1,8 +1,9 @@
 import {
-  render, screen, fireEvent,
+  render, screen, fireEvent, waitFor,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
@@ -12,12 +13,18 @@ import TourCollapsible from '../TourCollapsible';
 import { queryClient } from '../../test/testUtils';
 import { EnterpriseSubsidiesContext } from '../../EnterpriseSubsidiesContext';
 import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextProvider';
+import LmsApiService from '../../../data/services/LmsApiService';
+import { GROUP_TYPE_BUDGET } from '../../PeopleManagement/constants';
 import { features } from '../../../config';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 jest.mock('@edx/frontend-platform', () => ({
   ...jest.requireActual('@edx/frontend-platform'),
   getConfig: jest.fn().mockReturnValue({ FEATURE_CONTENT_HIGHLIGHTS: true }),
+}));
+
+jest.mock('@edx/frontend-platform/auth', () => ({
+  getAuthenticatedUser: jest.fn(),
 }));
 
 // Mock FloatingCollapsible component
@@ -127,6 +134,17 @@ const setup = (
 };
 
 describe('TourCollapsible', () => {
+  beforeEach(() => {
+    // Default: a non-staff admin whose customer has no budget group.
+    getAuthenticatedUser.mockReturnValue({ administrator: false });
+    jest.spyOn(LmsApiService, 'fetchEnterpriseGroups').mockResolvedValue({ data: { results: [] } });
+  });
+
+  afterEach(() => {
+    // Restore the fetchEnterpriseGroups spy so it doesn't leak across tests.
+    jest.restoreAllMocks();
+  });
+
   it('has no accessibility violations', async () => {
     const { wrapper } = setup();
     const results = await axe(wrapper.container, accessibilitySettings);
@@ -240,12 +258,60 @@ describe('TourCollapsible', () => {
     expect(screen.queryByText('Track learner progress')).toBeInTheDocument();
     expect(screen.queryByText('View enrollment insights')).toBeInTheDocument();
     expect(screen.queryByText('Administer subscriptions')).toBeInTheDocument();
-    expect(screen.queryByText('Organize learners')).toBeInTheDocument();
+    expect(screen.queryByText('Organize members')).toBeInTheDocument();
     expect(screen.queryByText('Customize reports')).toBeInTheDocument();
     expect(screen.queryByText('Set up preferences')).toBeInTheDocument();
   });
 
   it('displays the Showcase courses step when the edit highlights flag is enabled and highlights are available', () => {
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enableSubscriptionManagementScreen: true,
+        enterpriseFeatures: { enterpriseEditHighlightsEnabled: true },
+      },
+    };
+    const appContext = {
+      enterpriseCuration: { enterpriseCuration: { isHighlightFeatureActive: true } },
+    };
+    setup(state, true, defaultEnterpriseSubsidiesContextValue, appContext);
+    expect(screen.queryByText('Showcase courses')).toBeInTheDocument();
+  });
+
+  it('does not display the Showcase courses step when a non-staff admin has a budget group', async () => {
+    getAuthenticatedUser.mockReturnValue({ administrator: false });
+    LmsApiService.fetchEnterpriseGroups.mockResolvedValue({
+      data: { results: [{ groupType: GROUP_TYPE_BUDGET }] },
+    });
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enableSubscriptionManagementScreen: true,
+        enterpriseFeatures: { enterpriseEditHighlightsEnabled: true },
+      },
+    };
+    const appContext = {
+      enterpriseCuration: { enterpriseCuration: { isHighlightFeatureActive: true } },
+    };
+    setup(state, true, defaultEnterpriseSubsidiesContextValue, appContext);
+    await waitFor(() => {
+      expect(screen.queryByText('Showcase courses')).not.toBeInTheDocument();
+    });
+  });
+
+  it('still displays the Showcase courses step for edX staff even when a budget group exists', () => {
+    getAuthenticatedUser.mockReturnValue({ administrator: true });
+    LmsApiService.fetchEnterpriseGroups.mockResolvedValue({
+      data: { results: [{ groupType: GROUP_TYPE_BUDGET }] },
+    });
     const state = {
       enterpriseCustomerAdmin: {
         onboardingTourCompleted: false,

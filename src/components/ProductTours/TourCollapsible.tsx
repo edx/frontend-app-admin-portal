@@ -11,7 +11,12 @@ import {
 } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { getConfig } from '@edx/frontend-platform';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { logError } from '@edx/frontend-platform/logging';
 
+import { useOnMount } from '../../hooks';
+import LmsApiService from '../../data/services/LmsApiService';
+import { GROUP_TYPE_BUDGET } from '../PeopleManagement/constants';
 import FloatingCollapsible from '../FloatingCollapsible';
 import messages from './AdminOnboardingTours/messages';
 import { dismissOnboardingTour, reopenOnboardingTour } from '../../data/actions/enterpriseCustomerAdmin';
@@ -74,11 +79,34 @@ const TourCollapsible: FC<Props> = (
   const { canManageLearnerCredit } = useContext(EnterpriseSubsidiesContext);
   const { isLoadingCustomerAgreement, customerAgreement } = useContext(EnterpriseSubsidiesContext);
   const { enterpriseCuration: { enterpriseCuration } } = useContext(EnterpriseAppContext);
-  // The "Showcase courses" tour is gated behind the edit highlights feature flag,
-  // and only shown when the Highlights feature is actually available to the admin.
+  const isEdxStaff = getAuthenticatedUser()?.administrator;
+  const [hasBudgetGroup, setHasBudgetGroup] = useState(false);
+
+  // Mirror the Sidebar: hide Highlights (and this tour) for non-staff admins whose
+  // customer has a budget group.
+  useOnMount(() => {
+    async function fetchGroupsData() {
+      try {
+        const response = await LmsApiService.fetchEnterpriseGroups();
+        setHasBudgetGroup(
+          response.data.results.some((group) => group.groupType === GROUP_TYPE_BUDGET),
+        );
+      } catch (error) {
+        logError(error);
+      }
+    }
+    if (!isEdxStaff) {
+      fetchGroupsData();
+    }
+  });
+  const hideHighlightsForGroups = hasBudgetGroup && !isEdxStaff;
+
+  // Show the "Showcase courses" tour only when the Highlights sidebar item is
+  // visible (same conditions as the sidebar).
   const isHighlightsAvailable = editHighlightsEnabled
     && !!getConfig().FEATURE_CONTENT_HIGHLIGHTS
-    && !!enterpriseCuration?.isHighlightFeatureActive;
+    && !!enterpriseCuration?.isHighlightFeatureActive
+    && !hideHighlightsForGroups;
 
   const handleDismiss = () => {
     setShowCollapsible(false);

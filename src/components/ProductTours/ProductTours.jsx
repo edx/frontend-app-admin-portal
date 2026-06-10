@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 import { ProductTour } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform/config';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 import { features } from '../../config';
 import tourMessages from './messages';
 import portalAppearanceTour from './portalAppearanceTour';
@@ -35,6 +36,7 @@ import {
 import lprUpdateTour, { useLprUpdateTour } from './lprUpdateTour';
 import TourCollapsible from './TourCollapsible';
 import {
+  ADMIN_TOUR_EVENT_NAMES,
   ADMINISTER_SUBSCRIPTIONS_TARGETS,
   ALLOCATE_LEARNING_BUDGETS_TARGETS,
   EDIT_HIGHLIGHTS_TARGETS,
@@ -111,6 +113,7 @@ const ProductTours = ({
     } else if (targetId === CUSTOMIZE_REPORTS_SIDEBAR) {
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.reporting}/`);
     } else if (targetId === EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR) {
+      sendEnterpriseTrackEvent(enterpriseSlug, ADMIN_TOUR_EVENT_NAMES.EDIT_HIGHLIGHTS_VIEWED_EVENT_NAME);
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}/`);
     }
     setSelectedTourTarget(targetId);
