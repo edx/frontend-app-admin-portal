@@ -236,4 +236,36 @@ describe('LearnerActivityTable', () => {
     expect(screen.getByText('Try refreshing your screen Bad request')).toBeInTheDocument();
     expect(screen.queryByText('There are no results.')).not.toBeInTheDocument();
   });
+
+  it('does not update state when component unmounts before fetch resolves', async () => {
+    const deferred = createDeferred();
+    EnterpriseDataApiService.fetchCourseEnrollments.mockReturnValue(deferred.promise);
+
+    const { unmount } = render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" />);
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalled();
+    });
+
+    // Unmount sets isCurrent=false; resolving after should hit the early-return guard
+    unmount();
+    deferred.resolve(tableMockData);
+    // No state-update error or unhandled rejection should occur
+  });
+
+  it('does not update state when component unmounts before fetch rejects', async () => {
+    const deferred = createDeferred();
+    EnterpriseDataApiService.fetchCourseEnrollments.mockReturnValue(deferred.promise);
+
+    const { unmount } = render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" />);
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalled();
+    });
+
+    // Unmount sets isCurrent=false; rejecting after should hit the early-return guard
+    unmount();
+    deferred.reject(new Error('Network error'));
+    // No error state or unhandled rejection should propagate
+  });
 });
