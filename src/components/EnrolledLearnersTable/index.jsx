@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
-import { DataTable } from '@openedx/paragon';
+import { Alert, DataTable } from '@openedx/paragon';
+import { Error } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import PropTypes from 'prop-types';
@@ -14,10 +15,12 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
   const [tableData, setTableData] = useState([]);
   const [pageCount, setPageCount] = useState(0);
   const [itemCount, setItemCount] = useState(0);
+  const [error, setError] = useState(null);
 
   const fetchData = useCallback(
     async (args) => {
       setIsLoading(true);
+      setError(null);
       try {
         const primarySort = args.sortBy?.[0];
         const ordering = primarySort ? `${primarySort.desc ? '-' : ''}${primarySort.id}` : null;
@@ -38,8 +41,9 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
         setTableData(formattedRows);
         setItemCount(count || 0);
         setPageCount(numPages || 0);
-      } catch (error) {
-        logError(error);
+      } catch (err) {
+        logError(err);
+        setError(err);
         setTableData([]);
         setItemCount(0);
         setPageCount(0);
@@ -78,33 +82,41 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
   ];
 
   return (
-    <DataTable
-      isLoading={isLoading}
-      isPaginated
-      manualPagination
-      isSortable
-      manualSortBy
-      initialState={{
-        pageSize: 50,
-        pageIndex: 0,
-      }}
-      itemCount={itemCount}
-      pageCount={pageCount}
-      fetchData={fetchData}
-      data={tableData}
-      columns={columns}
-    >
-      <DataTable.TableControlBar />
-      <DataTable.Table />
-      <DataTable.EmptyTable
-        content={intl.formatMessage({
-          id: 'admin.portal.lpr.enrolled.learners.table.empty',
-          defaultMessage: 'There are no results.',
-          description: 'Message displayed when the enrolled learners table is empty',
-        })}
-      />
-      <DataTable.TableFooter />
-    </DataTable>
+    <>
+      {error && (
+        <Alert variant="danger" icon={Error}>
+          <Alert.Heading>Unable to load data</Alert.Heading>
+          <p>Try refreshing your screen {error.message}</p>
+        </Alert>
+      )}
+      <DataTable
+        isLoading={isLoading}
+        isPaginated
+        manualPagination
+        isSortable
+        manualSortBy
+        initialState={{
+          pageSize: 50,
+          pageIndex: 0,
+        }}
+        itemCount={itemCount}
+        pageCount={pageCount}
+        fetchData={fetchData}
+        data={tableData}
+        columns={columns}
+      >
+        <DataTable.TableControlBar />
+        <DataTable.Table />
+        <DataTable.EmptyTable
+          content={intl.formatMessage({
+            id: 'admin.portal.lpr.enrolled.learners.table.empty',
+            defaultMessage: 'There are no results.',
+            description: 'Message displayed when the enrolled learners table is empty',
+          })}
+        />
+        <DataTable.TableFooter />
+      </DataTable>
+    </>
   );
 };
 

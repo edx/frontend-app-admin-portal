@@ -1,6 +1,7 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import configureMockStore from 'redux-mock-store';
@@ -64,6 +65,33 @@ describe('EnrolledLearnersTable', () => {
       expect.objectContaining({ page: 1, page_size: 50 }),
     );
 
-    expect(screen.getByText('There are no results.')).toBeInTheDocument();
+    expect(await screen.findByText('There are no results.')).toBeInTheDocument();
+  });
+
+  it('sends ordering when sorting by a column', async () => {
+    render(<EnrolledLearnersWrapper />);
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchEnrolledLearners).toHaveBeenCalledTimes(1);
+    });
+
+    await userEvent.click(screen.getByText('Email'));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchEnrolledLearners).toHaveBeenLastCalledWith(
+        enterpriseId,
+        expect.objectContaining({ ordering: 'user_email' }),
+      );
+    });
+  });
+
+  it('renders an error state when the API request fails', async () => {
+    const errorMessage = 'API is unavailable';
+    EnterpriseDataApiService.fetchEnrolledLearners.mockRejectedValueOnce(new Error(errorMessage));
+
+    render(<EnrolledLearnersWrapper />);
+
+    expect(await screen.findByText('Unable to load data')).toBeInTheDocument();
+    expect(screen.getByText(`Try refreshing your screen ${errorMessage}`)).toBeInTheDocument();
   });
 });
