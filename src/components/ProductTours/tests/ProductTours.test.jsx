@@ -11,6 +11,7 @@ import {
 } from '@testing-library/react';
 import { mergeConfig } from '@edx/frontend-platform';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 
 import { axe } from 'jest-axe';
 import { features } from '../../../config';
@@ -28,7 +29,8 @@ import learnerCreditTour from '../learnerCreditTour';
 import learnerDetailPageTour from '../learnerDetailPageTour';
 import portalAppearanceTour from '../portalAppearanceTour';
 import highlightsTour from '../highlightsTour';
-import { ONBOARDING_WELCOME_MODAL_COOKIE_NAME } from '../AdminOnboardingTours/constants';
+import { ADMIN_TOUR_EVENT_NAMES, ONBOARDING_WELCOME_MODAL_COOKIE_NAME } from '../AdminOnboardingTours/constants';
+import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextProvider';
 import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import { ACCESS_TAB } from '../../settings/data/constants';
 import { SubsidyRequestsContext } from '../../subsidy-requests';
@@ -47,6 +49,13 @@ jest.mock('@2uinc/frontend-enterprise-utils', () => {
     ...actualModule,
     sendEnterpriseTrackEvent: jest.fn(),
   };
+});
+
+// Selecting a Quick Start Guide step opens AdminOnboardingTours, which mounts the
+// full flow tree (and needs budget/analytics data we don't provide here). Stub it
+// so tour selection can be tested without rendering that machinery.
+jest.mock('../AdminOnboardingTours/AdminOnboardingTours', () => function MockAdminOnboardingTours() {
+  return null;
 });
 
 const ENTERPRISE_SLUG = 'sluggy';
@@ -78,6 +87,13 @@ const ToursWithContext = ({
     },
     enterpriseSubsidyTypesForRequests: [SUBSIDY_TYPES.coupon],
   },
+  enterpriseAppContextValue = {
+    enterpriseCuration: {
+      enterpriseCuration: { highlightSets: [], isHighlightFeatureActive: false },
+      isLoading: false,
+      fetchError: null,
+    },
+  },
   store = mockStore({
     portalConfiguration: {
       enterpriseSlug: ENTERPRISE_SLUG,
@@ -102,16 +118,18 @@ const ToursWithContext = ({
             <Route
               path={`/${ENTERPRISE_SLUG}/admin/:enterpriseAppPage`}
               element={(
-                <EnterpriseSubsidiesContext.Provider value={EnterpriseSubsidiesContextValue}>
-                  <SubsidyRequestsContext.Provider value={subsidyRequestContextValue}>
-                    <>
-                      <ProductTours />
-                      <p id={TOUR_TARGETS.PEOPLE_MANAGEMENT}>People Management</p>
-                      <p id={TOUR_TARGETS.LEARNER_CREDIT}>Learner Credit Management</p>
-                      <p id={TOUR_TARGETS.SETTINGS_SIDEBAR}>Settings</p>
-                    </>
-                  </SubsidyRequestsContext.Provider>
-                </EnterpriseSubsidiesContext.Provider>
+                <EnterpriseAppContext.Provider value={enterpriseAppContextValue}>
+                  <EnterpriseSubsidiesContext.Provider value={EnterpriseSubsidiesContextValue}>
+                    <SubsidyRequestsContext.Provider value={subsidyRequestContextValue}>
+                      <>
+                        <ProductTours />
+                        <p id={TOUR_TARGETS.PEOPLE_MANAGEMENT}>People Management</p>
+                        <p id={TOUR_TARGETS.LEARNER_CREDIT}>Learner Credit Management</p>
+                        <p id={TOUR_TARGETS.SETTINGS_SIDEBAR}>Settings</p>
+                      </>
+                    </SubsidyRequestsContext.Provider>
+                  </EnterpriseSubsidiesContext.Provider>
+                </EnterpriseAppContext.Provider>
               )}
             />
           </Routes>
@@ -366,7 +384,7 @@ describe('<ProductTours/>', () => {
       // Only steps not filtered by feature flags / context are checked here.
       await waitFor(() => {
         expect(screen.queryByText('Track learner progress')).toBeTruthy();
-        expect(screen.queryByText('Organize learners')).toBeTruthy();
+        expect(screen.queryByText('Organize members')).toBeTruthy();
         expect(screen.queryByText('Set up preferences')).toBeTruthy();
       });
     });
@@ -395,6 +413,51 @@ describe('<ProductTours/>', () => {
       expect(tourConfig).toHaveProperty('onAdvance');
       expect(tourConfig).toHaveProperty('onDismiss');
       expect(tourConfig).toHaveProperty('onEnd');
+    });
+  });
+
+  describe('edit highlights onboarding tour', () => {
+    beforeEach(() => {
+      mergeConfig({ FEATURE_CONTENT_HIGHLIGHTS: true });
+      // Skip the welcome modal so the Quick Start Guide steps are reachable.
+      global.localStorage.setItem(ONBOARDING_WELCOME_MODAL_COOKIE_NAME, true);
+    });
+
+    const withHighlightsAvailable = {
+      enterpriseCuration: {
+        enterpriseCuration: { highlightSets: [], isHighlightFeatureActive: true },
+        isLoading: false,
+        fetchError: null,
+      },
+    };
+
+    const storeWithEditHighlights = mockStore({
+      portalConfiguration: {
+        enterpriseSlug: ENTERPRISE_SLUG,
+        enterpriseId: ENTERPRISE_UUID,
+        enableLearnerPortal: false,
+        enterpriseFeatures: {
+          enterpriseAdminOnboardingEnabled: true,
+          enterpriseEditHighlightsEnabled: true,
+        },
+      },
+      enterpriseCustomerAdmin: {
+        lastLogin: null,
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+      },
+    });
+
+    it('fires the viewed tracking event when the Showcase courses step is selected', async () => {
+      render(<ToursWithContext store={storeWithEditHighlights} enterpriseAppContextValue={withHighlightsAvailable} />);
+      const step = await screen.findByText('Showcase courses');
+      userEvent.click(step);
+      await waitFor(() => {
+        expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+          ENTERPRISE_SLUG,
+          ADMIN_TOUR_EVENT_NAMES.EDIT_HIGHLIGHTS_VIEWED_EVENT_NAME,
+        );
+      });
     });
   });
 
