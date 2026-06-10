@@ -24,7 +24,7 @@ const defaultPaginationData = {
 
 const RegisteredLearnersTable = ({ enterpriseId }) => {
   const intl = useIntl();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [ordering, setOrdering] = useState('user_email');
