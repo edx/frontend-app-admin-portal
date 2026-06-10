@@ -2,6 +2,7 @@ import React, {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 import PropTypes from 'prop-types';
@@ -31,8 +32,22 @@ const LearnerActivityTable = ({
   const [currentPage, setCurrentPage] = useState(0);
   const [ordering, setOrdering] = useState('user_email');
   const [paginationData, setPaginationData] = useState(defaultPaginationData);
+  const previousReportRef = useRef({ id, activity });
 
   useEffect(() => {
+    const reportChanged = previousReportRef.current.id !== id
+      || previousReportRef.current.activity !== activity;
+
+    if (reportChanged) {
+      previousReportRef.current = { id, activity };
+      setCurrentPage(0);
+      setOrdering('user_email');
+      setPaginationData(defaultPaginationData);
+      setError(null);
+      setIsLoading(true);
+      return undefined;
+    }
+
     let isCurrent = true;
 
     setIsLoading(true);
@@ -74,7 +89,7 @@ const LearnerActivityTable = ({
     return () => {
       isCurrent = false;
     };
-  }, [enterpriseId, activity, currentPage, ordering]);
+  }, [enterpriseId, id, activity, currentPage, ordering]);
 
   const fetchData = useCallback(({ pageIndex, sortBy = [] }) => {
     if (pageIndex !== currentPage) {
@@ -194,6 +209,7 @@ const LearnerActivityTable = ({
 
   return (
     <DataTable
+      key={`${enterpriseId}-${id}-${activity}`}
       className={id}
       isLoading={isLoading}
       isPaginated

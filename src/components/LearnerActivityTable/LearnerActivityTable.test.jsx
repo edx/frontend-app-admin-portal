@@ -268,4 +268,44 @@ describe('LearnerActivityTable', () => {
     deferred.reject(new Error('Network error'));
     // No error state or unhandled rejection should propagate
   });
+
+  it('resets to default page/sort when switching learner activity report', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments
+      .mockResolvedValueOnce({
+        data: {
+          ...tableMockData.data,
+          count: 60,
+          num_pages: 2,
+        },
+      })
+      .mockResolvedValue(tableMockData);
+
+    const { rerender } = render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" />);
+
+    await screen.findByText('awesome.me@example.com');
+    fireEvent.click(screen.getByRole('button', { name: /Next/i }));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({
+          learnerActivity: 'active_past_week',
+          page: 2,
+        }),
+      );
+    });
+
+    rerender(<LearnerActivityTableWrapper id="inactive-week" activity="inactive_past_week" />);
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({
+          learnerActivity: 'inactive_past_week',
+          page: 1,
+          ordering: 'user_email',
+        }),
+      );
+    });
+  });
 });
