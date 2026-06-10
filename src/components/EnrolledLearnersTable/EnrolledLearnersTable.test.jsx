@@ -45,13 +45,20 @@ describe('EnrolledLearnersTable', () => {
     jest.restoreAllMocks();
   });
 
+  it('has no accessibility violations', async () => {
+    const { container } = render(<EnrolledLearnersWrapper />);
+    const { axe } = require('jest-axe');
+    const { accessibilitySettings } = require('../../../tests/accessibility-settings');
+    const results = await axe(container, accessibilitySettings);
+    expect(results).toHaveNoViolations();
+  });
+
   it('renders empty state correctly', async () => {
     render(<EnrolledLearnersWrapper />);
 
     await waitFor(() => {
       expect(EnterpriseDataApiService.fetchEnrolledLearners).toHaveBeenCalled();
     });
-
     expect(EnterpriseDataApiService.fetchEnrolledLearners).toHaveBeenCalledWith(
       enterpriseId,
       expect.objectContaining({ page: 1, page_size: 50 }),
