@@ -112,6 +112,18 @@ const ContentHighlightsCardItemsContainer = ({
   } else {
     activeContent.push(...highlightedContent);
   }
+
+  const sortedActiveContent = [...activeContent].sort((a, b) => {
+    const aStarred = starredContentKeys.has(a.contentKey);
+    const bStarred = starredContentKeys.has(b.contentKey);
+
+    if (aStarred === bStarred) {
+      return 0;
+    }
+
+    return aStarred ? -1 : 1;
+  });
+
   const updateSetWithActiveContent = () => updateHighlightSet(activeContent);
 
   const archivedContentKeys = archivedContent.map(({ contentKey }) => contentKey);
@@ -148,7 +160,7 @@ const ContentHighlightsCardItemsContainer = ({
         </>
       )}
       <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
-        {activeContent.map(({
+        {sortedActiveContent.map(({
           uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
         }) => (
           <ContentHighlightCardItem

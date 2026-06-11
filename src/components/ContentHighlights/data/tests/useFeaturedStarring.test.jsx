@@ -3,17 +3,30 @@ import {
   act, renderHook, waitFor,
 } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import EnterpriseCatalogApiService from '../../../../data/services/EnterpriseCatalogApiService';
 import useFeaturedStarring from '../useFeaturedStarring';
+import { getHighlightSetQueryKey } from '../hooks';
 
 jest.mock('../../../../data/services/EnterpriseCatalogApiService');
 jest.mock('@edx/frontend-platform/logging');
 
-const wrapper = ({ children }) => (
-  <IntlProvider locale="en">{children}</IntlProvider>
-);
+const createWrapper = (queryClient) => function Wrapper({ children }) {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en">{children}</IntlProvider>
+    </QueryClientProvider>
+  );
+};
+
+const makeQueryClient = () => new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+    mutations: { retry: false },
+  },
+});
 
 const highlightSetUUID = 'highlight-set-uuid-123';
 
@@ -69,14 +82,17 @@ const mockHighlightedContent = [
 ];
 
 describe('useFeaturedStarring', () => {
+  let testQueryClient;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    testQueryClient = makeQueryClient();
   });
 
   it('initializes starredContentKeys from isFavorite items', () => {
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
     expect(result.current.starredContentKeys.has('edX+Course1')).toBe(true);
     expect(result.current.starredContentKeys.has('edX+Course3')).toBe(true);
@@ -88,7 +104,7 @@ describe('useFeaturedStarring', () => {
   it('returns starredItems derived from starredContentKeys', () => {
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
 
     expect(result.current.starredItems).toHaveLength(4);
@@ -103,7 +119,7 @@ describe('useFeaturedStarring', () => {
   it('returns loadingContentKey as null initially', () => {
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
     expect(result.current.loadingContentKey).toBeNull();
   });
@@ -111,7 +127,7 @@ describe('useFeaturedStarring', () => {
   it('returns isMaxStarredModalOpen as false initially', () => {
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
     expect(result.current.isMaxStarredModalOpen).toBe(false);
   });
@@ -120,7 +136,7 @@ describe('useFeaturedStarring', () => {
     // All 4 slots are taken (content-1, content-3, content-5, content-6)
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
 
     act(() => {
@@ -134,7 +150,7 @@ describe('useFeaturedStarring', () => {
   it('closes max starred modal via closeMaxStarredModal', () => {
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
 
     act(() => {
@@ -153,7 +169,7 @@ describe('useFeaturedStarring', () => {
 
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
 
     act(() => {
@@ -177,7 +193,7 @@ describe('useFeaturedStarring', () => {
 
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, content),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
 
     act(() => {
@@ -203,7 +219,7 @@ describe('useFeaturedStarring', () => {
 
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, content),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
 
     act(() => {
@@ -222,7 +238,7 @@ describe('useFeaturedStarring', () => {
   it('does nothing if contentKey is not found in highlightedContent', () => {
     const { result } = renderHook(
       () => useFeaturedStarring(highlightSetUUID, mockHighlightedContent),
-      { wrapper },
+      { wrapper: createWrapper(testQueryClient) },
     );
 
     act(() => {
@@ -240,7 +256,7 @@ describe('useFeaturedStarring', () => {
 
     const { result, rerender } = renderHook(
       ({ items }) => useFeaturedStarring(highlightSetUUID, items),
-      { wrapper, initialProps: { items: content } },
+      { wrapper: createWrapper(testQueryClient), initialProps: { items: content } },
     );
 
     expect(result.current.starredContentKeys.has('edX+Course1')).toBe(true);
@@ -255,5 +271,65 @@ describe('useFeaturedStarring', () => {
     // Should NOT reinitialize — still has original state
     expect(result.current.starredContentKeys.has('edX+Course1')).toBe(true);
     expect(result.current.starredContentKeys.has('edX+Course2')).toBe(false);
+  });
+
+  it('updates the cached highlight set when starring or unstarring', async () => {
+    EnterpriseCatalogApiService.toggleFavoriteHighlight.mockResolvedValue({});
+
+    const content = mockHighlightedContent.slice(0, 3);
+    const queryKey = getHighlightSetQueryKey(highlightSetUUID);
+
+    testQueryClient.setQueryData(queryKey, {
+      uuid: highlightSetUUID,
+      highlightedContent: content,
+    });
+
+    const setQueryDataSpy = jest.spyOn(testQueryClient, 'setQueryData');
+
+    const { result } = renderHook(
+      () => useFeaturedStarring(highlightSetUUID, content),
+      { wrapper: createWrapper(testQueryClient) },
+    );
+
+    await act(async () => {
+      result.current.handleToggleStar('edX+Course2');
+    });
+
+    await waitFor(() => expect(setQueryDataSpy).toHaveBeenCalledWith(queryKey, expect.any(Function)));
+
+    const updaterFn = setQueryDataSpy.mock.calls[0][1];
+    const starredCachedHighlightSet = updaterFn({
+      uuid: highlightSetUUID,
+      highlightedContent: content,
+    });
+
+    expect(
+      starredCachedHighlightSet.highlightedContent.find((item) => item.contentKey === 'edX+Course2').isFavorite,
+    ).toBe(true);
+
+    expect(
+      starredCachedHighlightSet.highlightedContent.find((item) => item.contentKey === 'edX+Course1').isFavorite,
+    ).toBe(true);
+    expect(
+      starredCachedHighlightSet.highlightedContent.find((item) => item.contentKey === 'edX+Course3').isFavorite,
+    ).toBe(true);
+
+    setQueryDataSpy.mockClear();
+
+    await act(async () => {
+      result.current.handleToggleStar('edX+Course2');
+    });
+
+    await waitFor(() => expect(setQueryDataSpy).toHaveBeenCalledWith(queryKey, expect.any(Function)));
+
+    const unstarUpdaterFn = setQueryDataSpy.mock.calls[0][1];
+    const unstarredCachedHighlightSet = unstarUpdaterFn({
+      uuid: highlightSetUUID,
+      highlightedContent: content,
+    });
+
+    expect(
+      unstarredCachedHighlightSet.highlightedContent.find((item) => item.contentKey === 'edX+Course2').isFavorite,
+    ).toBe(false);
   });
 });

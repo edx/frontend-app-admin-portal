@@ -1,10 +1,12 @@
 import {
-  useState, useCallback, useEffect, useMemo, useRef,
+  useState, useCallback, useEffect, useMemo, useRef, useContext,
 } from 'react';
+import { defaultContext } from '@tanstack/react-query';
 import { getConfig } from '@edx/frontend-platform';
 import { useToggle } from '@openedx/paragon';
 import { logError } from '@edx/frontend-platform/logging';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
+import { getHighlightSetQueryKey } from './hooks';
 
 const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
 
@@ -14,6 +16,7 @@ const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
  * Initializes from `highlightedContent[].isFavorite` returned by the backend.
  */
 const useFeaturedStarring = (highlightSetUUID, highlightedContent) => {
+  const queryClient = useContext(defaultContext);
   const [isMaxStarredModalOpen, openMaxStarredModal, closeMaxStarredModal] = useToggle(false);
   const [starredContentKeys, setStarredContentKeys] = useState(new Set());
   const [loadingContentKey, setLoadingContentKey] = useState(null);
@@ -61,6 +64,31 @@ const useFeaturedStarring = (highlightSetUUID, highlightedContent) => {
       contentItem.uuid,
       shouldFavorite,
     ).then(() => {
+      if (queryClient) {
+        queryClient.setQueryData(
+          getHighlightSetQueryKey(highlightSetUUID),
+          (previousHighlightSet) => {
+            if (!previousHighlightSet?.highlightedContent) {
+              return previousHighlightSet;
+            }
+
+            return {
+              ...previousHighlightSet,
+              highlightedContent: previousHighlightSet.highlightedContent.map((item) => (
+                item.contentKey === contentKey
+                  ? { ...item, isFavorite: shouldFavorite }
+                  : item
+              )),
+            };
+          },
+        );
+
+        queryClient.invalidateQueries({
+          queryKey: getHighlightSetQueryKey(highlightSetUUID),
+          exact: true,
+        });
+      }
+
       setLoadingContentKey((currentLoadingContentKey) => (
         currentLoadingContentKey === contentKey ? null : currentLoadingContentKey
       ));
@@ -72,7 +100,7 @@ const useFeaturedStarring = (highlightSetUUID, highlightedContent) => {
         currentLoadingContentKey === contentKey ? null : currentLoadingContentKey
       ));
     });
-  }, [openMaxStarredModal, highlightSetUUID, highlightedContent, starredContentKeys]);
+  }, [openMaxStarredModal, highlightSetUUID, highlightedContent, starredContentKeys, queryClient]);
 
   return {
     starredContentKeys,

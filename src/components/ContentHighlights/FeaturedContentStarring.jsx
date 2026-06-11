@@ -236,7 +236,7 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
 
   return (
     <div
-      className="featured-courses-section mb-4 p-4 rounded bg-light-200"
+      className="featured-courses-section mb-4 p-4 rounded"
       data-testid="featured-courses-section"
     >
       <h4 className="mb-1 font-weight-bold">
