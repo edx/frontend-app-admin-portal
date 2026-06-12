@@ -210,7 +210,6 @@ const LearnerActivityTable = ({
   return (
     <DataTable
       key={`${enterpriseId}-${id}-${activity}`}
-      className={id}
       isLoading={isLoading}
       isPaginated
       manualPagination
