@@ -48,12 +48,20 @@ const AnalyticsFilters = ({
 
   const handleDateRangeChange = (selectedRange) => {
     setDateRangeValue(selectedRange);
+    const newEndDate = new Date().toISOString().split('T')[0];
+
+    if (selectedRange === DATE_RANGE.YEAR_TO_DATE) {
+      setStartDate(`${newEndDate.split('-')[0]}-01-01`);
+      setEndDate(newEndDate);
+      trackFilterClick('Date range options', selectedRange);
+      return;
+    }
+
     const today = new Date();
     const rangeMap = {
       [DATE_RANGE.LAST_7_DAYS]: 7,
       [DATE_RANGE.LAST_30_DAYS]: 30,
       [DATE_RANGE.LAST_90_DAYS]: 90,
-      [DATE_RANGE.YEAR_TO_DATE]: 365,
       [DATE_RANGE.CUSTOM]: 0,
     };
     if (rangeMap[selectedRange] || rangeMap[selectedRange] === 0) {
@@ -62,7 +70,6 @@ const AnalyticsFilters = ({
         .split('T')[0];
       setStartDate(newStartDate);
     }
-    const newEndDate = new Date().toISOString().split('T')[0];
     setEndDate(newEndDate);
     trackFilterClick('Date range options', selectedRange);
   };
