@@ -9,7 +9,6 @@ import ErrorPage from '../ErrorPage';
 import BrandStyles from '../BrandStyles';
 import { features } from '../../config';
 import EnterpriseAppSkeleton from './EnterpriseAppSkeleton';
-import FeatureAnnouncementBanner from '../FeatureAnnouncementBanner';
 import EnterpriseAppContextProvider from './EnterpriseAppContextProvider';
 import ProductTours from '../ProductTours/ProductTours';
 import { SCHOLAR_THEME } from '../settings/data/constants';
@@ -156,13 +155,12 @@ class EnterpriseApp extends React.Component {
                     email={email}
                     enterpriseId={enterpriseId}
                     enterpriseName={enterpriseName}
+                    enterpriseSlug={enterpriseSlug}
                     enableCodeManagementPage={features.CODE_MANAGEMENT && enableCodeManagementScreen}
                     enableReportingPage={features.REPORTING_CONFIGURATIONS && enableReportingConfigurationsScreen}
                     enableSubscriptionManagementPage={enableSubscriptionManagementScreen}
                     enableAnalyticsPage={features.ANALYTICS && enableAnalyticsScreen}
-                  >
-                    <FeatureAnnouncementBanner enterpriseSlug={enterpriseSlug} />
-                  </EnterpriseAppContent>
+                  />
                 </div>
               </>
             )}
