@@ -1,273 +1,293 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`PastWeekPassedLearnersTable renders table correctly 1`] = `
-<div
-  className="completed-learners-week"
->
+<DocumentFragment>
   <div
-    className="row"
+    class="pgn__data-table-layout-wrapper"
   >
     <div
-      className="col"
+      class="pgn__data-table-layout-main"
     >
       <div
-        className="table-responsive"
+        class="pgn__data-table-wrapper"
       >
-        <table
-          className="table table-sm table-striped"
+        <div
+          class="pgn__data-table-container"
+          data-testid="data-table-container"
         >
-          <thead
-            className=""
+          <table
+            class="pgn__data-table is-striped"
+            role="table"
           >
-            <tr
-              className=""
+            <thead>
+              <tr
+                role="row"
+              >
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
+                      Email
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 14 5-5 5 5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
+                      Course Title
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up-down"
+                      style="opacity: 0.5;"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
+                      Passed Date
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up-down"
+                      style="opacity: 0.5;"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              role="rowgroup"
             >
-              <th
-                className="sortable"
-                scope="col"
+              <tr
+                class="pgn__data-table-row"
+                role="row"
               >
-                <button
-                  className="btn btn-header"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
+                <td
+                  class="pgn__data-table-cell-wrap"
+                  role="cell"
                 >
-                  <span>
-                    Email
-                    <span
-                      className="sr-only"
-                      data-testid="table-heading-sr"
-                    >
-                       
-                      sort ascending
-                    </span>
-                     
-                    <span
-                      aria-hidden={true}
-                      className="fa fa-sort-asc"
-                    />
+                  <span
+                    data-hj-suppress="true"
+                  >
+                    awesome.me@example.com
                   </span>
-                </button>
-              </th>
-              <th
-                className="sortable"
-                scope="col"
+                </td>
+                <td
+                  class="pgn__data-table-cell-wrap"
+                  role="cell"
+                >
+                  Dive into ReactJS
+                </td>
+                <td
+                  class="pgn__data-table-cell-wrap"
+                  role="cell"
+                >
+                  September 23, 2018
+                </td>
+              </tr>
+              <tr
+                class="pgn__data-table-row"
+                role="row"
               >
-                <button
-                  className="btn btn-header"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
+                <td
+                  class="pgn__data-table-cell-wrap"
+                  role="cell"
                 >
-                  <span>
-                    Course Title
-                    <span
-                      className="sr-only"
-                      data-testid="table-heading-sr"
-                    >
-                       
-                      click to sort
-                    </span>
-                     
-                    <span
-                      aria-hidden={true}
-                      className="fa fa-sort"
-                    />
+                  <span
+                    data-hj-suppress="true"
+                  >
+                    new@example.com
                   </span>
-                </button>
-              </th>
-              <th
-                className="sortable"
-                scope="col"
-              >
-                <button
-                  className="btn btn-header"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
+                </td>
+                <td
+                  class="pgn__data-table-cell-wrap"
+                  role="cell"
                 >
-                  <span>
-                    Passed Date
-                    <span
-                      className="sr-only"
-                      data-testid="table-heading-sr"
-                    >
-                       
-                      click to sort
-                    </span>
-                     
-                    <span
-                      aria-hidden={true}
-                      className="fa fa-sort"
-                    />
-                  </span>
-                </button>
-              </th>
-            </tr>
-          </thead>
-          <tbody
-            className=""
+                  Redux with ReactJS
+                </td>
+                <td
+                  class="pgn__data-table-cell-wrap"
+                  role="cell"
+                >
+                  September 22, 2018
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="pgn__data-table-footer"
+          data-testid="table-footer"
+        >
+          <div
+            data-testid="row-status"
           >
-            <tr
-              className=""
+            Showing 1 - 2 of 2.
+          </div>
+          <nav
+            aria-label="table pagination"
+            class="pagination-minimal"
+          >
+            <div
+              aria-atomic="true"
+              aria-live="polite"
+              aria-relevant="text"
+              class="sr-only"
             >
-              <td
-                className=""
-                scope={null}
-              >
-                <span
-                  data-hj-suppress={true}
-                >
-                  awesome.me@example.com
-                </span>
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                Dive into ReactJS
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                September 23, 2018
-              </td>
-            </tr>
-            <tr
-              className=""
+              Page 1, Current Page, of 1
+            </div>
+            <ul
+              class="pagination"
             >
-              <td
-                className=""
-                scope={null}
+              <li
+                class="page-item disabled"
               >
-                <span
-                  data-hj-suppress={true}
+                <button
+                  aria-label="Previous"
+                  class="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                  disabled=""
+                  tabindex="-1"
+                  type="button"
                 >
-                  new@example.com
-                </span>
-              </td>
-              <td
-                className=""
-                scope={null}
+                  <span
+                    class="btn-icon__icon-container"
+                  >
+                    <span
+                      class="pgn__icon btn-icon__icon"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M17.51 3.87 15.73 2.1 5.84 12l9.9 9.9 1.77-1.77L9.38 12l8.13-8.13Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                class="page-item disabled"
               >
-                Redux with ReactJS
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                September 22, 2018
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <button
+                  aria-label="Next"
+                  class="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                  disabled=""
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    class="btn-icon__icon-container"
+                  >
+                    <span
+                      class="pgn__icon btn-icon__icon"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m6.49 20.13 1.77 1.77 9.9-9.9-9.9-9.9-1.77 1.77L14.62 12l-8.13 8.13Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
       </div>
     </div>
   </div>
-  <div
-    className="row mt-2"
-  >
-    <div
-      className="col d-flex justify-content-center"
-    >
-      <nav
-        aria-label="completed-learners-week-pagination"
-        className="pagination-default"
-      >
-        <div
-          aria-atomic={true}
-          aria-live="polite"
-          aria-relevant="text"
-          className="sr-only"
-        >
-          Page 1, Current Page, of 1
-        </div>
-        <ul
-          className="pagination"
-        >
-          <li
-            className="page-item disabled"
-          >
-            <button
-              aria-label="Previous"
-              className="previous page-link btn btn-tertiary"
-              disabled={true}
-              onClick={[Function]}
-              tabIndex="-1"
-              type="button"
-            >
-              <span
-                className="pgn__icon btn-icon-before"
-              >
-                <svg
-                  aria-hidden={true}
-                  fill="none"
-                  focusable={false}
-                  height={24}
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width={24}
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-              Previous
-            </button>
-          </li>
-          <li
-            className="page-item active"
-          >
-            <button
-              aria-label="Page 1, Current Page"
-              className="page-link btn btn-primary"
-              disabled={false}
-              onClick={[Function]}
-              type="button"
-            >
-              1
-            </button>
-          </li>
-          <li
-            className="page-item disabled"
-          >
-            <button
-              aria-label="Next"
-              className="previous page-link btn btn-tertiary"
-              disabled={true}
-              onClick={[Function]}
-              tabIndex="-1"
-              type="button"
-            >
-              Next
-              <span
-                className="pgn__icon btn-icon-after"
-              >
-                <svg
-                  aria-hidden={true}
-                  fill="none"
-                  focusable={false}
-                  height={24}
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width={24}
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-            </button>
-          </li>
-        </ul>
-      </nav>
-    </div>
-  </div>
-</div>
+</DocumentFragment>
 `;
