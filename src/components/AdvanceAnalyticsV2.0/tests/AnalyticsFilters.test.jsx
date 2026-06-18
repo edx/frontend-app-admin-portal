@@ -269,6 +269,89 @@ describe('AnalyticsFilters Component', () => {
     });
   });
 
+  test('shows error when start date is after end date', async () => {
+    render(
+      <IntlProvider locale="en">
+        <AnalyticsFilters {...defaultProps} activeTab="engagement" />
+      </IntlProvider>,
+    );
+
+    const startDateInput = screen.getByLabelText('Start date');
+
+    // Set start date after end date (end date is defaultEndDate which is today)
+    fireEvent.change(startDateInput, { target: { value: '2099-12-31' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('Must be before the end date.')).toBeInTheDocument();
+    });
+  });
+
+  test('clears error when start date is corrected to before end date', async () => {
+    render(
+      <IntlProvider locale="en">
+        <AnalyticsFilters {...defaultProps} activeTab="engagement" />
+      </IntlProvider>,
+    );
+
+    const startDateInput = screen.getByLabelText('Start date');
+
+    // First set invalid date (after end date)
+    fireEvent.change(startDateInput, { target: { value: '2099-12-31' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('Must be before the end date.')).toBeInTheDocument();
+    });
+
+    // Then correct it to valid date (before end date)
+    fireEvent.change(startDateInput, { target: { value: '2021-06-01' } });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Must be before the end date.')).not.toBeInTheDocument();
+    });
+  });
+
+  test('shows error when end date is before start date', async () => {
+    const startDate = '2025-06-01';
+    render(
+      <IntlProvider locale="en">
+        <AnalyticsFilters {...defaultProps} activeTab="engagement" startDate={startDate} />
+      </IntlProvider>,
+    );
+
+    const endDateInput = screen.getByLabelText('End date');
+
+    // Set end date before start date
+    fireEvent.change(endDateInput, { target: { value: '2020-01-01' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('Must be before the end date.')).toBeInTheDocument();
+    });
+  });
+
+  test('clears error when preset date range is selected after invalid range', async () => {
+    render(
+      <IntlProvider locale="en">
+        <AnalyticsFilters {...defaultProps} activeTab="engagement" />
+      </IntlProvider>,
+    );
+
+    // First trigger the error
+    const startDateInput = screen.getByLabelText('Start date');
+    fireEvent.change(startDateInput, { target: { value: '2099-12-31' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('Must be before the end date.')).toBeInTheDocument();
+    });
+
+    // Select a preset range — error should be cleared
+    const dateRangeSelect = screen.getByLabelText('Date range options');
+    fireEvent.change(dateRangeSelect, { target: { value: 'last_90_days' } });
+
+    await waitFor(() => {
+      expect(screen.queryByText('Must be before the end date.')).not.toBeInTheDocument();
+    });
+  });
+
   test('changing budget calls handler and tracks event', () => {
     render(
       <IntlProvider locale="en">
