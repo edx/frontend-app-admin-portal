@@ -252,6 +252,23 @@ describe('AnalyticsFilters Component', () => {
     });
   });
 
+  test('selecting year to date sets start date to first day of current year', async () => {
+    render(
+      <IntlProvider locale="en">
+        <AnalyticsFilters {...defaultProps} activeTab="engagement" />
+      </IntlProvider>,
+    );
+
+    fireEvent.change(screen.getByLabelText('Date range options'), { target: { value: DATE_RANGE.YEAR_TO_DATE } });
+
+    await waitFor(() => {
+      expect(mockSetEndDate).toHaveBeenCalled();
+      const endDate = mockSetEndDate.mock.calls[mockSetEndDate.mock.calls.length - 1][0];
+      expect(mockSetStartDate).toHaveBeenCalledWith(`${endDate.split('-')[0]}-01-01`);
+      expect(mockTrackFilterClick).toHaveBeenCalledWith('Date range options', DATE_RANGE.YEAR_TO_DATE);
+    });
+  });
+
   test('changing budget calls handler and tracks event', () => {
     render(
       <IntlProvider locale="en">
