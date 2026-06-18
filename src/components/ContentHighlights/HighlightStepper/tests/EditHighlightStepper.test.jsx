@@ -181,20 +181,17 @@ describe('<EditHighlightStepper>', () => {
     expect(screen.getByText('Lose Progress?')).toBeInTheDocument();
   });
 
-  it('calls updateHighlightSet with empty payload when no changes', async () => {
-    // All existing keys are still selected, no new keys added
-    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({ data: {} });
+  it('does not call updateHighlightSet when no changes are made', async () => {
+    // All existing keys are still selected, no new keys added - should close modal without API call
     const user = userEvent.setup();
     renderWithRouter(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
     await user.click(screen.getByText('Save'));
 
+    // Verify the API was not called since there are no changes
     await waitFor(() => {
-      expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalledWith(
-        'test-highlight-uuid',
-        {},
-      );
+      expect(EnterpriseCatalogApiService.updateHighlightSet).not.toHaveBeenCalled();
     });
   });
 
