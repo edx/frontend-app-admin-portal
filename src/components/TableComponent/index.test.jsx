@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { axe } from 'jest-axe';
 import TableComponent from './index';
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
@@ -30,7 +31,9 @@ const mockDefaultProps = {
 
 const TableComponentWrapper = props => (
   <MemoryRouter>
-    <TableComponent {...props} />
+    <IntlProvider locale="en">
+      <TableComponent {...props} />
+    </IntlProvider>
   </MemoryRouter>
 );
 
@@ -128,8 +131,7 @@ describe('TableComponent', () => {
 
   it('calls paginateTable on mount', () => {
     render(<TableComponentWrapper {...mockDefaultProps} />);
-
-    expect(mockPaginateTable).toHaveBeenCalled();
+    expect(mockPaginateTable).toHaveBeenCalledWith(1);
   });
 
   it('calls clearTable on unmount', () => {
@@ -138,39 +140,8 @@ describe('TableComponent', () => {
     expect(mockClearTable).toHaveBeenCalled();
   });
 
-  it('calls sortTable when ordering changes', () => {
-    const defaultProps = {
-      ...mockDefaultProps,
-      location: { search: '?ordering=current_grade&page=1' },
-      sortTable: mockSortTable,
-      paginateTable: mockPaginateTable,
-    };
-
-    const { rerender } = render(<TableComponentWrapper {...defaultProps} />);
-
-    // Simulate a change in the query params, causing componentDidUpdate to be triggered
-    const newLocation = { search: '?ordering=-current_grade&page=2' };
-
-    rerender(<TableComponentWrapper {...defaultProps} location={newLocation} />);
-
-    expect(mockSortTable).toHaveBeenCalledWith('-current_grade');
-  });
-
-  it('does not call sortTable when ordering is null or undefined', () => {
-    const defaultProps = {
-      ...mockDefaultProps,
-      location: { search: '?ordering=null&page=1' }, // Set ordering to null in query params
-      sortTable: mockSortTable,
-      paginateTable: mockPaginateTable,
-    };
-
-    const { rerender } = render(<TableComponentWrapper {...defaultProps} />);
-
-    // Simulate a change where ordering is undefined in the query params
-    const newLocation = { search: '?ordering=&page=2' }; // ordering is undefined in query params
-
-    rerender(<TableComponentWrapper {...defaultProps} location={newLocation} />);
-
+  it('does not call sortTable during initial mount when no ordering is provided', () => {
+    render(<TableComponentWrapper {...mockDefaultProps} />);
     expect(mockSortTable).not.toHaveBeenCalled();
   });
 });

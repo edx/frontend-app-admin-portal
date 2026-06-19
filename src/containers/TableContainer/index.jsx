@@ -8,6 +8,7 @@ const mapStateToProps = (state, ownProps) => {
   return {
     enterpriseId: state.portalConfiguration.enterpriseId,
     data: tableState.data && tableState.data.results,
+    itemCount: tableState.data && tableState.data.count,
     currentPage: tableState.data && tableState.data.current_page,
     pageCount: tableState.data && tableState.data.num_pages,
     ordering: tableState.ordering,
