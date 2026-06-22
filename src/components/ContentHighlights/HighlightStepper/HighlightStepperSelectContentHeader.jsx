@@ -1,40 +1,17 @@
 import React from 'react';
 import { useContextSelector } from 'use-context-selector';
-import { Breadcrumb, Icon } from '@openedx/paragon';
+import { Icon } from '@openedx/paragon';
 import { AddCircle } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { Link, useParams } from 'react-router-dom';
 import { MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET } from '../data/constants';
 import { ContentHighlightsContext } from '../ContentHighlightsContext';
-import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 
 const HighlightStepperSelectContentTitle = () => {
   const intl = useIntl();
-  const { enterpriseSlug } = useParams();
   const highlightTitle = useContextSelector(ContentHighlightsContext, v => v[0].stepperModal.highlightTitle);
   const isEditMode = useContextSelector(ContentHighlightsContext, v => v[0].stepperModal.isEditMode);
-  const breadcrumbTitle = highlightTitle || intl.formatMessage({
-    id: 'highlights.new.highlights.stepper.breadcrumb.new.highlight',
-    defaultMessage: 'New highlight',
-    description: 'Breadcrumb label shown on the highlight stepper when creating a new highlight.',
-  });
   return (
     <>
-      <div className="small mb-3">
-        <Breadcrumb
-          ariaLabel="Highlights breadcrumb navigation"
-          links={[{
-            label: intl.formatMessage({
-              id: 'highlights.detail.breadcrumb.highlights',
-              defaultMessage: 'Highlights',
-              description: 'Breadcrumb label linking back to highlights dashboard from highlight detail page.',
-            }),
-            to: `/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}`,
-          }]}
-          linkAs={Link}
-          activeLabel={breadcrumbTitle}
-        />
-      </div>
       <h3 className="mb-3 d-flex align-items-center">
         <Icon src={AddCircle} className="mr-2 text-brand" />
         {isEditMode

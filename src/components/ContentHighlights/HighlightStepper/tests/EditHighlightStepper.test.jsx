@@ -123,12 +123,6 @@ describe('<EditHighlightStepper>', () => {
     expect(screen.getByText(STEPPER_STEP_TEXT.HEADER_TEXT.editSelectContent)).toBeInTheDocument();
   });
 
-  it('renders breadcrumb in edit content step', () => {
-    renderStepper(<EditHighlightStepperWrapper />);
-    expect(screen.getByLabelText('Highlights breadcrumb navigation')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Highlights' })).toHaveAttribute('href', expect.stringContaining('/admin/content-highlights'));
-  });
-
   it('does not display the Create a title step', () => {
     renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.queryByText(STEPPER_STEP_TEXT.HEADER_TEXT.createTitle)).not.toBeInTheDocument();

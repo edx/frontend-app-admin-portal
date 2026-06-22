@@ -11,6 +11,24 @@ import DeleteHighlightSet from './DeleteHighlightSet';
 import EditHighlightTitleModal from './EditHighlightTitleModal';
 import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 
+export const renderHighlightsBreadcrumb = ({ intl, enterpriseSlug, activeLabel }) => (
+  <div className="small mb-3">
+    <Breadcrumb
+      ariaLabel="Highlights breadcrumb navigation"
+      links={[{
+        label: intl.formatMessage({
+          id: 'highlights.detail.breadcrumb.highlights',
+          defaultMessage: 'Highlights',
+          description: 'Breadcrumb label linking back to highlights dashboard from highlight detail page.',
+        }),
+        to: `/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}`,
+      }]}
+      linkAs={Link}
+      activeLabel={activeLabel}
+    />
+  </div>
+);
+
 const CurrentContentHighlightItemsHeader = ({
   isLoading,
   highlightTitle,
@@ -29,23 +47,7 @@ const CurrentContentHighlightItemsHeader = ({
   const { enterpriseSlug } = useParams();
   const [isEditModalOpen, openEditModal, closeEditModal] = useToggle(false);
 
-  const breadcrumb = (
-    <div className="small mb-3">
-      <Breadcrumb
-        ariaLabel="Highlights breadcrumb navigation"
-        links={[{
-          label: intl.formatMessage({
-            id: 'highlights.detail.breadcrumb.highlights',
-            defaultMessage: 'Highlights',
-            description: 'Breadcrumb label linking back to highlights dashboard from highlight detail page.',
-          }),
-          to: `/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}`,
-        }]}
-        linkAs={Link}
-        activeLabel={highlightTitle}
-      />
-    </div>
-  );
+  const breadcrumb = renderHighlightsBreadcrumb({ intl, enterpriseSlug, activeLabel: highlightTitle });
 
   if (isLoading) {
     return (
