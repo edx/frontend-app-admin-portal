@@ -242,7 +242,7 @@ describe('<ContentHighlightSet>', () => {
       render(<ContentHighlightSetWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText('Recommended for Marketing')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
@@ -270,7 +270,7 @@ describe('<ContentHighlightSet>', () => {
       render(<ContentHighlightSetWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText('Recommended for Marketing')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
@@ -300,7 +300,7 @@ describe('<ContentHighlightSet>', () => {
       render(<ContentHighlightSetWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText('Recommended for Marketing')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
@@ -332,7 +332,7 @@ describe('<ContentHighlightSet>', () => {
       render(<ContentHighlightSetWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText('Recommended for Marketing')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
@@ -369,7 +369,7 @@ describe('<ContentHighlightSet>', () => {
       render(<ContentHighlightSetWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText('Recommended for Marketing')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
@@ -402,7 +402,7 @@ describe('<ContentHighlightSet>', () => {
       render(<ContentHighlightSetWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText('Recommended for Marketing')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
@@ -428,7 +428,7 @@ describe('<ContentHighlightSet>', () => {
       render(<ContentHighlightSetWrapper />);
 
       await waitFor(() => {
-        expect(screen.getByText('Recommended for Marketing')).toBeInTheDocument();
+        expect(screen.getByTestId('edit-content-button')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));

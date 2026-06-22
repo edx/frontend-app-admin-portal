@@ -1,13 +1,15 @@
 import React from 'react';
 import {
-  ActionRow, Button, Icon, IconButton, Skeleton, StatefulButton, useToggle,
+  ActionRow, Breadcrumb, Button, Icon, IconButton, Skeleton, StatefulButton, useToggle,
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
 import { useIntl, FormattedMessage } from '@edx/frontend-platform/i18n';
 import PropTypes from 'prop-types';
+import { Link, useParams } from 'react-router-dom';
 import ContentHighlightHelmet from './ContentHighlightHelmet';
 import DeleteHighlightSet from './DeleteHighlightSet';
 import EditHighlightTitleModal from './EditHighlightTitleModal';
+import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 
 const CurrentContentHighlightItemsHeader = ({
   isLoading,
@@ -24,7 +26,27 @@ const CurrentContentHighlightItemsHeader = ({
   existingHighlightTitles,
 }) => {
   const intl = useIntl();
+  const { enterpriseSlug } = useParams();
   const [isEditModalOpen, openEditModal, closeEditModal] = useToggle(false);
+
+  const breadcrumb = (
+    <div className="small mb-3">
+      <Breadcrumb
+        ariaLabel="Highlights breadcrumb navigation"
+        links={[{
+          label: intl.formatMessage({
+            id: 'highlights.detail.breadcrumb.highlights',
+            defaultMessage: 'Highlights',
+            description: 'Breadcrumb label linking back to highlights dashboard from highlight detail page.',
+          }),
+          to: `/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}`,
+        }]}
+        linkAs={Link}
+        activeLabel={highlightTitle}
+      />
+    </div>
+  );
+
   if (isLoading) {
     return (
       <ActionRow data-testid="header-skeleton">
@@ -39,6 +61,7 @@ const CurrentContentHighlightItemsHeader = ({
     return (
       <>
         <ContentHighlightHelmet title={`Manage ${highlightTitle} - Highlights`} />
+        {breadcrumb}
         <h2 className="mb-1" data-testid="manage-highlight-title">
           <FormattedMessage
             id="highlights.edit.manage.title"
@@ -97,6 +120,7 @@ const CurrentContentHighlightItemsHeader = ({
   return (
     <>
       <ContentHighlightHelmet title={`${highlightTitle} - Highlights`} />
+      {breadcrumb}
       <ActionRow className="mb-4.5">
         <h2 className="m-0">
           {highlightTitle}

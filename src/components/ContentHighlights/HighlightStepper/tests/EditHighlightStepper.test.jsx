@@ -22,6 +22,10 @@ import EnterpriseCatalogApiService from '../../../../data/services/EnterpriseCat
 jest.mock('../../../../data/services/EnterpriseCatalogApiService');
 
 const mockStore = configureMockStore([thunk]);
+const highlightSetUUID = 'test-highlight-uuid';
+const renderStepper = (ui) => renderWithRouter(ui, {
+  route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}`,
+});
 
 const initialState = {
   portalConfiguration: {
@@ -81,7 +85,7 @@ const EditHighlightStepperWrapper = ({
       titleStepValidationError: null,
       currentSelectedRowIds: overrideSelectedRowIds || testCourseAggregation,
       isEditMode: true,
-      highlightSetUuid: 'test-highlight-uuid',
+      highlightSetUuid: highlightSetUUID,
       existingContentKeys,
     },
     contentHighlights: [],
@@ -110,29 +114,35 @@ describe('<EditHighlightStepper>', () => {
   });
 
   it('renders the edit highlight modal with correct title', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.getByText('Edit highlight')).toBeInTheDocument();
   });
 
   it('displays select content as the first step', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.getByText(STEPPER_STEP_TEXT.HEADER_TEXT.editSelectContent)).toBeInTheDocument();
   });
 
+  it('renders breadcrumb in edit content step', () => {
+    renderStepper(<EditHighlightStepperWrapper />);
+    expect(screen.getByLabelText('Highlights breadcrumb navigation')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Highlights' })).toHaveAttribute('href', expect.stringContaining('/admin/content-highlights'));
+  });
+
   it('does not display the Create a title step', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.queryByText(STEPPER_STEP_TEXT.HEADER_TEXT.createTitle)).not.toBeInTheDocument();
   });
 
   it('has Cancel and Next buttons on the select content step', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.getByText('Cancel')).toBeInTheDocument();
     expect(screen.getByText('Next')).toBeInTheDocument();
   });
 
   it('navigates to Confirm and save step when Next is clicked', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     const nextButton = screen.getByText('Next');
     await user.click(nextButton);
@@ -142,7 +152,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('has Back and Save buttons on the confirm step', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
 
@@ -152,7 +162,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('navigates back to select content when Back is clicked on confirm step', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
     expect(screen.getByText(STEPPER_STEP_TEXT.HEADER_TEXT.editConfirmContent)).toBeInTheDocument();
@@ -163,7 +173,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('shows close confirmation modal when Cancel is clicked', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Cancel'));
 
@@ -173,7 +183,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('shows close confirmation modal when X is clicked', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     const closeButton = screen.getByRole('button', { name: 'Close' });
     await user.click(closeButton);
@@ -184,7 +194,7 @@ describe('<EditHighlightStepper>', () => {
   it('does not call updateHighlightSet when no changes are made', async () => {
     // All existing keys are still selected, no new keys added - should close modal without API call
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
     await user.click(screen.getByText('Save'));
@@ -207,6 +217,7 @@ describe('<EditHighlightStepper>', () => {
       <EditHighlightStepperWrapper
         overrideSelectedRowIds={partialSelectedRowIds}
       />,
+      { route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}` },
     );
 
     await user.click(screen.getByText('Next'));
@@ -235,6 +246,7 @@ describe('<EditHighlightStepper>', () => {
       <EditHighlightStepperWrapper
         overrideSelectedRowIds={mixedSelectedRowIds}
       />,
+      { route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}` },
     );
 
     await user.click(screen.getByText('Next'));
@@ -252,22 +264,22 @@ describe('<EditHighlightStepper>', () => {
   });
 
   it('does not render when isOpen is false', () => {
-    renderWithRouter(<EditHighlightStepperWrapper isOpen={false} />);
+    renderStepper(<EditHighlightStepperWrapper isOpen={false} />);
     expect(screen.queryByText('Edit highlight')).not.toBeInTheDocument();
   });
 
   it('shows edit-specific subtitle text with highlight name', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
-    expect(screen.getByText(/Recommended for Marketing/)).toBeInTheDocument();
+    renderStepper(<EditHighlightStepperWrapper />);
+    expect(screen.getByText(/Select up to 24 courses for "Recommended for Marketing"/)).toBeInTheDocument();
   });
 
   it('displays review header on confirm step', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
 
     expect(screen.getByText(STEPPER_STEP_TEXT.HEADER_TEXT.editConfirmContent)).toBeInTheDocument();
-    expect(screen.getByText(/Recommended for Marketing/)).toBeInTheDocument();
+    expect(screen.getByText('Review course selections for "Recommended for Marketing".')).toBeInTheDocument();
   });
 });

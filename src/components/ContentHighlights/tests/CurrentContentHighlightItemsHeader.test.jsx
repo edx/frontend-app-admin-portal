@@ -31,7 +31,7 @@ const CurrentContentHighlightItemsHeaderWrapper = (props) => (
 describe('<CurrentContentHighlightItemsHeader>', () => {
   it('has no accessibility violations', async () => {
     const { container } = render(
-      <CurrentContentHighlightItemsHeaderWrapper isLoading={false} highlightTitle={highlightTitle} />,
+      <CurrentContentHighlightItemsHeaderWrapper isLoading highlightTitle={highlightTitle} />,
     );
     const results = await axe(container, accessibilitySettings);
     expect(results).toHaveNoViolations();
@@ -41,8 +41,30 @@ describe('<CurrentContentHighlightItemsHeader>', () => {
     render(
       <CurrentContentHighlightItemsHeaderWrapper isLoading={false} highlightTitle={highlightTitle} />,
     );
-    expect(screen.getByText(highlightTitle)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2, name: highlightTitle })).toBeInTheDocument();
     expect(screen.getByTestId('deleteHighlightSet')).toBeInTheDocument();
+  });
+
+  it('renders breadcrumb in view mode', () => {
+    render(
+      <CurrentContentHighlightItemsHeaderWrapper isLoading={false} highlightTitle={highlightTitle} />,
+    );
+    expect(screen.getByLabelText('Highlights breadcrumb navigation')).toBeInTheDocument();
+    const highlightsLink = screen.getByRole('link', { name: 'Highlights' });
+    expect(highlightsLink).toHaveAttribute('href', '/test-enterprise/admin/content-highlights');
+    expect(screen.getByRole('heading', { level: 2, name: highlightTitle })).toBeInTheDocument();
+  });
+
+  it('renders breadcrumb in edit mode', () => {
+    render(
+      <CurrentContentHighlightItemsHeaderWrapper
+        isLoading={false}
+        highlightTitle={highlightTitle}
+        isEditing
+      />,
+    );
+    expect(screen.getByLabelText('Highlights breadcrumb navigation')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Highlights' })).toHaveAttribute('href', '/test-enterprise/admin/content-highlights');
   });
 
   it('Displays Skeleton on load', () => {

@@ -179,6 +179,17 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
       });
     });
 
+    it('renders highlight heading when isEditing is true and title is provided', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={testHighlightSet}
+        highlightTitle="Recommended for Marketing"
+        isEditing
+        selectedContentKeys={new Set()}
+      />);
+      expect(screen.getByText(/All courses and programs in "Recommended for Marketing" highlight/)).toBeInTheDocument();
+    });
+
     it('calls onToggleSelect with contentKey when checkbox is clicked', async () => {
       const onToggleSelect = jest.fn();
       const user = userEvent.setup();
