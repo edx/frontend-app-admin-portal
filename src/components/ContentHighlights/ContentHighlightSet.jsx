@@ -84,8 +84,8 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
       <AlertModal
         title={intl.formatMessage({
           id: 'highlights.edit.remove.featured.modal.title',
-          defaultMessage: 'Remove a featured course?',
-          description: 'Title for modal confirming removal of featured courses from a highlight.',
+          defaultMessage: 'Remove a featured content?',
+          description: 'Title for modal confirming removal of featured content from a highlight.',
         })}
         isOpen={isFeaturedModalOpen}
         onClose={() => setIsFeaturedModalOpen(false)}
@@ -119,7 +119,7 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
         <p>
           <FormattedMessage
             id="highlights.edit.remove.featured.modal.body"
-            defaultMessage="Do you want to remove these featured courses from your highlight?"
+            defaultMessage="Do you want to remove these featured content from your highlight?"
             description="Body text for the featured content removal confirmation modal."
           />
         </p>
