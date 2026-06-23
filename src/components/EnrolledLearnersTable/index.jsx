@@ -1,62 +1,131 @@
-import React from 'react';
-
+import React, { useState, useCallback } from 'react';
+import { connect } from 'react-redux';
+import { Alert, DataTable } from '@openedx/paragon';
+import { Error } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
+import PropTypes from 'prop-types';
 
-import TableContainer from '../../containers/TableContainer';
 import { i18nFormatTimestamp } from '../../utils';
 import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiService';
 
-const EnrolledLearnersTable = () => {
+const EnrolledLearnersTable = ({ enterpriseId }) => {
   const intl = useIntl();
+  const [isLoading, setIsLoading] = useState(true);
+  const [tableData, setTableData] = useState([]);
+  const [pageCount, setPageCount] = useState(0);
+  const [itemCount, setItemCount] = useState(0);
+  const [error, setError] = useState(null);
 
-  const tableColumns = [
+  const fetchData = useCallback(
+    async (args) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const primarySort = args.sortBy?.[0];
+        const ordering = primarySort ? `${primarySort.desc ? '-' : ''}${primarySort.id}` : null;
+        const response = await EnterpriseDataApiService.fetchEnrolledLearners(
+          enterpriseId,
+          {
+            page: args.pageIndex + 1,
+            page_size: args.pageSize,
+            ...(ordering && { ordering }),
+          },
+        );
+        const { results, count, num_pages: numPages } = response.data;
+        const formattedRows = (results || []).map(learner => ({
+          ...learner,
+          user_email: <span data-hj-suppress>{learner.user_email}</span>,
+          lms_user_created: i18nFormatTimestamp({ intl, timestamp: learner.lms_user_created }),
+        }));
+        setTableData(formattedRows);
+        setItemCount(count || 0);
+        setPageCount(numPages || 0);
+      } catch (err) {
+        logError(err);
+        setError(err);
+        setTableData([]);
+        setItemCount(0);
+        setPageCount(0);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [enterpriseId, intl],
+  );
+
+  const columns = [
     {
-      label: intl.formatMessage({
+      Header: intl.formatMessage({
         id: 'admin.portal.lpr.enrolled.learners.table.user_email.column.heading',
         defaultMessage: 'Email',
         description: 'Column heading for the user email column in the enrolled learners table',
       }),
-      key: 'user_email',
-      columnSortable: true,
+      accessor: 'user_email',
     },
     {
-      label: intl.formatMessage({
+      Header: intl.formatMessage({
         id: 'admin.portal.lpr.enrolled.learners.table.lms_user_created.column.heading',
         defaultMessage: 'Account Created',
         description: 'Column heading for the lms user created column in the enrolled learners table',
       }),
-      key: 'lms_user_created',
-      columnSortable: true,
+      accessor: 'lms_user_created',
     },
     {
-      label: intl.formatMessage({
+      Header: intl.formatMessage({
         id: 'admin.portal.lpr.enrolled.learners.table.enrollment_count.column.heading',
         defaultMessage: 'Total Course Enrollment Count',
         description: 'Column heading for the course enrollment count column in the enrolled learners table',
       }),
-      key: 'enrollment_count',
-      columnSortable: true,
+      accessor: 'enrollment_count',
     },
   ];
 
-  const formatLearnerData = learners => learners.map(learner => ({
-    ...learner,
-    user_email: <span data-hj-suppress>{learner.user_email}</span>,
-    lms_user_created: i18nFormatTimestamp({
-      intl, timestamp: learner.lms_user_created,
-    }),
-  }));
-
   return (
-    <TableContainer
-      id="enrolled-learners"
-      className="enrolled-learners"
-      fetchMethod={EnterpriseDataApiService.fetchEnrolledLearners}
-      columns={tableColumns}
-      formatData={formatLearnerData}
-      tableSortable
-    />
+    <>
+      {error && (
+        <Alert variant="danger" icon={Error}>
+          <Alert.Heading>Unable to load data</Alert.Heading>
+          <p>Try refreshing your screen {error.message}</p>
+        </Alert>
+      )}
+      <DataTable
+        isLoading={isLoading}
+        isPaginated
+        manualPagination
+        isSortable
+        manualSortBy
+        initialState={{
+          pageSize: 50,
+          pageIndex: 0,
+        }}
+        itemCount={itemCount}
+        pageCount={pageCount}
+        fetchData={fetchData}
+        data={tableData}
+        columns={columns}
+      >
+        <DataTable.TableControlBar />
+        <DataTable.Table />
+        <DataTable.EmptyTable
+          content={intl.formatMessage({
+            id: 'admin.portal.lpr.enrolled.learners.table.empty',
+            defaultMessage: 'There are no results.',
+            description: 'Message displayed when the enrolled learners table is empty',
+          })}
+        />
+        <DataTable.TableFooter />
+      </DataTable>
+    </>
   );
 };
 
-export default EnrolledLearnersTable;
+EnrolledLearnersTable.propTypes = {
+  enterpriseId: PropTypes.string.isRequired,
+};
+
+const mapStateToProps = state => ({
+  enterpriseId: state.portalConfiguration.enterpriseId,
+});
+
+export default connect(mapStateToProps)(EnrolledLearnersTable);
