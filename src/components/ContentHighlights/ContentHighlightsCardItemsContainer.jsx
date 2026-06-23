@@ -57,44 +57,56 @@ const ContentHighlightsCardItemsContainer = ({
 
   if (isEditing) {
     return (
-      <div data-testid="edit-mode-card-grid">
-        <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
-          {highlightedContent.map(({
-            uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
-          }) => (
-            <div
-              key={uuid}
-              style={{ position: 'relative' }}
-              data-testid={`selectable-card-wrapper-${uuid}`}
-            >
+      <>
+        {highlightTitle && (
+          <h4 className="mb-3">
+            <FormattedMessage
+              id="highlights.all.courses.section.heading"
+              defaultMessage='All courses and programs in "{highlightTitle}" highlight'
+              description="Heading above the full courses grid"
+              values={{ highlightTitle }}
+            />
+          </h4>
+        )}
+        <div data-testid="edit-mode-card-grid">
+          <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+            {highlightedContent.map(({
+              uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
+            }) => (
               <div
-                style={{
-                  position: 'absolute',
-                  top: '0.5rem',
-                  right: '0.5rem',
-                  zIndex: 1,
-                }}
+                key={uuid}
+                style={{ position: 'relative' }}
+                data-testid={`selectable-card-wrapper-${uuid}`}
               >
-                <Form.Checkbox
-                  aria-label={`Select ${title} for removal`}
-                  checked={selectedContentKeys.has(contentKey)}
-                  onChange={() => onToggleSelect(contentKey)}
-                  data-testid={`select-checkbox-${uuid}`}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '0.5rem',
+                    right: '0.5rem',
+                    zIndex: 1,
+                  }}
+                >
+                  <Form.Checkbox
+                    aria-label={`Select ${title} for removal`}
+                    checked={selectedContentKeys.has(contentKey)}
+                    onChange={() => onToggleSelect(contentKey)}
+                    data-testid={`select-checkbox-${uuid}`}
+                  />
+                </div>
+                <ContentHighlightCardItem
+                  isLoading={isLoading}
+                  key={uuid}
+                  cardImageUrl={cardImageUrl}
+                  title={title}
+                  archived={false}
+                  contentType={contentType.toLowerCase()}
+                  partners={authoringOrganizations}
                 />
               </div>
-              <ContentHighlightCardItem
-                isLoading={isLoading}
-                key={uuid}
-                cardImageUrl={cardImageUrl}
-                title={title}
-                archived={false}
-                contentType={contentType.toLowerCase()}
-                partners={authoringOrganizations}
-              />
-            </div>
-          ))}
-        </CardGrid>
-      </div>
+            ))}
+          </CardGrid>
+        </div>
+      </>
     );
   }
 

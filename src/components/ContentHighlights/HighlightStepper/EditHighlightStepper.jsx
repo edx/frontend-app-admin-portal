@@ -76,6 +76,13 @@ const EditHighlightStepper = ({ enterpriseId }) => {
         .filter(k => !selectedKeys.includes(k))
         .map(key => key.split(':')[1]);
 
+      // Check if there are actual changes to save
+      if (newKeys.length === 0 && removedKeys.length === 0) {
+        // No changes, close the modal without making an API call
+        closeStepperModal();
+        return;
+      }
+
       const payload = {};
       if (newKeys.length > 0) {
         payload.add_content_keys = newKeys;
