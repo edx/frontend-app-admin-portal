@@ -22,6 +22,7 @@ import TopCoursesByEnrollmentTable from '../tables/TopCoursesByEnrollmentTable';
 import TopCoursesByLearningHoursTable from '../tables/TopCoursesByLearningHoursTable';
 import TopSubjectsByEnrollmentTable from '../tables/TopSubjectsByEnrollmentTable';
 import TopSubjectsByLearningHoursTable from '../tables/TopSubjectsByLearningHoursTable';
+import IndividualEngagementsTable from '../tables/IndividualEngagementsTable';
 import EVENT_NAMES from '../../../eventTracking';
 import { get90DayPriorDate } from '../data/utils';
 import { useAllFlexEnterpriseGroups } from '../../learner-credit-management/data';
@@ -286,6 +287,22 @@ const Engagements = ({ enterpriseId }) => {
               trackCsvDownloadClick={trackCsvDownloadClick}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Individual Engagements */}
+      <div className="bg-primary-100 rounded-lg container-fluid mb-3 mt-3">
+        <div className="h-100 overflow-hidden">
+          <IndividualEngagementsTable
+            startDate={startDate}
+            endDate={endDate || currentDate}
+            enterpriseId={enterpriseId}
+            groupUUID={groupUUID}
+            courseType={courseType}
+            budgetUUID={budgetUUID}
+            course={course}
+            trackCsvDownloadClick={trackCsvDownloadClick}
+          />
         </div>
       </div>
     </div>
