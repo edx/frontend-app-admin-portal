@@ -14,6 +14,7 @@ const AnalyticsTable = ({
   tableColumns,
   tableTitle,
   tableSubtitle,
+  csvButtonText,
   entityId,
   startDate,
   endDate,
@@ -91,15 +92,17 @@ const AnalyticsTable = ({
             to={CSVDownloadURL}
             target="_blank"
             className={`btn btn-sm btn-primary rounded-0  ${!data?.results?.length ? 'disabled' : ''}`}
-            onClick={() => trackCsvDownloadClick(entityId)}
+            onClick={() => trackCsvDownloadClick?.(entityId)}
           >
             <Icon src={Download} className="me-2" />
-            <FormattedMessage
-              id="adminPortal.analytics.downloadCSV.button"
-              defaultMessage="Download {respectiveTableName} CSV"
-              description="Button to download CSV for respective table"
-              values={{ respectiveTableName: name.charAt(0).toUpperCase() + name.slice(1) }}
-            />
+            {csvButtonText || (
+              <FormattedMessage
+                id="adminPortal.analytics.downloadCSV.button"
+                defaultMessage="Download {respectiveTableName} CSV"
+                description="Button to download CSV for respective table"
+                values={{ respectiveTableName: name.charAt(0).toUpperCase() + name.slice(1) }}
+              />
+            )}
           </Link>
         </div>
 
@@ -141,6 +144,7 @@ AnalyticsTable.defaultProps = {
   groupUUID: undefined,
   courseType: undefined,
   course: undefined,
+  csvButtonText: undefined,
 };
 
 AnalyticsTable.propTypes = {
@@ -148,6 +152,7 @@ AnalyticsTable.propTypes = {
   tableColumns: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
   tableTitle: PropTypes.string.isRequired,
   tableSubtitle: PropTypes.string.isRequired,
+  csvButtonText: PropTypes.node,
   entityId: PropTypes.string.isRequired,
   enterpriseId: PropTypes.string.isRequired,
   startDate: PropTypes.string.isRequired,

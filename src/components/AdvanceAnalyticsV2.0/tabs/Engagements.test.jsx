@@ -417,6 +417,12 @@ describe('Rendering tests', () => {
     });
     hooks.useEnterpriseCourses.mockReturnValue({ isFetching: false, data: [] });
     hooks.useEnterpriseBudgets.mockReturnValue({ isFetching: false, data: [] });
+    // AnalyticsTable (Individual Engagements) destructures this hook; mock it so the
+    // test passes in isolation and the CSV download link is enabled.
+    hooks.useEnterpriseAnalyticsData.mockReturnValue({
+      isFetching: false,
+      data: mockEngagementTableData,
+    });
 
     render(
       <Router>
@@ -428,7 +434,7 @@ describe('Rendering tests', () => {
       </Router>,
     );
 
-    const downloadLink = await screen.findByRole('link', { name: /download.*csv/i });
+    const downloadLink = await screen.findByRole('link', { name: /download engagement csv/i });
     await userEvent.click(downloadLink);
 
     await waitFor(() => {
