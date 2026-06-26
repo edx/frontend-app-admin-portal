@@ -103,7 +103,14 @@ const ContentHighlightCardItem = ({
           }}
         >
           <Form.Checkbox
-            aria-label={`Select ${title} for removal`}
+            aria-label={intl.formatMessage(
+              {
+                id: 'highlights.card.select_for_removal.aria.label',
+                defaultMessage: 'Select {title} for removal',
+                description: 'Checkbox aria label for selecting highlighted content for removal',
+              },
+              { title },
+            )}
             checked={isSelected}
             onChange={onToggleSelect}
             data-testid={`select-checkbox-${uuid}`}
