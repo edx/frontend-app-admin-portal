@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import {
-  Card, Hyperlink, Icon, Truncate,
+  Card, Form, Hyperlink, Icon, Truncate,
 } from '@openedx/paragon';
 import { Archive } from '@openedx/paragon/icons';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
@@ -25,6 +25,9 @@ const ContentHighlightCardItem = ({
   uuid,
   isStarred,
   onToggleStar,
+  isSelectable,
+  isSelected,
+  onToggleSelect,
 }) => {
   const {
     FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING,
@@ -66,7 +69,7 @@ const ContentHighlightCardItem = ({
   }
 
   let cardWrapperTestId;
-  if (editHighlightsEnabled && uuid) {
+  if ((editHighlightsEnabled || isSelectable) && uuid) {
     cardWrapperTestId = archived ? `card-wrapper-archived-${uuid}` : `card-wrapper-${uuid}`;
   }
 
@@ -75,7 +78,7 @@ const ContentHighlightCardItem = ({
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
       className={classNames({
-        'position-relative w-100': editHighlightsEnabled && uuid,
+        'position-relative w-100': (editHighlightsEnabled || isSelectable) && uuid,
       })}
       data-testid={cardWrapperTestId}
     >
@@ -86,6 +89,33 @@ const ContentHighlightCardItem = ({
           isStarred={Boolean(isStarred)}
           onToggleStar={onToggleStar}
         />
+      )}
+      {isSelectable && uuid && (
+        <div
+          className="p-0 border-0 bg-transparent"
+          data-testid={`select-checkbox-wrapper-${uuid}`}
+          style={{
+            position: 'absolute',
+            top: '1px',
+            right: '-27px',
+            width: '24px',
+            height: '24px',
+          }}
+        >
+          <Form.Checkbox
+            aria-label={intl.formatMessage(
+              {
+                id: 'highlights.card.select_for_removal.aria.label',
+                defaultMessage: 'Select {title} for removal',
+                description: 'Checkbox aria label for selecting highlighted content for removal',
+              },
+              { title },
+            )}
+            checked={isSelected}
+            onChange={onToggleSelect}
+            data-testid={`select-checkbox-${uuid}`}
+          />
+        </div>
       )}
       <Card.ImageCap
         src={cardInfo.cardImgSrc}
@@ -145,6 +175,9 @@ ContentHighlightCardItem.propTypes = {
   uuid: PropTypes.string,
   isStarred: PropTypes.bool,
   onToggleStar: PropTypes.func,
+  isSelectable: PropTypes.bool,
+  isSelected: PropTypes.bool,
+  onToggleSelect: PropTypes.func,
 };
 
 ContentHighlightCardItem.defaultProps = {
@@ -157,6 +190,9 @@ ContentHighlightCardItem.defaultProps = {
   uuid: undefined,
   isStarred: false,
   onToggleStar: undefined,
+  isSelectable: false,
+  isSelected: false,
+  onToggleSelect: undefined,
 };
 
 export default ContentHighlightCardItem;
