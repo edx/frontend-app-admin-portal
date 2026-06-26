@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  ActionRow, Alert, Button, CardGrid, Form, useToggle,
+  ActionRow, Alert, Button, CardGrid, useToggle,
 } from '@openedx/paragon';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
@@ -73,36 +73,19 @@ const ContentHighlightsCardItemsContainer = ({
             {highlightedContent.map(({
               uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
             }) => (
-              <div
+              <ContentHighlightCardItem
+                isLoading={isLoading}
                 key={uuid}
-                style={{ position: 'relative' }}
-                data-testid={`selectable-card-wrapper-${uuid}`}
-              >
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: '0.5rem',
-                    right: '0.5rem',
-                    zIndex: 1,
-                  }}
-                >
-                  <Form.Checkbox
-                    aria-label={`Select ${title} for removal`}
-                    checked={selectedContentKeys.has(contentKey)}
-                    onChange={() => onToggleSelect(contentKey)}
-                    data-testid={`select-checkbox-${uuid}`}
-                  />
-                </div>
-                <ContentHighlightCardItem
-                  isLoading={isLoading}
-                  key={uuid}
-                  cardImageUrl={cardImageUrl}
-                  title={title}
-                  archived={false}
-                  contentType={contentType.toLowerCase()}
-                  partners={authoringOrganizations}
-                />
-              </div>
+                uuid={uuid}
+                cardImageUrl={cardImageUrl}
+                title={title}
+                archived={false}
+                contentType={contentType.toLowerCase()}
+                partners={authoringOrganizations}
+                isSelectable
+                isSelected={selectedContentKeys.has(contentKey)}
+                onToggleSelect={() => onToggleSelect(contentKey)}
+              />
             ))}
           </CardGrid>
         </div>
