@@ -261,7 +261,7 @@ class EnterpriseAccessApiService {
       page_size: 25,
       // Only include assignments with allocated or errored states. The table should NOT
       // include assignments in the canceled or accepted states.
-      state__in: 'allocated,errored',
+      state__in: 'allocated,errored,expired',
       ...snakeCaseObject(optionsRest),
     };
     if (learnerState) {

@@ -96,6 +96,14 @@ describe('useBudgetContentAssignments', () => {
       numPages: 1,
       currentPage: 1,
     });
+    expect(mockListContentAssignments).toHaveBeenCalledWith(
+      '123',
+      {
+        page: 1,
+        pageSize: 10,
+        learnerState: 'notifying,waiting,failed',
+      },
+    );
   });
 
   it.each([
@@ -157,6 +165,7 @@ describe('useBudgetContentAssignments', () => {
         page: 1,
         pageSize: 10,
         search: hasSearchParam ? 'test' : undefined,
+        learnerState: 'notifying,waiting,failed',
       },
     );
   });
@@ -316,6 +325,7 @@ describe('useBudgetContentAssignments', () => {
       {
         page: 1,
         pageSize: 10,
+        learnerState: 'notifying,waiting,failed',
         ordering: orderingQueryParam,
       },
     );

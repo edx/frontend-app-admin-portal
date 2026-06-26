@@ -30,6 +30,9 @@ const getLearnerStateDisplayName = (learnerState) => {
   if (learnerState === 'failed') {
     return 'Failed';
   }
+  if (learnerState === 'expired') {
+    return 'Expired';
+  }
 
   return undefined;
 };

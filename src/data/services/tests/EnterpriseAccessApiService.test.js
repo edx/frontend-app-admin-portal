@@ -145,7 +145,7 @@ describe('EnterpriseAccessApiService', () => {
     const expectedParams = new URLSearchParams({
       page: 1,
       page_size: 25,
-      state__in: 'allocated,errored',
+      state__in: 'allocated,errored,expired',
       learner_state__in: 'notifying,waiting',
     }).toString();
     expect(axios.get).toBeCalledWith(
@@ -158,7 +158,7 @@ describe('EnterpriseAccessApiService', () => {
     const expectedParams = new URLSearchParams({
       page: 1,
       page_size: 25,
-      state__in: 'allocated,errored',
+      state__in: 'allocated,errored,expired',
     }).toString();
     expect(axios.get).toBeCalledWith(
       `${enterpriseAccessBaseUrl}/api/v1/assignment-configurations/${mockAssignmentConfigurationUUID}/admin/assignments/?${expectedParams}`,
