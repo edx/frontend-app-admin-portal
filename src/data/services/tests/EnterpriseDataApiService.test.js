@@ -5,6 +5,8 @@ import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { snakeCaseObject, camelCaseObject } from '@edx/frontend-platform/utils';
 
 import EnterpriseDataApiService from '../EnterpriseDataApiService';
+import store from '../../store';
+import { configuration } from '../../../config';
 
 const axiosMock = new MockAdapter(axios);
 getAuthenticatedHttpClient.mockReturnValue(axios);
@@ -91,5 +93,45 @@ describe('EnterpriseDataApiService', () => {
     const response = await EnterpriseDataApiService.fetchEnterpriseCourses(mockEnterpriseUUID, requestOptions);
     expect(axiosMock.history.get[0].url).toBe(expectedURL);
     expect(response).toEqual(camelCaseObject(mockApiResponse));
+  });
+
+  describe('getAnalyticsCSVDownloadURL demo data toggle', () => {
+    let getStateSpy;
+    const originalDemoUUID = configuration.DEMO_ENTEPRISE_UUID;
+
+    afterEach(() => {
+      if (getStateSpy) {
+        getStateSpy.mockRestore();
+      }
+      configuration.DEMO_ENTEPRISE_UUID = originalDemoUUID;
+    });
+
+    it('uses the raw enterprise UUID when demo mode is off', () => {
+      getStateSpy = jest.spyOn(store, 'getState').mockReturnValue({
+        portalConfiguration: { enableDemoData: false },
+      });
+      const url = EnterpriseDataApiService.getAnalyticsCSVDownloadURL(
+        'engagementsTable',
+        mockEnterpriseUUID,
+        { start_date: '2021-01-01', end_date: '2021-12-31' },
+      );
+      expect(url).toContain(`${mockEnterpriseUUID}/engagements`);
+      expect(url).toContain('response_type=csv');
+    });
+
+    it('uses the demo enterprise UUID when demo mode is on', () => {
+      configuration.DEMO_ENTEPRISE_UUID = 'demo-enterprise-uuid';
+      getStateSpy = jest.spyOn(store, 'getState').mockReturnValue({
+        portalConfiguration: { enableDemoData: true },
+      });
+      const url = EnterpriseDataApiService.getAnalyticsCSVDownloadURL(
+        'engagementsTable',
+        mockEnterpriseUUID,
+        { start_date: '2021-01-01', end_date: '2021-12-31' },
+      );
+      expect(url).toContain('demo-enterprise-uuid/engagements');
+      expect(url).not.toContain(mockEnterpriseUUID);
+      expect(url).toContain('response_type=csv');
+    });
   });
 });
