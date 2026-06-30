@@ -6,7 +6,6 @@ import { logError } from '@edx/frontend-platform/logging';
 import { Skeleton } from '@openedx/paragon';
 
 import DismissibleCourseWarning from './DismissibleCourseWarning';
-import { configuration } from '../../../config';
 import {
   ADD_COURSES_TITLE,
   ADD_COURSE_DESCRIPTION,
@@ -77,7 +76,7 @@ const BaseSearchEnabled: React.FC<SearchEnabledProps> = ({
       <DismissibleCourseWarning defaultShow={(selectedCourses?.length || 0) > MAX_COURSES} />
       <SearchData>
         <InstantSearch
-          indexName={configuration.ALGOLIA.INDEX_NAME!}
+          indexName={algolia.indexName}
           searchClient={algolia.searchClient}
         >
           <Configure

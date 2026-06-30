@@ -8,7 +8,6 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { SearchData, SearchHeader } from '@2uinc/frontend-enterprise-catalog-search';
 import { connect } from 'react-redux';
 
-import { configuration } from '../../../config';
 import { ENABLE_TESTING, FOOTER_TEXT_BY_CONTENT_TYPE, MAX_PAGE_SIZE } from '../data/constants';
 import ContentSearchResultCard from './ContentSearchResultCard';
 import { ContentHighlightsContext } from '../ContentHighlightsContext';
@@ -178,6 +177,10 @@ const HighlightStepperSelectContent: React.FC<HighlightStepperSelectContentProps
     ContentHighlightsContext,
     v => v[0].algolia.searchClient,
   );
+  const algoliaIndexName = useContextSelector(
+    ContentHighlightsContext,
+    v => v[0].algolia.indexName,
+  );
   const hasSecuredAlgoliaApiKey = useContextSelector(
     ContentHighlightsContext,
     v => !!v[0].algolia.securedAlgoliaApiKey,
@@ -232,7 +235,7 @@ const HighlightStepperSelectContent: React.FC<HighlightStepperSelectContentProps
   return (
     <SearchData>
       <InstantSearch
-        indexName={configuration.ALGOLIA.INDEX_NAME!}
+        indexName={algoliaIndexName}
         searchClient={searchClient}
       >
         <Configure

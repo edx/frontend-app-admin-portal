@@ -6,7 +6,6 @@ import { Col, Skeleton } from '@openedx/paragon';
 
 import { BulkEnrollContext } from '../BulkEnrollmentContext';
 import ReviewList from './ReviewList';
-import { configuration } from '../../../config';
 import { setSelectedRowsAction } from '../data/actions';
 import { SearchUnavailableAlert, withAlgoliaSearch } from '../../algolia-search';
 import type { SelectedRow } from '../data/types';
@@ -139,7 +138,7 @@ export const BaseReviewStepCourseList = ({
 
   return (
     <InstantSearch
-      indexName={configuration.ALGOLIA.INDEX_NAME!}
+      indexName={algolia.indexName}
       searchClient={algolia.searchClient}
     >
       <Configure filters={searchFilters} />

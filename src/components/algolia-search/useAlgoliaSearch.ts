@@ -32,10 +32,12 @@ interface UseSecuredAlgoliaApiKeyResult {
 
 interface UseAlgoliaSearchArgs {
   enterpriseId: string;
+  useAlgoliaIndexV2?: boolean;
 }
 
 export interface UseAlgoliaSearchResult {
   isCatalogQueryFiltersEnabled: boolean;
+  indexName: string;
   securedAlgoliaApiKey: string | null;
   isLoading: boolean;
   searchClient: SearchClient | null;
@@ -97,8 +99,12 @@ function useSecuredAlgoliaApiKey({
 
 function useAlgoliaSearch({
   enterpriseId,
+  useAlgoliaIndexV2 = false,
 }: UseAlgoliaSearchArgs): UseAlgoliaSearchResult {
   const isCatalogQueryFiltersEnabled = !!configuration.ALGOLIA.APP_ID;
+  const indexName = (useAlgoliaIndexV2 && configuration.ALGOLIA.INDEX_NAME_V2)
+    ? configuration.ALGOLIA.INDEX_NAME_V2
+    : (configuration.ALGOLIA.INDEX_NAME ?? '');
   const securedAlgoliaApiKeyResult = useSecuredAlgoliaApiKey({
     enterpriseId,
     isCatalogQueryFiltersEnabled,
@@ -124,6 +130,7 @@ function useAlgoliaSearch({
 
   return {
     isCatalogQueryFiltersEnabled,
+    indexName,
     securedAlgoliaApiKey: securedAlgoliaApiKeyData?.apiKey || null,
     isLoading: isInitialLoadingSecuredAlgoliaApiKey,
     searchClient,

@@ -48,6 +48,7 @@ const defaultAlgoliaProps: UseAlgoliaSearchResult = {
   catalogUuidsToCatalogQueryUuids: null,
   isLoading: false,
   isCatalogQueryFiltersEnabled: false,
+  indexName: 'test-index',
   searchClient: null,
   securedAlgoliaApiKey: null,
 };

@@ -16,7 +16,6 @@ import { Assignment } from '@openedx/paragon/icons';
 import { camelCaseObject } from '@edx/frontend-platform';
 import { Configure, InstantSearch, connectStateResults } from 'react-instantsearch-dom';
 import { connect } from 'react-redux';
-import { configuration } from '../../../config';
 import {
   STEPPER_STEP_TEXT,
   MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET,
@@ -77,6 +76,10 @@ export const SelectedContent = ({ enterpriseId }) => {
   const searchClient = useContextSelector(
     ContentHighlightsContext,
     v => v[0].algolia.searchClient,
+  );
+  const algoliaIndexName = useContextSelector(
+    ContentHighlightsContext,
+    v => v[0].algolia.indexName,
   );
   const hasSecuredAlgoliaApiKey = useContextSelector(
     ContentHighlightsContext,
@@ -156,7 +159,7 @@ export const SelectedContent = ({ enterpriseId }) => {
 
   return (
     <InstantSearch
-      indexName={configuration.ALGOLIA.INDEX_NAME!}
+      indexName={algoliaIndexName}
       searchClient={searchClient}
     >
       <Configure
