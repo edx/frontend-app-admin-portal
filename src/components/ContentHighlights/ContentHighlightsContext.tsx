@@ -18,6 +18,7 @@ export type ContentHighlightsAlgoliaContextValue = {
   searchClient: SearchClient | null;
   securedAlgoliaApiKey: string | null;
   isLoading: boolean;
+  indexName: string;
 };
 
 export type ContentHighlightsContextValue = [
@@ -53,6 +54,7 @@ const initialState = {
     searchClient: null,
     securedAlgoliaApiKey: null,
     isLoading: false,
+    indexName: '',
   },
 };
 
@@ -72,10 +74,11 @@ const ContentHighlightsContextProvider = ({ children, algolia }: ContentHighligh
         searchClient: algolia.searchClient,
         securedAlgoliaApiKey: algolia.securedAlgoliaApiKey || null,
         isLoading: algolia.isLoading,
+        indexName: algolia.indexName,
       },
     },
     setState,
-  ], [state, algolia.searchClient, algolia.securedAlgoliaApiKey, algolia.isLoading]);
+  ], [state, algolia.searchClient, algolia.securedAlgoliaApiKey, algolia.isLoading, algolia.indexName]);
 
   return (
     <ContentHighlightsContext.Provider value={contextValue}>

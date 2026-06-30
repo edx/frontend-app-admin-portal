@@ -35,6 +35,8 @@ jest.mock('../../config', () => ({
     ALGOLIA: {
       APP_ID: 'testAppId',
       SEARCH_API_KEY: 'testSearchApiKey',
+      INDEX_NAME: 'enterprise_catalog_v1',
+      INDEX_NAME_V2: 'enterprise_catalog_v2',
     },
   },
 }));
@@ -49,6 +51,7 @@ const mockStore = configureMockStore([thunk]);
 
 interface PortalConfigurationState {
   enterpriseId: string;
+  enterpriseFeatures?: Record<string, boolean>;
 }
 
 interface RootState {
@@ -67,6 +70,7 @@ const MyComponent: React.FC<MyComponentProps> = ({ algolia, enterpriseId, classN
     <h1>My Component</h1>
     <div>{enterpriseId}</div>
     {algolia.searchClient && <div>Search Client Loaded</div>}
+    <div data-testid="index-name">{algolia.indexName}</div>
   </div>
 );
 interface MyComponentWrapperProps {
@@ -108,6 +112,7 @@ describe('withAlgoliaSearch', () => {
     const store: MockStore<RootState, DispatchExts> = mockStore({
       portalConfiguration: {
         enterpriseId: mockEnterpriseId,
+        enterpriseFeatures: {},
       },
     });
     const apiUrl = `${configuration.ENTERPRISE_CATALOG_BASE_URL}/api/v1/enterprise-customer/${mockEnterpriseId}/secured-algolia-api-key/`;
@@ -145,5 +150,26 @@ describe('withAlgoliaSearch', () => {
         configuration.ALGOLIA.SEARCH_API_KEY,
       );
     }
+  });
+
+  it.each([
+    { useAlgoliaIndexV2: false, expectedIndexName: 'enterprise_catalog_v1' },
+    { useAlgoliaIndexV2: true, expectedIndexName: 'enterprise_catalog_v2' },
+  ])('selects the correct index name when useAlgoliaIndexV2=%s', async ({ useAlgoliaIndexV2, expectedIndexName }) => {
+    const mockEnterpriseId = 'test-enterprise-id';
+    const store: MockStore<RootState, DispatchExts> = mockStore({
+      portalConfiguration: {
+        enterpriseId: mockEnterpriseId,
+        enterpriseFeatures: { useAlgoliaIndexV2 },
+      },
+    });
+    const apiUrl = `${configuration.ENTERPRISE_CATALOG_BASE_URL}/api/v1/enterprise-customer/${mockEnterpriseId}/secured-algolia-api-key/`;
+    axiosMock.onGet(apiUrl).reply(500);
+
+    render(<Wrapper store={store} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('index-name')).toHaveTextContent(expectedIndexName);
+    });
   });
 });

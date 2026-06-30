@@ -4,7 +4,6 @@ import { Configure, InstantSearch } from 'react-instantsearch-dom';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { SearchHeader } from '@2uinc/frontend-enterprise-catalog-search';
 
-import { configuration } from '../../../config';
 import CatalogSearchResults from './CatalogSearchResults';
 import {
   SEARCH_RESULT_PAGE_SIZE, useBudgetId, useEnterpriseGroup, useSubsidyAccessPolicy,
@@ -91,7 +90,7 @@ export const CatalogSearch = ({ algolia }: CatalogSearchProps) => {
         <p>Members of this budget will be able to browse and enroll the content in this catalog.</p>
       )}
       <InstantSearch
-        indexName={configuration.ALGOLIA.INDEX_NAME!}
+        indexName={algolia.indexName}
         searchClient={algolia.searchClient}
       >
         <div className="enterprise-catalogs-header">
