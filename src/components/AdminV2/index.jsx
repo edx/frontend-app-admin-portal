@@ -311,7 +311,7 @@ const Admin = ({
   const displaySearchBar = () => !actionSlug;
 
   const isTableDataMissing = (id) => {
-    if (LOCAL_STATE_DATATABLE_SLUGS.includes(id)) {
+    if (LEARNER_ACTIVITY_TABLE_SLUGS.includes(id)) {
       // These report tables use local DataTable state, not the redux table slice.
       // Never disable the CSV button due to missing redux table data for these slugs.
       return false;
