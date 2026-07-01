@@ -81,6 +81,7 @@ const useBudgetContentAssignments = ({
       const options = {
         page: args.pageIndex + 1, // `DataTable` uses zero-indexed array
         pageSize: args.pageSize,
+        includeExpired: true,
       };
       applyFiltersToOptions(args.filters, options);
       applySortByToOptions(args.sortBy, options);

@@ -101,6 +101,7 @@ describe('useBudgetContentAssignments', () => {
       {
         page: 1,
         pageSize: 10,
+        includeExpired: true,
         learnerState: 'notifying,waiting,failed',
       },
     );
@@ -159,15 +160,16 @@ describe('useBudgetContentAssignments', () => {
     await waitFor(() => {
       expect(result.current.isLoading).toEqual(false);
     });
-    expect(mockListContentAssignments).toHaveBeenCalledWith(
-      '123',
-      {
-        page: 1,
-        pageSize: 10,
-        search: hasSearchParam ? 'test' : undefined,
-        learnerState: 'notifying,waiting,failed',
-      },
-    );
+    const expectedOptions = {
+      page: 1,
+      pageSize: 10,
+      includeExpired: true,
+      learnerState: 'notifying,waiting,failed',
+    };
+    if (hasSearchParam) {
+      expectedOptions.search = 'test';
+    }
+    expect(mockListContentAssignments).toHaveBeenCalledWith('123', expectedOptions);
   });
 
   it.each([
@@ -227,6 +229,7 @@ describe('useBudgetContentAssignments', () => {
       {
         page: 1,
         pageSize: 10,
+        includeExpired: true,
         learnerState: selectedLearnerStateQueryParam,
       },
     );
@@ -325,6 +328,7 @@ describe('useBudgetContentAssignments', () => {
       {
         page: 1,
         pageSize: 10,
+        includeExpired: true,
         learnerState: 'notifying,waiting,failed',
         ordering: orderingQueryParam,
       },

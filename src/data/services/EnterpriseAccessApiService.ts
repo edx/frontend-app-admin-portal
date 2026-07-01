@@ -255,13 +255,13 @@ class EnterpriseAccessApiService {
    * List content assignments for a specific AssignmentConfiguration.
    */
   static listContentAssignments(assignmentConfigurationUUID, options: any = {}) {
-    const { learnerState, ...optionsRest } = options;
+    const { learnerState, includeExpired = false, ...optionsRest } = options;
     const params = {
       page: 1,
       page_size: 25,
-      // Only include assignments with allocated or errored states. The table should NOT
-      // include assignments in the canceled or accepted states.
-      state__in: 'allocated,errored,expired',
+      // Include allocated and errored assignments by default; include expired only when
+      // explicitly requested via `includeExpired`. Never include canceled or accepted.
+      state__in: includeExpired ? 'allocated,errored,expired' : 'allocated,errored',
       ...snakeCaseObject(optionsRest),
     };
     if (learnerState) {

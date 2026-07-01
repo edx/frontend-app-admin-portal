@@ -145,7 +145,7 @@ describe('EnterpriseAccessApiService', () => {
     const expectedParams = new URLSearchParams({
       page: 1,
       page_size: 25,
-      state__in: 'allocated,errored,expired',
+      state__in: 'allocated,errored',
       learner_state__in: 'notifying,waiting',
     }).toString();
     expect(axios.get).toBeCalledWith(
@@ -155,6 +155,20 @@ describe('EnterpriseAccessApiService', () => {
 
   test('listContentAssignments calls enterprise-access to fetch content assignments without learner state filter', () => {
     EnterpriseAccessApiService.listContentAssignments(mockAssignmentConfigurationUUID);
+    const expectedParams = new URLSearchParams({
+      page: 1,
+      page_size: 25,
+      state__in: 'allocated,errored',
+    }).toString();
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/assignment-configurations/${mockAssignmentConfigurationUUID}/admin/assignments/?${expectedParams}`,
+    );
+  });
+
+  test('listContentAssignments includes expired assignments when includeExpired is true', () => {
+    EnterpriseAccessApiService.listContentAssignments(mockAssignmentConfigurationUUID, {
+      includeExpired: true,
+    });
     const expectedParams = new URLSearchParams({
       page: 1,
       page_size: 25,
