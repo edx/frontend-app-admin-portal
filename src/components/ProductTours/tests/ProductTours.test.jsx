@@ -350,11 +350,14 @@ describe('<ProductTours/>', () => {
   describe('TourCollapsible', () => {
     it('renders the collapsible title', () => {
       render(<ToursWithContext />);
-      expect(screen.queryByText('Quick Start Guide')).toBeTruthy();
+      // The collapsible title is the non-bold "Quick Start Guide" (the modal body one is bold).
+      expect(screen.getAllByText('Quick Start Guide').some((el) => el.tagName !== 'STRONG')).toBe(true);
     });
     it('renders the welcome modal and opens the quick start guide', async () => {
       render(<ToursWithContext />);
       expect(screen.queryByText('Welcome!')).toBeTruthy();
+      // The "Quick Start Guide" phrase in the modal body should be bold.
+      expect(screen.getAllByText('Quick Start Guide').some((el) => el.tagName === 'STRONG')).toBe(true);
       userEvent.click(screen.getByText('Get started'));
       // "Get started" button should un-collapse the quick start guide
       await waitFor(() => {
@@ -367,6 +370,8 @@ describe('<ProductTours/>', () => {
       lastLogin = '2023-09-15T15:30:00Z';
       render(<ToursWithContext />);
       expect(screen.queryByText('Hello!')).toBeTruthy();
+      // The "Quick Start Guide" phrase in the modal body should be bold.
+      expect(screen.getAllByText('Quick Start Guide').some((el) => el.tagName === 'STRONG')).toBe(true);
       userEvent.click(screen.getByTestId('welcome-modal-dismiss'));
       await waitFor(() => {
         expect(screen.queryByText('Hello.')).not.toBeTruthy();
