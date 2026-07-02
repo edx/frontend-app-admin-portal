@@ -165,6 +165,20 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('listContentAssignments includes expired assignments when includeExpired is true', () => {
+    EnterpriseAccessApiService.listContentAssignments(mockAssignmentConfigurationUUID, {
+      includeExpired: true,
+    });
+    const expectedParams = new URLSearchParams({
+      page: 1,
+      page_size: 25,
+      state__in: 'allocated,errored,expired',
+    }).toString();
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/assignment-configurations/${mockAssignmentConfigurationUUID}/admin/assignments/?${expectedParams}`,
+    );
+  });
+
   test('listSubsidyAccessPolicies calls enterprise-access to fetch subsidy access policies', () => {
     EnterpriseAccessApiService.listSubsidyAccessPolicies(mockEnterpriseUUID);
     expect(axios.get).toBeCalledWith(
