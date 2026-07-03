@@ -19,7 +19,7 @@ const Leaderboard = ({ startDate, endDate, enterpriseId }) => {
           })}
           tableSubtitle={intl.formatMessage({
             id: 'advance.analytics.leaderboard.tab.datatable.leaderboard.subtitle',
-            defaultMessage: 'Explore the top learners ranked by engagement metrics. The list is sorted by learning hours by default. To dive deeper, download the full CSV to explore and sort by other metrics',
+            defaultMessage: 'Explore the top learners ranked by engagement metrics. The list is sorted by learning hours by default. To dive deeper, download the full CSV to explore and sort by other metrics.',
             description: 'Subtitle for the leaderboard datatable.',
           })}
           startDate={startDate}
