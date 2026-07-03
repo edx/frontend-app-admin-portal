@@ -7,7 +7,7 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import thunk from 'redux-thunk';
 import {
-  cleanup, render, screen, waitFor,
+  cleanup, render, screen, waitFor, within,
 } from '@testing-library/react';
 import { mergeConfig } from '@edx/frontend-platform';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -349,15 +349,20 @@ describe('<ProductTours/>', () => {
 
   describe('TourCollapsible', () => {
     it('renders the collapsible title', () => {
+      // Dismiss the welcome modal so the only "Quick Start Guide" on screen is the collapsible title.
+      global.localStorage.setItem(ONBOARDING_WELCOME_MODAL_COOKIE_NAME, 'true');
       render(<ToursWithContext />);
-      // The collapsible title is the non-bold "Quick Start Guide" (the modal body one is bold).
-      expect(screen.getAllByText('Quick Start Guide').some((el) => el.tagName !== 'STRONG')).toBe(true);
+      const title = screen.getByText('Quick Start Guide');
+      expect(title).toBeTruthy();
+      expect(title.tagName).not.toBe('STRONG');
     });
     it('renders the welcome modal and opens the quick start guide', async () => {
       render(<ToursWithContext />);
       expect(screen.queryByText('Welcome!')).toBeTruthy();
-      // The "Quick Start Guide" phrase in the modal body should be bold.
-      expect(screen.getAllByText('Quick Start Guide').some((el) => el.tagName === 'STRONG')).toBe(true);
+      // "Quick Start Guide" in the welcome modal body should render bold (<p><strong>...</strong></p>).
+      const modalBold = within(screen.getByRole('dialog')).getByText('Quick Start Guide');
+      expect(modalBold.tagName).toBe('STRONG');
+      expect(modalBold.closest('p')).not.toBeNull();
       userEvent.click(screen.getByText('Get started'));
       // "Get started" button should un-collapse the quick start guide
       await waitFor(() => {
@@ -370,8 +375,10 @@ describe('<ProductTours/>', () => {
       lastLogin = '2023-09-15T15:30:00Z';
       render(<ToursWithContext />);
       expect(screen.queryByText('Hello!')).toBeTruthy();
-      // The "Quick Start Guide" phrase in the modal body should be bold.
-      expect(screen.getAllByText('Quick Start Guide').some((el) => el.tagName === 'STRONG')).toBe(true);
+      // "Quick Start Guide" in the welcome modal body should render bold (<p><strong>...</strong></p>).
+      const modalBold = within(screen.getByRole('dialog')).getByText('Quick Start Guide');
+      expect(modalBold.tagName).toBe('STRONG');
+      expect(modalBold.closest('p')).not.toBeNull();
       userEvent.click(screen.getByTestId('welcome-modal-dismiss'));
       await waitFor(() => {
         expect(screen.queryByText('Hello.')).not.toBeTruthy();
