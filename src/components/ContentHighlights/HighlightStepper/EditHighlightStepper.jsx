@@ -1,5 +1,5 @@
 import React, {
-  useCallback, useEffect, useState,
+  useCallback, useContext, useEffect, useState,
 } from 'react';
 import PropTypes from 'prop-types';
 import { useContextSelector } from 'use-context-selector';
@@ -15,6 +15,8 @@ import { ContentHighlightsContext } from '../ContentHighlightsContext';
 import HighlightStepperSelectContent from './HighlightStepperSelectContent';
 import EditHighlightStepperConfirmContent from './EditHighlightStepperConfirmContent';
 import HighlightStepperFooterHelpLink from './HighlightStepperFooterHelpLink';
+import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextProvider';
+import { enterpriseCurationActions } from '../../EnterpriseApp/data/enterpriseCurationReducer';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
 import { useContentHighlightsContext } from '../data/hooks';
 import { EDIT_STEPPER_STEP_LABELS } from '../data/constants';
@@ -31,6 +33,11 @@ const EditHighlightStepper = ({ enterpriseId }) => {
   const intl = useIntl();
   const navigate = useNavigate();
   const location = useLocation();
+  const {
+    enterpriseCuration: {
+      dispatch: dispatchEnterpriseCuration,
+    } = {},
+  } = useContext(EnterpriseAppContext) || {};
   const [currentStep, setCurrentStep] = useState(editSteps[0]);
   const [isSaving, setIsSaving] = useState(false);
   const [isCloseAlertOpen, openCloseAlert, closeCloseAlert] = useToggle(false);
@@ -92,6 +99,18 @@ const EditHighlightStepper = ({ enterpriseId }) => {
       }
 
       await EnterpriseCatalogApiService.updateHighlightSet(highlightSetUuid, payload);
+
+      const updatedContentKeys = selectedKeys.map(key => key.split(':')[1]);
+      if (dispatchEnterpriseCuration) {
+        dispatchEnterpriseCuration(
+          enterpriseCurationActions.updateHighlightSetContentItems({
+            activeContentUuids: updatedContentKeys,
+            highlightSetUUID: highlightSetUuid,
+          }),
+        );
+      } else {
+        logError('EditHighlightStepper: dispatchEnterpriseCuration is unavailable; highlight set content count may be stale.');
+      }
 
       navigate(location.pathname, {
         state: { highlightSetEdited: true },

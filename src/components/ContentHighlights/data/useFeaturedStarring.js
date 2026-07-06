@@ -1,5 +1,5 @@
 import {
-  useState, useCallback, useEffect, useMemo, useRef, useContext,
+  useState, useCallback, useEffect, useMemo, useContext,
 } from 'react';
 import { defaultContext } from '@tanstack/react-query';
 import { getConfig } from '@edx/frontend-platform';
@@ -20,17 +20,13 @@ const useFeaturedStarring = (highlightSetUUID, highlightedContent) => {
   const [isMaxStarredModalOpen, openMaxStarredModal, closeMaxStarredModal] = useToggle(false);
   const [starredContentKeys, setStarredContentKeys] = useState(new Set());
   const [loadingContentKey, setLoadingContentKey] = useState(null);
-  const initialized = useRef(false);
 
   useEffect(() => {
-    if (!initialized.current && highlightedContent?.length > 0) {
-      initialized.current = true;
-      setStarredContentKeys(new Set(
-        highlightedContent
-          .filter((item) => item.isFavorite)
-          .map((item) => item.contentKey),
-      ));
-    }
+    setStarredContentKeys(new Set(
+      (highlightedContent || [])
+        .filter((item) => item.isFavorite)
+        .map((item) => item.contentKey),
+    ));
   }, [highlightedContent]);
 
   const starredItems = useMemo(

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
 import { useState } from 'react';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import algoliasearch from 'algoliasearch/lite';
 import thunk from 'redux-thunk';
 import { renderWithRouter } from '@2uinc/frontend-enterprise-utils';
@@ -18,8 +19,12 @@ import { configuration } from '../../../../config';
 import { EnterpriseAppContext } from '../../../EnterpriseApp/EnterpriseAppContextProvider';
 import EditHighlightStepper from '../EditHighlightStepper';
 import EnterpriseCatalogApiService from '../../../../data/services/EnterpriseCatalogApiService';
+import { UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS } from '../../../EnterpriseApp/data/enterpriseCurationReducer';
 
 jest.mock('../../../../data/services/EnterpriseCatalogApiService');
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+}));
 
 const mockStore = configureMockStore([thunk]);
 const highlightSetUUID = 'test-highlight-uuid';
@@ -34,11 +39,14 @@ const initialState = {
   },
 };
 
+const mockDispatch = jest.fn();
+
 const initialEnterpriseAppContextValue = {
   enterpriseCuration: {
     enterpriseCuration: {
       highlightSets: [],
     },
+    dispatch: mockDispatch,
   },
 };
 
@@ -111,6 +119,15 @@ const EditHighlightStepperWrapper = ({
 describe('<EditHighlightStepper>', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDispatch.mockReset();
+    logError.mockReset();
+  });
+
+  it('renders without crashing when EnterpriseAppContext value is missing', () => {
+    renderStepper(
+      <EditHighlightStepperWrapper enterpriseAppContextValue={null} />,
+    );
+    expect(screen.getByText('Edit highlight')).toBeInTheDocument();
   });
 
   it('renders the edit highlight modal with correct title', () => {
@@ -225,6 +242,16 @@ describe('<EditHighlightStepper>', () => {
         },
       );
     });
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS,
+        payload: {
+          activeContentUuids: ['HarvardX+CS50W', 'HarvardX+CS50AI'],
+          highlightSetUUID: 'test-highlight-uuid',
+        },
+      });
+    });
   });
 
   it('sends both add_content_keys and remove_content_keys when content is added and removed', async () => {
@@ -253,6 +280,40 @@ describe('<EditHighlightStepper>', () => {
           add_content_keys: ['MITx+NewCourse'],
           remove_content_keys: expect.arrayContaining(['HarvardX+CS50P', 'HarvardX+CS50x']),
         },
+      );
+    });
+  });
+
+  it('logs an error and continues save when dispatch is unavailable', async () => {
+    const partialSelectedRowIds = {
+      'course:HarvardX+CS50W': true,
+      'course:HarvardX+CS50AI': true,
+    };
+    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({ data: {} });
+    const user = userEvent.setup();
+    renderWithRouter(
+      <EditHighlightStepperWrapper
+        enterpriseAppContextValue={null}
+        overrideSelectedRowIds={partialSelectedRowIds}
+      />,
+      { route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}` },
+    );
+
+    await user.click(screen.getByText('Next'));
+    await user.click(screen.getByText('Save'));
+
+    await waitFor(() => {
+      expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalledWith(
+        'test-highlight-uuid',
+        {
+          remove_content_keys: expect.arrayContaining(['HarvardX+CS50P', 'HarvardX+CS50x']),
+        },
+      );
+    });
+
+    await waitFor(() => {
+      expect(logError).toHaveBeenCalledWith(
+        'EditHighlightStepper: dispatchEnterpriseCuration is unavailable; highlight set content count may be stale.',
       );
     });
   });

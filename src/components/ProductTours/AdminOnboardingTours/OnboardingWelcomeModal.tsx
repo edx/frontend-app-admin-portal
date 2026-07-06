@@ -62,8 +62,8 @@ const OnboardingWelcomeModal = ({
       <ModalDialog.Body>
         <p>
           {isNewUser
-            ? intl.formatMessage(messages.welcomeModalNewUserBody, { bold_tag: boldTagWrapper })
-            : intl.formatMessage(messages.welcomeModalExistingUserBody, { bold_tag: boldTagWrapper })}
+            ? intl.formatMessage(messages.welcomeModalNewUserBody, { b: boldTagWrapper })
+            : intl.formatMessage(messages.welcomeModalExistingUserBody, { b: boldTagWrapper })}
         </p>
       </ModalDialog.Body>
 
