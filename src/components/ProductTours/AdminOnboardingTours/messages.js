@@ -24,7 +24,7 @@ const messages = defineMessages({
   welcomeModalNewUserBody: {
     id: 'admin.portal.productTours.adminOnboarding.welcomeModal.body.new',
     defaultMessage: 'We\'re excited to show you the edX administrative portal.'
-    + ' Use our {bold_tag}Quick Start Guide{bold_tag} to get step-by-step guidance on what our portal can do for you.',
+    + ' Use our <b>Quick Start Guide</b> to get step-by-step guidance on what our portal can do for you.',
     description: 'Body for the welcome modal for new users.',
   },
   welcomeModalExistingUserTitle: {
@@ -34,7 +34,7 @@ const messages = defineMessages({
   },
   welcomeModalExistingUserBody: {
     id: 'admin.portal.productTours.adminOnboarding.welcomeModal.body.existing',
-    defaultMessage: 'We\'ve launched a new {bold_tag}Quick Start Guide{bold_tag}, which provides'
+    defaultMessage: 'We\'ve launched a new <b>Quick Start Guide</b>, which provides'
     + ' step-by-step guidance on what our portal can do for you.',
     description: 'Body for the welcome modal for existing users.',
   },
