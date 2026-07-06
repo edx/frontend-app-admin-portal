@@ -18,6 +18,7 @@ import { configuration } from '../../../../config';
 import { EnterpriseAppContext } from '../../../EnterpriseApp/EnterpriseAppContextProvider';
 import EditHighlightStepper from '../EditHighlightStepper';
 import EnterpriseCatalogApiService from '../../../../data/services/EnterpriseCatalogApiService';
+import { UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS } from '../../../EnterpriseApp/data/enterpriseCurationReducer';
 
 jest.mock('../../../../data/services/EnterpriseCatalogApiService');
 
@@ -34,11 +35,14 @@ const initialState = {
   },
 };
 
+const mockDispatch = jest.fn();
+
 const initialEnterpriseAppContextValue = {
   enterpriseCuration: {
     enterpriseCuration: {
       highlightSets: [],
     },
+    dispatch: mockDispatch,
   },
 };
 
@@ -111,6 +115,7 @@ const EditHighlightStepperWrapper = ({
 describe('<EditHighlightStepper>', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDispatch.mockReset();
   });
 
   it('renders the edit highlight modal with correct title', () => {
@@ -224,6 +229,16 @@ describe('<EditHighlightStepper>', () => {
           remove_content_keys: expect.arrayContaining(['HarvardX+CS50P', 'HarvardX+CS50x']),
         },
       );
+    });
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS,
+        payload: {
+          activeContentUuids: ['HarvardX+CS50W', 'HarvardX+CS50AI'],
+          highlightSetUUID: 'test-highlight-uuid',
+        },
+      });
     });
   });
 
