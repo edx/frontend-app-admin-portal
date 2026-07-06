@@ -80,8 +80,7 @@ describe('LeaderboardTable Component', () => {
     );
 
     expect(screen.getByText('Leaderboard')).toBeInTheDocument();
-    expect(screen.getByText('Explore the top learners ranked by engagement metrics. The list is sorted by learning hours by default. To dive deeper, download the full CSV to explore and sort by other metrics.'))
-      .toBeInTheDocument();
+    expect(screen.getByText('Explore the top learners ranked by engagement metrics. The list is sorted by learning hours by default. To dive deeper, download the full CSV to explore and sort by other metrics.')).toBeInTheDocument();
   });
 
   test('renders the table rows with correct values', async () => {
