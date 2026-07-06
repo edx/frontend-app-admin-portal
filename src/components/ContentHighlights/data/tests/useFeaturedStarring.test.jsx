@@ -248,7 +248,7 @@ describe('useFeaturedStarring', () => {
     expect(EnterpriseCatalogApiService.toggleFavoriteHighlight).not.toHaveBeenCalled();
   });
 
-  it('does not reinitialize starred keys on subsequent renders', () => {
+  it('re-syncs starred keys on subsequent renders when highlighted content changes', () => {
     const content = [
       { ...mockHighlightedContent[0], isFavorite: true },
       { ...mockHighlightedContent[1], isFavorite: false },
@@ -268,9 +268,8 @@ describe('useFeaturedStarring', () => {
 
     rerender({ items: updatedContent });
 
-    // Should NOT reinitialize — still has original state
-    expect(result.current.starredContentKeys.has('edX+Course1')).toBe(true);
-    expect(result.current.starredContentKeys.has('edX+Course2')).toBe(false);
+    expect(result.current.starredContentKeys.has('edX+Course1')).toBe(false);
+    expect(result.current.starredContentKeys.has('edX+Course2')).toBe(true);
   });
 
   it('updates the cached highlight set when starring or unstarring', async () => {
