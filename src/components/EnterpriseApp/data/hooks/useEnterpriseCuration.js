@@ -110,6 +110,7 @@ function useEnterpriseCuration({ enterpriseId, curationTitleForCreation }) {
     enterpriseCuration,
     enterpriseHighlightedSets,
     fetchError,
+    getEnterpriseCuration,
     updateEnterpriseCuration,
   };
 }

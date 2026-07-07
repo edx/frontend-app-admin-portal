@@ -22,7 +22,12 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
   const location = useLocation();
   const intl = useIntl();
   const [isToastOpen, openToast, closeToast] = useToggle(false);
-  const { enterpriseCuration: { enterpriseCuration } } = useContext(EnterpriseAppContext);
+  const {
+    enterpriseCuration: {
+      enterpriseCuration,
+      dispatch: dispatchEnterpriseCuration,
+    },
+  } = useContext(EnterpriseAppContext);
   const existingHighlightTitles = getExistingHighlightTitles(enterpriseCuration);
 
   const {
@@ -40,7 +45,9 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
     handleRemoveSelectedContent,
     handleAddContentClick,
     executeRemoveContent,
-  } = useContentHighlightSetEditing({ highlightSet, updateHighlightSet, openToast });
+  } = useContentHighlightSetEditing({
+    highlightSet, updateHighlightSet, openToast, dispatchEnterpriseCuration,
+  });
 
   // Refetch data when stepper saves successfully (detected via location state)
   useEffect(() => {
