@@ -67,6 +67,34 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
     return result;
   }, [editHighlightsEnabled, updateHighlightTitle, dispatchEnterpriseCuration, highlightSetUUID]);
 
+  const selectedFeaturedItemsCount = selectedFeaturedItems.length;
+  const featuredModalTitle = intl.formatMessage(
+    selectedFeaturedItemsCount > 1
+      ? {
+        id: 'highlights.edit.remove.featured.modal.title.multiple',
+        defaultMessage: 'Remove featured items?',
+        description: 'Title for modal confirming removal of multiple featured content items from a highlight.',
+      }
+      : {
+        id: 'highlights.edit.remove.featured.modal.title.single',
+        defaultMessage: 'Remove featured item?',
+        description: 'Title for modal confirming removal of a featured content item from a highlight.',
+      },
+  );
+  const featuredModalBody = intl.formatMessage(
+    selectedFeaturedItemsCount > 1
+      ? {
+        id: 'highlights.edit.remove.featured.modal.body.multiple',
+        defaultMessage: 'Do you want to remove these featured items from your highlight?',
+        description: 'Body text for the featured content removal confirmation modal when multiple items are selected.',
+      }
+      : {
+        id: 'highlights.edit.remove.featured.modal.body.single',
+        defaultMessage: 'Do you want to remove this featured content from your highlight?',
+        description: 'Body text for the featured content removal confirmation modal when one item is selected.',
+      },
+  );
+
   // Refetch data when stepper saves successfully (detected via location state)
   useEffect(() => {
     if (location.state?.highlightSetEdited) {
@@ -108,11 +136,7 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
         onToggleSelect={handleToggleSelect}
       />
       <AlertModal
-        title={intl.formatMessage({
-          id: 'highlights.edit.remove.featured.modal.title',
-          defaultMessage: 'Remove a featured content?',
-          description: 'Title for modal confirming removal of featured content from a highlight.',
-        })}
+        title={featuredModalTitle}
         isOpen={isFeaturedModalOpen}
         onClose={() => setIsFeaturedModalOpen(false)}
         footerNode={(
@@ -143,11 +167,7 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
         )}
       >
         <p>
-          <FormattedMessage
-            id="highlights.edit.remove.featured.modal.body"
-            defaultMessage="Do you want to remove these featured content from your highlight?"
-            description="Body text for the featured content removal confirmation modal."
-          />
+          {featuredModalBody}
         </p>
         <ul>
           {selectedFeaturedItems.map(item => (
