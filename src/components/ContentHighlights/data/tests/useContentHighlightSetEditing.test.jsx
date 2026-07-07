@@ -8,6 +8,7 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { ContentHighlightsContext } from '../../ContentHighlightsContext';
 import useContentHighlightSetEditing from '../useContentHighlightSetEditing';
 import { ROUTE_NAMES } from '../../../EnterpriseApp/data/constants';
+import { enterpriseCurationActions } from '../../../EnterpriseApp/data/enterpriseCurationReducer';
 import EnterpriseCatalogApiService from '../../../../data/services/EnterpriseCatalogApiService';
 import { useContentHighlightsContext } from '../hooks';
 
@@ -108,6 +109,20 @@ describe('useContentHighlightSetEditing', () => {
       highlightSet,
       updateHighlightSet: mockUpdateHighlightSet,
       openToast: mockOpenToast,
+      dispatchEnterpriseCuration: undefined,
+    }),
+    { wrapper: HookWrapper },
+  );
+
+  const renderEditingHookWithDispatch = (
+    dispatchEnterpriseCuration,
+    highlightSet = mockHighlightSet,
+  ) => renderHook(
+    () => useContentHighlightSetEditing({
+      highlightSet,
+      updateHighlightSet: mockUpdateHighlightSet,
+      openToast: mockOpenToast,
+      dispatchEnterpriseCuration,
     }),
     { wrapper: HookWrapper },
   );
@@ -267,6 +282,29 @@ describe('useContentHighlightSetEditing', () => {
     expect(result.current.isRemoving).toBe(false);
     expect(result.current.isFeaturedModalOpen).toBe(false);
     expect(mockOpenToast).toHaveBeenCalled();
+  });
+
+  it('executeRemoveContent dispatches highlight count update to enterprise curation', async () => {
+    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({});
+    const mockDispatchEnterpriseCuration = jest.fn();
+    const { result } = renderEditingHookWithDispatch(mockDispatchEnterpriseCuration);
+
+    act(() => {
+      result.current.handleToggleSelect('edX+Course1');
+    });
+
+    await act(async () => {
+      await result.current.executeRemoveContent();
+    });
+
+    await waitFor(() => {
+      expect(mockDispatchEnterpriseCuration).toHaveBeenCalledWith(
+        enterpriseCurationActions.updateHighlightSetContentItems({
+          activeContentUuids: ['edX+Course2', 'edX+Program1'],
+          highlightSetUUID,
+        }),
+      );
+    });
   });
 
   it('executeRemoveContent sets removeError on failure', async () => {

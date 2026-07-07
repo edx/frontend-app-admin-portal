@@ -152,6 +152,40 @@ describe('enterpriseCurationReducer', () => {
     ).toMatchObject({ enterpriseCuration: { highlightSets: [highlightSet] } });
   });
 
+  it('should update highlight set title', () => {
+    const highlightSet = {
+      uuid: highlightSetUUID,
+      title: 'Original title',
+      highlightedContentUuids: ['course-v1:edX+DemoX+Demo_Course'],
+    };
+    const stateWithHighlights = {
+      ...initialState,
+      enterpriseCuration: {
+        highlightSets: [highlightSet],
+      },
+    };
+
+    expect(
+      enterpriseCurationReducer(
+        stateWithHighlights,
+        enterpriseCurationActions.updateHighlightSetTitle({
+          highlightSetUUID,
+          title: 'Updated title',
+        }),
+      ),
+    ).toMatchObject({
+      enterpriseCuration: {
+        highlightSets: [
+          {
+            uuid: highlightSetUUID,
+            title: 'Updated title',
+            highlightedContentUuids: ['course-v1:edX+DemoX+Demo_Course'],
+          },
+        ],
+      },
+    });
+  });
+
   it('should handle missing enterpriseCuration when adding/deleting a highlight set', () => {
     const highlightSet = { uuid: highlightSetUUID };
     expect(
