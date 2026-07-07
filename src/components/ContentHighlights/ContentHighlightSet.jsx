@@ -91,6 +91,7 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
         onSaveTitle={editHighlightsEnabled ? onSaveTitle : null}
         editHighlightsEnabled={editHighlightsEnabled}
         existingHighlightTitles={existingHighlightTitles}
+        highlightedContentCount={highlightSet?.highlightedContent?.length ?? 0}
       />
       {removeError && (
         <Alert variant="danger" data-testid="remove-error-alert" className="mb-3">
