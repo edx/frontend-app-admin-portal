@@ -69,10 +69,11 @@ const useContentHighlightSetEditing = ({
 
       // Update enterprise curation context so dashboard card count reflects the change
       if (dispatchEnterpriseCuration) {
-        const activeContentUuids = remainingContent.map(item => item.contentKey);
+        const activeContentKeys = remainingContent.map(item => item.contentKey);
         dispatchEnterpriseCuration(
           enterpriseCurationActions.updateHighlightSetContentItems({
-            activeContentUuids,
+            // Reducer payload field is named activeContentUuids for legacy reasons.
+            activeContentUuids: activeContentKeys,
             highlightSetUUID,
           }),
         );

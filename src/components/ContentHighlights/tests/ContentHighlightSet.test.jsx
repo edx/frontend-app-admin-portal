@@ -18,6 +18,7 @@ import { useHighlightSet, useContentHighlightsContext } from '../data/hooks';
 import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
 import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextProvider';
+import { enterpriseCurationActions } from '../../EnterpriseApp/data/enterpriseCurationReducer';
 import { TEST_COURSE_HIGHLIGHTS_DATA } from '../data/constants';
 import { configuration } from '../../../config';
 
@@ -441,6 +442,48 @@ describe('<ContentHighlightSet>', () => {
           existingContent: mockHighlightSetWithFeatured.highlightedContent,
         });
       });
+    });
+
+    it('dispatches enterprise curation title update when highlight name is saved', async () => {
+      mockUpdateHighlightTitle.mockResolvedValueOnce({
+        title: 'Renamed Highlight',
+      });
+      useHighlightSet.mockReturnValue({
+        highlightSet: mockHighlightSetWithFeatured,
+        isLoading: false,
+        error: null,
+        updateHighlightSet: mockUpdateHighlightSet,
+        updateHighlightTitle: mockUpdateHighlightTitle,
+        refetch: mockRefetch,
+      });
+
+      render(<ContentHighlightSetWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-highlight-title-button')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('edit-highlight-title-button'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('dialog', { name: 'Edit highlight name' })).toBeInTheDocument();
+      });
+
+      fireEvent.change(screen.getByTestId('edit-highlight-title-input'), {
+        target: { value: 'Renamed Highlight' },
+      });
+      fireEvent.click(screen.getByTestId('edit-highlight-title-save-button'));
+
+      await waitFor(() => {
+        expect(mockUpdateHighlightTitle).toHaveBeenCalledWith('Renamed Highlight');
+      });
+
+      expect(mockDispatchFn).toHaveBeenCalledWith(
+        enterpriseCurationActions.updateHighlightSetTitle({
+          highlightSetUUID,
+          title: 'Renamed Highlight',
+        }),
+      );
     });
   });
 });

@@ -20,6 +20,7 @@ export const SET_IS_NEW_ARCHIVED_CONTENT = 'SET_IS_NEW_ARCHIVED_CONTENT';
 export const SET_ENTERPRISE_HIGHLIGHTED_CONTENTS = 'SET_ENTERPRISE_HIGHLIGHTED_CONTENTS';
 export const UPDATE_DISMISSED_ARCHIVED_CONTENT = 'UPDATE_DISMISSED_ARCHIVED_CONTENT';
 export const UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS = 'UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS';
+export const UPDATE_HIGHLIGHT_SET_TITLE = 'UPDATE_HIGHLIGHT_SET_TITLE';
 
 export const enterpriseCurationActions = {
   setIsLoading: (payload) => ({
@@ -64,6 +65,10 @@ export const enterpriseCurationActions = {
   }),
   updateHighlightSetContentItems: (payload) => ({
     type: UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS,
+    payload,
+  }),
+  updateHighlightSetTitle: (payload) => ({
+    type: UPDATE_HIGHLIGHT_SET_TITLE,
     payload,
   }),
 };
@@ -183,6 +188,22 @@ function enterpriseCurationReducer(state, action) {
       const updatedHighlightSets = existingHighlightSets.map((highlightSet) => {
         if (highlightSet.uuid === action.payload.highlightSetUUID) {
           return { ...highlightSet, highlightedContentUuids: action.payload.activeContentUuids };
+        }
+        return highlightSet;
+      });
+      return {
+        ...state,
+        enterpriseCuration: {
+          ...state.enterpriseCuration,
+          highlightSets: updatedHighlightSets,
+        },
+      };
+    }
+    case UPDATE_HIGHLIGHT_SET_TITLE: {
+      const existingHighlightSets = getHighlightSetsFromState(state);
+      const updatedHighlightSets = existingHighlightSets.map((highlightSet) => {
+        if (highlightSet.uuid === action.payload.highlightSetUUID) {
+          return { ...highlightSet, title: action.payload.title };
         }
         return highlightSet;
       });

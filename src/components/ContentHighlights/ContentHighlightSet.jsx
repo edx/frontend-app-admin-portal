@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useCallback, useContext, useEffect } from 'react';
 import { connect } from 'react-redux';
 import {
   ActionRow, Alert, AlertModal, Button, Container, Toast, useToggle,
@@ -12,13 +12,13 @@ import { useHighlightSet } from './data/hooks';
 import { getExistingHighlightTitles } from './data/utils';
 import useContentHighlightSetEditing from './data/useContentHighlightSetEditing';
 import { EnterpriseAppContext } from '../EnterpriseApp/EnterpriseAppContextProvider';
+import { enterpriseCurationActions } from '../EnterpriseApp/data/enterpriseCurationReducer';
 
 const ContentHighlightSet = ({ editHighlightsEnabled }) => {
   const { highlightSetUUID } = useParams();
   const {
     highlightSet, isLoading, updateHighlightSet, refetch, updateHighlightTitle,
   } = useHighlightSet(highlightSetUUID);
-  const onSaveTitle = editHighlightsEnabled ? updateHighlightTitle : null;
   const location = useLocation();
   const intl = useIntl();
   const [isToastOpen, openToast, closeToast] = useToggle(false);
@@ -49,6 +49,24 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
     highlightSet, updateHighlightSet, openToast, dispatchEnterpriseCuration,
   });
 
+  const onSaveTitle = useCallback(async (newTitle) => {
+    if (!editHighlightsEnabled) {
+      return null;
+    }
+
+    const result = await updateHighlightTitle(newTitle);
+    const updatedTitle = result?.title || newTitle;
+    if (dispatchEnterpriseCuration) {
+      dispatchEnterpriseCuration(
+        enterpriseCurationActions.updateHighlightSetTitle({
+          highlightSetUUID,
+          title: updatedTitle,
+        }),
+      );
+    }
+    return result;
+  }, [editHighlightsEnabled, updateHighlightTitle, dispatchEnterpriseCuration, highlightSetUUID]);
+
   // Refetch data when stepper saves successfully (detected via location state)
   useEffect(() => {
     if (location.state?.highlightSetEdited) {
@@ -70,7 +88,7 @@ const ContentHighlightSet = ({ editHighlightsEnabled }) => {
         onAddContentClick={handleAddContentClick}
         selectedCount={selectedContentKeys.size}
         isRemoving={isRemoving}
-        onSaveTitle={onSaveTitle}
+        onSaveTitle={editHighlightsEnabled ? onSaveTitle : null}
         editHighlightsEnabled={editHighlightsEnabled}
         existingHighlightTitles={existingHighlightTitles}
       />
