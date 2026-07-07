@@ -9,12 +9,15 @@ import { logError } from '@edx/frontend-platform/logging';
 import { Alert, DataTable } from '@openedx/paragon';
 import { Error } from '@openedx/paragon/icons';
 
-import { i18nFormatTimestamp, updateUrl } from '../../utils';
+import {
+  DEFAULT_TABLE_ORDERING,
+  DEFAULT_TABLE_PAGE_SIZE,
+  i18nFormatTimestamp,
+  updateUrl,
+} from '../../utils';
 import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiService';
 
 const TABLE_ID = 'enrolled-learners';
-const DEFAULT_PAGE_SIZE = 50;
-const DEFAULT_ORDERING = 'user_email';
 
 const getTableStateFromSearch = (search) => {
   const query = new URLSearchParams(search);
@@ -22,12 +25,12 @@ const getTableStateFromSearch = (search) => {
 
   return {
     pageIndex: Number.isNaN(page) || page < 1 ? 0 : page - 1,
-    ordering: query.get('ordering') || DEFAULT_ORDERING,
+    ordering: query.get('ordering') || DEFAULT_TABLE_ORDERING,
   };
 };
 
 const getSortStateFromOrdering = ordering => ([{
-  id: (ordering || DEFAULT_ORDERING).replace('-', ''),
+  id: (ordering || DEFAULT_TABLE_ORDERING).replace('-', ''),
   desc: ordering?.startsWith('-') || false,
 }]);
 
@@ -122,7 +125,7 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
 
     const options = {
       page: pageIndex + 1,
-      page_size: DEFAULT_PAGE_SIZE,
+      page_size: DEFAULT_TABLE_PAGE_SIZE,
     };
 
     if (ordering) {
@@ -215,7 +218,7 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
       isSortable
       manualSortBy
       initialState={{
-        pageSize: DEFAULT_PAGE_SIZE,
+        pageSize: DEFAULT_TABLE_PAGE_SIZE,
         pageIndex,
         sortBy: getSortStateFromOrdering(ordering),
       }}

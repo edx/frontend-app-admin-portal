@@ -36,6 +36,9 @@ import { COURSE_RUN_STATUSES } from './components/ContentHighlights/data/constan
 
 import LmsApiService from './data/services/LmsApiService';
 
+const DEFAULT_TABLE_PAGE_SIZE = 50;
+const DEFAULT_TABLE_ORDERING = 'user_email';
+
 const formatTimestamp = ({ timestamp, format = 'MMMM D, YYYY' }) => {
   if (timestamp) {
     return dayjs(timestamp).format(format);
@@ -809,6 +812,8 @@ const getEnterpriseAdminRegisterLogoutUrl = (enterpriseSlug, params) => {
 };
 
 export {
+  DEFAULT_TABLE_PAGE_SIZE,
+  DEFAULT_TABLE_ORDERING,
   camelCaseDict,
   camelCaseDictArray,
   channelMapping,
