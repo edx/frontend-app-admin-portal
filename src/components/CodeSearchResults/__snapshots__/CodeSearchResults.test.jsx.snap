@@ -673,371 +673,418 @@ exports[`<CodeSearchResults /> basic rendering should render table data 1`] = `
             className="col"
           >
             <div
-              className="table-responsive"
-            >
-              <table
-                className="table table-sm table-striped"
-              >
-                <thead
-                  className=""
-                >
-                  <tr
-                    className=""
-                  >
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Coupon Batch
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Code
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Redeemed
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Redemption Date
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Course Title
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody
-                  className=""
-                >
-                  <tr
-                    className=""
-                  >
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Test Coupon Name
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Y7XS3OGG7WB7KQ5R
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      <span
-                        className="pgn__icon text-primary"
-                      >
-                        <svg
-                          aria-hidden={true}
-                          fill="none"
-                          focusable={false}
-                          height={24}
-                          role="img"
-                          viewBox="0 0 24 24"
-                          width={24}
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                        <span
-                          className="sr-only"
-                        >
-                          has been redeemed
-                        </span>
-                      </span>
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      August 28, 2019
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Test Course Title
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                  </tr>
-                  <tr
-                    className=""
-                  >
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Test Coupon Name 2
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      CMX9N1LPGTUSL7DU
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                  </tr>
-                  <tr
-                    className=""
-                  >
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Test Coupon Name
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Y7XS3OGG7WB7KQ5R
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      <span
-                        className="pgn__icon text-primary"
-                      >
-                        <svg
-                          aria-hidden={true}
-                          fill="none"
-                          focusable={false}
-                          height={24}
-                          role="img"
-                          viewBox="0 0 24 24"
-                          width={24}
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                        <span
-                          className="sr-only"
-                        >
-                          has been redeemed
-                        </span>
-                      </span>
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      August 30, 2019
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Test Course Title
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                  </tr>
-                  <tr
-                    className=""
-                  >
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Test Coupon Name
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      FAG2LVLNHAKIXQ0Q
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div
-          className="row mt-2"
-        >
-          <div
-            className="col d-flex justify-content-center"
-          >
-            <nav
-              aria-label="code-search-results-pagination"
-              className="pagination-default"
+              className="pgn__data-table-layout-wrapper"
             >
               <div
-                aria-atomic={true}
-                aria-live="polite"
-                aria-relevant="text"
-                className="sr-only"
+                className="pgn__data-table-layout-main"
               >
-                Page 1, Current Page, of 1
+                <div
+                  className="pgn__data-table-wrapper"
+                >
+                  <div
+                    className="pgn__data-table-container"
+                    data-testid="data-table-container"
+                  >
+                    <table
+                      className="pgn__data-table is-striped"
+                      role="table"
+                    >
+                      <thead>
+                        <tr
+                          role="row"
+                        >
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Coupon Batch
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Code
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Redeemed
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Redemption Date
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Course Title
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Actions
+                              </span>
+                            </span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        role="rowgroup"
+                      >
+                        <tr
+                          className="pgn__data-table-row"
+                          role="row"
+                        >
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Test Coupon Name
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Y7XS3OGG7WB7KQ5R
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            <span
+                              className="pgn__icon text-primary"
+                            >
+                              <svg
+                                aria-hidden={true}
+                                fill="none"
+                                focusable={false}
+                                height={24}
+                                role="img"
+                                viewBox="0 0 24 24"
+                                width={24}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                              <span
+                                className="sr-only"
+                              >
+                                has been redeemed
+                              </span>
+                            </span>
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            August 28, 2019
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Test Course Title
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                        </tr>
+                        <tr
+                          className="pgn__data-table-row"
+                          role="row"
+                        >
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Test Coupon Name 2
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            CMX9N1LPGTUSL7DU
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                        </tr>
+                        <tr
+                          className="pgn__data-table-row"
+                          role="row"
+                        >
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Test Coupon Name
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Y7XS3OGG7WB7KQ5R
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            <span
+                              className="pgn__icon text-primary"
+                            >
+                              <svg
+                                aria-hidden={true}
+                                fill="none"
+                                focusable={false}
+                                height={24}
+                                role="img"
+                                viewBox="0 0 24 24"
+                                width={24}
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"
+                                  fill="currentColor"
+                                />
+                              </svg>
+                              <span
+                                className="sr-only"
+                              >
+                                has been redeemed
+                              </span>
+                            </span>
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            August 30, 2019
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Test Course Title
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                        </tr>
+                        <tr
+                          className="pgn__data-table-row"
+                          role="row"
+                        >
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Test Coupon Name
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            FAG2LVLNHAKIXQ0Q
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div
+                    className="pgn__data-table-footer"
+                    data-testid="table-footer"
+                  >
+                    <div
+                      data-testid="row-status"
+                    >
+                      Showing 1 - 4 of 0.
+                    </div>
+                    <nav
+                      aria-label="table pagination"
+                      className="pagination-minimal"
+                    >
+                      <div
+                        aria-atomic={true}
+                        aria-live="polite"
+                        aria-relevant="text"
+                        className="sr-only"
+                      >
+                        Page 1, Current Page, of 1
+                      </div>
+                      <ul
+                        className="pagination"
+                      >
+                        <li
+                          className="page-item disabled"
+                        >
+                          <button
+                            aria-label="Previous"
+                            className="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                            disabled={true}
+                            onClick={[Function]}
+                            tabIndex="-1"
+                            type="button"
+                          >
+                            <span
+                              className="btn-icon__icon-container"
+                            >
+                              <span
+                                className="pgn__icon btn-icon__icon"
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  fill="none"
+                                  focusable={false}
+                                  height={24}
+                                  role="img"
+                                  viewBox="0 0 24 24"
+                                  width={24}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M17.51 3.87 15.73 2.1 5.84 12l9.9 9.9 1.77-1.77L9.38 12l8.13-8.13Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                        <li
+                          className="page-item disabled"
+                        >
+                          <button
+                            aria-label="Next"
+                            className="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                            disabled={true}
+                            onClick={[Function]}
+                            tabIndex="-1"
+                            type="button"
+                          >
+                            <span
+                              className="btn-icon__icon-container"
+                            >
+                              <span
+                                className="pgn__icon btn-icon__icon"
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  fill="none"
+                                  focusable={false}
+                                  height={24}
+                                  role="img"
+                                  viewBox="0 0 24 24"
+                                  width={24}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="m6.49 20.13 1.77 1.77 9.9-9.9-9.9-9.9-1.77 1.77L14.62 12l-8.13 8.13Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
               </div>
-              <ul
-                className="pagination"
-              >
-                <li
-                  className="page-item disabled"
-                >
-                  <button
-                    aria-label="Previous"
-                    className="previous page-link btn btn-tertiary"
-                    disabled={true}
-                    onClick={[Function]}
-                    tabIndex="-1"
-                    type="button"
-                  >
-                    <span
-                      className="pgn__icon btn-icon-before"
-                    >
-                      <svg
-                        aria-hidden={true}
-                        fill="none"
-                        focusable={false}
-                        height={24}
-                        role="img"
-                        viewBox="0 0 24 24"
-                        width={24}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </span>
-                    Previous
-                  </button>
-                </li>
-                <li
-                  className="page-item active"
-                >
-                  <button
-                    aria-label="Page 1, Current Page"
-                    className="page-link btn btn-primary"
-                    disabled={false}
-                    onClick={[Function]}
-                    type="button"
-                  >
-                    1
-                  </button>
-                </li>
-                <li
-                  className="page-item disabled"
-                >
-                  <button
-                    aria-label="Next"
-                    className="previous page-link btn btn-tertiary"
-                    disabled={true}
-                    onClick={[Function]}
-                    tabIndex="-1"
-                    type="button"
-                  >
-                    Next
-                    <span
-                      className="pgn__icon btn-icon-after"
-                    >
-                      <svg
-                        aria-hidden={true}
-                        fill="none"
-                        focusable={false}
-                        height={24}
-                        role="img"
-                        viewBox="0 0 24 24"
-                        width={24}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                </li>
-              </ul>
-            </nav>
+            </div>
           </div>
         </div>
       </div>
@@ -1125,233 +1172,283 @@ exports[`<CodeSearchResults /> basic rendering should render table data when sea
             className="col"
           >
             <div
-              className="table-responsive"
-            >
-              <table
-                className="table table-sm table-striped"
-              >
-                <thead
-                  className=""
-                >
-                  <tr
-                    className=""
-                  >
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Coupon Batch
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Code
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Redeemed
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Redemption Date
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Assigned To
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Course Title
-                    </th>
-                    <th
-                      className=""
-                      scope="col"
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody
-                  className=""
-                >
-                  <tr
-                    className=""
-                  >
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      Test Coupon Name
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      FAG2LVLNHAKIXQ0Q
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      test@test.com
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      -
-                    </td>
-                    <td
-                      className=""
-                      scope={null}
-                    >
-                      <button
-                        className="remind-btn btn-sm p-0 btn btn-link"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        Remind
-                      </button>
-                       | 
-                      <button
-                        className="revoke-btn btn-sm p-0 btn btn-link"
-                        disabled={false}
-                        onClick={[Function]}
-                        type="button"
-                      >
-                        Revoke
-                      </button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div
-          className="row mt-2"
-        >
-          <div
-            className="col d-flex justify-content-center"
-          >
-            <nav
-              aria-label="code-search-results-pagination"
-              className="pagination-default"
+              className="pgn__data-table-layout-wrapper"
             >
               <div
-                aria-atomic={true}
-                aria-live="polite"
-                aria-relevant="text"
-                className="sr-only"
+                className="pgn__data-table-layout-main"
               >
-                Page 1, Current Page, of 1
+                <div
+                  className="pgn__data-table-wrapper"
+                >
+                  <div
+                    className="pgn__data-table-container"
+                    data-testid="data-table-container"
+                  >
+                    <table
+                      className="pgn__data-table is-striped"
+                      role="table"
+                    >
+                      <thead>
+                        <tr
+                          role="row"
+                        >
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Coupon Batch
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Code
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Redeemed
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Redemption Date
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Assigned To
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Course Title
+                              </span>
+                            </span>
+                          </th>
+                          <th
+                            colSpan={1}
+                            role="columnheader"
+                          >
+                            <span
+                              className="d-flex align-items-center"
+                            >
+                              <span>
+                                Actions
+                              </span>
+                            </span>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody
+                        role="rowgroup"
+                      >
+                        <tr
+                          className="pgn__data-table-row"
+                          role="row"
+                        >
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            Test Coupon Name
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            FAG2LVLNHAKIXQ0Q
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            test@test.com
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            -
+                          </td>
+                          <td
+                            className="pgn__data-table-cell-wrap"
+                            role="cell"
+                          >
+                            <button
+                              className="remind-btn btn-sm p-0 btn btn-link"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              Remind
+                            </button>
+                             | 
+                            <button
+                              className="revoke-btn btn-sm p-0 btn btn-link"
+                              disabled={false}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              Revoke
+                            </button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div
+                    className="pgn__data-table-footer"
+                    data-testid="table-footer"
+                  >
+                    <div
+                      data-testid="row-status"
+                    >
+                      Showing 1 - 1 of 0.
+                    </div>
+                    <nav
+                      aria-label="table pagination"
+                      className="pagination-minimal"
+                    >
+                      <div
+                        aria-atomic={true}
+                        aria-live="polite"
+                        aria-relevant="text"
+                        className="sr-only"
+                      >
+                        Page 1, Current Page, of 1
+                      </div>
+                      <ul
+                        className="pagination"
+                      >
+                        <li
+                          className="page-item disabled"
+                        >
+                          <button
+                            aria-label="Previous"
+                            className="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                            disabled={true}
+                            onClick={[Function]}
+                            tabIndex="-1"
+                            type="button"
+                          >
+                            <span
+                              className="btn-icon__icon-container"
+                            >
+                              <span
+                                className="pgn__icon btn-icon__icon"
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  fill="none"
+                                  focusable={false}
+                                  height={24}
+                                  role="img"
+                                  viewBox="0 0 24 24"
+                                  width={24}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="M17.51 3.87 15.73 2.1 5.84 12l9.9 9.9 1.77-1.77L9.38 12l8.13-8.13Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                        <li
+                          className="page-item disabled"
+                        >
+                          <button
+                            aria-label="Next"
+                            className="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                            disabled={true}
+                            onClick={[Function]}
+                            tabIndex="-1"
+                            type="button"
+                          >
+                            <span
+                              className="btn-icon__icon-container"
+                            >
+                              <span
+                                className="pgn__icon btn-icon__icon"
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  fill="none"
+                                  focusable={false}
+                                  height={24}
+                                  role="img"
+                                  viewBox="0 0 24 24"
+                                  width={24}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    d="m6.49 20.13 1.77 1.77 9.9-9.9-9.9-9.9-1.77 1.77L14.62 12l-8.13 8.13Z"
+                                    fill="currentColor"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
               </div>
-              <ul
-                className="pagination"
-              >
-                <li
-                  className="page-item disabled"
-                >
-                  <button
-                    aria-label="Previous"
-                    className="previous page-link btn btn-tertiary"
-                    disabled={true}
-                    onClick={[Function]}
-                    tabIndex="-1"
-                    type="button"
-                  >
-                    <span
-                      className="pgn__icon btn-icon-before"
-                    >
-                      <svg
-                        aria-hidden={true}
-                        fill="none"
-                        focusable={false}
-                        height={24}
-                        role="img"
-                        viewBox="0 0 24 24"
-                        width={24}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </span>
-                    Previous
-                  </button>
-                </li>
-                <li
-                  className="page-item active"
-                >
-                  <button
-                    aria-label="Page 1, Current Page"
-                    className="page-link btn btn-primary"
-                    disabled={false}
-                    onClick={[Function]}
-                    type="button"
-                  >
-                    1
-                  </button>
-                </li>
-                <li
-                  className="page-item disabled"
-                >
-                  <button
-                    aria-label="Next"
-                    className="previous page-link btn btn-tertiary"
-                    disabled={true}
-                    onClick={[Function]}
-                    tabIndex="-1"
-                    type="button"
-                  >
-                    Next
-                    <span
-                      className="pgn__icon btn-icon-after"
-                    >
-                      <svg
-                        aria-hidden={true}
-                        fill="none"
-                        focusable={false}
-                        height={24}
-                        role="img"
-                        viewBox="0 0 24 24"
-                        width={24}
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6Z"
-                          fill="currentColor"
-                        />
-                      </svg>
-                    </span>
-                  </button>
-                </li>
-              </ul>
-            </nav>
+            </div>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { axe } from 'jest-axe';
+import { IntlProvider } from '@edx/frontend-platform/i18n';
 import TableComponent from './index';
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
@@ -29,9 +30,11 @@ const mockDefaultProps = {
 };
 
 const TableComponentWrapper = props => (
-  <MemoryRouter>
-    <TableComponent {...props} />
-  </MemoryRouter>
+  <IntlProvider locale="en">
+    <MemoryRouter>
+      <TableComponent {...props} />
+    </MemoryRouter>
+  </IntlProvider>
 );
 
 describe('TableComponent', () => {
