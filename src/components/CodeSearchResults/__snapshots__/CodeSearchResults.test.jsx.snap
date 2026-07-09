@@ -990,7 +990,7 @@ exports[`<CodeSearchResults /> basic rendering should render table data 1`] = `
                     <div
                       data-testid="row-status"
                     >
-                      Showing 1 - 4 of 0.
+                      Showing 1 - 4 of 4.
                     </div>
                     <nav
                       aria-label="table pagination"
@@ -1354,7 +1354,7 @@ exports[`<CodeSearchResults /> basic rendering should render table data when sea
                     <div
                       data-testid="row-status"
                     >
-                      Showing 1 - 1 of 0.
+                      Showing 1 - 1 of 1.
                     </div>
                     <nav
                       aria-label="table pagination"

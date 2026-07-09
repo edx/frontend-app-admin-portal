@@ -56,7 +56,8 @@ class TableComponent extends React.Component {
       return [];
     }
 
-    const fallbackColumnKey = columns[defaultSortIndex]?.accessor || columns[0]?.accessor;
+    const fallbackColumn = columns[defaultSortIndex] || columns[0];
+    const fallbackColumnKey = fallbackColumn && fallbackColumn.accessor;
     const activeOrdering = ordering || fallbackColumnKey;
 
     if (!activeOrdering) {
@@ -69,6 +70,11 @@ class TableComponent extends React.Component {
         ? defaultSortType === 'desc'
         : activeOrdering.startsWith('-'),
     }];
+  }
+
+  getPageSize() {
+    const query = new URLSearchParams(this.props.location.search);
+    return parseInt(query.get('page_size'), 10) || DEFAULT_PAGE_SIZE;
   }
 
   handleFetchData = ({ pageIndex = 0, sortBy = [] } = {}) => {
@@ -84,7 +90,7 @@ class TableComponent extends React.Component {
     } = this.props;
 
     const latestSort = sortBy[sortBy.length - 1];
-    if (tableSortable && latestSort?.id) {
+    if (tableSortable && latestSort && latestSort.id) {
       const nextOrdering = `${latestSort.desc ? '-' : ''}${latestSort.id}`;
       if (nextOrdering !== ordering) {
         const column = columns.find(({ key }) => key === latestSort.id);
@@ -94,7 +100,7 @@ class TableComponent extends React.Component {
         });
         sendEnterpriseTrackEvent(enterpriseId, 'edx.ui.enterprise.admin_portal.table.sorted', {
           tableId: id,
-          column: column?.label,
+          column: column ? column.label : undefined,
           direction: latestSort.desc ? 'desc' : 'asc',
         });
         return;
@@ -125,6 +131,8 @@ class TableComponent extends React.Component {
     } = this.props;
 
     const formattedData = formatData(data);
+    const pageSize = this.getPageSize();
+    const resolvedItemCount = Math.max(itemCount, formattedData.length);
     const columnConfig = this.props.columns.map(column => ({
       Header: column.label,
       accessor: column.key,
@@ -143,13 +151,13 @@ class TableComponent extends React.Component {
               manualPagination
               isSortable={tableSortable}
               manualSortBy={tableSortable}
-              itemCount={itemCount}
+              itemCount={resolvedItemCount}
               pageCount={pageCount || 1}
               fetchData={this.handleFetchData}
               data={formattedData}
               columns={columnConfig}
               initialState={{
-                pageSize: DEFAULT_PAGE_SIZE,
+                pageSize,
                 pageIndex: (currentPage || 1) - 1,
                 sortBy: this.getSortState(columnConfig),
               }}

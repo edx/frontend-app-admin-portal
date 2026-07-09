@@ -6,12 +6,27 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import TableComponent from './index';
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
+let capturedDataTableProps;
+
 jest.mock('@2uinc/frontend-enterprise-utils', () => ({
   sendEnterpriseTrackEvent: jest.fn(),
 }));
 jest.mock('../../utils', () => ({
   updateUrl: jest.fn(),
 }));
+jest.mock('@openedx/paragon', () => {
+  const ReactMod = jest.requireActual('react');
+  const actual = jest.requireActual('@openedx/paragon');
+  const CapturingDataTable = ({ fetchData, ...props }) => {
+    capturedDataTableProps = props;
+    return ReactMod.createElement(actual.DataTable, { fetchData, ...props });
+  };
+  Object.assign(CapturingDataTable, actual.DataTable);
+  return {
+    ...actual,
+    DataTable: CapturingDataTable,
+  };
+});
 
 const mockPaginateTable = jest.fn();
 const mockSortTable = jest.fn();
@@ -40,6 +55,41 @@ const TableComponentWrapper = props => (
 describe('TableComponent', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    capturedDataTableProps = undefined;
+  });
+
+  it('uses page_size from URL for DataTable initial state', () => {
+    const props = {
+      ...mockDefaultProps,
+      location: { pathname: '/test', search: '?page_size=25' },
+      data: [{ user_email: 'user@example.com' }],
+      columns: [{ key: 'user_email', label: 'Email', columnSortable: true }],
+      currentPage: 1,
+      pageCount: 1,
+      itemCount: 1,
+    };
+
+    render(<TableComponentWrapper {...props} />);
+
+    expect(capturedDataTableProps.initialState.pageSize).toEqual(25);
+  });
+
+  it('ensures itemCount is at least data length', () => {
+    const props = {
+      ...mockDefaultProps,
+      data: [
+        { user_email: 'user1@example.com' },
+        { user_email: 'user2@example.com' },
+      ],
+      columns: [{ key: 'user_email', label: 'Email', columnSortable: true }],
+      currentPage: 1,
+      pageCount: 1,
+      itemCount: 0,
+    };
+
+    render(<TableComponentWrapper {...props} />);
+
+    expect(capturedDataTableProps.itemCount).toEqual(2);
   });
 
   it('renders the loading message when loading and no data is available', () => {
