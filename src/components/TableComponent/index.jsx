@@ -245,7 +245,7 @@ TableComponent.defaultProps = {
   tableSortable: false,
   data: undefined,
   ordering: undefined,
-  currentPage: undefined,
+  currentPage: 1,
   itemCount: 0,
   pageCount: undefined,
   error: null,
