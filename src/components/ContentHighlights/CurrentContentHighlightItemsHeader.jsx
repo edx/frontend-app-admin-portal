@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
-  ActionRow, Breadcrumb, Button, Icon, IconButton, ModalPopup, Skeleton, StatefulButton, useToggle,
+  ActionRow, Breadcrumb, Button, Icon, IconButton, ModalDialog, Skeleton, StatefulButton, useToggle,
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
 import { useIntl, FormattedMessage } from '@edx/frontend-platform/i18n';
@@ -48,17 +48,21 @@ const CurrentContentHighlightItemsHeader = ({
   const intl = useIntl();
   const { enterpriseSlug } = useParams();
   const [isEditModalOpen, openEditModal, closeEditModal] = useToggle(false);
-  const [addContentTarget, setAddContentTarget] = useState(null);
-  const [isMaxContentPopupOpen, openMaxContentPopup, closeMaxContentPopup] = useToggle(false);
+  const [isMaxContentModalOpen, openMaxContentModal, closeMaxContentModal] = useToggle(false);
 
   const isMaxContentReached = highlightedContentCount >= MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET;
+  const maxContentReachedModalTitle = intl.formatMessage({
+    id: 'highlights.edit.max.content.reached.popup.title',
+    defaultMessage: 'Remove content',
+    description: 'Title of the modal shown when the highlight already has the maximum number of content and the admin clicks the Add content button in edit mode.',
+  });
 
-  // Close the popup if content drops below the max (e.g. after removing content).
+  // Close the modal if content drops below the max (e.g. after removing content).
   useEffect(() => {
-    if (!isMaxContentReached && isMaxContentPopupOpen) {
-      closeMaxContentPopup();
+    if (!isMaxContentReached && isMaxContentModalOpen) {
+      closeMaxContentModal();
     }
-  }, [isMaxContentReached, isMaxContentPopupOpen, closeMaxContentPopup]);
+  }, [isMaxContentReached, isMaxContentModalOpen, closeMaxContentModal]);
 
   const breadcrumb = renderHighlightsBreadcrumb({ intl, enterpriseSlug, activeLabel: highlightTitle });
 
@@ -107,8 +111,7 @@ const CurrentContentHighlightItemsHeader = ({
             data-testid="remove-content-button"
           />
           <Button
-            ref={setAddContentTarget}
-            onClick={isMaxContentReached ? openMaxContentPopup : onAddContentClick}
+            onClick={isMaxContentReached ? openMaxContentModal : onAddContentClick}
             data-testid="add-content-button"
           >
             <FormattedMessage
@@ -117,47 +120,46 @@ const CurrentContentHighlightItemsHeader = ({
               description="Button to open add content stepper from edit mode."
             />
           </Button>
-          <ModalPopup
-            hasArrow
-            placement="bottom-end"
-            positionRef={addContentTarget}
-            isOpen={isMaxContentPopupOpen && isMaxContentReached}
-            onClose={closeMaxContentPopup}
+          <ModalDialog
+            title={maxContentReachedModalTitle}
+            isOpen={isMaxContentModalOpen && isMaxContentReached}
+            onClose={closeMaxContentModal}
+            hasCloseButton={false}
+            size="sm"
+            isFullscreenOnMobile
+            data-testid="add-content-max-reached-modal"
           >
-            <div
-              className="p-4 shadow border rounded bg-white"
-              style={{ maxWidth: 400 }}
-            >
-              <h3 className="mb-3" data-testid="add-content-max-reached-title">
-                <FormattedMessage
-                  id="highlights.edit.max.content.reached.popup.title"
-                  defaultMessage="Remove content"
-                  description="Title of the popup shown when the highlight already has the maximum number of content and the admin clicks the Add content button in edit mode."
-                />
-              </h3>
+            <ModalDialog.Header>
+              <ModalDialog.Title data-testid="add-content-max-reached-title">
+                {maxContentReachedModalTitle}
+              </ModalDialog.Title>
+            </ModalDialog.Header>
+            <ModalDialog.Body>
               <p className="mb-4">
                 <FormattedMessage
                   id="highlights.edit.max.content.reached.popup"
                   defaultMessage="You've reached the maximum number of content for this highlight. To add new content, remove an existing content first."
-                  description="Popup message shown when the highlight already has the maximum number of content and the admin clicks the Add content button in edit mode."
+                  description="Modal message shown when the highlight already has the maximum number of content and the admin clicks the Add content button in edit mode."
                 />
               </p>
+            </ModalDialog.Body>
+            <ModalDialog.Footer>
               <ActionRow>
                 <ActionRow.Spacer />
                 <Button
                   variant="primary"
-                  onClick={closeMaxContentPopup}
+                  onClick={closeMaxContentModal}
                   data-testid="add-content-max-reached-close"
                 >
                   <FormattedMessage
                     id="highlights.edit.max.content.reached.popup.close"
                     defaultMessage="Close"
-                    description="Close button on the max content reached popup in edit mode."
+                    description="Close button on the max content reached modal in edit mode."
                   />
                 </Button>
               </ActionRow>
-            </div>
-          </ModalPopup>
+            </ModalDialog.Footer>
+          </ModalDialog>
           <Button
             variant="tertiary"
             onClick={onCancelClick}
