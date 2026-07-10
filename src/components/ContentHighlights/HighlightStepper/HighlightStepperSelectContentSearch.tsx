@@ -133,7 +133,7 @@ const BaseHighlightStepperSelectContentDataTable = ({
             xs: 12,
             md: 6,
             lg: 4,
-            xl: 3,
+            xl: 4,
           }}
           SkeletonCardComponent={SkeletonContentCard}
           CardComponent={ContentSearchResultCard}

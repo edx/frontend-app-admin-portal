@@ -30,7 +30,7 @@ export const HIGHLIGHTS_CARD_GRID_COLUMN_SIZES = {
   xs: 12,
   md: 6,
   lg: 4,
-  xl: 3,
+  xl: 4,
 };
 
 // Tab titles
