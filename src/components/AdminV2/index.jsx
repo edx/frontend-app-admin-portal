@@ -45,11 +45,12 @@ import { SubscriptionData } from '../subscriptions';
 
 import { features } from '../../config';
 
-// These slugs are backed by LearnerActivityTable which manages its own state
-// via DataTable (not the legacy redux table slice). isTableDataMissing must not
-// consult state.table for them or the CSV download button stays permanently disabled.
+// These slugs are backed by DataTable components that manage local state
+// (not the legacy redux table slice). isTableDataMissing must not consult
+// state.table for them or the CSV download button stays permanently disabled.
 const LEARNER_ACTIVITY_TABLE_SLUGS = [
   'enrolled-learners',
+  'enrolled-learners-inactive-courses',
   'learners-active-week',
   'learners-inactive-week',
   'learners-inactive-month',

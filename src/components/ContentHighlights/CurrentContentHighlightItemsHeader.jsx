@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
-  ActionRow, Breadcrumb, Button, Icon, IconButton, Skeleton, StatefulButton, useToggle,
+  ActionRow, Breadcrumb, Button, Icon, IconButton, ModalDialog, Skeleton, StatefulButton, useToggle,
 } from '@openedx/paragon';
 import { Edit } from '@openedx/paragon/icons';
 import { useIntl, FormattedMessage } from '@edx/frontend-platform/i18n';
@@ -9,6 +9,7 @@ import { Link, useParams } from 'react-router-dom';
 import ContentHighlightHelmet from './ContentHighlightHelmet';
 import DeleteHighlightSet from './DeleteHighlightSet';
 import EditHighlightTitleModal from './EditHighlightTitleModal';
+import { MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET } from './data/constants';
 import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 
 export const renderHighlightsBreadcrumb = ({ intl, enterpriseSlug, activeLabel }) => (
@@ -42,10 +43,26 @@ const CurrentContentHighlightItemsHeader = ({
   isRemoving,
   editHighlightsEnabled,
   existingHighlightTitles,
+  highlightedContentCount,
 }) => {
   const intl = useIntl();
   const { enterpriseSlug } = useParams();
   const [isEditModalOpen, openEditModal, closeEditModal] = useToggle(false);
+  const [isMaxContentModalOpen, openMaxContentModal, closeMaxContentModal] = useToggle(false);
+
+  const isMaxContentReached = highlightedContentCount >= MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET;
+  const maxContentReachedModalTitle = intl.formatMessage({
+    id: 'highlights.edit.max.content.reached.popup.title',
+    defaultMessage: 'Remove content',
+    description: 'Title of the modal shown when the highlight already has the maximum number of content and the admin clicks the Add content button in edit mode.',
+  });
+
+  // Close the modal if content drops below the max (e.g. after removing content).
+  useEffect(() => {
+    if (!isMaxContentReached && isMaxContentModalOpen) {
+      closeMaxContentModal();
+    }
+  }, [isMaxContentReached, isMaxContentModalOpen, closeMaxContentModal]);
 
   const breadcrumb = renderHighlightsBreadcrumb({ intl, enterpriseSlug, activeLabel: highlightTitle });
 
@@ -94,7 +111,7 @@ const CurrentContentHighlightItemsHeader = ({
             data-testid="remove-content-button"
           />
           <Button
-            onClick={onAddContentClick}
+            onClick={isMaxContentReached ? openMaxContentModal : onAddContentClick}
             data-testid="add-content-button"
           >
             <FormattedMessage
@@ -103,6 +120,46 @@ const CurrentContentHighlightItemsHeader = ({
               description="Button to open add content stepper from edit mode."
             />
           </Button>
+          <ModalDialog
+            title={maxContentReachedModalTitle}
+            isOpen={isMaxContentModalOpen && isMaxContentReached}
+            onClose={closeMaxContentModal}
+            hasCloseButton={false}
+            size="sm"
+            isFullscreenOnMobile
+            data-testid="add-content-max-reached-modal"
+          >
+            <ModalDialog.Header>
+              <ModalDialog.Title data-testid="add-content-max-reached-title">
+                {maxContentReachedModalTitle}
+              </ModalDialog.Title>
+            </ModalDialog.Header>
+            <ModalDialog.Body>
+              <p className="mb-4">
+                <FormattedMessage
+                  id="highlights.edit.max.content.reached.popup"
+                  defaultMessage="You've reached the maximum number of content for this highlight. To add new content, remove an existing content first."
+                  description="Modal message shown when the highlight already has the maximum number of content and the admin clicks the Add content button in edit mode."
+                />
+              </p>
+            </ModalDialog.Body>
+            <ModalDialog.Footer>
+              <ActionRow>
+                <ActionRow.Spacer />
+                <Button
+                  variant="primary"
+                  onClick={closeMaxContentModal}
+                  data-testid="add-content-max-reached-close"
+                >
+                  <FormattedMessage
+                    id="highlights.edit.max.content.reached.popup.close"
+                    defaultMessage="Close"
+                    description="Close button on the max content reached modal in edit mode."
+                  />
+                </Button>
+              </ActionRow>
+            </ModalDialog.Footer>
+          </ModalDialog>
           <Button
             variant="tertiary"
             onClick={onCancelClick}
@@ -182,6 +239,7 @@ CurrentContentHighlightItemsHeader.propTypes = {
   onSaveTitle: PropTypes.func,
   editHighlightsEnabled: PropTypes.bool,
   existingHighlightTitles: PropTypes.arrayOf(PropTypes.string),
+  highlightedContentCount: PropTypes.number,
 };
 
 CurrentContentHighlightItemsHeader.defaultProps = {
@@ -196,6 +254,7 @@ CurrentContentHighlightItemsHeader.defaultProps = {
   editHighlightsEnabled: false,
   onSaveTitle: null,
   existingHighlightTitles: [],
+  highlightedContentCount: 0,
 };
 
 export default CurrentContentHighlightItemsHeader;

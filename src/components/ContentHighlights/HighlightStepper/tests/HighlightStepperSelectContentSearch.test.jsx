@@ -12,6 +12,7 @@ import { axe } from 'jest-axe';
 import {
   testCourseAggregation,
   testCourseData,
+  MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET,
 } from '../../data/constants';
 import { ContentHighlightsContext } from '../../ContentHighlightsContext';
 import { configuration } from '../../../../config';
@@ -172,6 +173,62 @@ describe('HighlightStepperSelectContentSearch', () => {
     );
     expect(screen.getByText(`${mockCourseData.length} selected (${mockCourseData.length} shown below)`, { exact: false })).toBeInTheDocument();
     expect(screen.getByText('Clear selection')).toBeInTheDocument();
+  });
+
+  test('shows the max limit modal and blocks selection when the maximum is reached', async () => {
+    const user = userEvent.setup();
+    const maxedSelectedRowIds = {};
+    for (let i = 0; i < MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET; i++) {
+      maxedSelectedRowIds[`course:Filler+Course${i}`] = true;
+    }
+    const highlightStepperState = {
+      ...initialHighlightStepperState,
+      stepperModal: {
+        ...initialHighlightStepperState.stepperModal,
+        currentSelectedRowIds: maxedSelectedRowIds,
+      },
+    };
+    renderWithRouter(
+      <HighlightStepperSelectContentSearchWrapper initialStepperState={highlightStepperState}>
+        <HighlightStepperSelectContent />
+      </HighlightStepperSelectContentSearchWrapper>,
+    );
+    // Switch to list view so the row selection checkboxes render as table cells.
+    await user.click(screen.getByRole('button', { name: 'List' }));
+    const checkboxes = screen.getAllByRole('checkbox');
+    // None of the visible rows are among the maxed-out selection, so clicking one attempts to add a new item.
+    await user.click(checkboxes[0]);
+
+    expect(screen.getByText('Unselect an item')).toBeInTheDocument();
+    expect(screen.getByText(
+      `Maximum of ${MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET} items reached. Remove an item to add a new one.`,
+    )).toBeInTheDocument();
+    // Selection is blocked: the count is unchanged.
+    expect(screen.getByText(
+      `${MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET} selected`,
+      { exact: false },
+    )).toBeInTheDocument();
+
+    // The modal can be dismissed via Close.
+    await user.click(screen.getByRole('button', { name: 'Close' }));
+    expect(screen.queryByText('Unselect an item')).not.toBeInTheDocument();
+  });
+
+  test('allows selection when the maximum is not reached', async () => {
+    const user = userEvent.setup();
+
+    renderWithRouter(
+      <HighlightStepperSelectContentSearchWrapper initialStepperState={initialHighlightStepperState}>
+        <HighlightStepperSelectContent />
+      </HighlightStepperSelectContentSearchWrapper>,
+    );
+
+    await user.click(screen.getByRole('button', { name: 'List' }));
+    const checkboxes = screen.getAllByRole('checkbox');
+    await user.click(checkboxes[0]);
+
+    expect(screen.getByText('1 selected', { exact: false })).toBeInTheDocument();
+    expect(screen.queryByText('Unselect an item')).not.toBeInTheDocument();
   });
 
   test('sends track event on click', async () => {

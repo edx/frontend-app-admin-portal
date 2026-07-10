@@ -6,6 +6,7 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 
 import { axe } from 'jest-axe';
 import CurrentContentHighlightItemsHeader from '../CurrentContentHighlightItemsHeader';
+import { MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET } from '../data/constants';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
 jest.mock('../DeleteHighlightSet', () => ({
@@ -228,6 +229,92 @@ describe('<CurrentContentHighlightItemsHeader>', () => {
     );
     fireEvent.click(screen.getByTestId('add-content-button'));
     expect(onAddContentClick).toHaveBeenCalledTimes(1);
+  });
+
+  const maxReachedMessage = "You've reached the maximum number of content for this highlight. "
+    + 'To add new content, remove an existing content first.';
+
+  it('does not show the max content reached popup before clicking when below the maximum', () => {
+    render(
+      <CurrentContentHighlightItemsHeaderWrapper
+        isLoading={false}
+        highlightTitle={highlightTitle}
+        isEditing
+        highlightedContentCount={MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET - 1}
+      />,
+    );
+    expect(screen.getByTestId('add-content-button')).toBeInTheDocument();
+    expect(screen.queryByText(maxReachedMessage)).not.toBeInTheDocument();
+  });
+
+  it('opens the stepper (does not show the popup) when clicking Add content below the maximum', () => {
+    const onAddContentClick = jest.fn();
+    render(
+      <CurrentContentHighlightItemsHeaderWrapper
+        isLoading={false}
+        highlightTitle={highlightTitle}
+        isEditing
+        highlightedContentCount={MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET - 1}
+        onAddContentClick={onAddContentClick}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('add-content-button'));
+    expect(onAddContentClick).toHaveBeenCalledTimes(1);
+    expect(screen.queryByText(maxReachedMessage)).not.toBeInTheDocument();
+  });
+
+  it('shows the max content reached popup (and blocks the stepper) when clicking Add content at the maximum', () => {
+    const onAddContentClick = jest.fn();
+    render(
+      <CurrentContentHighlightItemsHeaderWrapper
+        isLoading={false}
+        highlightTitle={highlightTitle}
+        isEditing
+        highlightedContentCount={MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET}
+        onAddContentClick={onAddContentClick}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('add-content-button'));
+    expect(screen.getByTestId('add-content-max-reached-title')).toHaveTextContent('Remove content');
+    expect(screen.getByText(maxReachedMessage)).toBeInTheDocument();
+    expect(onAddContentClick).not.toHaveBeenCalled();
+  });
+
+  it('hides the popup if the content count drops below the maximum while it is open', () => {
+    const { rerender } = render(
+      <CurrentContentHighlightItemsHeaderWrapper
+        isLoading={false}
+        highlightTitle={highlightTitle}
+        isEditing
+        highlightedContentCount={MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('add-content-button'));
+    expect(screen.getByText(maxReachedMessage)).toBeInTheDocument();
+    rerender(
+      <CurrentContentHighlightItemsHeaderWrapper
+        isLoading={false}
+        highlightTitle={highlightTitle}
+        isEditing
+        highlightedContentCount={MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET - 1}
+      />,
+    );
+    expect(screen.queryByText(maxReachedMessage)).not.toBeInTheDocument();
+  });
+
+  it('closes the max content reached popup when the close button is clicked', () => {
+    render(
+      <CurrentContentHighlightItemsHeaderWrapper
+        isLoading={false}
+        highlightTitle={highlightTitle}
+        isEditing
+        highlightedContentCount={MAX_CONTENT_ITEMS_PER_HIGHLIGHT_SET}
+      />,
+    );
+    fireEvent.click(screen.getByTestId('add-content-button'));
+    expect(screen.getByText(maxReachedMessage)).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('add-content-max-reached-close'));
+    expect(screen.queryByText(maxReachedMessage)).not.toBeInTheDocument();
   });
 
   it('calls onRemoveSelectedContent when Remove content is clicked with selection', () => {

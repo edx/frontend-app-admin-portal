@@ -18,6 +18,7 @@ import { useHighlightSet, useContentHighlightsContext } from '../data/hooks';
 import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
 import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextProvider';
+import { enterpriseCurationActions } from '../../EnterpriseApp/data/enterpriseCurationReducer';
 import { TEST_COURSE_HIGHLIGHTS_DATA } from '../data/constants';
 import { configuration } from '../../../config';
 
@@ -250,9 +251,9 @@ describe('<ContentHighlightSet>', () => {
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
+        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
       });
-      expect(screen.getByText('Do you want to remove these featured content from your highlight?')).toBeInTheDocument();
+      expect(screen.getByText('Do you want to remove this featured content from your highlight?')).toBeInTheDocument();
       const featuredAlphaElements = screen.getAllByText('Featured Course Alpha');
       expect(featuredAlphaElements.length).toBeGreaterThanOrEqual(2);
     });
@@ -277,7 +278,7 @@ describe('<ContentHighlightSet>', () => {
       fireEvent.click(screen.getByLabelText('Select Regular Course Beta for removal'));
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
-      expect(screen.queryByText('Remove a featured content?')).not.toBeInTheDocument();
+      expect(screen.queryByText('Remove featured item?')).not.toBeInTheDocument();
 
       await waitFor(() => {
         expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalled();
@@ -308,13 +309,13 @@ describe('<ContentHighlightSet>', () => {
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
+        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('featured-modal-cancel'));
 
       await waitFor(() => {
-        expect(screen.queryByText('Remove a featured content?')).not.toBeInTheDocument();
+        expect(screen.queryByText('Remove featured item?')).not.toBeInTheDocument();
       });
       expect(EnterpriseCatalogApiService.updateHighlightSet).not.toHaveBeenCalled();
     });
@@ -340,7 +341,7 @@ describe('<ContentHighlightSet>', () => {
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
+        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('featured-modal-confirm'));
@@ -378,8 +379,10 @@ describe('<ContentHighlightSet>', () => {
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
+        expect(screen.getByText('Remove featured items?')).toBeInTheDocument();
       });
+
+      expect(screen.getByText('Do you want to remove these featured items from your highlight?')).toBeInTheDocument();
 
       const alphaElements = screen.getAllByText('Featured Course Alpha');
       const gammaElements = screen.getAllByText('Featured Program Gamma');
@@ -406,8 +409,14 @@ describe('<ContentHighlightSet>', () => {
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
-      fireEvent.click(screen.getByLabelText('Select Regular Course Beta for removal'));
+      fireEvent.click(screen.getByLabelText('Select Featured Course Alpha for removal'));
       fireEvent.click(screen.getByTestId('remove-content-button'));
+
+      await waitFor(() => {
+        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('featured-modal-confirm'));
 
       await waitFor(() => {
         expect(screen.getByTestId('remove-error-alert')).toBeInTheDocument();
@@ -441,6 +450,48 @@ describe('<ContentHighlightSet>', () => {
           existingContent: mockHighlightSetWithFeatured.highlightedContent,
         });
       });
+    });
+
+    it('dispatches enterprise curation title update when highlight name is saved', async () => {
+      mockUpdateHighlightTitle.mockResolvedValueOnce({
+        title: 'Renamed Highlight',
+      });
+      useHighlightSet.mockReturnValue({
+        highlightSet: mockHighlightSetWithFeatured,
+        isLoading: false,
+        error: null,
+        updateHighlightSet: mockUpdateHighlightSet,
+        updateHighlightTitle: mockUpdateHighlightTitle,
+        refetch: mockRefetch,
+      });
+
+      render(<ContentHighlightSetWrapper />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId('edit-highlight-title-button')).toBeInTheDocument();
+      });
+
+      fireEvent.click(screen.getByTestId('edit-highlight-title-button'));
+
+      await waitFor(() => {
+        expect(screen.getByRole('dialog', { name: 'Edit highlight name' })).toBeInTheDocument();
+      });
+
+      fireEvent.change(screen.getByTestId('edit-highlight-title-input'), {
+        target: { value: 'Renamed Highlight' },
+      });
+      fireEvent.click(screen.getByTestId('edit-highlight-title-save-button'));
+
+      await waitFor(() => {
+        expect(mockUpdateHighlightTitle).toHaveBeenCalledWith('Renamed Highlight');
+      });
+
+      expect(mockDispatchFn).toHaveBeenCalledWith(
+        enterpriseCurationActions.updateHighlightSetTitle({
+          highlightSetUUID,
+          title: 'Renamed Highlight',
+        }),
+      );
     });
   });
 });
