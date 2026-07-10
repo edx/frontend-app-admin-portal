@@ -83,19 +83,20 @@ const ContentHighlightsCardItemsContainer = ({
             {highlightedContent.map(({
               uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
             }) => (
-              <ContentHighlightCardItem
-                isLoading={isLoading}
-                key={uuid}
-                uuid={uuid}
-                cardImageUrl={cardImageUrl}
-                title={title}
-                archived={false}
-                contentType={contentType.toLowerCase()}
-                partners={authoringOrganizations}
-                isSelectable
-                isSelected={selectedContentKeys.has(contentKey)}
-                onToggleSelect={() => onToggleSelect(contentKey)}
-              />
+              <div key={uuid} className="w-100 px-2.5">
+                <ContentHighlightCardItem
+                  isLoading={isLoading}
+                  uuid={uuid}
+                  cardImageUrl={cardImageUrl}
+                  title={title}
+                  archived={false}
+                  contentType={contentType.toLowerCase()}
+                  partners={authoringOrganizations}
+                  isSelectable
+                  isSelected={selectedContentKeys.has(contentKey)}
+                  onToggleSelect={() => onToggleSelect(contentKey)}
+                />
+              </div>
             ))}
           </CardGrid>
         </div>
@@ -168,30 +169,31 @@ const ContentHighlightsCardItemsContainer = ({
         {sortedActiveContent.map(({
           uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
         }) => (
-          <ContentHighlightCardItem
-            isLoading={isLoading}
-            key={uuid}
-            uuid={uuid}
-            editHighlightsEnabled={editHighlightsEnabled}
-            isStarred={starredContentKeys.has(contentKey)}
-            onToggleStar={() => handleToggleStar(contentKey)}
-            cardImageUrl={cardImageUrl}
-            title={title}
-            archived={false}
-            hyperlinkAttrs={
-              {
-                href: generateAboutPageUrl({
-                  enterpriseSlug,
-                  contentType: contentType.toLowerCase(),
-                  contentKey,
-                }),
-                target: '_blank',
-                onClick: () => trackClickEvent({ aggregationKey }),
+          <div key={uuid} className="w-100 px-2.5">
+            <ContentHighlightCardItem
+              isLoading={isLoading}
+              uuid={uuid}
+              editHighlightsEnabled={editHighlightsEnabled}
+              isStarred={starredContentKeys.has(contentKey)}
+              onToggleStar={() => handleToggleStar(contentKey)}
+              cardImageUrl={cardImageUrl}
+              title={title}
+              archived={false}
+              hyperlinkAttrs={
+                {
+                  href: generateAboutPageUrl({
+                    enterpriseSlug,
+                    contentType: contentType.toLowerCase(),
+                    contentKey,
+                  }),
+                  target: '_blank',
+                  onClick: () => trackClickEvent({ aggregationKey }),
+                }
               }
-            }
-            contentType={contentType.toLowerCase()}
-            partners={authoringOrganizations}
-          />
+              contentType={contentType.toLowerCase()}
+              partners={authoringOrganizations}
+            />
+          </div>
         ))}
       </CardGrid>
       {archivedContent.length > 0 && (
@@ -231,30 +233,31 @@ const ContentHighlightsCardItemsContainer = ({
             {archivedContent.map(({
               uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
             }) => (
-              <ContentHighlightCardItem
-                isLoading={isLoading}
-                key={uuid}
-                uuid={uuid}
-                editHighlightsEnabled={editHighlightsEnabled}
-                isStarred={starredContentKeys.has(contentKey)}
-                onToggleStar={() => handleToggleStar(contentKey)}
-                cardImageUrl={cardImageUrl}
-                title={title}
-                archived
-                hyperlinkAttrs={
-                  {
-                    href: generateAboutPageUrl({
-                      enterpriseSlug,
-                      contentType: contentType.toLowerCase(),
-                      contentKey,
-                    }),
-                    target: '_blank',
-                    onClick: () => trackClickEvent({ aggregationKey }),
+              <div key={uuid} className="w-100 px-1">
+                <ContentHighlightCardItem
+                  isLoading={isLoading}
+                  uuid={uuid}
+                  editHighlightsEnabled={editHighlightsEnabled}
+                  isStarred={starredContentKeys.has(contentKey)}
+                  onToggleStar={() => handleToggleStar(contentKey)}
+                  cardImageUrl={cardImageUrl}
+                  title={title}
+                  archived
+                  hyperlinkAttrs={
+                    {
+                      href: generateAboutPageUrl({
+                        enterpriseSlug,
+                        contentType: contentType.toLowerCase(),
+                        contentKey,
+                      }),
+                      target: '_blank',
+                      onClick: () => trackClickEvent({ aggregationKey }),
+                    }
                   }
-                }
-                contentType={contentType.toLowerCase()}
-                partners={authoringOrganizations}
-              />
+                  contentType={contentType.toLowerCase()}
+                  partners={authoringOrganizations}
+                />
+              </div>
             ))}
           </CardGrid>
         </>
