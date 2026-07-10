@@ -78,7 +78,7 @@ const ContentHighlightCardItem = ({
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
       className={classNames({
-        'position-relative w-100 overflow-visible': (editHighlightsEnabled || isSelectable) && uuid,
+        'position-relative w-100': (editHighlightsEnabled || isSelectable) && uuid,
       })}
       data-testid={cardWrapperTestId}
     >
@@ -96,8 +96,8 @@ const ContentHighlightCardItem = ({
           data-testid={`select-checkbox-wrapper-${uuid}`}
           style={{
             position: 'absolute',
-            top: '8px',
-            right: '-20px',
+            top: '1px',
+            right: '-27px',
             width: '24px',
             height: '24px',
           }}
