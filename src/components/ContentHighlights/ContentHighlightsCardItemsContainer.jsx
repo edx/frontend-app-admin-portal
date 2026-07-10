@@ -59,14 +59,24 @@ const ContentHighlightsCardItemsContainer = ({
     return (
       <>
         {highlightTitle && (
-          <h4 className="mb-3">
-            <FormattedMessage
-              id="highlights.all.courses.section.heading"
-              defaultMessage='All courses and programs in "{highlightTitle}" highlight'
-              description="Heading above the full courses grid"
-              values={{ highlightTitle }}
-            />
-          </h4>
+          <>
+            <h4 className="mb-0">
+              <FormattedMessage
+                id="highlights.all.courses.section.heading"
+                defaultMessage='All courses and programs in "{highlightTitle}" highlight'
+                description="Heading above the full courses grid"
+                values={{ highlightTitle }}
+              />
+            </h4>
+            <p className="mb-3">
+              <FormattedMessage
+                id="highlights.edit.mode.selected.count"
+                defaultMessage="{count} selected ({count} shown below)"
+                description="Shows how many content items are selected in edit mode"
+                values={{ count: highlightedContent.length }}
+              />
+            </p>
+          </>
         )}
         <div data-testid="edit-mode-card-grid">
           <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
