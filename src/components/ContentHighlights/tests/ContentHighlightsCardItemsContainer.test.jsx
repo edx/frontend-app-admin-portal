@@ -285,6 +285,19 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
       expect(screen.queryByText(/All courses and programs in/)).not.toBeInTheDocument();
     });
 
+    it('renders selected count message when isEditing is true and title is provided', () => {
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={testHighlightSet}
+        highlightTitle="Recommended for Marketing"
+        isEditing
+        selectedContentKeys={new Set()}
+      />);
+      expect(screen.getByText(
+        new RegExp(`${testHighlightSet.length} selected \\(${testHighlightSet.length} shown below\\)`),
+      )).toBeInTheDocument();
+    });
+
     it('renders StarButton for each active card when editHighlightsEnabled is true', () => {
       renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
         isLoading={false}
