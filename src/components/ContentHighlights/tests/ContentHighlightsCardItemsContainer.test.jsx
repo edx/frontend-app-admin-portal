@@ -1,4 +1,5 @@
-import { screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 
 import { Provider } from 'react-redux';
@@ -38,6 +39,24 @@ jest.mock('@2uinc/frontend-enterprise-utils', () => {
     ...originalModule,
     sendEnterpriseTrackEvent: jest.fn(),
   });
+});
+
+jest.mock('../DeleteArchivedHighlightsDialogs', () => {
+  const MockDeleteArchivedHighlightsDialogs = ({ updateSetWithActiveContent }) => (
+    <button
+      type="button"
+      data-testid="mock-delete-archived-dialog"
+      onClick={() => {
+        if (typeof updateSetWithActiveContent === 'function') {
+          updateSetWithActiveContent();
+        }
+      }}
+    >
+      mock-delete-archived
+    </button>
+  );
+
+  return MockDeleteArchivedHighlightsDialogs;
 });
 
 const mockDispatchFn = jest.fn();
@@ -205,6 +224,20 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
       expect(onToggleSelect).toHaveBeenCalledWith(firstItem.contentKey);
     });
 
+    it('uses default onToggleSelect handler when none is provided', async () => {
+      const user = userEvent.setup();
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={testHighlightSet}
+        isEditing
+        selectedContentKeys={new Set()}
+      />);
+
+      const firstItem = testHighlightSet[0];
+      await user.click(screen.getByTestId(`select-checkbox-${firstItem.uuid}`));
+      expect(screen.getByTestId(`select-checkbox-${firstItem.uuid}`)).not.toBeChecked();
+    });
+
     it('checkbox is checked when item is in selectedContentKeys', () => {
       const firstItem = testHighlightSet[0];
       renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
@@ -337,6 +370,43 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
       expect(cardTitles[1]).toHaveTextContent(highlightedContentWithFavorites[1].title);
     });
 
+    it('sorts correctly when a later item is starred', () => {
+      const highlightedContentWithSecondFavorite = testHighlightSet.map((item, idx) => ({
+        ...item,
+        contentKey: `reordered-content-key-${idx}`,
+        isFavorite: idx === 1,
+      }));
+
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithSecondFavorite}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+
+      const cardTitles = screen.getAllByTestId('hyperlink-title');
+      expect(cardTitles[0]).toHaveTextContent(highlightedContentWithSecondFavorite[1].title);
+    });
+
+    it('keeps original order when all cards have the same starred state', () => {
+      const highlightedContentWithoutFavorites = testHighlightSet.map((item, idx) => ({
+        ...item,
+        contentKey: `all-unstarred-content-key-${idx}`,
+        isFavorite: false,
+      }));
+
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithoutFavorites}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+
+      const cardTitles = screen.getAllByTestId('hyperlink-title');
+      expect(cardTitles[0]).toHaveTextContent(highlightedContentWithoutFavorites[0].title);
+      expect(cardTitles[1]).toHaveTextContent(highlightedContentWithoutFavorites[1].title);
+    });
+
     it('starred item appears in featured section', () => {
       renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
         isLoading={false}
@@ -382,6 +452,83 @@ describe('<ContentHighlightsCardItemsContainer>', () => {
       />);
       expect(screen.getByTestId(`card-wrapper-archived-${archivedItem.uuid}`)).toBeInTheDocument();
       expect(screen.getByTestId(`star-btn-${archivedItem.uuid}`)).toBeInTheDocument();
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = false;
+    });
+
+    it('renders archived cards with links when archive messaging is enabled', () => {
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = true;
+      const highlightedContentWithArchived = testHighlightSet.map((item, idx) => ({
+        ...item,
+        contentKey: `archived-content-key-${idx}`,
+        isFavorite: false,
+        courseRunStatuses: idx < 2 ? ['archived'] : ['published'],
+      }));
+
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithArchived}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+
+      const archivedCards = highlightedContentWithArchived.filter(
+        (item) => item.courseRunStatuses?.includes('archived'),
+      );
+      archivedCards.forEach((item) => {
+        expect(screen.getByTestId(`card-wrapper-archived-${item.uuid}`)).toBeInTheDocument();
+        expect(screen.getByTestId(`star-btn-${item.uuid}`)).toBeInTheDocument();
+      });
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = false;
+    });
+
+    it('clicking archived card star button and link triggers handlers', async () => {
+      const user = userEvent.setup();
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = true;
+      const highlightedContentWithArchived = testHighlightSet.map((item, idx) => ({
+        ...item,
+        contentKey: `archived-toggle-content-key-${idx}`,
+        isFavorite: false,
+        courseRunStatuses: idx === 0 ? ['archived'] : ['published'],
+      }));
+      const archivedItem = highlightedContentWithArchived[0];
+
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithArchived}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+      />);
+
+      await user.click(screen.getByTestId(`star-btn-${archivedItem.uuid}`));
+      const archivedWrapper = screen.getByTestId(`card-wrapper-archived-${archivedItem.uuid}`);
+      const archivedLink = within(archivedWrapper).getByTestId('hyperlink-title');
+      await user.click(archivedLink);
+
+      expect(sendEnterpriseTrackEvent).toHaveBeenCalled();
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = false;
+    });
+
+    it('invokes updateSetWithActiveContent from archived delete dialog', async () => {
+      const user = userEvent.setup();
+      features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = true;
+      const updateHighlightSet = jest.fn();
+      const highlightedContentWithArchived = testHighlightSet.map((item, idx) => ({
+        ...item,
+        contentKey: `delete-archived-content-key-${idx}`,
+        isFavorite: false,
+        courseRunStatuses: idx === 0 ? ['archived'] : ['published'],
+      }));
+
+      renderWithRouter(<ContentHighlightsCardItemsContainerWrapper
+        isLoading={false}
+        highlightedContent={highlightedContentWithArchived}
+        highlightTitle="Test"
+        storeState={editHighlightsEnabledState}
+        updateHighlightSet={updateHighlightSet}
+      />);
+
+      await user.click(screen.getByTestId('mock-delete-archived-dialog'));
+      expect(updateHighlightSet).toHaveBeenCalled();
       features.FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING = false;
     });
   });

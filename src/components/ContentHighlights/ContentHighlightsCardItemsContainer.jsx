@@ -79,11 +79,11 @@ const ContentHighlightsCardItemsContainer = ({
           </>
         )}
         <div data-testid="edit-mode-card-grid">
-          <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+          <CardGrid className="px-4" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
             {highlightedContent.map(({
               uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
             }) => (
-              <div key={uuid} className="w-100 px-2.5">
+              <div key={uuid} className="w-100 px-4">
                 <ContentHighlightCardItem
                   isLoading={isLoading}
                   uuid={uuid}
@@ -165,11 +165,11 @@ const ContentHighlightsCardItemsContainer = ({
           </h4>
         </>
       )}
-      <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+      <CardGrid className="px-4" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
         {sortedActiveContent.map(({
           uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
         }) => (
-          <div key={uuid} className="w-100 px-2.5">
+          <div key={uuid} className="w-100 px-4">
             <ContentHighlightCardItem
               isLoading={isLoading}
               uuid={uuid}
@@ -229,11 +229,11 @@ const ContentHighlightsCardItemsContainer = ({
               description="Subheading for archived courses section on highlights tab."
             />
           </div>
-          <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+          <CardGrid className="px-4" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
             {archivedContent.map(({
               uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
             }) => (
-              <div key={uuid} className="w-100 px-1">
+              <div key={uuid} className="w-100 px-4">
                 <ContentHighlightCardItem
                   isLoading={isLoading}
                   uuid={uuid}

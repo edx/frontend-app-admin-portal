@@ -40,7 +40,7 @@ const StarButton = ({
       style={{
         position: 'absolute',
         top: '1px',
-        right: '-23px',
+        right: '-36px',
         width: '24px',
         height: '24px',
       }}
