@@ -77,7 +77,7 @@ const ContentHighlightCardItem = ({
     <Card
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
-      className={classNames('h-100 ml-n5', {
+      className={classNames({
         'position-relative w-100': (editHighlightsEnabled || isSelectable) && uuid,
       })}
       data-testid={cardWrapperTestId}
@@ -97,7 +97,7 @@ const ContentHighlightCardItem = ({
           style={{
             position: 'absolute',
             top: '1px',
-            right: '-35px',
+            right: '-27px',
             width: '24px',
             height: '24px',
           }}

@@ -79,24 +79,22 @@ const ContentHighlightsCardItemsContainer = ({
           </>
         )}
         <div data-testid="edit-mode-card-grid">
-          <CardGrid className="pl-4 ml-n0" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+          <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
             {highlightedContent.map(({
               uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
             }) => (
-              <div key={uuid} className="w-100 px-4">
-                <ContentHighlightCardItem
-                  isLoading={isLoading}
-                  uuid={uuid}
-                  cardImageUrl={cardImageUrl}
-                  title={title}
-                  archived={false}
-                  contentType={contentType.toLowerCase()}
-                  partners={authoringOrganizations}
-                  isSelectable
-                  isSelected={selectedContentKeys.has(contentKey)}
-                  onToggleSelect={() => onToggleSelect(contentKey)}
-                />
-              </div>
+              <ContentHighlightCardItem
+                isLoading={isLoading}
+                uuid={uuid}
+                cardImageUrl={cardImageUrl}
+                title={title}
+                archived={false}
+                contentType={contentType.toLowerCase()}
+                partners={authoringOrganizations}
+                isSelectable
+                isSelected={selectedContentKeys.has(contentKey)}
+                onToggleSelect={() => onToggleSelect(contentKey)}
+              />
             ))}
           </CardGrid>
         </div>
@@ -166,35 +164,34 @@ const ContentHighlightsCardItemsContainer = ({
           </h4>
         </>
       )}
-      <CardGrid className="px-4" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+      <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
         {sortedActiveContent.map(({
           uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
         }) => (
-          <div key={uuid} className="w-100 px-4">
-            <ContentHighlightCardItem
-              isLoading={isLoading}
-              uuid={uuid}
-              editHighlightsEnabled={editHighlightsEnabled}
-              isStarred={starredContentKeys.has(contentKey)}
-              onToggleStar={() => handleToggleStar(contentKey)}
-              cardImageUrl={cardImageUrl}
-              title={title}
-              archived={false}
-              hyperlinkAttrs={
-                {
-                  href: generateAboutPageUrl({
-                    enterpriseSlug,
-                    contentType: contentType.toLowerCase(),
-                    contentKey,
-                  }),
-                  target: '_blank',
-                  onClick: () => trackClickEvent({ aggregationKey }),
-                }
+          <ContentHighlightCardItem
+            isLoading={isLoading}
+            key={uuid}
+            uuid={uuid}
+            editHighlightsEnabled={editHighlightsEnabled}
+            isStarred={starredContentKeys.has(contentKey)}
+            onToggleStar={() => handleToggleStar(contentKey)}
+            cardImageUrl={cardImageUrl}
+            title={title}
+            archived={false}
+            hyperlinkAttrs={
+              {
+                href: generateAboutPageUrl({
+                  enterpriseSlug,
+                  contentType: contentType.toLowerCase(),
+                  contentKey,
+                }),
+                target: '_blank',
+                onClick: () => trackClickEvent({ aggregationKey }),
               }
-              contentType={contentType.toLowerCase()}
-              partners={authoringOrganizations}
-            />
-          </div>
+            }
+            contentType={contentType.toLowerCase()}
+            partners={authoringOrganizations}
+          />
         ))}
       </CardGrid>
       {archivedContent.length > 0 && (
@@ -231,35 +228,34 @@ const ContentHighlightsCardItemsContainer = ({
               description="Subheading for archived courses section on highlights tab."
             />
           </div>
-          <CardGrid className="px-4" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+          <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
             {archivedContent.map(({
               uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
             }) => (
-              <div key={uuid} className="w-100 px-4">
-                <ContentHighlightCardItem
-                  isLoading={isLoading}
-                  uuid={uuid}
-                  editHighlightsEnabled={editHighlightsEnabled}
-                  isStarred={starredContentKeys.has(contentKey)}
-                  onToggleStar={() => handleToggleStar(contentKey)}
-                  cardImageUrl={cardImageUrl}
-                  title={title}
-                  archived
-                  hyperlinkAttrs={
-                    {
-                      href: generateAboutPageUrl({
-                        enterpriseSlug,
-                        contentType: contentType.toLowerCase(),
-                        contentKey,
-                      }),
-                      target: '_blank',
-                      onClick: () => trackClickEvent({ aggregationKey }),
-                    }
+              <ContentHighlightCardItem
+                isLoading={isLoading}
+                key={uuid}
+                uuid={uuid}
+                editHighlightsEnabled={editHighlightsEnabled}
+                isStarred={starredContentKeys.has(contentKey)}
+                onToggleStar={() => handleToggleStar(contentKey)}
+                cardImageUrl={cardImageUrl}
+                title={title}
+                archived
+                hyperlinkAttrs={
+                  {
+                    href: generateAboutPageUrl({
+                      enterpriseSlug,
+                      contentType: contentType.toLowerCase(),
+                      contentKey,
+                    }),
+                    target: '_blank',
+                    onClick: () => trackClickEvent({ aggregationKey }),
                   }
-                  contentType={contentType.toLowerCase()}
-                  partners={authoringOrganizations}
-                />
-              </div>
+                }
+                contentType={contentType.toLowerCase()}
+                partners={authoringOrganizations}
+              />
             ))}
           </CardGrid>
         </>
@@ -297,7 +293,7 @@ ContentHighlightsCardItemsContainer.defaultProps = {
   highlightTitle: '',
   isEditing: false,
   selectedContentKeys: new Set(),
-  onToggleSelect: () => {},
+  onToggleSelect: () => { },
   editHighlightsEnabled: false,
 };
 
