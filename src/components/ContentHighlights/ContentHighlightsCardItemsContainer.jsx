@@ -79,7 +79,7 @@ const ContentHighlightsCardItemsContainer = ({
           </>
         )}
         <div data-testid="edit-mode-card-grid">
-          <CardGrid className="px-4" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+          <CardGrid className="pl-4 ml-n0" columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
             {highlightedContent.map(({
               uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
             }) => (
