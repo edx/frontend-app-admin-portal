@@ -131,6 +131,7 @@ const ContentHighlightsCardItemsContainer = ({
   });
 
   const updateSetWithActiveContent = () => updateHighlightSet(activeContent);
+  const activeContentCardImageUrl = activeContent[0]?.cardImageUrl || null;
 
   const archivedContentKeys = archivedContent.map(({ contentKey }) => contentKey);
   const activeContentUuids = activeContent.map(({ uuid }) => uuid);
@@ -203,6 +204,7 @@ const ContentHighlightsCardItemsContainer = ({
             closeDeleteModal={closeDeleteModal}
             archivedContentKeys={archivedContentKeys}
             activeContentUuids={activeContentUuids}
+            activeContentCardImageUrl={activeContentCardImageUrl}
             updateSetWithActiveContent={updateSetWithActiveContent}
           />
           <ActionRow>

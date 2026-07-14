@@ -74,6 +74,7 @@ const useContentHighlightSetEditing = ({
           enterpriseCurationActions.updateHighlightSetContentItems({
             // Reducer payload field is named activeContentUuids for legacy reasons.
             activeContentUuids: activeContentKeys,
+            cardImageUrl: remainingContent[0]?.cardImageUrl || null,
             highlightSetUUID,
           }),
         );

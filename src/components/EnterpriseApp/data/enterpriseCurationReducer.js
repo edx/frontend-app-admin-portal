@@ -187,7 +187,16 @@ function enterpriseCurationReducer(state, action) {
       const existingHighlightSets = getHighlightSetsFromState(state);
       const updatedHighlightSets = existingHighlightSets.map((highlightSet) => {
         if (highlightSet.uuid === action.payload.highlightSetUUID) {
-          return { ...highlightSet, highlightedContentUuids: action.payload.activeContentUuids };
+          const updatedHighlightSet = {
+            ...highlightSet,
+            highlightedContentUuids: action.payload.activeContentUuids,
+          };
+
+          if (Object.prototype.hasOwnProperty.call(action.payload, 'cardImageUrl')) {
+            updatedHighlightSet.cardImageUrl = action.payload.cardImageUrl;
+          }
+
+          return updatedHighlightSet;
         }
         return highlightSet;
       });
