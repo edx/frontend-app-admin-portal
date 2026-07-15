@@ -12,7 +12,12 @@ import { enterpriseCurationActions } from '../EnterpriseApp/data/enterpriseCurat
 import EnterpriseCatalogApiService from '../../data/services/EnterpriseCatalogApiService';
 
 const DeleteArchivedCoursesDialogs = ({
-  isDeleteModalOpen, closeDeleteModal, archivedContentKeys, activeContentUuids, updateSetWithActiveContent,
+  isDeleteModalOpen,
+  closeDeleteModal,
+  archivedContentKeys,
+  activeContentUuids,
+  activeContentCardImageUrl,
+  updateSetWithActiveContent,
 }) => {
   const { highlightSetUUID } = useParams();
   const navigate = useNavigate();
@@ -32,6 +37,7 @@ const DeleteArchivedCoursesDialogs = ({
         closeDeleteModal();
         const payload = {
           activeContentUuids,
+          cardImageUrl: activeContentCardImageUrl,
           highlightSetUUID,
         };
         dispatch(enterpriseCurationActions.updateHighlightSetContentItems(payload));
@@ -139,7 +145,12 @@ DeleteArchivedCoursesDialogs.propTypes = {
   closeDeleteModal: PropTypes.func.isRequired,
   archivedContentKeys: PropTypes.arrayOf(PropTypes.string).isRequired,
   activeContentUuids: PropTypes.arrayOf(PropTypes.string).isRequired,
+  activeContentCardImageUrl: PropTypes.string,
   updateSetWithActiveContent: PropTypes.func.isRequired,
+};
+
+DeleteArchivedCoursesDialogs.defaultProps = {
+  activeContentCardImageUrl: null,
 };
 
 export default DeleteArchivedCoursesDialogs;
