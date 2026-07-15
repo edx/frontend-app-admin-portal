@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { Container, Tabs, Tab } from '@openedx/paragon';
@@ -28,7 +28,7 @@ const ContentHighlightsDashboard = () => {
   const { enterpriseCuration: { enterpriseCuration } } = useContext(EnterpriseAppContext);
   const highlightSets = enterpriseCuration?.highlightSets;
   const [activeTab, setActiveTab] = useState(TAB_TITLES.highlights);
-  const [isHighlightSetCreated, setIsHighlightSetCreated] = useState(false);
+  const isHighlightSetCreated = (highlightSets?.length || 0) > 0;
   const intl = useIntl();
   const sendTrackEventTabSwitch = (tab) => {
     const trackInfo = {
@@ -40,11 +40,6 @@ const ContentHighlightsDashboard = () => {
       trackInfo,
     );
   };
-  useEffect(() => {
-    if (highlightSets.length > 0) {
-      setIsHighlightSetCreated(true);
-    }
-  }, [highlightSets]);
   return (
     <ContentHighlightsDashboardBase>
       <Tabs
