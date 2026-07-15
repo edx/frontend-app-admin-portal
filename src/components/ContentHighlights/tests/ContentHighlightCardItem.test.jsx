@@ -114,6 +114,8 @@ describe('<ContentHighlightCardItem>', () => {
     expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).toBeInTheDocument();
     const starButton = screen.getByTestId(`star-btn-${testHighlightedContent.uuid}`);
     expect(starButton).toBeInTheDocument();
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`).parentElement)
+      .toHaveClass('pgn__data-table__selectable-card', 'selection-right');
 
     await user.click(starButton);
     expect(onToggleStar).toHaveBeenCalledTimes(1);
@@ -131,5 +133,23 @@ describe('<ContentHighlightCardItem>', () => {
 
     expect(screen.queryByTestId(`star-btn-${testHighlightedContent.uuid}`)).not.toBeInTheDocument();
     expect(screen.queryByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).not.toBeInTheDocument();
+  });
+
+  it('renders selectable cards in Paragon selectable-card layout', () => {
+    renderWithRouter(<ContentHighlightCardItemContainerWrapper
+      isLoading={false}
+      uuid={testHighlightedContent.uuid}
+      isSelectable
+      isSelected={false}
+      title={testHighlightedContent.title}
+      contentType={testHighlightedContent.contentType.toLowerCase()}
+      partners={testHighlightedContent.authoringOrganizations}
+    />);
+
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`select-checkbox-wrapper-${testHighlightedContent.uuid}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).toHaveClass('position-relative');
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`).parentElement)
+      .toHaveClass('pgn__data-table__selectable-card', 'selection-right');
   });
 });
