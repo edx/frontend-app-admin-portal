@@ -18,8 +18,10 @@ import SubscriptionErrorToast from './SubscriptionErrorToast';
  */
 const SubscriptionLifecycle = ({
   enterpriseUuid,
+  productType,
 }: {
   enterpriseUuid: string;
+  productType?: string | null;
 }) => {
   const intl = useIntl();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -122,6 +124,8 @@ const SubscriptionLifecycle = ({
 
   const formattedAmount = formatAmount(yearlyAmount, currency);
   const formattedPeriodEnd = formatDate(currentPeriodEnd);
+  const normalizedProductType = productType?.toLowerCase();
+  const subscriptionTypeLabel = normalizedProductType === 'essentials' ? 'Essentials' : 'Teams';
 
   return (
     <>
@@ -173,6 +177,18 @@ const SubscriptionLifecycle = ({
           />
           <Card.Section>
             <Stack gap={3}>
+
+              {/* Subscription Type */}
+              <div>
+                <div className="small text-muted">
+                  <FormattedMessage
+                    id="admin.portal.billing.subscription.type.label"
+                    defaultMessage="Subscription Type"
+                    description="Label for subscription type field"
+                  />
+                </div>
+                <div className="font-weight-bold">{subscriptionTypeLabel}</div>
+              </div>
 
               {/* Current Period End */}
               <div>

@@ -12,6 +12,7 @@ const initialState = {
   enterpriseId: null,
   enterpriseName: null,
   enterpriseSlug: null,
+  productType: null,
   enterpriseBranding: null,
   identityProvider: null,
   disableExpiryMessagingForLearnerCredit: false,
@@ -41,6 +42,7 @@ const enterpriseData = {
     logo: 'https://s3...',
   },
   contact_email: 'fake@example.com',
+  product_type: 'essentials',
   identity_provider: {
     uuid: 'test-identity-provider-uuid',
   },
@@ -77,6 +79,7 @@ describe('portalConfiguration reducer', () => {
       enterpriseId: enterpriseData.uuid,
       enterpriseName: enterpriseData.name,
       enterpriseSlug: enterpriseData.slug,
+      productType: enterpriseData.product_type,
       enterpriseBranding: enterpriseData.branding_configuration,
       identityProvider: enterpriseData.identity_provider,
       disableExpiryMessagingForLearnerCredit: enterpriseData.disable_expiry_messaging_for_learner_credit,
@@ -98,6 +101,21 @@ describe('portalConfiguration reducer', () => {
       type: FETCH_PORTAL_CONFIGURATION_SUCCESS,
       payload: { data: enterpriseData, enterpriseFeatures: mockEnterpriseFeatures },
     })).toEqual(expected);
+  });
+
+  it('maps camelCase productType when product_type is not provided', () => {
+    const enterpriseDataWithCamelCaseProductType = {
+      ...enterpriseData,
+      product_type: undefined,
+      productType: 'teams',
+    };
+
+    const state = portalConfiguration(undefined, {
+      type: FETCH_PORTAL_CONFIGURATION_SUCCESS,
+      payload: { data: enterpriseDataWithCamelCaseProductType, enterpriseFeatures: mockEnterpriseFeatures },
+    });
+
+    expect(state.productType).toBe('teams');
   });
 
   it('updates fetch portal configuration failure state', () => {

@@ -23,6 +23,7 @@ import Hero from '../Hero';
 
 interface BillingPageProps {
   enterpriseId: string;
+  productType?: string | null;
 }
 
 /**
@@ -35,7 +36,7 @@ interface BillingPageProps {
  * - Transaction history
  * - Subscription lifecycle controls
  */
-const BillingPage = ({ enterpriseId }: BillingPageProps) => {
+const BillingPage = ({ enterpriseId, productType = null }: BillingPageProps) => {
   const [isAddPaymentMethodModalOpen, setIsAddPaymentMethodModalOpen] = useState(false);
   const [isAddBillingAddressModalOpen, setIsAddBillingAddressModalOpen] = useState(false);
   const [deleteModalState, setDeleteModalState] = useState<{
@@ -275,7 +276,10 @@ const BillingPage = ({ enterpriseId }: BillingPageProps) => {
             <TransactionHistory enterpriseUuid={enterpriseId || ''} />
 
             {/* Subscription Lifecycle Section (Teams/Essentials only) */}
-            <SubscriptionLifecycle enterpriseUuid={enterpriseId || ''} />
+            <SubscriptionLifecycle
+              enterpriseUuid={enterpriseId || ''}
+              productType={productType}
+            />
           </Stack>
 
           {/* Add Payment Method Modal - Only mount StripeProvider when modal is open to avoid crashes */}
