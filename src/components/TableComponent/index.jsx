@@ -14,6 +14,8 @@ import { withLocation, withNavigate } from '../../hoc';
 const DEFAULT_PAGE_SIZE = 50;
 
 class TableComponent extends React.Component {
+  hasHandledDataTableMount = false;
+
   componentDidMount() {
     // Get initial data
     this.props.paginateTable();
@@ -81,6 +83,11 @@ class TableComponent extends React.Component {
   }
 
   handleFetchData = ({ pageIndex = 0, sortBy = [] } = {}) => {
+    if (!this.hasHandledDataTableMount) {
+      this.hasHandledDataTableMount = true;
+      return;
+    }
+
     const {
       columns,
       currentPage,
@@ -93,9 +100,6 @@ class TableComponent extends React.Component {
     } = this.props;
 
     const latestSort = sortBy[sortBy.length - 1];
-    if (tableSortable && ordering === undefined && pageIndex === 0 && latestSort) {
-      return;
-    }
     if (tableSortable && latestSort && latestSort.id) {
       const nextOrdering = `${latestSort.desc ? '-' : ''}${latestSort.id}`;
       if (nextOrdering !== ordering) {
