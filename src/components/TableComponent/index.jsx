@@ -64,11 +64,14 @@ class TableComponent extends React.Component {
       return [];
     }
 
+    let desc = activeOrdering.startsWith('-');
+    if (!ordering && defaultSortType) {
+      desc = defaultSortType === 'desc';
+    }
+
     return [{
       id: activeOrdering.replace('-', ''),
-      desc: defaultSortType
-        ? defaultSortType === 'desc'
-        : activeOrdering.startsWith('-'),
+      desc,
     }];
   }
 
@@ -90,6 +93,9 @@ class TableComponent extends React.Component {
     } = this.props;
 
     const latestSort = sortBy[sortBy.length - 1];
+    if (tableSortable && ordering === undefined && pageIndex === 0 && latestSort) {
+      return;
+    }
     if (tableSortable && latestSort && latestSort.id) {
       const nextOrdering = `${latestSort.desc ? '-' : ''}${latestSort.id}`;
       if (nextOrdering !== ordering) {
