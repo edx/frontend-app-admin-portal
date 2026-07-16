@@ -63,6 +63,7 @@ const useContentHighlightSetEditing = ({
       await EnterpriseCatalogApiService.updateHighlightSet(highlightSetUUID, {
         remove_content_keys: keysToRemove,
       });
+      setIsFeaturedModalOpen(false);
       const remainingContent = (highlightSet?.highlightedContent || [])
         .filter(item => !selectedContentKeys.has(item.contentKey));
       updateHighlightSet(remainingContent);
@@ -74,6 +75,7 @@ const useContentHighlightSetEditing = ({
           enterpriseCurationActions.updateHighlightSetContentItems({
             // Reducer payload field is named activeContentUuids for legacy reasons.
             activeContentUuids: activeContentKeys,
+            cardImageUrl: remainingContent[0]?.cardImageUrl ?? null,
             highlightSetUUID,
           }),
         );

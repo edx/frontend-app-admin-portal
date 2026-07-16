@@ -51,7 +51,7 @@ const ContentHighlightCardItem = ({
     }),
   };
   const cardInfo = {
-    cardImgSrc: cardImageUrl,
+    cardImgSrc: cardImageUrl || cardImageCapFallbackSrc,
     cardLogoSrc: partners.length === 1 ? partners[0].logoImageUrl : undefined,
     cardLogoAlt: partners.length === 1 ? `${partners[0].name}'s logo` : undefined,
     cardTitle: <Truncate lines={3} title={title}>{title}</Truncate>,
@@ -82,41 +82,6 @@ const ContentHighlightCardItem = ({
       })}
       data-testid={cardWrapperTestId}
     >
-      {editHighlightsEnabled && uuid && (
-        <StarButton
-          title={title}
-          uuid={uuid}
-          isStarred={Boolean(isStarred)}
-          onToggleStar={onToggleStar}
-        />
-      )}
-      {isSelectable && uuid && (
-        <div
-          className="p-0 border-0 bg-transparent"
-          data-testid={`select-checkbox-wrapper-${uuid}`}
-          style={{
-            position: 'absolute',
-            top: '1px',
-            right: '-27px',
-            width: '24px',
-            height: '24px',
-          }}
-        >
-          <Form.Checkbox
-            aria-label={intl.formatMessage(
-              {
-                id: 'highlights.card.select_for_removal.aria.label',
-                defaultMessage: 'Select {title} for removal',
-                description: 'Checkbox aria label for selecting highlighted content for removal',
-              },
-              { title },
-            )}
-            checked={isSelected}
-            onChange={onToggleSelect}
-            data-testid={`select-checkbox-${uuid}`}
-          />
-        </div>
-      )}
       <Card.ImageCap
         src={cardInfo.cardImgSrc}
         fallbackSrc={cardImageCapFallbackSrc}
@@ -150,6 +115,43 @@ const ContentHighlightCardItem = ({
       )}
     </Card>
   );
+
+  if (editHighlightsEnabled && uuid) {
+    return (
+      <div className="pgn__data-table__selectable-card selection-right">
+        {card}
+        <StarButton
+          title={title}
+          uuid={uuid}
+          isStarred={Boolean(isStarred)}
+          onToggleStar={onToggleStar}
+        />
+      </div>
+    );
+  }
+
+  if (isSelectable && uuid) {
+    return (
+      <div className="pgn__data-table__selectable-card selection-right">
+        {card}
+        <div data-testid={`select-checkbox-wrapper-${uuid}`}>
+          <Form.Checkbox
+            aria-label={intl.formatMessage(
+              {
+                id: 'highlights.card.select_for_removal.aria.label',
+                defaultMessage: 'Select {title} for removal',
+                description: 'Checkbox aria label for selecting highlighted content for removal',
+              },
+              { title },
+            )}
+            checked={isSelected}
+            onChange={onToggleSelect}
+            data-testid={`select-checkbox-${uuid}`}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return card;
 };

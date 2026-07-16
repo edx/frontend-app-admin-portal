@@ -247,11 +247,13 @@ describe('<ContentHighlightSet>', () => {
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
-      fireEvent.click(screen.getByLabelText('Select Featured Course Alpha for removal'));
+      const featuredAlphaCheckbox = screen.getByLabelText('Select Featured Course Alpha for removal');
+      fireEvent.click(featuredAlphaCheckbox);
+      expect(featuredAlphaCheckbox).toBeChecked();
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
+        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
       });
       expect(screen.getByText('Do you want to remove this featured content from your highlight?')).toBeInTheDocument();
       const featuredAlphaElements = screen.getAllByText('Featured Course Alpha');
@@ -278,7 +280,7 @@ describe('<ContentHighlightSet>', () => {
       fireEvent.click(screen.getByLabelText('Select Regular Course Beta for removal'));
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
-      expect(screen.queryByText('Remove featured item?')).not.toBeInTheDocument();
+      expect(screen.queryByText('Remove a featured content?')).not.toBeInTheDocument();
 
       await waitFor(() => {
         expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalled();
@@ -305,17 +307,19 @@ describe('<ContentHighlightSet>', () => {
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
-      fireEvent.click(screen.getByLabelText('Select Featured Course Alpha for removal'));
+      const featuredAlphaCheckbox = screen.getByLabelText('Select Featured Course Alpha for removal');
+      fireEvent.click(featuredAlphaCheckbox);
+      expect(featuredAlphaCheckbox).toBeChecked();
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
+        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('featured-modal-cancel'));
 
       await waitFor(() => {
-        expect(screen.queryByText('Remove featured item?')).not.toBeInTheDocument();
+        expect(screen.queryByText('Remove a featured content?')).not.toBeInTheDocument();
       });
       expect(EnterpriseCatalogApiService.updateHighlightSet).not.toHaveBeenCalled();
     });
@@ -337,11 +341,13 @@ describe('<ContentHighlightSet>', () => {
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
-      fireEvent.click(screen.getByLabelText('Select Featured Course Alpha for removal'));
+      const featuredAlphaCheckbox = screen.getByLabelText('Select Featured Course Alpha for removal');
+      fireEvent.click(featuredAlphaCheckbox);
+      expect(featuredAlphaCheckbox).toBeChecked();
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
+        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('featured-modal-confirm'));
@@ -374,15 +380,19 @@ describe('<ContentHighlightSet>', () => {
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
-      fireEvent.click(screen.getByLabelText('Select Featured Course Alpha for removal'));
-      fireEvent.click(screen.getByLabelText('Select Featured Program Gamma for removal'));
+      const featuredAlphaCheckbox = screen.getByLabelText('Select Featured Course Alpha for removal');
+      const featuredGammaCheckbox = screen.getByLabelText('Select Featured Program Gamma for removal');
+      fireEvent.click(featuredAlphaCheckbox);
+      fireEvent.click(featuredGammaCheckbox);
+      expect(featuredAlphaCheckbox).toBeChecked();
+      expect(featuredGammaCheckbox).toBeChecked();
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove featured items?')).toBeInTheDocument();
+        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
       });
 
-      expect(screen.getByText('Do you want to remove these featured items from your highlight?')).toBeInTheDocument();
+      expect(screen.getByText('Do you want to remove this featured content from your highlight?')).toBeInTheDocument();
 
       const alphaElements = screen.getAllByText('Featured Course Alpha');
       const gammaElements = screen.getAllByText('Featured Program Gamma');
@@ -409,11 +419,13 @@ describe('<ContentHighlightSet>', () => {
       });
 
       fireEvent.click(screen.getByTestId('edit-content-button'));
-      fireEvent.click(screen.getByLabelText('Select Featured Course Alpha for removal'));
+      const featuredAlphaCheckbox = screen.getByLabelText('Select Featured Course Alpha for removal');
+      fireEvent.click(featuredAlphaCheckbox);
+      expect(featuredAlphaCheckbox).toBeChecked();
       fireEvent.click(screen.getByTestId('remove-content-button'));
 
       await waitFor(() => {
-        expect(screen.getByText('Remove featured item?')).toBeInTheDocument();
+        expect(screen.getByText('Remove a featured content?')).toBeInTheDocument();
       });
 
       fireEvent.click(screen.getByTestId('featured-modal-confirm'));

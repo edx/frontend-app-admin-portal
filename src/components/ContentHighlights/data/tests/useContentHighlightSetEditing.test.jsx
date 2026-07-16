@@ -301,6 +301,7 @@ describe('useContentHighlightSetEditing', () => {
       expect(mockDispatchEnterpriseCuration).toHaveBeenCalledWith(
         enterpriseCurationActions.updateHighlightSetContentItems({
           activeContentUuids: ['edX+Course2', 'edX+Program1'],
+          cardImageUrl: 'https://example.com/image2.jpg',
           highlightSetUUID,
         }),
       );

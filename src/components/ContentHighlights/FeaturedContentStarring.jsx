@@ -140,7 +140,7 @@ const MaxStarredModal = ({ isOpen, onClose }) => (
       </ActionRow>
     )}
   >
-    <p className="small mb-0">
+    <p className="mb-0">
       <FormattedMessage
         id="highlights.max.starred.modal.body"
         defaultMessage="Only {max} courses or programs can be featured in a highlight. Unstar a selection to continue."
