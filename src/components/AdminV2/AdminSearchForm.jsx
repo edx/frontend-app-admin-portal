@@ -29,14 +29,22 @@ const AdminSearchForm = ({
   enterpriseId,
 }) => {
   const intl = useIntl();
-  const isFirstRender = useRef(true);
+  const prevSearchParamsRef = useRef({
+    searchQuery, searchCourseQuery, searchDateQuery, searchBudgetQuery, searchGroupQuery, searchEnrollmentQuery,
+  });
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    const prevSearchParams = prevSearchParamsRef.current;
+    const currentSearchParams = {
+      searchQuery, searchCourseQuery, searchDateQuery, searchBudgetQuery, searchGroupQuery, searchEnrollmentQuery,
+    };
+    prevSearchParamsRef.current = currentSearchParams;
+
+    const hasSearchParamsChanged = Object.keys(currentSearchParams)
+      .some(key => currentSearchParams[key] !== prevSearchParams[key]);
+    if (hasSearchParamsChanged) {
+      searchEnrollmentsList();
     }
-    searchEnrollmentsList();
   }, [searchEnrollmentsList, searchQuery, searchCourseQuery, searchDateQuery, searchBudgetQuery, searchGroupQuery,
     searchEnrollmentQuery]);
 

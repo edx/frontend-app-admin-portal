@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { MemoryRouter } from 'react-router-dom';
 import { axe } from 'jest-axe';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -208,6 +209,35 @@ describe('TableComponent', () => {
     );
   });
 
+  it('paginates instead of triggering a sort when ordering is unset but a default sort applies', () => {
+    const props = {
+      ...mockDefaultProps,
+      data: [{ current_grade: 0.5 }],
+      columns: [{ key: 'current_grade', label: 'Current Grade', columnSortable: true }],
+      currentPage: 1,
+      pageCount: 3,
+      itemCount: 3,
+      tableSortable: true,
+      defaultSortIndex: 0,
+      defaultSortType: 'desc',
+      location: { pathname: '/test', search: '' },
+    };
+
+    render(<TableComponentWrapper {...props} />);
+    // Pagination-only change: sortBy is unchanged from the defaultSortIndex/defaultSortType fallback.
+    capturedFetchData({ pageIndex: 1, sortBy: [{ id: 'current_grade', desc: true }] });
+
+    expect(updateUrl).toHaveBeenCalledWith(expect.any(Function), '/test', { page: 2 });
+    expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+      props.enterpriseId,
+      'edx.ui.enterprise.admin_portal.table.paginated',
+      {
+        tableId: props.id,
+        page: 2,
+      },
+    );
+  });
+
   it('updates URL and tracks event on pagination change from DataTable fetchData', () => {
     const props = {
       ...mockDefaultProps,
@@ -387,12 +417,12 @@ describe('TableComponent', () => {
 
   it('renders the empty data message when no data is available', () => {
     render(<TableComponentWrapper {...mockDefaultProps} data={[]} />);
-    expect(screen.getByText('There are no results.'));
+    expect(screen.getByText('There are no results.')).toBeInTheDocument();
   });
 
   it('renders custom empty data message when provided', () => {
     render(<TableComponentWrapper {...mockDefaultProps} data={[]} customEmptyMessage="No rows found" />);
-    expect(screen.getByText('No rows found')).toBeTruthy();
+    expect(screen.getByText('No rows found')).toBeInTheDocument();
   });
 
   it('renders the table content when data is available', () => {

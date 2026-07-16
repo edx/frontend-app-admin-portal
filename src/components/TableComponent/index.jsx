@@ -102,7 +102,12 @@ class TableComponent extends React.Component {
     const latestSort = sortBy[sortBy.length - 1];
     if (tableSortable && latestSort && latestSort.id) {
       const nextOrdering = `${latestSort.desc ? '-' : ''}${latestSort.id}`;
-      if (nextOrdering !== ordering) {
+      // When `ordering` is absent, DataTable's sortBy still reflects the defaultSortIndex/
+      // defaultSortType fallback (see getSortState). Compare against that same baseline so a
+      // pagination-only change (sortBy unchanged) isn't mistaken for a user-initiated sort.
+      const [currentSort] = this.getSortState(columns.map(({ key }) => ({ accessor: key })));
+      const currentOrdering = currentSort ? `${currentSort.desc ? '-' : ''}${currentSort.id}` : ordering;
+      if (nextOrdering !== currentOrdering) {
         const column = columns.find(({ key }) => key === latestSort.id);
         updateUrl(navigate, location.pathname, {
           page: 1,
