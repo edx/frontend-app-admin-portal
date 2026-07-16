@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import classNames from 'classnames';
+import { isEqual } from 'lodash-es';
 import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
 
@@ -40,9 +41,7 @@ const AdminSearchForm = ({
     };
     prevSearchParamsRef.current = currentSearchParams;
 
-    const hasSearchParamsChanged = Object.keys(currentSearchParams)
-      .some(key => currentSearchParams[key] !== prevSearchParams[key]);
-    if (hasSearchParamsChanged) {
+    if (!isEqual(currentSearchParams, prevSearchParams)) {
       searchEnrollmentsList();
     }
   }, [searchEnrollmentsList, searchQuery, searchCourseQuery, searchDateQuery, searchBudgetQuery, searchGroupQuery,
