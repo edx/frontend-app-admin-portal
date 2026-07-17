@@ -1,9 +1,11 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { AppContext } from '@edx/frontend-platform/react';
+import { useParams } from 'react-router-dom';
 
 import { EnterpriseSubsidiesContext, useEnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
 import { SubsidyRequestsContext, useSubsidyRequestsContext } from '../subsidy-requests/SubsidyRequestsContext';
+import { useEnterpriseCustomer } from '../learner-credit-management/data/hooks';
 import {
   useEnterpriseCurationContext,
   useUpdateActiveEnterpriseForUser,
@@ -37,6 +39,8 @@ export type TEnterpriseCurationData = {
 
 export type TEnterpriseAppContext = {
   enterpriseCuration: TEnterpriseCurationData;
+  productType: string | null;
+  slug: string;
 };
 
 interface EnterpriseAppContextProviderProps {
@@ -60,6 +64,8 @@ export const EnterpriseAppContext = createContext<TEnterpriseAppContext>({
     isLoading: true,
     fetchError: null,
   },
+  productType: null,
+  slug: '',
 });
 
 const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> = ({
@@ -69,6 +75,7 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
   children,
 }) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
+  const { enterpriseSlug } = useParams();
   // subsidies for the enterprise customer
   const enterpriseSubsidiesContext = useEnterpriseSubsidiesContext({
     enterpriseId,
@@ -87,6 +94,11 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
     curationTitleForCreation: enterpriseName,
   });
 
+  const {
+    data: enterpriseCustomer,
+    isLoading: isLoadingEnterpriseCustomer,
+  } = useEnterpriseCustomer(enterpriseId);
+
   const { isLoading: isUpdatingActiveEnterprise } = useUpdateActiveEnterpriseForUser({
     enterpriseId,
     user: authenticatedUser,
@@ -96,14 +108,19 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
     subsidyRequestsContext.isLoading
     || enterpriseSubsidiesContext.isLoading
     || enterpriseCurationContext.isLoading
+    || isLoadingEnterpriseCustomer
     || isUpdatingActiveEnterprise
   );
+
+  const productType = enterpriseCustomer?.productType ?? null;
 
   // [tech debt] consolidate the other context values (e.g., useSubsidyRequestsContext)
   // into a singular `EnterpriseAppContext.Provider`.
   const enterpriseAppContext = useMemo(() => ({
     enterpriseCuration: enterpriseCurationContext,
-  } as TEnterpriseAppContext), [enterpriseCurationContext]);
+    productType,
+    slug: enterpriseSlug ?? '',
+  } as TEnterpriseAppContext), [enterpriseCurationContext, enterpriseSlug, productType]);
 
   if (isLoading) {
     return <EnterpriseAppSkeleton />;

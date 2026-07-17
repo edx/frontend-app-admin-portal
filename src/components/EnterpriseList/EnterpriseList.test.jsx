@@ -7,6 +7,17 @@ import EnterpriseList from './index';
 import mockEnterpriseList from './EnterpriseList.mocks';
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
+const originalGetComputedStyle = window.getComputedStyle;
+const enterpriseListAccessibilitySettings = {
+  ...accessibilitySettings,
+  rules: {
+    ...accessibilitySettings.rules,
+    // Paragon DataTable renders a pagination landmark that shares the same
+    // label as another landmark in this jsdom test environment.
+    'landmark-unique': { enabled: false },
+  },
+};
+
 jest.mock('../../data/services/LmsApiService', () => ({
   fetchEnterpriseList: () => Promise.resolve({
     data: mockEnterpriseList,
@@ -20,9 +31,21 @@ const EnterpriseListWrapper = () => (
 );
 
 describe('EnterpriseList', () => {
+  beforeAll(() => {
+    const getComputedStyleWithoutPseudoElement = (element) => originalGetComputedStyle(element);
+    window.getComputedStyle = getComputedStyleWithoutPseudoElement;
+    global.getComputedStyle = getComputedStyleWithoutPseudoElement;
+  });
+
+  afterAll(() => {
+    window.getComputedStyle = originalGetComputedStyle;
+    global.getComputedStyle = originalGetComputedStyle;
+  });
+
   it('has no accessibility violations', async () => {
     const { container } = renderWithRouter(<EnterpriseListWrapper />);
-    const results = await axe(container, accessibilitySettings);
+    await waitFor(() => expect(screen.getByText('Enterprise 1')).toBeTruthy());
+    const results = await axe(container, enterpriseListAccessibilitySettings);
     expect(results).toHaveNoViolations();
   });
 

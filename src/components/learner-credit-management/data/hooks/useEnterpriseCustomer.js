@@ -12,8 +12,11 @@ import LmsApiService from '../../../../data/services/LmsApiService';
  */
 const getEnterpriseCustomer = async (enterpriseCustomerUuid) => {
   const response = await LmsApiService.fetchEnterpriseCustomer(enterpriseCustomerUuid);
-  const enterpriseCustomer = camelCaseObject(response.data);
-  return enterpriseCustomer;
+  const { product_type: productType, ...enterpriseCustomerData } = response.data;
+  return {
+    ...camelCaseObject(enterpriseCustomerData),
+    productType,
+  };
 };
 
 const useEnterpriseCustomer = (enterpriseCustomerUuid, { queryOptions } = {}) => useQuery({

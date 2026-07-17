@@ -65,6 +65,49 @@ exports[`<Sidebar /> renders correctly 1`] = `
       >
         <a
           className="nav-link text-left rounded-0 d-flex align-items-center"
+          href="/test-enterprise-slug/admin/analytics"
+          id="analytics-sidebar"
+          onClick={[Function]}
+        >
+          <div
+            className="position-relative d-flex align-items-center"
+          >
+            <span
+              className="d-flex align-items-center"
+            >
+              <span
+                className="pgn__icon"
+              >
+                <svg
+                  aria-hidden={true}
+                  fill="none"
+                  focusable={false}
+                  height={24}
+                  role="img"
+                  viewBox="0 0 24 24"
+                  width={24}
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2 2H5V5h14v14zm2-16H3v18h18V3z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+            </span>
+            <span
+              className="sr-only"
+            >
+              Analytics
+            </span>
+          </div>
+        </a>
+      </li>
+      <li
+        className="nav-item"
+      >
+        <a
+          className="nav-link text-left rounded-0 d-flex align-items-center"
           href="/test-enterprise-slug/admin/coupons"
           onClick={[Function]}
         >
@@ -536,6 +579,47 @@ exports[`<Sidebar /> renders correctly when expanded 1`] = `
       >
         <a
           className="nav-link text-left rounded-0 d-flex align-items-center"
+          href="/test-enterprise-slug/admin/analytics"
+          id="analytics-sidebar"
+          onClick={[Function]}
+        >
+          <div
+            className="position-relative d-flex align-items-center"
+          >
+            <span
+              className="d-flex align-items-center"
+            >
+              <span
+                className="pgn__icon mr-2"
+              >
+                <svg
+                  aria-hidden={true}
+                  fill="none"
+                  focusable={false}
+                  height={24}
+                  role="img"
+                  viewBox="0 0 24 24"
+                  width={24}
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2 2H5V5h14v14zm2-16H3v18h18V3z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+            </span>
+            <span>
+              Analytics
+            </span>
+          </div>
+        </a>
+      </li>
+      <li
+        className="nav-item"
+      >
+        <a
+          className="nav-link text-left rounded-0 d-flex align-items-center"
           href="/test-enterprise-slug/admin/coupons"
           onClick={[Function]}
         >
@@ -794,6 +878,47 @@ exports[`<Sidebar /> renders correctly when expanded by toggle 1`] = `
             </span>
             <span>
               Learner Progress Report
+            </span>
+          </div>
+        </a>
+      </li>
+      <li
+        className="nav-item"
+      >
+        <a
+          className="nav-link text-left rounded-0 d-flex align-items-center"
+          href="/test-enterprise-slug/admin/analytics"
+          id="analytics-sidebar"
+          onClick={[Function]}
+        >
+          <div
+            className="position-relative d-flex align-items-center"
+          >
+            <span
+              className="d-flex align-items-center"
+            >
+              <span
+                className="pgn__icon mr-2"
+              >
+                <svg
+                  aria-hidden={true}
+                  fill="none"
+                  focusable={false}
+                  height={24}
+                  role="img"
+                  viewBox="0 0 24 24"
+                  width={24}
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4zm2 2H5V5h14v14zm2-16H3v18h18V3z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
+            </span>
+            <span>
+              Analytics
             </span>
           </div>
         </a>

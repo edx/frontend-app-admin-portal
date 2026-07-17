@@ -14,6 +14,13 @@ const TEST_ENTERPRISE_UUID = 'test-enterprise-uuid';
 const TEST_ENTERPRISE_NAME = 'test-enterprise-name';
 
 jest.mock('./data/hooks');
+jest.mock('../learner-credit-management/data/hooks', () => ({
+  ...jest.requireActual('../learner-credit-management/data/hooks'),
+  useEnterpriseCustomer: jest.fn(() => ({
+    data: { productType: null },
+    isLoading: false,
+  })),
+}));
 
 describe('<EnterpriseAppContextProvider />', () => {
   it.each([{

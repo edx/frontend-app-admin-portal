@@ -19,6 +19,11 @@ export const ROUTE_NAMES = {
   subscriptionManagement: 'subscriptions',
 };
 
+export const PRODUCT_TYPES = {
+  ESSENTIALS: 'Essentials',
+  TEAMS: 'Teams',
+};
+
 export const BUDGET_STATUSES = {
   active: 'Active',
   expired: 'Expired',
