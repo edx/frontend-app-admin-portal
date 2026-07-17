@@ -5,10 +5,14 @@ import { learnerCreditManagementQueryKeys } from '../constants';
 import LmsApiService from '../../../../data/services/LmsApiService';
 
 /**
+ * @typedef {{ productType?: string | null } & Record<string, unknown>} EnterpriseCustomer
+ */
+
+/**
  * Retrieves a enterprise customer by UUID from the API.
  *
  * @param {*} queryKey The queryKey from the associated `useQuery` call.
- * @returns The enterprise customer object
+ * @returns {Promise<EnterpriseCustomer>} The enterprise customer object
  */
 const getEnterpriseCustomer = async (enterpriseCustomerUuid) => {
   const response = await LmsApiService.fetchEnterpriseCustomer(enterpriseCustomerUuid);
