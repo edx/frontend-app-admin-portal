@@ -2,6 +2,7 @@ import React from 'react';
 import {
   render, screen, fireEvent, waitFor,
 } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -19,8 +20,10 @@ jest.mock('@openedx/paragon', () => {
       return <IconComponent data-testid="icon" />;
     },
     ActionRow: ({ children }) => <div data-testid="action-row">{children}</div>,
-    Button: ({ children, variant, onClick }) => (
-      <button type="button" data-testid={`button-${variant}`} onClick={onClick}>
+    Button: ({
+      children, variant, onClick, disabled,
+    }) => (
+      <button type="button" data-testid={`button-${variant}`} onClick={onClick} disabled={disabled}>
         {children}
       </button>
     ),
@@ -107,6 +110,19 @@ describe('FloatingCollapsible', () => {
     await waitFor(() => {
       expect(screen.queryByText('Test Content')).toBeFalsy();
     });
+  });
+
+  it('hides the dismiss button when hideDismissButton is true', () => {
+    setup({ hideDismissButton: true });
+
+    expect(screen.queryByTestId('button-tertiary')).toBeFalsy();
+    expect(screen.queryByText('Test Content')).toBeTruthy();
+  });
+
+  it('has no accessibility violations when hideDismissButton is true', async () => {
+    const { container } = setup({ hideDismissButton: true });
+    const results = await axe(container, accessibilitySettings);
+    expect(results).toHaveNoViolations();
   });
 
   it('renders Dismiss and Close button text via i18n', () => {

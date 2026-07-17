@@ -29,10 +29,16 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 // Mock FloatingCollapsible component
 jest.mock('../../FloatingCollapsible', () => {
-  const FloatingCollapsible = ({ children, title, onDismiss }) => (
+  const FloatingCollapsible = ({
+    children, title, onDismiss, hideDismissButton,
+  }) => (
     <div data-testid="floating-collapsible">
       <h3>{title}</h3>
-      <button type="button" data-testid="dismiss-button" onClick={onDismiss}>Dismiss</button>
+      {!hideDismissButton && (
+        <button type="button" data-testid="dismiss-button" onClick={onDismiss}>
+          Dismiss
+        </button>
+      )}
       {children}
     </div>
   );
@@ -197,6 +203,23 @@ describe('TourCollapsible', () => {
 
     // Check if the collapsible has been dismissed
     expect(mockSetShowCollapsible).toHaveBeenCalledWith(false);
+  });
+
+  it('hides the dismiss button when the onboarding tour is already completed', () => {
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: true,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enableSubscriptionManagementScreen: true,
+      },
+    };
+    // showCollapsible=true mirrors reopening a completed tour via the question icon button.
+    setup(state, true);
+
+    expect(screen.queryByTestId('dismiss-button')).toBeFalsy();
   });
 
   it('reopens the tour when question icon is clicked', async () => {
