@@ -44,6 +44,7 @@ interface Props {
   enableAnalyticsScreen: boolean;
   enableReportingConfigScreen: boolean;
   enableSubscriptionManagementScreen: boolean;
+  onboardingTourCompleted: boolean;
   onTourSelect?: (targetId: string) => void;
   reopenOnboardingTour: (adminUuid: string) => void;
   showCollapsible: boolean;
@@ -66,6 +67,7 @@ const TourCollapsible: FC<Props> = (
     enableAnalyticsScreen,
     enableReportingConfigScreen,
     enableSubscriptionManagementScreen,
+    onboardingTourCompleted,
     onTourSelect,
     reopenOnboardingTour: reopenTour,
     showCollapsible,
@@ -242,6 +244,7 @@ const TourCollapsible: FC<Props> = (
         <FloatingCollapsible
           title={intl.formatMessage(messages.collapsibleTitle)}
           onDismiss={handleDismiss}
+          hideDismissButton={onboardingTourCompleted}
         >
           <p className="small">{intl.formatMessage(messages.collapsibleIntro)}</p>
           <Stack gap={2} className="mb-3">
