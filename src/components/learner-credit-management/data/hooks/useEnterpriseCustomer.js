@@ -11,7 +11,7 @@ import LmsApiService from '../../../../data/services/LmsApiService';
 /**
  * Retrieves a enterprise customer by UUID from the API.
  *
- * @param {*} queryKey The queryKey from the associated `useQuery` call.
+ * @param {string} enterpriseCustomerUuid The enterprise customer UUID.
  * @returns {Promise<EnterpriseCustomer>} The enterprise customer object
  */
 const getEnterpriseCustomer = async (enterpriseCustomerUuid) => {
@@ -23,6 +23,13 @@ const getEnterpriseCustomer = async (enterpriseCustomerUuid) => {
   };
 };
 
+/**
+ * Retrieves an enterprise customer query result.
+ *
+ * @param {string} enterpriseCustomerUuid The enterprise customer UUID.
+ * @param {{ queryOptions?: Record<string, unknown> }} [options]
+ * @returns {import('@tanstack/react-query').UseQueryResult<EnterpriseCustomer, unknown>}
+ */
 const useEnterpriseCustomer = (enterpriseCustomerUuid, { queryOptions } = {}) => useQuery({
   queryKey: learnerCreditManagementQueryKeys.enterpriseCustomer(enterpriseCustomerUuid),
   queryFn: () => getEnterpriseCustomer(enterpriseCustomerUuid),
