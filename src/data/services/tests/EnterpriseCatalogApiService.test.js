@@ -139,4 +139,24 @@ describe('EnterpriseCatalogApiService', () => {
       },
     );
   });
+
+  test('toggleFavoriteHighlight posts correct URL and payload when shouldFavorite is true', async () => {
+    const mockContentUuid = 'test-content-uuid';
+    await EnterpriseCatalogApiService.toggleFavoriteHighlight(mockHighlightSetUUID, mockContentUuid, true);
+
+    expect(axios.post).toHaveBeenCalledWith(
+      `${enterpriseCatalogBaseUrl}/highlight-sets-admin/${mockHighlightSetUUID}/toggle-favorite-highlight/`,
+      { content_uuid: mockContentUuid, favorite: 'true' },
+    );
+  });
+
+  test('toggleFavoriteHighlight posts correct URL and payload when shouldFavorite is false', async () => {
+    const mockContentUuid = 'test-content-uuid';
+    await EnterpriseCatalogApiService.toggleFavoriteHighlight(mockHighlightSetUUID, mockContentUuid, false);
+
+    expect(axios.post).toHaveBeenCalledWith(
+      `${enterpriseCatalogBaseUrl}/highlight-sets-admin/${mockHighlightSetUUID}/toggle-favorite-highlight/`,
+      { content_uuid: mockContentUuid, favorite: 'false' },
+    );
+  });
 });

@@ -7,10 +7,16 @@ import {
   IconButton, Icon, OverlayTrigger, Tooltip, Stack,
 } from '@openedx/paragon';
 import {
-  CreditCard, InsertChartOutlined, MoneyOutline, Person, Question, Settings, TextSnippet, TrendingUp,
+  CreditCard, InsertChartOutlined, MenuBook, MoneyOutline, Person, Question, Settings, TextSnippet, TrendingUp,
 } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { getConfig } from '@edx/frontend-platform';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { logError } from '@edx/frontend-platform/logging';
 
+import { useOnMount } from '../../hooks';
+import LmsApiService from '../../data/services/LmsApiService';
+import { GROUP_TYPE_BUDGET } from '../PeopleManagement/constants';
 import FloatingCollapsible from '../FloatingCollapsible';
 import messages from './AdminOnboardingTours/messages';
 import { dismissOnboardingTour, reopenOnboardingTour } from '../../data/actions/enterpriseCustomerAdmin';
@@ -20,6 +26,7 @@ import {
   ALLOCATE_LEARNING_BUDGETS_TARGETS,
   ANALYTICS_V2_TARGETS,
   CUSTOMIZE_REPORTS_SIDEBAR,
+  EDIT_HIGHLIGHTS_TARGETS,
   ORGANIZE_LEARNER_TARGETS,
   TRACK_LEARNER_PROGRESS_TARGETS,
 } from './AdminOnboardingTours/constants';
@@ -28,13 +35,16 @@ import useFetchCompletedOnboardingFlows from './AdminOnboardingTours/data/useFet
 import { configuration, features } from '../../config';
 import TourCompleteModal from './TourCompleteModal';
 import { EnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
+import { EnterpriseAppContext } from '../EnterpriseApp/EnterpriseAppContextProvider';
 
 interface Props {
   adminUuid: string;
   dismissOnboardingTour: (adminUuid: string) => void;
+  editHighlightsEnabled: boolean;
   enableAnalyticsScreen: boolean;
   enableReportingConfigScreen: boolean;
   enableSubscriptionManagementScreen: boolean;
+  onboardingTourCompleted: boolean;
   onTourSelect?: (targetId: string) => void;
   reopenOnboardingTour: (adminUuid: string) => void;
   showCollapsible: boolean;
@@ -53,9 +63,11 @@ const TourCollapsible: FC<Props> = (
   {
     adminUuid,
     dismissOnboardingTour: dismissTour,
+    editHighlightsEnabled,
     enableAnalyticsScreen,
     enableReportingConfigScreen,
     enableSubscriptionManagementScreen,
+    onboardingTourCompleted,
     onTourSelect,
     reopenOnboardingTour: reopenTour,
     showCollapsible,
@@ -68,6 +80,35 @@ const TourCollapsible: FC<Props> = (
   const { data: onboardingTourData } = useFetchCompletedOnboardingFlows(adminUuid);
   const { canManageLearnerCredit } = useContext(EnterpriseSubsidiesContext);
   const { isLoadingCustomerAgreement, customerAgreement } = useContext(EnterpriseSubsidiesContext);
+  const { enterpriseCuration: { enterpriseCuration } } = useContext(EnterpriseAppContext);
+  const isEdxStaff = getAuthenticatedUser()?.administrator;
+  const [hasBudgetGroup, setHasBudgetGroup] = useState(false);
+
+  // Mirror the Sidebar: hide Highlights (and this tour) for non-staff admins whose
+  // customer has a budget group.
+  useOnMount(() => {
+    async function fetchGroupsData() {
+      try {
+        const response = await LmsApiService.fetchEnterpriseGroups();
+        setHasBudgetGroup(
+          response.data.results.some((group) => group.groupType === GROUP_TYPE_BUDGET),
+        );
+      } catch (error) {
+        logError(error);
+      }
+    }
+    if (!isEdxStaff) {
+      fetchGroupsData();
+    }
+  });
+  const hideHighlightsForGroups = hasBudgetGroup && !isEdxStaff;
+
+  // Show the "Showcase courses" tour only when the Highlights sidebar item is
+  // visible (same conditions as the sidebar).
+  const isHighlightsAvailable = editHighlightsEnabled
+    && !!getConfig().FEATURE_CONTENT_HIGHLIGHTS
+    && !!enterpriseCuration?.isHighlightFeatureActive
+    && !hideHighlightsForGroups;
 
   const handleDismiss = () => {
     setShowCollapsible(false);
@@ -104,6 +145,12 @@ const TourCollapsible: FC<Props> = (
       targetId: ADMINISTER_SUBSCRIPTIONS_TARGETS.SIDEBAR,
       completed: false,
     }, {
+      icon: MenuBook,
+      title: intl.formatMessage(messages.editHighlightsStepOneTitle),
+      timeEstimate: 2,
+      targetId: EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR,
+      completed: false,
+    }, {
       icon: Person,
       title: intl.formatMessage(messages.organizeLearnersStepOneTitle),
       timeEstimate: 2,
@@ -135,6 +182,7 @@ const TourCollapsible: FC<Props> = (
         ADMIN_ONBOARDING_UUIDS.FLOW_ORGANIZE_LEARNERS_UUID?.toString(),
       ],
       [CUSTOMIZE_REPORTS_SIDEBAR, ADMIN_ONBOARDING_UUIDS.FLOW_CUSTOMIZE_REPORTS_UUID?.toString()],
+      [EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR, ADMIN_ONBOARDING_UUIDS.FLOW_SHOWCASE_COURSES_UUID?.toString()],
       [TOUR_TARGETS.SETTINGS_SIDEBAR, ADMIN_ONBOARDING_UUIDS.FLOW_PREFERENCES_UUID?.toString()],
     ]);
 
@@ -150,6 +198,8 @@ const TourCollapsible: FC<Props> = (
           return enableReportingConfigScreen;
         case ANALYTICS_V2_TARGETS.SIDEBAR:
           return features.ANALYTICS && enableAnalyticsScreen;
+        case EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR:
+          return isHighlightsAvailable;
         default:
           return true;
       }
@@ -173,8 +223,10 @@ const TourCollapsible: FC<Props> = (
     canManageLearnerCredit,
     customerAgreement?.subscriptions,
     enableAnalyticsScreen,
+    editHighlightsEnabled,
     enableReportingConfigScreen,
     enableSubscriptionManagementScreen,
+    isHighlightsAvailable,
     isLoadingCustomerAgreement,
     onboardingTourData?.completedTourFlows,
     onboardingTourData?.onboardingTourCompleted,
@@ -192,6 +244,7 @@ const TourCollapsible: FC<Props> = (
         <FloatingCollapsible
           title={intl.formatMessage(messages.collapsibleTitle)}
           onDismiss={handleDismiss}
+          hideDismissButton={onboardingTourCompleted}
         >
           <p className="small">{intl.formatMessage(messages.collapsibleIntro)}</p>
           <Stack gap={2} className="mb-3">
@@ -233,6 +286,8 @@ const TourCollapsible: FC<Props> = (
 
 const mapStateToProps = state => ({
   adminUuid: state.enterpriseCustomerAdmin.uuid as string,
+  editHighlightsEnabled:
+    (state.portalConfiguration.enterpriseFeatures?.enterpriseEditHighlightsEnabled ?? false) as boolean,
   enableAnalyticsScreen: state.portalConfiguration.enableAnalyticsScreen as boolean,
   enableReportingConfigScreen: state.portalConfiguration.enableReportingConfigScreen as boolean,
   enableSubscriptionManagementScreen: state.portalConfiguration.enableSubscriptionManagementScreen as boolean,

@@ -20,8 +20,6 @@ interface AdminOnboardingToursProps {
   setTarget: Function,
   targetSelector: string;
   enablePortalLearnerCreditManagementScreen: boolean;
-  enterpriseFeatures: {
-  };
 }
 
 interface RootState {
@@ -38,7 +36,6 @@ interface RootState {
 }
 
 const AdminOnboardingTours: FC<AdminOnboardingToursProps> = ({
-  enterpriseFeatures,
   enablePortalLearnerCreditManagementScreen,
   adminUuid, enterpriseId, enterpriseSlug, isOpen, onClose, setTarget, targetSelector,
 }) => {
@@ -47,7 +44,6 @@ const AdminOnboardingTours: FC<AdminOnboardingToursProps> = ({
   const [currentStep, setCurrentStep] = useState(0);
   const prevPathnameRef = useRef(location.pathname);
   const adminOnboardingSteps = AdminOnboardingTour({
-    enterpriseFeatures,
     enablePortalLearnerCreditManagementScreen,
     adminUuid,
     currentStep,
@@ -124,7 +120,16 @@ const AdminOnboardingTours: FC<AdminOnboardingToursProps> = ({
 
   return (
     <>
-      <CheckpointOverlay target={adminOnboardingSteps[currentStep]?.target || targetSelector} />
+      <CheckpointOverlay
+        target={
+          adminOnboardingSteps[currentStep]?.overlayTarget
+          || adminOnboardingSteps[currentStep]?.target
+          || targetSelector
+        }
+        widthRatio={adminOnboardingSteps[currentStep]?.overlayWidthRatio}
+        topTarget={adminOnboardingSteps[currentStep]?.overlayTopTarget}
+        padding={adminOnboardingSteps[currentStep]?.overlayPadding}
+      />
       <ProductTour
         tours={tours}
       />
@@ -145,6 +150,5 @@ const mapStateToProps = (state: RootState) => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
   enterpriseSlug: state.portalConfiguration.enterpriseSlug,
   enablePortalLearnerCreditManagementScreen: state.portalConfiguration.enablePortalLearnerCreditManagementScreen,
-  enterpriseFeatures: state.portalConfiguration.enterpriseFeatures,
 });
 export default connect(mapStateToProps)(AdminOnboardingTours);

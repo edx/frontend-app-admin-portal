@@ -7,10 +7,11 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import thunk from 'redux-thunk';
 import {
-  cleanup, render, screen, waitFor,
+  cleanup, render, screen, waitFor, within,
 } from '@testing-library/react';
 import { mergeConfig } from '@edx/frontend-platform';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 
 import { axe } from 'jest-axe';
 import { features } from '../../../config';
@@ -28,7 +29,8 @@ import learnerCreditTour from '../learnerCreditTour';
 import learnerDetailPageTour from '../learnerDetailPageTour';
 import portalAppearanceTour from '../portalAppearanceTour';
 import highlightsTour from '../highlightsTour';
-import { ONBOARDING_WELCOME_MODAL_COOKIE_NAME } from '../AdminOnboardingTours/constants';
+import { ADMIN_TOUR_EVENT_NAMES, ONBOARDING_WELCOME_MODAL_COOKIE_NAME } from '../AdminOnboardingTours/constants';
+import { EnterpriseAppContext } from '../../EnterpriseApp/EnterpriseAppContextProvider';
 import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import { ACCESS_TAB } from '../../settings/data/constants';
 import { SubsidyRequestsContext } from '../../subsidy-requests';
@@ -49,6 +51,13 @@ jest.mock('@2uinc/frontend-enterprise-utils', () => {
   };
 });
 
+// Selecting a Quick Start Guide step opens AdminOnboardingTours, which mounts the
+// full flow tree (and needs budget/analytics data we don't provide here). Stub it
+// so tour selection can be tested without rendering that machinery.
+jest.mock('../AdminOnboardingTours/AdminOnboardingTours', () => function MockAdminOnboardingTours() {
+  return null;
+});
+
 const ENTERPRISE_SLUG = 'sluggy';
 const ENTERPRISE_UUID = 'test-enterprise-uuid';
 const mockIntl = { formatMessage: ({ defaultMessage }) => defaultMessage };
@@ -67,7 +76,6 @@ const ToursWithContext = ({
   subsidyRequestsEnabled = false,
   canManageLearnerCredit = false,
   enableLearnerPortal = false,
-  enableInviteAdmins = false,
   EnterpriseSubsidiesContextValue = {
     canManageLearnerCredit,
     enterpriseSubsidyTypes: [SUBSIDY_TYPES.coupon],
@@ -79,6 +87,13 @@ const ToursWithContext = ({
     },
     enterpriseSubsidyTypesForRequests: [SUBSIDY_TYPES.coupon],
   },
+  enterpriseAppContextValue = {
+    enterpriseCuration: {
+      enterpriseCuration: { highlightSets: [], isHighlightFeatureActive: false },
+      isLoading: false,
+      fetchError: null,
+    },
+  },
   store = mockStore({
     portalConfiguration: {
       enterpriseSlug: ENTERPRISE_SLUG,
@@ -86,7 +101,6 @@ const ToursWithContext = ({
       enableLearnerPortal,
       enterpriseFeatures: {
         enterpriseAdminOnboardingEnabled: onboardingEnabled,
-        enterpriseInviteAdminsEnabled: enableInviteAdmins,
       },
     },
     enterpriseCustomerAdmin: {
@@ -104,16 +118,18 @@ const ToursWithContext = ({
             <Route
               path={`/${ENTERPRISE_SLUG}/admin/:enterpriseAppPage`}
               element={(
-                <EnterpriseSubsidiesContext.Provider value={EnterpriseSubsidiesContextValue}>
-                  <SubsidyRequestsContext.Provider value={subsidyRequestContextValue}>
-                    <>
-                      <ProductTours />
-                      <p id={TOUR_TARGETS.PEOPLE_MANAGEMENT}>People Management</p>
-                      <p id={TOUR_TARGETS.LEARNER_CREDIT}>Learner Credit Management</p>
-                      <p id={TOUR_TARGETS.SETTINGS_SIDEBAR}>Settings</p>
-                    </>
-                  </SubsidyRequestsContext.Provider>
-                </EnterpriseSubsidiesContext.Provider>
+                <EnterpriseAppContext.Provider value={enterpriseAppContextValue}>
+                  <EnterpriseSubsidiesContext.Provider value={EnterpriseSubsidiesContextValue}>
+                    <SubsidyRequestsContext.Provider value={subsidyRequestContextValue}>
+                      <>
+                        <ProductTours />
+                        <p id={TOUR_TARGETS.PEOPLE_MANAGEMENT}>People Management</p>
+                        <p id={TOUR_TARGETS.LEARNER_CREDIT}>Learner Credit Management</p>
+                        <p id={TOUR_TARGETS.SETTINGS_SIDEBAR}>Settings</p>
+                      </>
+                    </SubsidyRequestsContext.Provider>
+                  </EnterpriseSubsidiesContext.Provider>
+                </EnterpriseAppContext.Provider>
               )}
             />
           </Routes>
@@ -211,7 +227,7 @@ describe('<ProductTours/>', () => {
     it('is not shown when feature is enabled and localStorage record found ', () => {
       global.localStorage.setItem(BROWSE_AND_REQUEST_TOUR_COOKIE_NAME, true);
       render(<ToursWithContext enableLearnerPortal />);
-      expect(screen.queryByText('New Feature')).toBeFalsy();
+      expect(screen.queryByText('browse for courses', { exact: false })).toBeFalsy();
     });
 
     it('it is shown in settings page', () => {
@@ -232,7 +248,7 @@ describe('<ProductTours/>', () => {
           }}
         />,
       );
-      expect(screen.queryByText('New Feature')).toBeFalsy();
+      expect(screen.queryByText('browse for courses', { exact: false })).toBeFalsy();
     });
   });
 
@@ -260,20 +276,15 @@ describe('<ProductTours/>', () => {
       expect(tourConfig).toHaveProperty('onEnd');
     });
 
-    it('is not shown when invite admins feature is disabled', () => {
+    it('is shown when invite admins alert cookie is not set', () => {
       render(<ToursWithContext />);
-      expect(screen.queryByText("We've recently added the ability for you to invite and manage your admins.", { exact: false })).toBeFalsy();
-    });
-
-    it('is shown when invite admins feature is enabled and alert cookie is not set', () => {
-      render(<ToursWithContext enableInviteAdmins />);
       expect(screen.queryByText("We've recently added the ability for you to invite and manage your admins.", { exact: false })).toBeTruthy();
     });
 
     it('is not shown when invite admins alert cookie is set for the user', () => {
       const alertCookie = generateAdminsTabAlertCookieName();
       global.localStorage.setItem(alertCookie, true);
-      render(<ToursWithContext enableInviteAdmins />);
+      render(<ToursWithContext />);
       expect(screen.queryByText("We've recently added the ability for you to invite and manage your admins.", { exact: false })).toBeFalsy();
     });
 
@@ -327,7 +338,7 @@ describe('<ProductTours/>', () => {
     it('is not shown if localStorage record is present', () => {
       global.localStorage.setItem(LEARNER_CREDIT_COOKIE_NAME, true);
       render(<ToursWithContext canManageLearnerCredit />);
-      expect(screen.queryByText('New Feature')).toBeFalsy();
+      expect(screen.queryByText('Learner Credit feature', { exact: false })).toBeFalsy();
     });
 
     it('is shown if in Learner Credit page', () => {
@@ -338,12 +349,20 @@ describe('<ProductTours/>', () => {
 
   describe('TourCollapsible', () => {
     it('renders the collapsible title', () => {
+      // Dismiss the welcome modal so the only "Quick Start Guide" on screen is the collapsible title.
+      global.localStorage.setItem(ONBOARDING_WELCOME_MODAL_COOKIE_NAME, 'true');
       render(<ToursWithContext />);
-      expect(screen.queryByText('Quick Start Guide')).toBeTruthy();
+      const title = screen.getByText('Quick Start Guide');
+      expect(title).toBeTruthy();
+      expect(title.tagName).not.toBe('STRONG');
     });
     it('renders the welcome modal and opens the quick start guide', async () => {
       render(<ToursWithContext />);
       expect(screen.queryByText('Welcome!')).toBeTruthy();
+      // "Quick Start Guide" in the welcome modal body should render bold (<p><strong>...</strong></p>).
+      const modalBold = within(screen.getByRole('dialog')).getByText('Quick Start Guide');
+      expect(modalBold.tagName).toBe('STRONG');
+      expect(modalBold.closest('p')).not.toBeNull();
       userEvent.click(screen.getByText('Get started'));
       // "Get started" button should un-collapse the quick start guide
       await waitFor(() => {
@@ -356,6 +375,10 @@ describe('<ProductTours/>', () => {
       lastLogin = '2023-09-15T15:30:00Z';
       render(<ToursWithContext />);
       expect(screen.queryByText('Hello!')).toBeTruthy();
+      // "Quick Start Guide" in the welcome modal body should render bold (<p><strong>...</strong></p>).
+      const modalBold = within(screen.getByRole('dialog')).getByText('Quick Start Guide');
+      expect(modalBold.tagName).toBe('STRONG');
+      expect(modalBold.closest('p')).not.toBeNull();
       userEvent.click(screen.getByTestId('welcome-modal-dismiss'));
       await waitFor(() => {
         expect(screen.queryByText('Hello.')).not.toBeTruthy();
@@ -373,7 +396,7 @@ describe('<ProductTours/>', () => {
       // Only steps not filtered by feature flags / context are checked here.
       await waitFor(() => {
         expect(screen.queryByText('Track learner progress')).toBeTruthy();
-        expect(screen.queryByText('Organize learners')).toBeTruthy();
+        expect(screen.queryByText('Organize members')).toBeTruthy();
         expect(screen.queryByText('Set up preferences')).toBeTruthy();
       });
     });
@@ -402,6 +425,51 @@ describe('<ProductTours/>', () => {
       expect(tourConfig).toHaveProperty('onAdvance');
       expect(tourConfig).toHaveProperty('onDismiss');
       expect(tourConfig).toHaveProperty('onEnd');
+    });
+  });
+
+  describe('edit highlights onboarding tour', () => {
+    beforeEach(() => {
+      mergeConfig({ FEATURE_CONTENT_HIGHLIGHTS: true });
+      // Skip the welcome modal so the Quick Start Guide steps are reachable.
+      global.localStorage.setItem(ONBOARDING_WELCOME_MODAL_COOKIE_NAME, true);
+    });
+
+    const withHighlightsAvailable = {
+      enterpriseCuration: {
+        enterpriseCuration: { highlightSets: [], isHighlightFeatureActive: true },
+        isLoading: false,
+        fetchError: null,
+      },
+    };
+
+    const storeWithEditHighlights = mockStore({
+      portalConfiguration: {
+        enterpriseSlug: ENTERPRISE_SLUG,
+        enterpriseId: ENTERPRISE_UUID,
+        enableLearnerPortal: false,
+        enterpriseFeatures: {
+          enterpriseAdminOnboardingEnabled: true,
+          enterpriseEditHighlightsEnabled: true,
+        },
+      },
+      enterpriseCustomerAdmin: {
+        lastLogin: null,
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+      },
+    });
+
+    it('fires the viewed tracking event when the Showcase courses step is selected', async () => {
+      render(<ToursWithContext store={storeWithEditHighlights} enterpriseAppContextValue={withHighlightsAvailable} />);
+      const step = await screen.findByText('Showcase courses');
+      userEvent.click(step);
+      await waitFor(() => {
+        expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+          ENTERPRISE_SLUG,
+          ADMIN_TOUR_EVENT_NAMES.EDIT_HIGHLIGHTS_VIEWED_EVENT_NAME,
+        );
+      });
     });
   });
 

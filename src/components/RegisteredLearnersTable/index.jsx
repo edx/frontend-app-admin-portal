@@ -1,54 +1,163 @@
-import React from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+
+import { logError } from '@edx/frontend-platform/logging';
+import { Alert, DataTable } from '@openedx/paragon';
+import { Error } from '@openedx/paragon/icons';
 
 import { useIntl } from '@edx/frontend-platform/i18n';
-
-import TableContainer from '../../containers/TableContainer';
 
 import { i18nFormatTimestamp } from '../../utils';
 import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiService';
 
-const RegisteredLearnersTable = () => {
-  const intl = useIntl();
+const defaultPaginationData = {
+  itemCount: 0,
+  pageCount: 1,
+  data: [],
+};
 
-  const tableColumns = [
+const RegisteredLearnersTable = ({ enterpriseId }) => {
+  const intl = useIntl();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [ordering, setOrdering] = useState('user_email');
+  const [paginationData, setPaginationData] = useState(defaultPaginationData);
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    setIsLoading(true);
+    setError(null);
+
+    EnterpriseDataApiService.fetchUnenrolledRegisteredLearners(enterpriseId, {
+      page: currentPage + 1,
+      ordering,
+    })
+      .then((response) => {
+        if (!isCurrent) {
+          return;
+        }
+
+        setPaginationData({
+          itemCount: response.data.count,
+          pageCount: response.data.num_pages || 1,
+          data: response.data.results,
+        });
+      })
+      .catch((err) => {
+        if (!isCurrent) {
+          return;
+        }
+
+        logError(err);
+        setError(err);
+      })
+      .finally(() => {
+        if (isCurrent) {
+          setIsLoading(false);
+        }
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [enterpriseId, currentPage, ordering]);
+
+  const fetchData = useCallback(({ pageIndex, sortBy = [] }) => {
+    if (pageIndex !== currentPage) {
+      setCurrentPage(pageIndex);
+    }
+
+    const currentSortBy = sortBy.at(-1);
+    if (currentSortBy?.id) {
+      const nextOrdering = `${currentSortBy.desc ? '-' : ''}${currentSortBy.id}`;
+      if (nextOrdering !== ordering) {
+        setOrdering(nextOrdering);
+      }
+    }
+  }, [currentPage, ordering]);
+
+  const tableColumns = useMemo(() => ([
     {
-      label: intl.formatMessage({
+      Header: intl.formatMessage({
         id: 'admin.portal.lpr.registered.learners.table.user_email.column.heading',
         defaultMessage: 'Email',
         description: 'Column heading for the user email column in the registered learners table',
       }),
-      key: 'user_email',
-      columnSortable: true,
+      accessor: 'user_email',
     },
     {
-      label: intl.formatMessage({
+      Header: intl.formatMessage({
         id: 'admin.portal.lpr.registered.learners.table.lms_user_created.column.heading',
         defaultMessage: 'Account Created',
         description: 'Column heading for the lms user created column in the registered learners table',
       }),
-      key: 'lms_user_created',
-      columnSortable: true,
+      accessor: 'lms_user_created',
     },
-  ];
+  ]), [intl]);
 
-  const formatLearnerData = learners => learners.map(learner => ({
+  const formattedData = useMemo(() => paginationData.data.map(learner => ({
     ...learner,
     user_email: <span data-hj-suppress>{learner.user_email}</span>,
     lms_user_created: i18nFormatTimestamp({
-      intl, timestamp: learner.lms_user_created,
+      intl,
+      timestamp: learner.lms_user_created,
     }),
-  }));
+  })), [paginationData.data, intl]);
+
+  if (error) {
+    return (
+      <Alert variant="danger" icon={Error}>
+        <Alert.Heading>Unable to load data</Alert.Heading>
+        <p>Try refreshing your screen {error.message}</p>
+      </Alert>
+    );
+  }
 
   return (
-    <TableContainer
-      id="registered-unenrolled-learners"
+    <DataTable
       className="registered-unenrolled-learners"
-      fetchMethod={EnterpriseDataApiService.fetchUnenrolledRegisteredLearners}
+      isLoading={isLoading}
+      isPaginated
+      manualPagination
+      isSortable
+      manualSortBy
+      itemCount={paginationData.itemCount}
+      pageCount={paginationData.pageCount}
+      fetchData={fetchData}
+      data={formattedData}
       columns={tableColumns}
-      formatData={formatLearnerData}
-      tableSortable
-    />
+      initialState={{
+        pageSize: 50,
+        pageIndex: 0,
+        sortBy: [{
+          id: 'user_email',
+          desc: false,
+        }],
+      }}
+    >
+      <DataTable.Table />
+      {!isLoading && (
+        <DataTable.EmptyTable content="There are no results." />
+      )}
+      <DataTable.TableFooter />
+    </DataTable>
   );
 };
 
-export default RegisteredLearnersTable;
+RegisteredLearnersTable.propTypes = {
+  enterpriseId: PropTypes.string.isRequired,
+};
+
+const mapStateToProps = state => ({
+  enterpriseId: state.portalConfiguration.enterpriseId,
+});
+
+export default connect(mapStateToProps)(RegisteredLearnersTable);

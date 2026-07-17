@@ -559,6 +559,40 @@ describe('<Admin />', () => {
         );
       });
     });
+
+    it('keeps enrolled learners CSV enabled without redux table data', async () => {
+      render(
+        <AdminWrapper
+          {...baseProps}
+          enterpriseId="test-enterprise-id"
+          table={{}}
+          actionSlug="enrolled-learners"
+          location={{
+            pathname: '/',
+          }}
+        />,
+      );
+
+      const downloadButton = await screen.findByTestId('download-csv-btn');
+      expect(downloadButton).toBeEnabled();
+    });
+
+    it('keeps enrolled learners inactive courses CSV enabled without redux table data', async () => {
+      render(
+        <AdminWrapper
+          {...baseProps}
+          enterpriseId="test-enterprise-id"
+          table={{}}
+          actionSlug="enrolled-learners-inactive-courses"
+          location={{
+            pathname: '/',
+          }}
+        />,
+      );
+
+      const downloadButton = await screen.findByTestId('download-csv-btn');
+      expect(downloadButton).toBeEnabled();
+    });
   });
 
   describe('reset form button', () => {

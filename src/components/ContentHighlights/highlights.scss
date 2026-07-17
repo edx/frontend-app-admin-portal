@@ -1,0 +1,36 @@
+.featured-courses-section {
+  background-color: #F2F0EF !important;
+  th:first-child,
+  td:first-child {
+    width: 20%;
+  }
+
+  th:last-child,
+  td:last-child {
+    width: 45%;
+  }
+
+  thead tr {
+    background-color: #F2F0EF !important;
+  }
+
+  tbody tr:nth-child(odd) {
+    background-color: #F2F0EF !important;
+  }
+
+  tbody tr:nth-child(even) {
+    background-color: #FBFAF9 !important;
+  }
+
+  tbody tr[data-row-index="0"] td,
+  tbody tr:only-child {
+    background-color: #FBFAF9 !important;
+  }
+}
+
+
+@media (max-width: 1440px) {
+  .pgn__data-table-layout-wrapper {
+    overflow-x: hidden !important;
+  }
+}

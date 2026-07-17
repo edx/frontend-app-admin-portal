@@ -152,6 +152,111 @@ describe('enterpriseCurationReducer', () => {
     ).toMatchObject({ enterpriseCuration: { highlightSets: [highlightSet] } });
   });
 
+  it('should update highlight set title', () => {
+    const highlightSet = {
+      uuid: highlightSetUUID,
+      title: 'Original title',
+      highlightedContentUuids: ['course-v1:edX+DemoX+Demo_Course'],
+    };
+    const stateWithHighlights = {
+      ...initialState,
+      enterpriseCuration: {
+        highlightSets: [highlightSet],
+      },
+    };
+
+    expect(
+      enterpriseCurationReducer(
+        stateWithHighlights,
+        enterpriseCurationActions.updateHighlightSetTitle({
+          highlightSetUUID,
+          title: 'Updated title',
+        }),
+      ),
+    ).toMatchObject({
+      enterpriseCuration: {
+        highlightSets: [
+          {
+            uuid: highlightSetUUID,
+            title: 'Updated title',
+            highlightedContentUuids: ['course-v1:edX+DemoX+Demo_Course'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('should update highlight set content items and card image url', () => {
+    const highlightSet = {
+      uuid: highlightSetUUID,
+      title: 'Original title',
+      cardImageUrl: 'https://example.com/old.jpg',
+      highlightedContentUuids: ['course-v1:edX+Old+Course'],
+    };
+    const stateWithHighlights = {
+      ...initialState,
+      enterpriseCuration: {
+        highlightSets: [highlightSet],
+      },
+    };
+
+    expect(
+      enterpriseCurationReducer(
+        stateWithHighlights,
+        enterpriseCurationActions.updateHighlightSetContentItems({
+          activeContentUuids: ['course-v1:edX+New+Course'],
+          cardImageUrl: 'https://example.com/new.jpg',
+          highlightSetUUID,
+        }),
+      ),
+    ).toMatchObject({
+      enterpriseCuration: {
+        highlightSets: [
+          {
+            uuid: highlightSetUUID,
+            cardImageUrl: 'https://example.com/new.jpg',
+            highlightedContentUuids: ['course-v1:edX+New+Course'],
+          },
+        ],
+      },
+    });
+  });
+
+  it('should update highlight set content items without changing card image when cardImageUrl is omitted', () => {
+    const highlightSet = {
+      uuid: highlightSetUUID,
+      title: 'Original title',
+      cardImageUrl: 'https://example.com/original.jpg',
+      highlightedContentUuids: ['course-v1:edX+Old+Course'],
+    };
+    const stateWithHighlights = {
+      ...initialState,
+      enterpriseCuration: {
+        highlightSets: [highlightSet],
+      },
+    };
+
+    expect(
+      enterpriseCurationReducer(
+        stateWithHighlights,
+        enterpriseCurationActions.updateHighlightSetContentItems({
+          activeContentUuids: ['course-v1:edX+Still+Course'],
+          highlightSetUUID,
+        }),
+      ),
+    ).toMatchObject({
+      enterpriseCuration: {
+        highlightSets: [
+          {
+            uuid: highlightSetUUID,
+            cardImageUrl: 'https://example.com/original.jpg',
+            highlightedContentUuids: ['course-v1:edX+Still+Course'],
+          },
+        ],
+      },
+    });
+  });
+
   it('should handle missing enterpriseCuration when adding/deleting a highlight set', () => {
     const highlightSet = { uuid: highlightSetUUID };
     expect(

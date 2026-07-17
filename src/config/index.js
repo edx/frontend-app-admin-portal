@@ -30,6 +30,7 @@ const configuration = {
     APP_ID: process.env.ALGOLIA_APP_ID,
     SEARCH_API_KEY: process.env.ALGOLIA_SEARCH_API_KEY,
     INDEX_NAME: process.env.ALGOLIA_INDEX_NAME,
+    INDEX_NAME_V2: process.env.ALGOLIA_INDEX_NAME_V2,
   },
   LOGO_URL: process.env.LOGO_URL,
   LOGO_WHITE_URL: process.env.LOGO_WHITE_URL,

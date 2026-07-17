@@ -24,10 +24,11 @@ interface Props {
   onDismiss?: () => void;
   title: string;
   children: React.ReactNode;
+  hideDismissButton?: boolean;
 }
 
 const FloatingCollapsible: FC<Props> = ({
-  onDismiss = () => {}, title, children,
+  onDismiss = () => {}, title, children, hideDismissButton = false,
 }) => {
   const intl = useIntl();
   const [collapseOpen, setCollapseOpen] = useState(true);
@@ -73,9 +74,11 @@ const FloatingCollapsible: FC<Props> = ({
           <Collapsible.Body className="floating-collapsible__body bg-light-300 text-gray-700 rounded-bottom p-3">
             {children}
             <ActionRow>
-              <Button variant="tertiary" onClick={handleDismiss}>
-                {intl.formatMessage(messages.dismissButton)}
-              </Button>
+              {!hideDismissButton && (
+                <Button variant="tertiary" onClick={handleDismiss}>
+                  {intl.formatMessage(messages.dismissButton)}
+                </Button>
+              )}
               <Button variant="primary" onClick={() => setCollapseOpen(false)}>
                 {intl.formatMessage(messages.closeButton)}
               </Button>

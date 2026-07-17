@@ -45,6 +45,18 @@ import { SubscriptionData } from '../subscriptions';
 
 import { features } from '../../config';
 
+// These slugs are backed by DataTable components that manage local state
+// (not the legacy redux table slice). isTableDataMissing must not consult
+// state.table for them or the CSV download button stays permanently disabled.
+const LEARNER_ACTIVITY_TABLE_SLUGS = [
+  'enrolled-learners',
+  'enrolled-learners-inactive-courses',
+  'learners-active-week',
+  'learners-inactive-week',
+  'learners-inactive-month',
+  'completed-learners-week',
+];
+
 const Admin = ({
   fetchDashboardAnalytics,
   clearDashboardAnalytics,
@@ -300,6 +312,11 @@ const Admin = ({
   const displaySearchBar = () => !actionSlug;
 
   const isTableDataMissing = (id) => {
+    if (LEARNER_ACTIVITY_TABLE_SLUGS.includes(id)) {
+      // These report tables use local DataTable state, not the redux table slice.
+      // Never disable the CSV button due to missing redux table data for these slugs.
+      return false;
+    }
     const tableData = getTableData(id);
     if (!tableData) {
       return true;

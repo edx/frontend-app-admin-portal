@@ -57,6 +57,7 @@ type DeclineBnrSubsidyRequestsParams = {
   enterpriseId: string;
   subsidyAccessPolicyId: string;
   subsidyRequestUUIDs: string[];
+  declineReason?: string;
 };
 
 type ApproveAllBnrSubsidyRequestsParams = {
@@ -75,6 +76,7 @@ export type ApproveAllBnrSubsidyRequestsResponse = AxiosResponse<ApproveAllBnrSu
 type DeclineAllBnrSubsidyRequestsParams = {
   enterpriseId: string;
   subsidyAccessPolicyId: string;
+  declineReason?: string;
 };
 
 type DeclineAllBnrSubsidyRequestsResponseData = {
@@ -253,13 +255,13 @@ class EnterpriseAccessApiService {
    * List content assignments for a specific AssignmentConfiguration.
    */
   static listContentAssignments(assignmentConfigurationUUID, options: any = {}) {
-    const { learnerState, ...optionsRest } = options;
+    const { learnerState, includeExpired = false, ...optionsRest } = options;
     const params = {
       page: 1,
       page_size: 25,
-      // Only include assignments with allocated or errored states. The table should NOT
-      // include assignments in the canceled or accepted states.
-      state__in: 'allocated,errored',
+      // Include allocated and errored assignments by default; include expired only when
+      // explicitly requested via `includeExpired`. Never include canceled or accepted.
+      state__in: includeExpired ? 'allocated,errored,expired' : 'allocated,errored',
       ...snakeCaseObject(optionsRest),
     };
     if (learnerState) {
@@ -464,18 +466,23 @@ class EnterpriseAccessApiService {
    * @param params.enterpriseId - The UUID of the enterprise customer
    * @param params.subsidyAccessPolicyId - The UUID of the subsidy policy
    * @param params.subsidyRequestUUIDs - The UUIDs of the subsidy requests to decline
+   * @param params.declineReason - Optional reason for declining the requests
    * @returns A promise that resolves to the API response for the decline operation
    */
   static bulkDeclineBnrSubsidyRequests({
     enterpriseId,
     subsidyAccessPolicyId,
     subsidyRequestUUIDs,
+    declineReason,
   }: DeclineBnrSubsidyRequestsParams): Promise<DeclineBnrSubsidyRequestResponse> {
-    const options = {
+    const options: Record<string, unknown> = {
       subsidy_request_uuids: subsidyRequestUUIDs,
       enterprise_customer_uuid: enterpriseId,
       policy_uuid: subsidyAccessPolicyId,
     };
+    if (declineReason) {
+      options.decline_reason = declineReason;
+    }
 
     const url = `${EnterpriseAccessApiService.baseUrl}/learner-credit-requests/decline/`;
     return EnterpriseAccessApiService.apiClient().post(url, options);
@@ -506,16 +513,21 @@ class EnterpriseAccessApiService {
    *
    * @param params.enterpriseId - The UUID of the enterprise customer
    * @param params.subsidyAccessPolicyId - The UUID of the subsidy policy
+   * @param params.declineReason - Optional reason applied to every declined request
    * @returns A promise that resolves with {declined, non_declinable}
    */
   static declineAllBnrSubsidyRequests({
     enterpriseId,
     subsidyAccessPolicyId,
+    declineReason,
   }: DeclineAllBnrSubsidyRequestsParams): Promise<DeclineAllBnrSubsidyRequestsResponse> {
-    const options = {
+    const options: Record<string, unknown> = {
       enterprise_customer_uuid: enterpriseId,
       policy_uuid: subsidyAccessPolicyId,
     };
+    if (declineReason) {
+      options.decline_reason = declineReason;
+    }
 
     const url = `${EnterpriseAccessApiService.baseUrl}/learner-credit-requests/decline-all/`;
     return EnterpriseAccessApiService.apiClient().post(url, options);

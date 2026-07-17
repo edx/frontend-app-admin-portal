@@ -16,18 +16,20 @@ const initialContentAssignmentsState = {
   learnerStateCounts: [],
 };
 
-export const applyFiltersToOptions = (filters, options) => {
-  if (!filters || filters.length === 0) {
-    return;
-  }
+const DEFAULT_LEARNER_STATES = ['notifying', 'waiting', 'failed'];
+
+export const applyFiltersToOptions = (filters = [], options) => {
   const searchQuery = filters.find(filter => filter.id === 'assignmentDetails')?.value;
   if (searchQuery) {
     Object.assign(options, { search: searchQuery });
   }
+
   const learnerStateFilter = filters.find(filter => filter.id === 'learnerState')?.value;
-  if (learnerStateFilter) {
-    Object.assign(options, { learnerState: learnerStateFilter.join(',') });
-  }
+  const learnerStates = learnerStateFilter?.length
+    ? learnerStateFilter
+    : DEFAULT_LEARNER_STATES;
+
+  Object.assign(options, { learnerState: learnerStates.join(',') });
 };
 
 export const applySortByToOptions = (sortBy, options) => {
@@ -79,6 +81,7 @@ const useBudgetContentAssignments = ({
       const options = {
         page: args.pageIndex + 1, // `DataTable` uses zero-indexed array
         pageSize: args.pageSize,
+        includeExpired: true,
       };
       applyFiltersToOptions(args.filters, options);
       applySortByToOptions(args.sortBy, options);

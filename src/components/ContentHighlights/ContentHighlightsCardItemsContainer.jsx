@@ -1,12 +1,15 @@
 import React from 'react';
 import {
-  ActionRow, Alert, Button, CardGrid, Form, useToggle,
+  ActionRow, Alert, Button, CardGrid, useToggle,
 } from '@openedx/paragon';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { connect } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 import ContentHighlightCardItem from './ContentHighlightCardItem';
+import useFeaturedStarring from './data/useFeaturedStarring';
+import { FeaturedContentSection, MaxStarredModal } from './FeaturedContentStarring';
 import {
   DEFAULT_ERROR_MESSAGE,
   HIGHLIGHTS_CARD_GRID_COLUMN_SIZES,
@@ -20,10 +23,20 @@ import DeleteArchivedHighlightsDialogs from './DeleteArchivedHighlightsDialogs';
 import { isArchivedContent } from '../../utils';
 
 const ContentHighlightsCardItemsContainer = ({
-  enterpriseId, enterpriseSlug, isLoading, highlightedContent, updateHighlightSet,
-  isEditing, selectedContentKeys, onToggleSelect,
+  enterpriseId, enterpriseSlug, isLoading, highlightedContent, highlightTitle, updateHighlightSet,
+  isEditing, selectedContentKeys, onToggleSelect, editHighlightsEnabled,
 }) => {
   const [isDeleteModalOpen, openDeleteModal, closeDeleteModal] = useToggle(false);
+  const { highlightSetUUID } = useParams();
+
+  const {
+    starredContentKeys,
+    starredItems,
+    loadingContentKey,
+    isMaxStarredModalOpen,
+    closeMaxStarredModal,
+    handleToggleStar,
+  } = useFeaturedStarring(highlightSetUUID, highlightedContent);
 
   const {
     FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING,
@@ -44,44 +57,48 @@ const ContentHighlightsCardItemsContainer = ({
 
   if (isEditing) {
     return (
-      <div data-testid="edit-mode-card-grid">
-        <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
-          {highlightedContent.map(({
-            uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
-          }) => (
-            <div
-              key={uuid}
-              style={{ position: 'relative' }}
-              data-testid={`selectable-card-wrapper-${uuid}`}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '0.5rem',
-                  right: '0.5rem',
-                  zIndex: 1,
-                }}
-              >
-                <Form.Checkbox
-                  aria-label={`Select ${title} for removal`}
-                  checked={selectedContentKeys.has(contentKey)}
-                  onChange={() => onToggleSelect(contentKey)}
-                  data-testid={`select-checkbox-${uuid}`}
-                />
-              </div>
+      <>
+        {highlightTitle && (
+          <>
+            <h4 className="mb-0">
+              <FormattedMessage
+                id="highlights.all.courses.section.heading"
+                defaultMessage='All courses and programs in "{highlightTitle}" highlight'
+                description="Heading above the full courses grid"
+                values={{ highlightTitle }}
+              />
+            </h4>
+            <p className="mb-3">
+              <FormattedMessage
+                id="highlights.edit.mode.selected.count"
+                defaultMessage="{count} selected ({count} shown below)"
+                description="Shows how many content items are selected in edit mode"
+                values={{ count: highlightedContent.length }}
+              />
+            </p>
+          </>
+        )}
+        <div data-testid="edit-mode-card-grid">
+          <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
+            {highlightedContent.map(({
+              uuid, title, contentType, authoringOrganizations, cardImageUrl, contentKey,
+            }) => (
               <ContentHighlightCardItem
                 isLoading={isLoading}
-                key={uuid}
+                uuid={uuid}
                 cardImageUrl={cardImageUrl}
                 title={title}
                 archived={false}
                 contentType={contentType.toLowerCase()}
                 partners={authoringOrganizations}
+                isSelectable
+                isSelected={selectedContentKeys.has(contentKey)}
+                onToggleSelect={() => onToggleSelect(contentKey)}
               />
-            </div>
-          ))}
-        </CardGrid>
-      </div>
+            ))}
+          </CardGrid>
+        </div>
+      </>
     );
   }
 
@@ -99,7 +116,20 @@ const ContentHighlightsCardItemsContainer = ({
   } else {
     activeContent.push(...highlightedContent);
   }
+
+  const sortedActiveContent = [...activeContent].sort((a, b) => {
+    const aStarred = starredContentKeys.has(a.contentKey);
+    const bStarred = starredContentKeys.has(b.contentKey);
+
+    if (aStarred === bStarred) {
+      return 0;
+    }
+
+    return aStarred ? -1 : 1;
+  });
+
   const updateSetWithActiveContent = () => updateHighlightSet(activeContent);
+  const activeContentCardImageUrl = activeContent[0]?.cardImageUrl || null;
 
   const archivedContentKeys = archivedContent.map(({ contentKey }) => contentKey);
   const activeContentUuids = activeContent.map(({ uuid }) => uuid);
@@ -116,27 +146,49 @@ const ContentHighlightsCardItemsContainer = ({
   };
   return (
     <>
+      {editHighlightsEnabled && (
+        <>
+          <MaxStarredModal isOpen={isMaxStarredModalOpen} onClose={closeMaxStarredModal} />
+          <FeaturedContentSection
+            starredItems={starredItems}
+            loadingContentKey={loadingContentKey}
+            onUnstar={handleToggleStar}
+          />
+          <h4 className="mb-3">
+            <FormattedMessage
+              id="highlights.all.courses.section.heading"
+              defaultMessage='All courses and programs in "{highlightTitle}" highlight'
+              description="Heading above the full courses grid"
+              values={{ highlightTitle }}
+            />
+          </h4>
+        </>
+      )}
       <CardGrid columnSizes={HIGHLIGHTS_CARD_GRID_COLUMN_SIZES}>
-        {activeContent.map(({
+        {sortedActiveContent.map(({
           uuid, title, contentType, authoringOrganizations, contentKey, cardImageUrl, aggregationKey,
         }) => (
           <ContentHighlightCardItem
             isLoading={isLoading}
             key={uuid}
+            uuid={uuid}
+            editHighlightsEnabled={editHighlightsEnabled}
+            isStarred={starredContentKeys.has(contentKey)}
+            onToggleStar={() => handleToggleStar(contentKey)}
             cardImageUrl={cardImageUrl}
             title={title}
             archived={false}
             hyperlinkAttrs={
-            {
-              href: generateAboutPageUrl({
-                enterpriseSlug,
-                contentType: contentType.toLowerCase(),
-                contentKey,
-              }),
-              target: '_blank',
-              onClick: () => trackClickEvent({ aggregationKey }),
+              {
+                href: generateAboutPageUrl({
+                  enterpriseSlug,
+                  contentType: contentType.toLowerCase(),
+                  contentKey,
+                }),
+                target: '_blank',
+                onClick: () => trackClickEvent({ aggregationKey }),
+              }
             }
-        }
             contentType={contentType.toLowerCase()}
             partners={authoringOrganizations}
           />
@@ -149,6 +201,7 @@ const ContentHighlightsCardItemsContainer = ({
             closeDeleteModal={closeDeleteModal}
             archivedContentKeys={archivedContentKeys}
             activeContentUuids={activeContentUuids}
+            activeContentCardImageUrl={activeContentCardImageUrl}
             updateSetWithActiveContent={updateSetWithActiveContent}
           />
           <ActionRow>
@@ -182,20 +235,24 @@ const ContentHighlightsCardItemsContainer = ({
               <ContentHighlightCardItem
                 isLoading={isLoading}
                 key={uuid}
+                uuid={uuid}
+                editHighlightsEnabled={editHighlightsEnabled}
+                isStarred={starredContentKeys.has(contentKey)}
+                onToggleStar={() => handleToggleStar(contentKey)}
                 cardImageUrl={cardImageUrl}
                 title={title}
                 archived
                 hyperlinkAttrs={
-          {
-            href: generateAboutPageUrl({
-              enterpriseSlug,
-              contentType: contentType.toLowerCase(),
-              contentKey,
-            }),
-            target: '_blank',
-            onClick: () => trackClickEvent({ aggregationKey }),
-          }
-      }
+                  {
+                    href: generateAboutPageUrl({
+                      enterpriseSlug,
+                      contentType: contentType.toLowerCase(),
+                      contentKey,
+                    }),
+                    target: '_blank',
+                    onClick: () => trackClickEvent({ aggregationKey }),
+                  }
+                }
                 contentType={contentType.toLowerCase()}
                 partners={authoringOrganizations}
               />
@@ -213,6 +270,7 @@ ContentHighlightsCardItemsContainer.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   highlightedContent: PropTypes.arrayOf(PropTypes.shape({
     uuid: PropTypes.string,
+    contentKey: PropTypes.string,
     contentType: PropTypes.oneOf(['course', 'program', 'learnerpathway']),
     title: PropTypes.string,
     cardImageUrl: PropTypes.string,
@@ -223,21 +281,26 @@ ContentHighlightsCardItemsContainer.propTypes = {
     })),
     courseRunStatuses: PropTypes.arrayOf(PropTypes.string),
   })).isRequired,
+  highlightTitle: PropTypes.string,
   updateHighlightSet: PropTypes.func.isRequired,
   isEditing: PropTypes.bool,
   selectedContentKeys: PropTypes.instanceOf(Set),
   onToggleSelect: PropTypes.func,
+  editHighlightsEnabled: PropTypes.bool,
 };
 
 ContentHighlightsCardItemsContainer.defaultProps = {
+  highlightTitle: '',
   isEditing: false,
   selectedContentKeys: new Set(),
-  onToggleSelect: () => {},
+  onToggleSelect: () => { },
+  editHighlightsEnabled: false,
 };
 
 const mapStateToProps = state => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
   enterpriseSlug: state.portalConfiguration.enterpriseSlug,
+  editHighlightsEnabled: state.portalConfiguration.enterpriseFeatures?.enterpriseEditHighlightsEnabled ?? false,
 });
 
 export default connect(mapStateToProps)(ContentHighlightsCardItemsContainer);

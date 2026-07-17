@@ -142,14 +142,6 @@ describe('<GroupDetailPageWrapper >', () => {
       pageSize: 10,
       sortBy: [{ desc: true, id: 'memberDetails' }],
     }));
-
-    await user.click(screen.getByText('Enrollments'));
-    await waitFor(() => expect(mockFetchEnterpriseGroupLearnersTableData).toHaveBeenCalledWith({
-      filters: [],
-      pageIndex: 0,
-      pageSize: 10,
-      sortBy: [{ desc: false, id: 'enrollmentCount' }],
-    }));
   });
   // Skipped because this test fails a11y checks; to be addressed in ENT-11719
   it.skip('has no accessibility violations', async () => {

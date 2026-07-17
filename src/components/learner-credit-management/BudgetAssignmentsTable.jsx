@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DataTable, CheckboxFilter } from '@openedx/paragon';
+import { DataTable } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { CheckboxFilter } from '../CheckboxFilter';
 import TableTextFilter from './TableTextFilter';
 import CustomDataTableEmptyState from './CustomDataTableEmptyState';
 import AssignmentDetailsTableCell from './AssignmentDetailsTableCell';
@@ -29,6 +30,9 @@ const getLearnerStateDisplayName = (learnerState) => {
   }
   if (learnerState === 'failed') {
     return 'Failed';
+  }
+  if (learnerState === 'expired') {
+    return 'Expired';
   }
 
   return undefined;

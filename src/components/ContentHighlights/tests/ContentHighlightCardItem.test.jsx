@@ -95,4 +95,61 @@ describe('<ContentHighlightCardItem>', () => {
     />);
     expect(screen.getByText('Archived')).toBeInTheDocument();
   });
+
+  it('renders StarButton and wrapper when editHighlightsEnabled is true', async () => {
+    const user = userEvent.setup();
+    const onToggleStar = jest.fn();
+
+    renderWithRouter(<ContentHighlightCardItemContainerWrapper
+      isLoading={false}
+      uuid={testHighlightedContent.uuid}
+      editHighlightsEnabled
+      isStarred={false}
+      onToggleStar={onToggleStar}
+      title={testHighlightedContent.title}
+      contentType={testHighlightedContent.contentType.toLowerCase()}
+      partners={testHighlightedContent.authoringOrganizations}
+    />);
+
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).toBeInTheDocument();
+    const starButton = screen.getByTestId(`star-btn-${testHighlightedContent.uuid}`);
+    expect(starButton).toBeInTheDocument();
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`).parentElement)
+      .toHaveClass('pgn__data-table__selectable-card', 'selection-right');
+
+    await user.click(starButton);
+    expect(onToggleStar).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not render StarButton when editHighlightsEnabled is false', () => {
+    renderWithRouter(<ContentHighlightCardItemContainerWrapper
+      isLoading={false}
+      uuid={testHighlightedContent.uuid}
+      editHighlightsEnabled={false}
+      title={testHighlightedContent.title}
+      contentType={testHighlightedContent.contentType.toLowerCase()}
+      partners={testHighlightedContent.authoringOrganizations}
+    />);
+
+    expect(screen.queryByTestId(`star-btn-${testHighlightedContent.uuid}`)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).not.toBeInTheDocument();
+  });
+
+  it('renders selectable cards in Paragon selectable-card layout', () => {
+    renderWithRouter(<ContentHighlightCardItemContainerWrapper
+      isLoading={false}
+      uuid={testHighlightedContent.uuid}
+      isSelectable
+      isSelected={false}
+      title={testHighlightedContent.title}
+      contentType={testHighlightedContent.contentType.toLowerCase()}
+      partners={testHighlightedContent.authoringOrganizations}
+    />);
+
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`select-checkbox-wrapper-${testHighlightedContent.uuid}`)).toBeInTheDocument();
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`)).toHaveClass('position-relative');
+    expect(screen.getByTestId(`card-wrapper-${testHighlightedContent.uuid}`).parentElement)
+      .toHaveClass('pgn__data-table__selectable-card', 'selection-right');
+  });
 });

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
 import { useState } from 'react';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
+import { logError } from '@edx/frontend-platform/logging';
 import algoliasearch from 'algoliasearch/lite';
 import thunk from 'redux-thunk';
 import { renderWithRouter } from '@2uinc/frontend-enterprise-utils';
@@ -18,10 +19,18 @@ import { configuration } from '../../../../config';
 import { EnterpriseAppContext } from '../../../EnterpriseApp/EnterpriseAppContextProvider';
 import EditHighlightStepper from '../EditHighlightStepper';
 import EnterpriseCatalogApiService from '../../../../data/services/EnterpriseCatalogApiService';
+import { UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS } from '../../../EnterpriseApp/data/enterpriseCurationReducer';
 
 jest.mock('../../../../data/services/EnterpriseCatalogApiService');
+jest.mock('@edx/frontend-platform/logging', () => ({
+  logError: jest.fn(),
+}));
 
 const mockStore = configureMockStore([thunk]);
+const highlightSetUUID = 'test-highlight-uuid';
+const renderStepper = (ui) => renderWithRouter(ui, {
+  route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}`,
+});
 
 const initialState = {
   portalConfiguration: {
@@ -30,11 +39,14 @@ const initialState = {
   },
 };
 
+const mockDispatch = jest.fn();
+
 const initialEnterpriseAppContextValue = {
   enterpriseCuration: {
     enterpriseCuration: {
       highlightSets: [],
     },
+    dispatch: mockDispatch,
   },
 };
 
@@ -81,7 +93,7 @@ const EditHighlightStepperWrapper = ({
       titleStepValidationError: null,
       currentSelectedRowIds: overrideSelectedRowIds || testCourseAggregation,
       isEditMode: true,
-      highlightSetUuid: 'test-highlight-uuid',
+      highlightSetUuid: highlightSetUUID,
       existingContentKeys,
     },
     contentHighlights: [],
@@ -107,32 +119,41 @@ const EditHighlightStepperWrapper = ({
 describe('<EditHighlightStepper>', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockDispatch.mockReset();
+    logError.mockReset();
+  });
+
+  it('renders without crashing when EnterpriseAppContext value is missing', () => {
+    renderStepper(
+      <EditHighlightStepperWrapper enterpriseAppContextValue={null} />,
+    );
+    expect(screen.getByText('Edit highlight')).toBeInTheDocument();
   });
 
   it('renders the edit highlight modal with correct title', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.getByText('Edit highlight')).toBeInTheDocument();
   });
 
   it('displays select content as the first step', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.getByText(STEPPER_STEP_TEXT.HEADER_TEXT.editSelectContent)).toBeInTheDocument();
   });
 
   it('does not display the Create a title step', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.queryByText(STEPPER_STEP_TEXT.HEADER_TEXT.createTitle)).not.toBeInTheDocument();
   });
 
   it('has Cancel and Next buttons on the select content step', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
     expect(screen.getByText('Cancel')).toBeInTheDocument();
     expect(screen.getByText('Next')).toBeInTheDocument();
   });
 
   it('navigates to Confirm and save step when Next is clicked', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     const nextButton = screen.getByText('Next');
     await user.click(nextButton);
@@ -142,7 +163,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('has Back and Save buttons on the confirm step', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
 
@@ -152,7 +173,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('navigates back to select content when Back is clicked on confirm step', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
     expect(screen.getByText(STEPPER_STEP_TEXT.HEADER_TEXT.editConfirmContent)).toBeInTheDocument();
@@ -163,7 +184,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('shows close confirmation modal when Cancel is clicked', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Cancel'));
 
@@ -173,7 +194,7 @@ describe('<EditHighlightStepper>', () => {
 
   it('shows close confirmation modal when X is clicked', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     const closeButton = screen.getByRole('button', { name: 'Close' });
     await user.click(closeButton);
@@ -181,20 +202,17 @@ describe('<EditHighlightStepper>', () => {
     expect(screen.getByText('Lose Progress?')).toBeInTheDocument();
   });
 
-  it('calls updateHighlightSet with empty payload when no changes', async () => {
-    // All existing keys are still selected, no new keys added
-    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({ data: {} });
+  it('does not call updateHighlightSet when no changes are made', async () => {
+    // All existing keys are still selected, no new keys added - should close modal without API call
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
     await user.click(screen.getByText('Save'));
 
+    // Verify the API was not called since there are no changes
     await waitFor(() => {
-      expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalledWith(
-        'test-highlight-uuid',
-        {},
-      );
+      expect(EnterpriseCatalogApiService.updateHighlightSet).not.toHaveBeenCalled();
     });
   });
 
@@ -210,6 +228,7 @@ describe('<EditHighlightStepper>', () => {
       <EditHighlightStepperWrapper
         overrideSelectedRowIds={partialSelectedRowIds}
       />,
+      { route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}` },
     );
 
     await user.click(screen.getByText('Next'));
@@ -222,6 +241,16 @@ describe('<EditHighlightStepper>', () => {
           remove_content_keys: expect.arrayContaining(['HarvardX+CS50P', 'HarvardX+CS50x']),
         },
       );
+    });
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledWith({
+        type: UPDATE_HIGHLIGHT_SET_CONTENT_ITEMS,
+        payload: {
+          activeContentUuids: ['HarvardX+CS50W', 'HarvardX+CS50AI'],
+          highlightSetUUID: 'test-highlight-uuid',
+        },
+      });
     });
   });
 
@@ -238,6 +267,7 @@ describe('<EditHighlightStepper>', () => {
       <EditHighlightStepperWrapper
         overrideSelectedRowIds={mixedSelectedRowIds}
       />,
+      { route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}` },
     );
 
     await user.click(screen.getByText('Next'));
@@ -254,23 +284,57 @@ describe('<EditHighlightStepper>', () => {
     });
   });
 
+  it('logs an error and continues save when dispatch is unavailable', async () => {
+    const partialSelectedRowIds = {
+      'course:HarvardX+CS50W': true,
+      'course:HarvardX+CS50AI': true,
+    };
+    EnterpriseCatalogApiService.updateHighlightSet.mockResolvedValueOnce({ data: {} });
+    const user = userEvent.setup();
+    renderWithRouter(
+      <EditHighlightStepperWrapper
+        enterpriseAppContextValue={null}
+        overrideSelectedRowIds={partialSelectedRowIds}
+      />,
+      { route: `/test-enterprise/admin/content-highlights/${highlightSetUUID}` },
+    );
+
+    await user.click(screen.getByText('Next'));
+    await user.click(screen.getByText('Save'));
+
+    await waitFor(() => {
+      expect(EnterpriseCatalogApiService.updateHighlightSet).toHaveBeenCalledWith(
+        'test-highlight-uuid',
+        {
+          remove_content_keys: expect.arrayContaining(['HarvardX+CS50P', 'HarvardX+CS50x']),
+        },
+      );
+    });
+
+    await waitFor(() => {
+      expect(logError).toHaveBeenCalledWith(
+        'EditHighlightStepper: dispatchEnterpriseCuration is unavailable; highlight set content count may be stale.',
+      );
+    });
+  });
+
   it('does not render when isOpen is false', () => {
-    renderWithRouter(<EditHighlightStepperWrapper isOpen={false} />);
+    renderStepper(<EditHighlightStepperWrapper isOpen={false} />);
     expect(screen.queryByText('Edit highlight')).not.toBeInTheDocument();
   });
 
   it('shows edit-specific subtitle text with highlight name', () => {
-    renderWithRouter(<EditHighlightStepperWrapper />);
-    expect(screen.getByText(/Recommended for Marketing/)).toBeInTheDocument();
+    renderStepper(<EditHighlightStepperWrapper />);
+    expect(screen.getByText(/Select up to 24 courses for "Recommended for Marketing"/)).toBeInTheDocument();
   });
 
   it('displays review header on confirm step', async () => {
     const user = userEvent.setup();
-    renderWithRouter(<EditHighlightStepperWrapper />);
+    renderStepper(<EditHighlightStepperWrapper />);
 
     await user.click(screen.getByText('Next'));
 
     expect(screen.getByText(STEPPER_STEP_TEXT.HEADER_TEXT.editConfirmContent)).toBeInTheDocument();
-    expect(screen.getByText(/Recommended for Marketing/)).toBeInTheDocument();
+    expect(screen.getByText('Review course selections for "Recommended for Marketing".')).toBeInTheDocument();
   });
 });

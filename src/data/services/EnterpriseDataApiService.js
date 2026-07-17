@@ -230,13 +230,14 @@ class EnterpriseDataApiService {
   }
 
   static getAnalyticsCSVDownloadURL(key, enterpriseId, options) {
+    const enterpriseUUID = EnterpriseDataApiService.getEnterpriseUUID(enterpriseId);
     const queryParams = new URLSearchParams({
       ...options,
       ...{ response_type: 'csv' },
     });
     const tableURL = EnterpriseDataApiService.constructAnalyticsDataURL(
       key,
-      `${EnterpriseDataApiService.enterpriseAdminAnalyticsV2BaseUrl}${enterpriseId}`,
+      `${EnterpriseDataApiService.enterpriseAdminAnalyticsV2BaseUrl}${enterpriseUUID}`,
     );
     return `${tableURL}?${queryParams.toString()}`;
   }

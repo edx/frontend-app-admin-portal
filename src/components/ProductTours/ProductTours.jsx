@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router';
 import { ProductTour } from '@openedx/paragon';
 import { getConfig } from '@edx/frontend-platform/config';
 import { useIntl } from '@edx/frontend-platform/i18n';
+import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 import { features } from '../../config';
 import tourMessages from './messages';
 import portalAppearanceTour from './portalAppearanceTour';
@@ -14,6 +15,7 @@ import highlightsTour from './highlightsTour';
 import analyticsTour from './AnalyticsTour';
 import browseAndRequestTour from './browseAndRequestTour';
 import adminsTabNewFeatureTour, { useAdminsTabNewFeatureTour } from './adminsTabNewFeatureTour';
+
 import { disableAll, filterCheckpoints } from './data/utils';
 import AdminOnboardingTours from './AdminOnboardingTours/AdminOnboardingTours';
 import {
@@ -24,16 +26,20 @@ import {
   PORTAL_APPEARANCE_TOUR_COOKIE_NAME,
   ANALYTICS_COOKIE_NAME,
   ADMINS_TAB_NEW_FEATURE_COOKIE_NAME,
+  LPR_UPDATE_COOKIE_NAME,
 } from './constants';
 
 import {
   useBrowseAndRequestTour, usePortalAppearanceTour, useLearnerCreditTour, useHighlightsTour,
   useAnalyticsTour, useLearnerDetailPageTour,
 } from './data/hooks';
+import lprUpdateTour, { useLprUpdateTour } from './lprUpdateTour';
 import TourCollapsible from './TourCollapsible';
 import {
+  ADMIN_TOUR_EVENT_NAMES,
   ADMINISTER_SUBSCRIPTIONS_TARGETS,
   ALLOCATE_LEARNING_BUDGETS_TARGETS,
+  EDIT_HIGHLIGHTS_TARGETS,
   ORGANIZE_LEARNER_TARGETS,
   TRACK_LEARNER_PROGRESS_TARGETS,
   CUSTOMIZE_REPORTS_SIDEBAR,
@@ -51,7 +57,6 @@ const ProductTours = ({
   enableLearnerPortal,
   enterpriseSlug,
   enterpriseId,
-  enableInviteAdmins,
   onboardingEnabled,
   onboardingTourCompleted,
   onboardingTourDismissed,
@@ -72,7 +77,8 @@ const ProductTours = ({
     [LEARNER_CREDIT_COOKIE_NAME]: useLearnerCreditTour(),
     [LEARNER_DETAIL_PAGE_COOKIE_NAME]: useLearnerDetailPageTour(),
     [PORTAL_APPEARANCE_TOUR_COOKIE_NAME]: usePortalAppearanceTour(enablePortalAppearance),
-    [ADMINS_TAB_NEW_FEATURE_COOKIE_NAME]: useAdminsTabNewFeatureTour(enableInviteAdmins),
+    [ADMINS_TAB_NEW_FEATURE_COOKIE_NAME]: useAdminsTabNewFeatureTour(),
+    [LPR_UPDATE_COOKIE_NAME]: useLprUpdateTour(),
   };
   const newFeatureTourCheckpoints = {
     [BROWSE_AND_REQUEST_TOUR_COOKIE_NAME]: browseAndRequestTour({ enterpriseSlug, intl }),
@@ -82,6 +88,7 @@ const ProductTours = ({
     [LEARNER_DETAIL_PAGE_COOKIE_NAME]: learnerDetailPageTour({ enterpriseSlug, intl }),
     [PORTAL_APPEARANCE_TOUR_COOKIE_NAME]: portalAppearanceTour({ enterpriseSlug, intl }),
     [ADMINS_TAB_NEW_FEATURE_COOKIE_NAME]: adminsTabNewFeatureTour({ enterpriseId, enterpriseSlug, intl }),
+    [LPR_UPDATE_COOKIE_NAME]: lprUpdateTour({ enterpriseSlug, intl }),
   };
   const checkpointsArray = filterCheckpoints(newFeatureTourCheckpoints, enabledFeatures);
   const tours = [{
@@ -105,6 +112,9 @@ const ProductTours = ({
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/`);
     } else if (targetId === CUSTOMIZE_REPORTS_SIDEBAR) {
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.reporting}/`);
+    } else if (targetId === EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR) {
+      sendEnterpriseTrackEvent(enterpriseSlug, ADMIN_TOUR_EVENT_NAMES.EDIT_HIGHLIGHTS_VIEWED_EVENT_NAME);
+      navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}/`);
     }
     setSelectedTourTarget(targetId);
     setIsAdminTourOpen(true);
@@ -152,7 +162,6 @@ ProductTours.propTypes = {
   enableLearnerPortal: PropTypes.bool.isRequired,
   enterpriseSlug: PropTypes.string.isRequired,
   enterpriseId: PropTypes.string.isRequired,
-  enableInviteAdmins: PropTypes.bool.isRequired,
   onboardingEnabled: PropTypes.bool.isRequired,
   onboardingTourCompleted: PropTypes.bool.isRequired,
   onboardingTourDismissed: PropTypes.bool.isRequired,
@@ -162,7 +171,6 @@ const mapStateToProps = state => ({
   enableLearnerPortal: state.portalConfiguration.enableLearnerPortal,
   enterpriseSlug: state.portalConfiguration.enterpriseSlug,
   enterpriseId: state.portalConfiguration.enterpriseId,
-  enableInviteAdmins: state.portalConfiguration.enterpriseFeatures?.enterpriseInviteAdminsEnabled || false,
   onboardingEnabled: state.portalConfiguration.enterpriseFeatures?.enterpriseAdminOnboardingEnabled || false,
   onboardingTourCompleted: state.enterpriseCustomerAdmin.onboardingTourCompleted,
   onboardingTourDismissed: state.enterpriseCustomerAdmin.onboardingTourDismissed,

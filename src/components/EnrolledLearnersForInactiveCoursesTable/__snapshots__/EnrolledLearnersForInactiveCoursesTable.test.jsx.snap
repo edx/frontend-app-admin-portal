@@ -1,182 +1,529 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EnrolledLearnersForInactiveCoursesTable renders empty state correctly 1`] = `
-<div
-  className="fade alert-content alert alert-warning show"
-  role="alert"
->
-  <span
-    className="pgn__icon alert-icon"
-  >
-    <svg
-      aria-hidden={true}
-      fill="none"
-      focusable={false}
-      height={24}
-      role="img"
-      viewBox="0 0 24 24"
-      width={24}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z"
-        fill="currentColor"
-      />
-    </svg>
-  </span>
+exports[`EnrolledLearnersForInactiveCoursesTable renders empty state snapshot correctly 1`] = `
+<DocumentFragment>
   <div
-    className="pgn__alert-message-wrapper"
+    class="pgn__data-table-layout-wrapper"
   >
     <div
-      className="alert-message-content"
-    >
-      There are no results.
-    </div>
-  </div>
-</div>
-`;
-
-exports[`EnrolledLearnersForInactiveCoursesTable renders enrolled learners for inactive courses table correctly 1`] = `
-<div
-  className="enrolled-learners-inactive-courses"
->
-  <div
-    className="row"
-  >
-    <div
-      className="col"
+      class="pgn__data-table-layout-main"
     >
       <div
-        className="table-responsive"
+        class="pgn__data-table-wrapper"
       >
-        <table
-          className="table table-sm table-striped"
+        <div
+          class="pgn__data-table-status-bar"
+          data-testid="table-control-bar"
         >
-          <thead
-            className=""
+          <div
+            class="pgn__data-table-status"
           >
-            <tr
-              className=""
+            <div
+              class="pgn__data-table-status-left"
+            />
+            <div
+              class="pgn__data-table-actions-right"
             >
-              <th
-                className="sortable"
-                scope="col"
+              <div
+                class="pgn__data-table-toggle"
+              />
+              <div />
+            </div>
+          </div>
+        </div>
+        <div
+          class="pgn__data-table-container"
+          data-testid="data-table-container"
+        >
+          <table
+            class="pgn__data-table is-striped"
+            role="table"
+          >
+            <thead>
+              <tr
+                role="row"
+              >
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
+                      Email
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 14 5-5 5 5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
+                      Total Course Enrollment Count
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up-down"
+                      style="opacity: 0.5;"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
+                      Total Completed Courses Count
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up-down"
+                      style="opacity: 0.5;"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
+                      Last Activity Date
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up-down"
+                      style="opacity: 0.5;"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              role="rowgroup"
+            />
+          </table>
+        </div>
+        <div
+          class="pgn__data-table-empty"
+        >
+          There are no results.
+        </div>
+        <div
+          class="pgn__data-table-footer"
+          data-testid="table-footer"
+        >
+          <nav
+            aria-label="table pagination"
+            class="pagination-minimal"
+          >
+            <div
+              aria-atomic="true"
+              aria-live="polite"
+              aria-relevant="text"
+              class="sr-only"
+            >
+              Page 1, Current Page, of 1
+            </div>
+            <ul
+              class="pagination"
+            >
+              <li
+                class="page-item disabled"
               >
                 <button
-                  className="btn btn-header"
-                  disabled={false}
-                  onClick={[Function]}
+                  aria-label="Previous"
+                  class="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                  disabled=""
+                  tabindex="-1"
                   type="button"
+                >
+                  <span
+                    class="btn-icon__icon-container"
+                  >
+                    <span
+                      class="pgn__icon btn-icon__icon"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M17.51 3.87 15.73 2.1 5.84 12l9.9 9.9 1.77-1.77L9.38 12l8.13-8.13Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </button>
+              </li>
+              <li
+                class="page-item disabled"
+              >
+                <button
+                  aria-label="Next"
+                  class="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                  disabled=""
+                  tabindex="-1"
+                  type="button"
+                >
+                  <span
+                    class="btn-icon__icon-container"
+                  >
+                    <span
+                      class="pgn__icon btn-icon__icon"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m6.49 20.13 1.77 1.77 9.9-9.9-9.9-9.9-1.77 1.77L14.62 12l-8.13 8.13Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</DocumentFragment>
+`;
+
+exports[`EnrolledLearnersForInactiveCoursesTable renders enrolled learners for inactive courses table snapshot correctly 1`] = `
+<div
+  className="pgn__data-table-layout-wrapper"
+>
+  <div
+    className="pgn__data-table-layout-main"
+  >
+    <div
+      className="pgn__data-table-wrapper"
+    >
+      <div
+        className="pgn__data-table-status-bar"
+        data-testid="table-control-bar"
+      >
+        <div
+          className="pgn__data-table-status"
+        >
+          <div
+            className="pgn__data-table-status-left"
+          >
+            <div
+              className="pgn__smart-status"
+              data-testid="row-status"
+            >
+              Showing 1 - 1 of 1.
+            </div>
+          </div>
+          <div
+            className="pgn__data-table-actions-right"
+          >
+            <div
+              className="pgn__data-table-toggle"
+            />
+            <div />
+          </div>
+        </div>
+      </div>
+      <div
+        className="pgn__data-table-container"
+        data-testid="data-table-container"
+      >
+        <table
+          className="pgn__data-table is-striped"
+          role="table"
+        >
+          <thead>
+            <tr
+              role="row"
+            >
+              <th
+                colSpan={1}
+                onClick={[Function]}
+                role="columnheader"
+                style={
+                  {
+                    "cursor": "pointer",
+                  }
+                }
+                title="Toggle SortBy"
+              >
+                <span
+                  className="d-flex align-items-center"
                 >
                   <span>
                     Email
-                    <span
-                      className="sr-only"
-                      data-testid="table-heading-sr"
-                    >
-                       
-                      sort ascending
-                    </span>
-                     
-                    <span
-                      aria-hidden={true}
-                      className="fa fa-sort-asc"
-                    />
                   </span>
-                </button>
+                  <span
+                    className="pgn__icon"
+                    data-testid="arrow-drop-up"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      fill="none"
+                      focusable={false}
+                      height={24}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width={24}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m7 14 5-5 5 5H7Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </span>
               </th>
               <th
-                className="sortable"
-                scope="col"
+                colSpan={1}
+                onClick={[Function]}
+                role="columnheader"
+                style={
+                  {
+                    "cursor": "pointer",
+                  }
+                }
+                title="Toggle SortBy"
               >
-                <button
-                  className="btn btn-header"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
+                <span
+                  className="d-flex align-items-center"
                 >
                   <span>
                     Total Course Enrollment Count
-                    <span
-                      className="sr-only"
-                      data-testid="table-heading-sr"
-                    >
-                       
-                      click to sort
-                    </span>
-                     
-                    <span
-                      aria-hidden={true}
-                      className="fa fa-sort"
-                    />
                   </span>
-                </button>
+                  <span
+                    className="pgn__icon"
+                    data-testid="arrow-drop-up-down"
+                    style={
+                      {
+                        "opacity": 0.5,
+                      }
+                    }
+                  >
+                    <svg
+                      aria-hidden={true}
+                      fill="none"
+                      focusable={false}
+                      height={24}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width={24}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </span>
               </th>
               <th
-                className="sortable"
-                scope="col"
+                colSpan={1}
+                onClick={[Function]}
+                role="columnheader"
+                style={
+                  {
+                    "cursor": "pointer",
+                  }
+                }
+                title="Toggle SortBy"
               >
-                <button
-                  className="btn btn-header"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
+                <span
+                  className="d-flex align-items-center"
                 >
                   <span>
                     Total Completed Courses Count
-                    <span
-                      className="sr-only"
-                      data-testid="table-heading-sr"
-                    >
-                       
-                      click to sort
-                    </span>
-                     
-                    <span
-                      aria-hidden={true}
-                      className="fa fa-sort"
-                    />
                   </span>
-                </button>
+                  <span
+                    className="pgn__icon"
+                    data-testid="arrow-drop-up-down"
+                    style={
+                      {
+                        "opacity": 0.5,
+                      }
+                    }
+                  >
+                    <svg
+                      aria-hidden={true}
+                      fill="none"
+                      focusable={false}
+                      height={24}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width={24}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </span>
               </th>
               <th
-                className="sortable"
-                scope="col"
+                colSpan={1}
+                onClick={[Function]}
+                role="columnheader"
+                style={
+                  {
+                    "cursor": "pointer",
+                  }
+                }
+                title="Toggle SortBy"
               >
-                <button
-                  className="btn btn-header"
-                  disabled={false}
-                  onClick={[Function]}
-                  type="button"
+                <span
+                  className="d-flex align-items-center"
                 >
                   <span>
                     Last Activity Date
-                    <span
-                      className="sr-only"
-                      data-testid="table-heading-sr"
-                    >
-                       
-                      click to sort
-                    </span>
-                     
-                    <span
-                      aria-hidden={true}
-                      className="fa fa-sort"
-                    />
                   </span>
-                </button>
+                  <span
+                    className="pgn__icon"
+                    data-testid="arrow-drop-up-down"
+                    style={
+                      {
+                        "opacity": 0.5,
+                      }
+                    }
+                  >
+                    <svg
+                      aria-hidden={true}
+                      fill="none"
+                      focusable={false}
+                      height={24}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width={24}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </span>
               </th>
             </tr>
           </thead>
           <tbody
-            className=""
+            role="rowgroup"
           >
             <tr
-              className=""
+              className="pgn__data-table-row"
+              role="row"
             >
               <td
-                className=""
-                scope={null}
+                className="pgn__data-table-cell-wrap"
+                role="cell"
               >
                 <span
                   data-hj-suppress={true}
@@ -185,195 +532,126 @@ exports[`EnrolledLearnersForInactiveCoursesTable renders enrolled learners for i
                 </span>
               </td>
               <td
-                className=""
-                scope={null}
+                className="pgn__data-table-cell-wrap"
+                role="cell"
               >
                 2
               </td>
               <td
-                className=""
-                scope={null}
+                className="pgn__data-table-cell-wrap"
+                role="cell"
               >
                 1
               </td>
               <td
-                className=""
-                scope={null}
+                className="pgn__data-table-cell-wrap"
+                role="cell"
               >
                 June 23, 2017
-              </td>
-            </tr>
-            <tr
-              className=""
-            >
-              <td
-                className=""
-                scope={null}
-              >
-                <span
-                  data-hj-suppress={true}
-                >
-                  test_user_2@example.com
-                </span>
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                5
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                5
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                January 15, 2018
-              </td>
-            </tr>
-            <tr
-              className=""
-            >
-              <td
-                className=""
-                scope={null}
-              >
-                <span
-                  data-hj-suppress={true}
-                >
-                  test_user_3@example.com
-                </span>
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                6
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                4
-              </td>
-              <td
-                className=""
-                scope={null}
-              >
-                November 18, 2017
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-    </div>
-  </div>
-  <div
-    className="row mt-2"
-  >
-    <div
-      className="col d-flex justify-content-center"
-    >
-      <nav
-        aria-label="enrolled-learners-inactive-courses-pagination"
-        className="pagination-default"
+      <div
+        className="pgn__data-table-footer"
+        data-testid="table-footer"
       >
         <div
-          aria-atomic={true}
-          aria-live="polite"
-          aria-relevant="text"
-          className="sr-only"
+          data-testid="row-status"
         >
-          Page 1, Current Page, of 1
+          Showing 1 - 1 of 1.
         </div>
-        <ul
-          className="pagination"
+        <nav
+          aria-label="table pagination"
+          className="pagination-minimal"
         >
-          <li
-            className="page-item disabled"
+          <div
+            aria-atomic={true}
+            aria-live="polite"
+            aria-relevant="text"
+            className="sr-only"
           >
-            <button
-              aria-label="Previous"
-              className="previous page-link btn btn-tertiary"
-              disabled={true}
-              onClick={[Function]}
-              tabIndex="-1"
-              type="button"
+            Page 1, Current Page, of 1
+          </div>
+          <ul
+            className="pagination"
+          >
+            <li
+              className="page-item disabled"
             >
-              <span
-                className="pgn__icon btn-icon-before"
+              <button
+                aria-label="Previous"
+                className="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                disabled={true}
+                onClick={[Function]}
+                tabIndex="-1"
+                type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  fill="none"
-                  focusable={false}
-                  height={24}
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width={24}
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  className="btn-icon__icon-container"
                 >
-                  <path
-                    d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12l4.58-4.59Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-              Previous
-            </button>
-          </li>
-          <li
-            className="page-item active"
-          >
-            <button
-              aria-label="Page 1, Current Page"
-              className="page-link btn btn-primary"
-              disabled={false}
-              onClick={[Function]}
-              type="button"
+                  <span
+                    className="pgn__icon btn-icon__icon"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      fill="none"
+                      focusable={false}
+                      height={24}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width={24}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M17.51 3.87 15.73 2.1 5.84 12l9.9 9.9 1.77-1.77L9.38 12l8.13-8.13Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </span>
+              </button>
+            </li>
+            <li
+              className="page-item disabled"
             >
-              1
-            </button>
-          </li>
-          <li
-            className="page-item disabled"
-          >
-            <button
-              aria-label="Next"
-              className="previous page-link btn btn-tertiary"
-              disabled={true}
-              onClick={[Function]}
-              tabIndex="-1"
-              type="button"
-            >
-              Next
-              <span
-                className="pgn__icon btn-icon-after"
+              <button
+                aria-label="Next"
+                className="btn-icon btn-icon-primary btn-icon-md previous page-link"
+                disabled={true}
+                onClick={[Function]}
+                tabIndex="-1"
+                type="button"
               >
-                <svg
-                  aria-hidden={true}
-                  fill="none"
-                  focusable={false}
-                  height={24}
-                  role="img"
-                  viewBox="0 0 24 24"
-                  width={24}
-                  xmlns="http://www.w3.org/2000/svg"
+                <span
+                  className="btn-icon__icon-container"
                 >
-                  <path
-                    d="M10 6 8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6-6-6Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </span>
-            </button>
-          </li>
-        </ul>
-      </nav>
+                  <span
+                    className="pgn__icon btn-icon__icon"
+                  >
+                    <svg
+                      aria-hidden={true}
+                      fill="none"
+                      focusable={false}
+                      height={24}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width={24}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m6.49 20.13 1.77 1.77 9.9-9.9-9.9-9.9-1.77 1.77L14.62 12l-8.13 8.13Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   </div>
 </div>

@@ -12,6 +12,7 @@ import CourseFilterDropdown from './CourseFilterDropdown';
 import { ANALYTICS_TABS } from './constants';
 
 export const DEFAULT_GROUP = '';
+const START_DATE_ERROR_ID = 'analytics-start-date-error';
 
 const AnalyticsFilters = ({
   startDate,
@@ -45,15 +46,40 @@ const AnalyticsFilters = ({
   const isProgressOrOutcomesTab = activeTab === ANALYTICS_TABS.PROGRESS || activeTab === ANALYTICS_TABS.OUTCOMES;
   const filterByCourseStartDate = false; // To be implemented in future
   const [dateRangeValue, setDateRangeValue] = useState(DATE_RANGE.LAST_90_DAYS);
+  const [startDateError, setStartDateError] = useState('');
+
+  const validateDateRange = (newStartDate, newEndDate) => {
+    if (newStartDate && newEndDate && newStartDate > newEndDate) {
+      setStartDateError(
+        intl.formatMessage({
+          id: 'advance.analytics.date.validation.start.after.end',
+          defaultMessage: 'Must be before the end date.',
+          description: 'Error message when start date is after end date',
+        }),
+      );
+      return false;
+    }
+    setStartDateError('');
+    return true;
+  };
 
   const handleDateRangeChange = (selectedRange) => {
     setDateRangeValue(selectedRange);
+    setStartDateError('');
+    const newEndDate = new Date().toISOString().split('T')[0];
+
+    if (selectedRange === DATE_RANGE.YEAR_TO_DATE) {
+      setStartDate(`${newEndDate.split('-')[0]}-01-01`);
+      setEndDate(newEndDate);
+      trackFilterClick('Date range options', selectedRange);
+      return;
+    }
+
     const today = new Date();
     const rangeMap = {
       [DATE_RANGE.LAST_7_DAYS]: 7,
       [DATE_RANGE.LAST_30_DAYS]: 30,
       [DATE_RANGE.LAST_90_DAYS]: 90,
-      [DATE_RANGE.YEAR_TO_DATE]: 365,
       [DATE_RANGE.CUSTOM]: 0,
     };
     if (rangeMap[selectedRange] || rangeMap[selectedRange] === 0) {
@@ -62,19 +88,20 @@ const AnalyticsFilters = ({
         .split('T')[0];
       setStartDate(newStartDate);
     }
-    const newEndDate = new Date().toISOString().split('T')[0];
     setEndDate(newEndDate);
     trackFilterClick('Date range options', selectedRange);
   };
 
   const handleStartDateChange = (selectedDate) => {
     setStartDate(selectedDate);
+    validateDateRange(selectedDate, endDate);
     setDateRangeValue(DATE_RANGE.CUSTOM);
     trackFilterClick('Start date', selectedDate);
   };
 
   const handleEndDateChange = (selectedDate) => {
     setEndDate(selectedDate);
+    validateDateRange(startDate, selectedDate);
     setDateRangeValue(DATE_RANGE.CUSTOM);
     trackFilterClick('End date', selectedDate);
   };
@@ -172,7 +199,14 @@ const AnalyticsFilters = ({
                   type="date"
                   value={startDate || get90DayPriorDate()}
                   onChange={(e) => handleStartDateChange(e.target.value)}
+                  isInvalid={!!startDateError}
+                  aria-describedby={startDateError ? START_DATE_ERROR_ID : undefined}
                 />
+                {startDateError && (
+                  <Form.Text id={START_DATE_ERROR_ID} className="text-danger mt-1">
+                    {startDateError}
+                  </Form.Text>
+                )}
               </Form.Group>
             </div>
             <div className="col">

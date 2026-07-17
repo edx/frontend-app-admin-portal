@@ -4,17 +4,18 @@ import { logError } from '@edx/frontend-platform/logging';
 import {
   ADMINISTER_SUBSCRIPTIONS_TARGETS,
   CUSTOMIZE_REPORTS_SIDEBAR,
+  EDIT_HIGHLIGHTS_TARGETS,
   ORGANIZE_LEARNER_TARGETS,
   TRACK_LEARNER_PROGRESS_TARGETS,
   ALLOCATE_LEARNING_BUDGETS_TARGETS,
   ANALYTICS_V2_TARGETS,
 } from '../constants';
-
 import { TourStep } from '../../types';
 import LmsApiService from '../../../../data/services/LmsApiService';
 import AdministerSubscriptionsFlow from './AdministerSubscriptionsFlow';
 import useAllocateLearningBudgetsFlow from './AllocateLearningBudgetsFlow';
 import CustomizeReportsFlow from './CustomizeReportsFlow';
+import EditHighlightsFlow from './EditHighlightsFlow';
 import LearnerProgressFlow from './LearnerProgressFlow';
 import AnalyticsV2Flow from './AnalyticsV2Flow';
 import OrganizeLearnersFlow from './OrganizeLearnersFlow';
@@ -26,9 +27,6 @@ interface AdminOnboardingTourProps {
   adminUuid: string;
   currentStep: number;
   enablePortalLearnerCreditManagementScreen: boolean;
-  enterpriseFeatures: {
-    enterpriseInviteAdminsEnabled?: boolean;
-  }
   enterpriseId: string;
   enterpriseSlug: string;
   onClose: () => void;
@@ -41,7 +39,6 @@ const AdminOnboardingTour = (
     adminUuid,
     currentStep,
     enablePortalLearnerCreditManagementScreen,
-    enterpriseFeatures,
     enterpriseSlug,
     onClose,
     setCurrentStep,
@@ -66,11 +63,20 @@ const AdminOnboardingTour = (
     try {
       onClose();
       sendEnterpriseTrackEvent(enterpriseSlug, endEventName);
-      await LmsApiService.updateCompletedTourFlows(adminUuid, flowUuid);
-      refetch();
+      // Skip the completion POST when the flow UUID is not configured for this
+      // environment to avoid sending an empty `flow_uuid` to the LMS.
+      if (flowUuid) {
+        await LmsApiService.updateCompletedTourFlows(adminUuid, flowUuid);
+        refetch();
+      }
     } catch (error) {
       logError(error);
     }
+  }
+
+  function handleDismissTour(dismissEventName: string) {
+    sendEnterpriseTrackEvent(enterpriseSlug, dismissEventName);
+    onClose();
   }
 
   const administerSubscriptionsFlow = AdministerSubscriptionsFlow({
@@ -85,7 +91,7 @@ const AdminOnboardingTour = (
   });
   const organizeLearnersFlow = OrganizeLearnersFlow({
     enterpriseId,
-    enableInviteAdmins: enterpriseFeatures?.enterpriseInviteAdminsEnabled ?? false,
+    enableInviteAdmins: true,
     handleAdvanceTour,
     handleBackTour,
     handleEndTour,
@@ -93,7 +99,6 @@ const AdminOnboardingTour = (
   const allocateLearningBudgetsFlow = useAllocateLearningBudgetsFlow({
     currentStep,
     enablePortalLearnerCreditManagementScreen,
-    enterpriseFeatures,
     enterpriseId,
     enterpriseSlug,
     handleBackTour,
@@ -102,6 +107,9 @@ const AdminOnboardingTour = (
     targetSelector,
   });
   const setUpPreferencesFlow = SetUpPreferencesFlow({ handleEndTour });
+  const editHighlightsFlow = EditHighlightsFlow({
+    handleAdvanceTour, handleBackTour, handleEndTour, handleDismissTour,
+  });
 
   // Map target selectors to their respective flows
   const flowMapping = {
@@ -121,6 +129,10 @@ const AdminOnboardingTour = (
     ...Object.fromEntries(
       Object.values(ALLOCATE_LEARNING_BUDGETS_TARGETS)
         .map(target => [target, allocateLearningBudgetsFlow]),
+    ),
+    ...Object.fromEntries(
+      Object.values(EDIT_HIGHLIGHTS_TARGETS)
+        .map(target => [target, editHighlightsFlow]),
     ),
     // Customize reports flow target
     [CUSTOMIZE_REPORTS_SIDEBAR]: customizeReportsFlow,

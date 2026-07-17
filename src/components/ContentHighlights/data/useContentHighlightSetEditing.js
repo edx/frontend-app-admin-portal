@@ -6,8 +6,11 @@ import { logError } from '@edx/frontend-platform/logging';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import EnterpriseCatalogApiService from '../../../data/services/EnterpriseCatalogApiService';
 import { useContentHighlightsContext } from './hooks';
+import { enterpriseCurationActions } from '../../EnterpriseApp/data/enterpriseCurationReducer';
 
-const useContentHighlightSetEditing = ({ highlightSet, updateHighlightSet, openToast }) => {
+const useContentHighlightSetEditing = ({
+  highlightSet, updateHighlightSet, openToast, dispatchEnterpriseCuration,
+}) => {
   const { highlightSetUUID } = useParams();
   const intl = useIntl();
   const { openEditStepperModal } = useContentHighlightsContext();
@@ -60,9 +63,24 @@ const useContentHighlightSetEditing = ({ highlightSet, updateHighlightSet, openT
       await EnterpriseCatalogApiService.updateHighlightSet(highlightSetUUID, {
         remove_content_keys: keysToRemove,
       });
+      setIsFeaturedModalOpen(false);
       const remainingContent = (highlightSet?.highlightedContent || [])
         .filter(item => !selectedContentKeys.has(item.contentKey));
       updateHighlightSet(remainingContent);
+
+      // Update enterprise curation context so dashboard card count reflects the change
+      if (dispatchEnterpriseCuration) {
+        const activeContentKeys = remainingContent.map(item => item.contentKey);
+        dispatchEnterpriseCuration(
+          enterpriseCurationActions.updateHighlightSetContentItems({
+            // Reducer payload field is named activeContentUuids for legacy reasons.
+            activeContentUuids: activeContentKeys,
+            cardImageUrl: remainingContent[0]?.cardImageUrl ?? null,
+            highlightSetUUID,
+          }),
+        );
+      }
+
       setSelectedContentKeys(new Set());
       setIsEditing(false);
       setToastMessage(intl.formatMessage({
@@ -78,7 +96,8 @@ const useContentHighlightSetEditing = ({ highlightSet, updateHighlightSet, openT
       setIsRemoving(false);
       setIsFeaturedModalOpen(false);
     }
-  }, [highlightSet, selectedContentKeys, highlightSetUUID, updateHighlightSet, intl, openToast]);
+  }, [highlightSet, selectedContentKeys, highlightSetUUID, updateHighlightSet, intl, openToast,
+    dispatchEnterpriseCuration]);
 
   const handleRemoveSelectedContent = useCallback(() => {
     if (selectedFeaturedItems.length > 0) {

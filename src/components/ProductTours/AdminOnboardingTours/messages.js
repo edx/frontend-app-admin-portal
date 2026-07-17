@@ -24,7 +24,7 @@ const messages = defineMessages({
   welcomeModalNewUserBody: {
     id: 'admin.portal.productTours.adminOnboarding.welcomeModal.body.new',
     defaultMessage: 'We\'re excited to show you the edX administrative portal.'
-    + ' Use our {bold_tag}Quick Start Guide{bold_tag} to get step-by-step guidance on what our portal can do for you.',
+    + ' Use our <b>Quick Start Guide</b> to get step-by-step guidance on what our portal can do for you.',
     description: 'Body for the welcome modal for new users.',
   },
   welcomeModalExistingUserTitle: {
@@ -34,7 +34,7 @@ const messages = defineMessages({
   },
   welcomeModalExistingUserBody: {
     id: 'admin.portal.productTours.adminOnboarding.welcomeModal.body.existing',
-    defaultMessage: 'We\'ve launched a new {bold_tag}Quick Start Guide{bold_tag}, which provides'
+    defaultMessage: 'We\'ve launched a new <b>Quick Start Guide</b>, which provides'
     + ' step-by-step guidance on what our portal can do for you.',
     description: 'Body for the welcome modal for existing users.',
   },
@@ -116,8 +116,8 @@ const messages = defineMessages({
   },
   organizeLearnersStepOneTitle: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.title.1',
-    defaultMessage: 'Organize learners',
-    description: 'Title for the organize learners flow step one',
+    defaultMessage: 'Organize members',
+    description: 'Title for the organize members flow step one',
   },
   organizeLearnersStepOneBody: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.body.1',
@@ -152,8 +152,8 @@ const messages = defineMessages({
   },
   organizeLearnersStepFourBody: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.body.4',
-    defaultMessage: 'Organize learners by creating groups for tracking and assignments.',
-    description: 'Description for the organize learners flow step four',
+    defaultMessage: 'Organize members by creating groups for tracking and assignments.',
+    description: 'Description for the organize members flow step four',
   },
   organizeLearnersStepFiveBody: {
     id: 'adminPortal.productTours.adminOnboarding.organizeLearners.body.5',
@@ -351,6 +351,46 @@ const messages = defineMessages({
     defaultMessage: 'Customize and configure your portal to fit your organization\'s needs. Set up branding, '
       + 'manage learner access, enable SSO, and integrate learning platforms—all in one place.',
     description: 'Description for the set up preferences step',
+  },
+  editHighlightsStepOneTitle: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.title.1',
+    defaultMessage: 'Showcase courses',
+    description: 'Title for the Quick Start Guide entry that opens the edit highlights flow',
+  },
+  editHighlightsPopupOneTitle: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.popup.title.1',
+    defaultMessage: 'Showcase courses',
+    description: 'Title shown inside the first popup of the edit highlights flow',
+  },
+  editHighlightsDismissButton: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.dismiss',
+    defaultMessage: 'Dismiss',
+    description: 'Label for the dismiss button on the first step of the edit highlights flow',
+  },
+  editHighlightsStepOneBody: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.body.1',
+    defaultMessage: 'Showcase selected courses to your learners with Highlights.',
+    description: 'Description for the edit highlights flow step one — discover active highlights',
+  },
+  editHighlightsStepTwoBody: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.body.2',
+    defaultMessage: 'View and manage your published Highlights here.',
+    description: 'Description for the edit highlights flow step two — review existing highlights',
+  },
+  editHighlightsStepThreeBody: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.body.3',
+    defaultMessage: 'Create a Highlight by selecting this button. Add up to 24 courses, name your Highlight, and publish it. <a>Learn more</a>.',
+    description: 'Description for the edit highlights flow step three — create a highlight',
+  },
+  editHighlightsStepFourBody: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.body.4',
+    defaultMessage: 'Control who can see your Highlights by adjusting catalog visibility.',
+    description: 'Description for the edit highlights flow step four — catalog visibility',
+  },
+  editHighlightsStepFiveBody: {
+    id: 'adminPortal.productTours.adminOnboarding.editHighlights.body.5',
+    defaultMessage: 'To view details or edit a specific Highlight, select its card.',
+    description: 'Description for the edit highlights flow step five — view or edit a specific highlight',
   },
   completeTourModalTitle: {
     id: 'adminPortal.productTours.adminOnboarding.completeTour.modalTitle',

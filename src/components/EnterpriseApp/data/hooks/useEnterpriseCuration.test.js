@@ -57,6 +57,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseCuration: null,
         enterpriseHighlightedSets: null,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
       expect(EnterpriseCatalogApiService.getEnterpriseCurationConfig).not.toHaveBeenCalled();
@@ -81,6 +82,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseCuration: null,
         enterpriseHighlightedSets: null,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
       expect(EnterpriseCatalogApiService.getEnterpriseCurationConfig).not.toHaveBeenCalled();
@@ -104,6 +106,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseCuration: null,
         enterpriseHighlightedSets: null,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
 
@@ -126,6 +129,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseHighlightedSets: [mockEnterpriseHighlightedSetResponse],
         enterpriseCuration: expect.objectContaining(mockEnterpriseCurationConfig),
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
     });
@@ -171,6 +175,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseHighlightedSets: [undefined],
         enterpriseCuration: updatedEnterpriseCuration,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
     });
@@ -197,6 +202,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseCuration: null,
         enterpriseHighlightedSets: null,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
 
@@ -216,6 +222,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseHighlightedSets: [undefined],
         enterpriseCuration: expect.objectContaining(mockEnterpriseCurationConfig),
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
     });
@@ -235,6 +242,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseCuration: null,
         enterpriseHighlightedSets: null,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
 
@@ -251,6 +259,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: mockErrorMessage,
         enterpriseCuration: null,
         enterpriseHighlightedSets: null,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
     });
@@ -276,6 +285,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: null,
         enterpriseCuration: null,
         enterpriseHighlightedSets: null,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
 
@@ -292,6 +302,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: mockErrorMessage,
         enterpriseHighlightedSets: null,
         enterpriseCuration: undefined,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
     });
@@ -331,6 +342,7 @@ describe('useEnterpriseCuration', () => {
         fetchError: mockErrorMessage,
         enterpriseHighlightedSets: [undefined],
         enterpriseCuration: undefined,
+        getEnterpriseCuration: expect.any(Function),
         updateEnterpriseCuration: expect.any(Function),
       });
     });

@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 import {
-  Card, Hyperlink, Icon, Truncate,
+  Card, Form, Hyperlink, Icon, Truncate,
 } from '@openedx/paragon';
 import { Archive } from '@openedx/paragon/icons';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
@@ -9,6 +10,7 @@ import cardImageCapFallbackSrc from '@edx/brand/paragon/images/card-imagecap-fal
 
 import { features } from '../../config';
 import { getContentHighlightCardFooter } from './data/utils';
+import StarButton from './StarButton';
 
 const ContentHighlightCardItem = ({
   isLoading,
@@ -19,6 +21,13 @@ const ContentHighlightCardItem = ({
   cardImageUrl,
   price,
   archived,
+  editHighlightsEnabled,
+  uuid,
+  isStarred,
+  onToggleStar,
+  isSelectable,
+  isSelected,
+  onToggleSelect,
 }) => {
   const {
     FEATURE_HIGHLIGHTS_ARCHIVE_MESSAGING,
@@ -42,7 +51,7 @@ const ContentHighlightCardItem = ({
     }),
   };
   const cardInfo = {
-    cardImgSrc: cardImageUrl,
+    cardImgSrc: cardImageUrl || cardImageCapFallbackSrc,
     cardLogoSrc: partners.length === 1 ? partners[0].logoImageUrl : undefined,
     cardLogoAlt: partners.length === 1 ? `${partners[0].name}'s logo` : undefined,
     cardTitle: <Truncate lines={3} title={title}>{title}</Truncate>,
@@ -58,10 +67,20 @@ const ContentHighlightCardItem = ({
       </Hyperlink>
     );
   }
-  return (
+
+  let cardWrapperTestId;
+  if ((editHighlightsEnabled || isSelectable) && uuid) {
+    cardWrapperTestId = archived ? `card-wrapper-archived-${uuid}` : `card-wrapper-${uuid}`;
+  }
+
+  const card = (
     <Card
       variant={contentType === 'course' ? 'light' : 'dark'}
       isLoading={isLoading}
+      className={classNames({
+        'position-relative w-100': (editHighlightsEnabled || isSelectable) && uuid,
+      })}
+      data-testid={cardWrapperTestId}
     >
       <Card.ImageCap
         src={cardInfo.cardImgSrc}
@@ -96,6 +115,45 @@ const ContentHighlightCardItem = ({
       )}
     </Card>
   );
+
+  if (editHighlightsEnabled && uuid) {
+    return (
+      <div className="pgn__data-table__selectable-card selection-right">
+        {card}
+        <StarButton
+          title={title}
+          uuid={uuid}
+          isStarred={Boolean(isStarred)}
+          onToggleStar={onToggleStar}
+        />
+      </div>
+    );
+  }
+
+  if (isSelectable && uuid) {
+    return (
+      <div className="pgn__data-table__selectable-card selection-right">
+        {card}
+        <div data-testid={`select-checkbox-wrapper-${uuid}`}>
+          <Form.Checkbox
+            aria-label={intl.formatMessage(
+              {
+                id: 'highlights.card.select_for_removal.aria.label',
+                defaultMessage: 'Select {title} for removal',
+                description: 'Checkbox aria label for selecting highlighted content for removal',
+              },
+              { title },
+            )}
+            checked={isSelected}
+            onChange={onToggleSelect}
+            data-testid={`select-checkbox-${uuid}`}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  return card;
 };
 
 ContentHighlightCardItem.propTypes = {
@@ -115,6 +173,13 @@ ContentHighlightCardItem.propTypes = {
   })).isRequired,
   price: PropTypes.number,
   archived: PropTypes.bool,
+  editHighlightsEnabled: PropTypes.bool,
+  uuid: PropTypes.string,
+  isStarred: PropTypes.bool,
+  onToggleStar: PropTypes.func,
+  isSelectable: PropTypes.bool,
+  isSelected: PropTypes.bool,
+  onToggleSelect: PropTypes.func,
 };
 
 ContentHighlightCardItem.defaultProps = {
@@ -123,6 +188,13 @@ ContentHighlightCardItem.defaultProps = {
   cardImageUrl: undefined,
   price: undefined,
   archived: false,
+  editHighlightsEnabled: false,
+  uuid: undefined,
+  isStarred: false,
+  onToggleStar: undefined,
+  isSelectable: false,
+  isSelected: false,
+  onToggleSelect: undefined,
 };
 
 export default ContentHighlightCardItem;
