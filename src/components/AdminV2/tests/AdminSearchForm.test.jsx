@@ -101,6 +101,30 @@ describe('<AdminSearchForm />', () => {
     });
   });
 
+  it('does not call searchEnrollmentsList on a StrictMode-simulated double mount', () => {
+    const spy = jest.fn();
+    const baseSearchParams = {
+      searchQuery: '',
+      searchCourseQuery: '',
+      searchDateQuery: '',
+      searchBudgetQuery: '',
+      searchGroupQuery: '',
+      searchEnrollmentQuery: '',
+    };
+
+    render(
+      <React.StrictMode>
+        <AdminSearchFormWrapper
+          {...DEFAULT_PROPS}
+          searchEnrollmentsList={spy}
+          searchParams={baseSearchParams}
+        />
+      </React.StrictMode>,
+    );
+
+    expect(spy).not.toHaveBeenCalled();
+  });
+
   it('select the correct budget', async () => {
     const budgetUUID = '8d6503dd-e40d-42b8-442b-37dd4c5450e3';
     const budgets = [{

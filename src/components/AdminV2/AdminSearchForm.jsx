@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import classNames from 'classnames';
+import { isEqual } from 'lodash-es';
 import PropTypes from 'prop-types';
 import { useEffect, useRef } from 'react';
 
@@ -29,14 +30,20 @@ const AdminSearchForm = ({
   enterpriseId,
 }) => {
   const intl = useIntl();
-  const isFirstRender = useRef(true);
+  const prevSearchParamsRef = useRef({
+    searchQuery, searchCourseQuery, searchDateQuery, searchBudgetQuery, searchGroupQuery, searchEnrollmentQuery,
+  });
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
+    const prevSearchParams = prevSearchParamsRef.current;
+    const currentSearchParams = {
+      searchQuery, searchCourseQuery, searchDateQuery, searchBudgetQuery, searchGroupQuery, searchEnrollmentQuery,
+    };
+    prevSearchParamsRef.current = currentSearchParams;
+
+    if (!isEqual(currentSearchParams, prevSearchParams)) {
+      searchEnrollmentsList();
     }
-    searchEnrollmentsList();
   }, [searchEnrollmentsList, searchQuery, searchCourseQuery, searchDateQuery, searchBudgetQuery, searchGroupQuery,
     searchEnrollmentQuery]);
 

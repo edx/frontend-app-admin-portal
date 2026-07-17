@@ -51,7 +51,7 @@ const ContentHighlightCardItem = ({
     }),
   };
   const cardInfo = {
-    cardImgSrc: cardImageUrl,
+    cardImgSrc: cardImageUrl || cardImageCapFallbackSrc,
     cardLogoSrc: partners.length === 1 ? partners[0].logoImageUrl : undefined,
     cardLogoAlt: partners.length === 1 ? `${partners[0].name}'s logo` : undefined,
     cardTitle: <Truncate lines={3} title={title}>{title}</Truncate>,
