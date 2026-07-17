@@ -9,7 +9,7 @@ import LmsApiService from '../../../../data/services/LmsApiService';
  */
 
 /**
- * Retrieves a enterprise customer by UUID from the API.
+ * Retrieves an enterprise customer by UUID from the API.
  *
  * @param {string} enterpriseCustomerUuid The enterprise customer UUID.
  * @returns {Promise<EnterpriseCustomer>} The enterprise customer object

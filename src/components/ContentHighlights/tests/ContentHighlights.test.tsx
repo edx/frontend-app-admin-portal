@@ -36,8 +36,6 @@ const initialEnterpriseAppContextValue: TEnterpriseAppContext = {
     isLoading: false,
     fetchError: null,
   },
-  productType: null,
-  slug: '',
 };
 const initialState = {
   portalConfiguration:

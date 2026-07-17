@@ -39,8 +39,8 @@ export type TEnterpriseCurationData = {
 
 export type TEnterpriseAppContext = {
   enterpriseCuration: TEnterpriseCurationData;
-  productType: string | null;
-  slug: string;
+  productType?: string | null;
+  slug?: string;
 };
 
 interface EnterpriseAppContextProviderProps {

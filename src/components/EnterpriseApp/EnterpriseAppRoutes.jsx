@@ -56,6 +56,15 @@ const EnterpriseAppRoutes = ({
       : <FeatureNotSupportedPage />;
   };
 
+  const getAnalyticsV1Element = () => {
+    if (isEssentials) {
+      return <Navigate to={`/${slug}/admin/${ROUTE_NAMES.learners}`} replace />;
+    }
+    return features.ANALYTICS_SUPPORTED
+      ? <AnalyticsV2Page enterpriseId={enterpriseId} />
+      : <FeatureNotSupportedPage />;
+  };
+
   return (
     <Routes>
       {enterpriseAppPage === ROUTE_NAMES.learners && (
@@ -114,9 +123,7 @@ const EnterpriseAppRoutes = ({
         <Route
           key="analytics"
           path="/"
-          element={features.ANALYTICS_SUPPORTED
-            ? <AnalyticsV2Page enterpriseId={enterpriseId} />
-            : <FeatureNotSupportedPage />}
+          element={getAnalyticsV1Element()}
         />
       )}
 

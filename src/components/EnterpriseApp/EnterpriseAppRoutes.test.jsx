@@ -90,6 +90,20 @@ describe('EnterpriseAppRoutes', () => {
     expect(screen.getByText('AnalyticsV2Page Mock Component')).toBeInTheDocument();
   });
 
+  it('redirects Essentials customers away from AnalyticsV2Page on analytics-v1', () => {
+    mockEnterpriseAppPage = 'analytics-v1';
+    features.ANALYTICS_SUPPORTED = true;
+    features.ADMIN_V1 = true;
+    renderWithProviders(defaultProps, {
+      ...mockEnterpriseAppContextValue,
+      productType: PRODUCT_TYPES.ESSENTIALS,
+      slug: 'test-enterprise',
+    });
+
+    expect(screen.getByTestId('redirect')).toHaveAttribute('data-to', '/test-enterprise/admin/learners');
+    expect(screen.queryByText('AnalyticsV2Page Mock Component')).not.toBeInTheDocument();
+  });
+
   it('renders AdminPage when ANALYTICS_SUPPORTED is true', () => {
     mockEnterpriseAppPage = 'learners';
     features.ANALYTICS_SUPPORTED = true;

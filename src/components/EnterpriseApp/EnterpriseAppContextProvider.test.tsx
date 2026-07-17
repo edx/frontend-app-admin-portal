@@ -13,6 +13,13 @@ import * as enterpriseSubsidiesContext from '../EnterpriseSubsidiesContext';
 const TEST_ENTERPRISE_UUID = 'test-enterprise-uuid';
 const TEST_ENTERPRISE_NAME = 'test-enterprise-name';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: () => ({
+    enterpriseSlug: 'test-enterprise',
+  }),
+}));
+
 jest.mock('./data/hooks');
 jest.mock('../learner-credit-management/data/hooks', () => ({
   ...jest.requireActual('../learner-credit-management/data/hooks'),
