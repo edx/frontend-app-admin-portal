@@ -17,6 +17,7 @@ const mapStateToProps = state => ({
   enableLearnerPortal: state.portalConfiguration.enableLearnerPortal,
   enableLmsConfigurationsScreen: state.portalConfiguration.enableLmsConfigurationsScreen,
   enableAnalyticsScreen: state.portalConfiguration.enableAnalyticsScreen,
+  enablePeopleManagementScreen: state.portalConfiguration.enablePeopleManagementScreen,
 });
 
 const mapDispatchToProps = dispatch => ({

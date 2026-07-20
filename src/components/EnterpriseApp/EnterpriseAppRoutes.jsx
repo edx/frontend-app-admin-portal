@@ -34,6 +34,7 @@ const EnterpriseAppRoutes = ({
   enableSubscriptionManagementPage,
   enableAnalyticsPage,
   enableContentHighlightsPage,
+  enablePeopleManagementPage,
 }) => {
   const { canManageLearnerCredit, hasBillingSubscription } = useContext(EnterpriseSubsidiesContext);
   const { enterpriseAppPage } = useParams();
@@ -137,7 +138,7 @@ const EnterpriseAppRoutes = ({
         />
       )}
 
-      {enterpriseAppPage === ROUTE_NAMES.peopleManagement && ([
+      {enablePeopleManagementPage && enterpriseAppPage === ROUTE_NAMES.peopleManagement && ([
         <Route
           path="/:groupUuid"
           key="group-detail"
@@ -181,6 +182,7 @@ EnterpriseAppRoutes.propTypes = {
   enableSubscriptionManagementPage: PropTypes.bool.isRequired,
   enableAnalyticsPage: PropTypes.bool.isRequired,
   enableContentHighlightsPage: PropTypes.bool.isRequired,
+  enablePeopleManagementPage: PropTypes.bool.isRequired,
 };
 
 export default EnterpriseAppRoutes;
