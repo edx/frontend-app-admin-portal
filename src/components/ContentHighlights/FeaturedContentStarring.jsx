@@ -10,10 +10,10 @@ import './highlights.scss';
 
 const { MAX_STARRED_CONTENT_ITEMS_PER_HIGHLIGHT_SET = 4 } = getConfig();
 
-const renderTitleHeader = (courseTitleLabel) => (
+const renderTitleHeader = (titleLabel) => (
   <div className="d-flex align-items-center">
     <Icon src={StarOutline} className="mr-2 text-muted" />
-    <span className="font-weight-bold text-dark">{courseTitleLabel}</span>
+    <span className="font-weight-bold text-dark">{titleLabel}</span>
   </div>
 );
 
@@ -51,27 +51,13 @@ const renderTitleCell = ({ row, onUnstar, getUnstarAriaLabel }) => {
   );
 };
 
-const renderPartnerCell = ({ row }) => {
-  const orgs = row.original.authoringOrganizations;
-  return (
-    <div className="d-flex align-items-center justify-content-between">
-      <span>{orgs.map((org) => org.name).join(', ')}</span>
-      <div className="d-flex align-items-center">
-        {orgs.map((org) => (
-          org.logoImageUrl && (
-            <img
-              key={org.uuid}
-              className="ml-2"
-              src={org.logoImageUrl}
-              alt={org.name}
-              style={{ height: '32px', width: '82px' }}
-            />
-          )
-        ))}
-      </div>
-    </div>
-  );
-};
+const renderPartnerCell = ({ row }) => (
+  <span>{row.original.authoringOrganizations.map((org) => org.name).join(', ')}</span>
+);
+
+const renderContentTypeCell = ({ row, formattedContentTypes }) => (
+  <span>{formattedContentTypes[row.original.contentType?.toLowerCase()] ?? ''}</span>
+);
 
 const renderEmptyPlaceholderCell = (emptyPlaceholderLabel) => (
   <div className="d-flex align-items-center text-muted">
@@ -84,6 +70,8 @@ const getFeaturedColumns = ({
   TitleHeader,
   TitleCell,
   educationalPartnerLabel,
+  contentTypeLabel,
+  ContentTypeCell,
 }) => ([
   {
     Header: TitleHeader,
@@ -95,23 +83,34 @@ const getFeaturedColumns = ({
     accessor: 'authoringOrganizations',
     Cell: renderPartnerCell,
   },
+  {
+    Header: <span className="font-weight-bold text-dark">{contentTypeLabel}</span>,
+    accessor: 'contentType',
+    Cell: ContentTypeCell,
+  },
 ]);
 
 const getEmptyFeaturedColumns = ({
-  courseTitleHeader,
+  titleHeader,
   educationalPartnerHeader,
+  contentTypeHeader,
   EmptyTitleCell,
-  EmptyPartnerCell,
+  EmptyCell,
 }) => ([
   {
-    Header: courseTitleHeader,
+    Header: titleHeader,
     accessor: 'title',
     Cell: EmptyTitleCell,
   },
   {
     Header: educationalPartnerHeader,
     accessor: 'authoringOrganizations',
-    Cell: EmptyPartnerCell,
+    Cell: EmptyCell,
+  },
+  {
+    Header: contentTypeHeader,
+    accessor: 'contentType',
+    Cell: EmptyCell,
   },
 ]);
 
@@ -160,15 +159,39 @@ MaxStarredModal.propTypes = {
 const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) => {
   const intl = useIntl();
 
-  const courseTitleLabel = intl.formatMessage({
+  // Keyed by the lowercased `contentType` returned by the catalog API.
+  const formattedContentTypes = useMemo(() => ({
+    course: intl.formatMessage({
+      id: 'highlights.highlights.tab.content.type.course.label',
+      defaultMessage: 'Course',
+      description: 'Label for course content type in the highlight content card',
+    }),
+    program: intl.formatMessage({
+      id: 'highlights.highlights.tab.content.type.program.label',
+      defaultMessage: 'Program',
+      description: 'Label for program content type in the highlight content card',
+    }),
+    learnerpathway: intl.formatMessage({
+      id: 'highlights.highlights.tab.content.type.pathway.label',
+      defaultMessage: 'Pathway',
+      description: 'Label for pathway content type in the highlight content card',
+    }),
+  }), [intl]);
+
+  const titleLabel = intl.formatMessage({
     id: 'highlights.featured.table.col.title',
-    defaultMessage: 'Course Title',
-    description: 'Column header - course title',
+    defaultMessage: 'Title',
+    description: 'Column header - content title',
   });
   const educationalPartnerLabel = intl.formatMessage({
     id: 'highlights.featured.table.col.partner',
     defaultMessage: 'Educational Partner',
     description: 'Column header - educational partner',
+  });
+  const contentTypeLabel = intl.formatMessage({
+    id: 'highlights.featured.table.col.content.type',
+    defaultMessage: 'Content Type',
+    description: 'Column header - content type',
   });
   const emptyPlaceholderLabel = intl.formatMessage({
     id: 'highlights.featured.table.empty.placeholder',
@@ -188,25 +211,31 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
     const rows = starredItems
       .filter(({ contentKey }) => contentKey !== loadingContentKey)
       .map(({
-        uuid, title, contentKey, authoringOrganizations,
+        uuid, title, contentKey, authoringOrganizations, contentType,
       }) => ({
         uuid,
         title,
         contentKey,
         authoringOrganizations: authoringOrganizations || [],
+        contentType,
         isLoading: false,
       }));
     if (loadingContentKey !== null) {
       rows.push({
-        uuid: '__loading__', title: '', contentKey: '', authoringOrganizations: [], isLoading: true,
+        uuid: '__loading__',
+        title: '',
+        contentKey: '',
+        authoringOrganizations: [],
+        contentType: '',
+        isLoading: true,
       });
     }
     return rows;
   }, [starredItems, loadingContentKey]);
 
   const TitleHeader = useCallback(
-    () => renderTitleHeader(courseTitleLabel),
-    [courseTitleLabel],
+    () => renderTitleHeader(titleLabel),
+    [titleLabel],
   );
 
   const TitleCell = useCallback(
@@ -214,25 +243,33 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
     [onUnstar, getUnstarAriaLabel],
   );
 
+  const ContentTypeCell = useCallback(
+    ({ row }) => renderContentTypeCell({ row, formattedContentTypes }),
+    [formattedContentTypes],
+  );
+
   const EmptyTitleCell = useCallback(
     () => renderEmptyPlaceholderCell(emptyPlaceholderLabel),
     [emptyPlaceholderLabel],
   );
 
-  const EmptyPartnerCell = useCallback(() => null, []);
+  const EmptyCell = useCallback(() => null, []);
 
   const columns = useMemo(() => getFeaturedColumns({
     TitleHeader,
     TitleCell,
     educationalPartnerLabel,
-  }), [TitleHeader, TitleCell, educationalPartnerLabel]);
+    contentTypeLabel,
+    ContentTypeCell,
+  }), [TitleHeader, TitleCell, educationalPartnerLabel, contentTypeLabel, ContentTypeCell]);
 
   const emptyColumns = useMemo(() => getEmptyFeaturedColumns({
-    courseTitleHeader: TitleHeader,
+    titleHeader: TitleHeader,
     educationalPartnerHeader: educationalPartnerLabel,
+    contentTypeHeader: contentTypeLabel,
     EmptyTitleCell,
-    EmptyPartnerCell,
-  }), [TitleHeader, educationalPartnerLabel, EmptyTitleCell, EmptyPartnerCell]);
+    EmptyCell,
+  }), [TitleHeader, educationalPartnerLabel, contentTypeLabel, EmptyTitleCell, EmptyCell]);
 
   return (
     <div
@@ -271,7 +308,12 @@ const FeaturedContentSection = ({ starredItems, loadingContentKey, onUnstar }) =
           <DataTable
             className="featured-courses-table"
             data={[{
-              uuid: 'empty', title: '', contentKey: '', authoringOrganizations: [], isLoading: false,
+              uuid: 'empty',
+              title: '',
+              contentKey: '',
+              authoringOrganizations: [],
+              contentType: '',
+              isLoading: false,
             }]}
             columns={emptyColumns}
             itemCount={1}
@@ -289,10 +331,10 @@ FeaturedContentSection.propTypes = {
     uuid: PropTypes.string,
     title: PropTypes.string,
     contentKey: PropTypes.string,
+    contentType: PropTypes.string,
     authoringOrganizations: PropTypes.arrayOf(PropTypes.shape({
       uuid: PropTypes.string,
       name: PropTypes.string,
-      logoImageUrl: PropTypes.string,
     })),
   })).isRequired,
   loadingContentKey: PropTypes.string,
