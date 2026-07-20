@@ -6,6 +6,7 @@ import {
   Toast, StatefulButton, Icon, Spinner, useToggle,
 } from '@openedx/paragon';
 import { Download, Check, Close } from '@openedx/paragon/icons';
+import { createUtf8CsvBlob } from '../../utils';
 
 const DownloadCSVButton = ({
   jsonData, csvFileName, entityId, trackCsvDownloadClick,
@@ -37,7 +38,7 @@ const DownloadCSVButton = ({
   const downloadCsv = () => {
     setButtonState('pending');
     const csv = jsonToCSV(jsonData);
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = createUtf8CsvBlob(csv);
     saveAs(blob, csvFileName);
     showToast();
     setButtonState('complete');
@@ -54,7 +55,7 @@ const DownloadCSVButton = ({
     <div className="d-flex justify-content-end">
       { isToastShowing
      && (
-     <Toast onClose={hideToast} show={showToast}>
+     <Toast onClose={hideToast} show={isToastShowing}>
        {toastText}
      </Toast>
      )}

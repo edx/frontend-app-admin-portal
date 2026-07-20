@@ -668,6 +668,21 @@ function getTimeStampedFilename(suffix) {
 }
 
 /**
+ * Wraps CSV text in a Blob typed so spreadsheet apps (e.g. Excel) render non-Latin characters
+ * (e.g. Arabic course titles) correctly instead of as mojibake.
+ *
+ * Deliberately does NOT prepend a UTF-8 BOM itself: file-saver's `saveAs` already auto-prepends
+ * one for any blob type matching `text/*;charset=utf-8` (see its `auto_bom` helper). Adding one
+ * here too results in a double BOM in the downloaded file.
+ *
+ * @param {string} csv
+ * @returns {Blob}
+ */
+function createUtf8CsvBlob(csv) {
+  return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+}
+
+/**
  * Transform data to csv format and save to file
  *
  * @param {string} fileName
@@ -688,9 +703,7 @@ function downloadCsv(fileName, data, headers, dataEntryToRow) {
 
   const body = data.map(generateCsvRow).join('\n');
   const csvText = `${headers}\n${body}`;
-  const blob = new Blob([csvText], {
-    type: 'text/csv',
-  });
+  const blob = createUtf8CsvBlob(csvText);
   saveAs(blob, fileName);
 }
 
@@ -863,6 +876,7 @@ export {
   isFalsy,
   getTimeStampedFilename,
   downloadCsv,
+  createUtf8CsvBlob,
   splitAndTrim,
   removeStringsFromList,
   removeStringsFromListCaseInsensitive,
