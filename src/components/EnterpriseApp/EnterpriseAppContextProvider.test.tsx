@@ -7,7 +7,6 @@ import {
 import '@testing-library/jest-dom/extend-expect';
 import * as hooks from './data/hooks';
 import EnterpriseAppContextProvider from './EnterpriseAppContextProvider';
-import * as learnerCreditHooks from '../learner-credit-management/data/hooks';
 import * as subsidyRequestsContext from '../subsidy-requests/SubsidyRequestsContext';
 import * as enterpriseSubsidiesContext from '../EnterpriseSubsidiesContext';
 
@@ -136,58 +135,6 @@ describe('<EnterpriseAppContextProvider />', () => {
       } else {
         expect(screen.getByText('children'));
       }
-    });
-  });
-
-  it('renders children while enterprise customer data is loading', async () => {
-    jest.spyOn(enterpriseSubsidiesContext, 'useEnterpriseSubsidiesContext').mockReturnValue({
-      isLoading: false,
-      customerAgreement: undefined,
-      canManageLearnerCredit: false,
-      coupons: [],
-      enterpriseSubsidyTypes: [],
-      hasBillingSubscription: false,
-      isLoadingCustomerAgreement: false,
-    });
-    jest.spyOn(subsidyRequestsContext, 'useSubsidyRequestsContext').mockReturnValue({
-      isLoading: false,
-      updateSubsidyRequestConfiguration: jest.fn(),
-      subsidyRequestConfiguration: {
-        enterpriseSubsidyTypes: [],
-      },
-      decrementCouponCodeRequestCount: jest.fn(),
-      decrementLicenseRequestCount: jest.fn(),
-      enterpriseSubsidyTypesForRequests: [],
-      refreshsubsidyRequestsCounts: jest.fn(),
-      subsidyRequestsCounts: {
-        couponCodes: 0,
-        subscriptionLicenses: 0,
-      },
-    });
-    jest.spyOn(hooks, 'useEnterpriseCurationContext').mockReturnValue({
-      isLoading: false,
-    });
-    jest.spyOn(hooks, 'useUpdateActiveEnterpriseForUser').mockReturnValue({
-      isLoading: false,
-    });
-    jest.spyOn(learnerCreditHooks, 'useEnterpriseCustomer').mockReturnValue({
-      data: { productType: null },
-      isLoading: true,
-    } as unknown as ReturnType<typeof learnerCreditHooks.useEnterpriseCustomer>);
-
-    render(
-      <EnterpriseAppContextProvider
-        enterpriseId={TEST_ENTERPRISE_UUID}
-        enterpriseName={TEST_ENTERPRISE_NAME}
-        enablePortalLearnerCreditManagementScreen
-      >
-        children
-      </EnterpriseAppContextProvider>,
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('children')).toBeInTheDocument();
-      expect(screen.queryByTestId('enterprise-app-skeleton')).not.toBeInTheDocument();
     });
   });
 });

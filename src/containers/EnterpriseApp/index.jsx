@@ -22,6 +22,7 @@ const mapStateToProps = (state) => {
     enterpriseFeatures: state.portalConfiguration.enterpriseFeatures,
     enterpriseId: state.portalConfiguration.enterpriseId,
     enterpriseName: state.portalConfiguration.enterpriseName,
+    enterpriseProductType: state.portalConfiguration.enterpriseProductType,
     enterprises: enterpriseListState.data,
     error: state.portalConfiguration.error,
     loading: state.portalConfiguration.loading,

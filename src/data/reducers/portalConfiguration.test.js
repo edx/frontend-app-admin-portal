@@ -13,6 +13,7 @@ const initialState = {
   enterpriseName: null,
   enterpriseSlug: null,
   enterpriseBranding: null,
+  enterpriseProductType: null,
   identityProvider: null,
   disableExpiryMessagingForLearnerCredit: false,
   enableCodeManagementScreen: false,
@@ -40,6 +41,7 @@ const enterpriseData = {
     enterprise_slug: 'test-enterprise',
     logo: 'https://s3...',
   },
+  product_type: 'Essentials',
   contact_email: 'fake@example.com',
   identity_provider: {
     uuid: 'test-identity-provider-uuid',
@@ -78,6 +80,7 @@ describe('portalConfiguration reducer', () => {
       enterpriseName: enterpriseData.name,
       enterpriseSlug: enterpriseData.slug,
       enterpriseBranding: enterpriseData.branding_configuration,
+      enterpriseProductType: enterpriseData.product_type,
       identityProvider: enterpriseData.identity_provider,
       disableExpiryMessagingForLearnerCredit: enterpriseData.disable_expiry_messaging_for_learner_credit,
       enableCodeManagementScreen: enterpriseData.enable_portal_code_management_screen,

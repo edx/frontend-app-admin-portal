@@ -5,7 +5,6 @@ import { useParams } from 'react-router-dom';
 
 import { EnterpriseSubsidiesContext, useEnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
 import { SubsidyRequestsContext, useSubsidyRequestsContext } from '../subsidy-requests/SubsidyRequestsContext';
-import { useEnterpriseCustomer } from '../learner-credit-management/data/hooks';
 import {
   useEnterpriseCurationContext,
   useUpdateActiveEnterpriseForUser,
@@ -46,6 +45,7 @@ export type TEnterpriseAppContext = {
 interface EnterpriseAppContextProviderProps {
   enterpriseId: string;
   enterpriseName: string;
+  enterpriseProductType?: string | null;
   enablePortalLearnerCreditManagementScreen: boolean;
   children: React.ReactNode;
 }
@@ -71,6 +71,7 @@ export const EnterpriseAppContext = createContext<TEnterpriseAppContext>({
 const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> = ({
   enterpriseId,
   enterpriseName,
+  enterpriseProductType,
   enablePortalLearnerCreditManagementScreen,
   children,
 }) => {
@@ -94,10 +95,6 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
     curationTitleForCreation: enterpriseName,
   });
 
-  const {
-    data: enterpriseCustomer,
-  } = useEnterpriseCustomer(enterpriseId);
-
   const { isLoading: isUpdatingActiveEnterprise } = useUpdateActiveEnterpriseForUser({
     enterpriseId,
     user: authenticatedUser,
@@ -110,15 +107,13 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
     || isUpdatingActiveEnterprise
   );
 
-  const productType = enterpriseCustomer?.productType ?? null;
-
   // [tech debt] consolidate the other context values (e.g., useSubsidyRequestsContext)
   // into a singular `EnterpriseAppContext.Provider`.
   const enterpriseAppContext = useMemo(() => ({
     enterpriseCuration: enterpriseCurationContext,
-    productType,
+    productType: enterpriseProductType ?? null,
     slug: enterpriseSlug ?? '',
-  } as TEnterpriseAppContext), [enterpriseCurationContext, enterpriseSlug, productType]);
+  } as TEnterpriseAppContext), [enterpriseCurationContext, enterpriseProductType, enterpriseSlug]);
 
   if (isLoading) {
     return <EnterpriseAppSkeleton />;
