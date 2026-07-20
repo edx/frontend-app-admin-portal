@@ -27,6 +27,7 @@ import {
   ANALYTICS_COOKIE_NAME,
   ADMINS_TAB_NEW_FEATURE_COOKIE_NAME,
   LPR_UPDATE_COOKIE_NAME,
+  TOUR_TARGETS,
 } from './constants';
 
 import {
@@ -112,6 +113,8 @@ const ProductTours = ({
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/`);
     } else if (targetId === CUSTOMIZE_REPORTS_SIDEBAR) {
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.reporting}/`);
+    } else if (targetId === TOUR_TARGETS.SETTINGS_SIDEBAR) {
+      navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.settings}/`);
     } else if (targetId === EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR) {
       sendEnterpriseTrackEvent(enterpriseSlug, ADMIN_TOUR_EVENT_NAMES.EDIT_HIGHLIGHTS_VIEWED_EVENT_NAME);
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}/`);
