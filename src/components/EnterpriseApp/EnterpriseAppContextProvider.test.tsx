@@ -173,7 +173,7 @@ describe('<EnterpriseAppContextProvider />', () => {
     jest.spyOn(learnerCreditHooks, 'useEnterpriseCustomer').mockReturnValue({
       data: { productType: null },
       isLoading: true,
-    });
+    } as unknown as ReturnType<typeof learnerCreditHooks.useEnterpriseCustomer>);
 
     render(
       <EnterpriseAppContextProvider
