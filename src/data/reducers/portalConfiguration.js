@@ -51,7 +51,7 @@ const portalConfiguration = (state = initialState, action) => {
         enterpriseName: action.payload.data.name,
         enterpriseSlug: action.payload.data.slug,
         enterpriseBranding: action.payload.data.branding_configuration,
-        enterpriseProductType: action.payload.data.product_type ?? null,
+        enterpriseProductType: action.payload.data.product_type ?? action.payload.data.productType ?? null,
         identityProvider: action.payload.data.identity_provider,
         disableExpiryMessagingForLearnerCredit: action.payload.data.disable_expiry_messaging_for_learner_credit,
         enableCodeManagementScreen: action.payload.data.enable_portal_code_management_screen || false,
@@ -127,6 +127,10 @@ const portalConfiguration = (state = initialState, action) => {
       return {
         ...state,
         ...action.payload.data,
+        enterpriseProductType:
+          action.payload.data.product_type
+          ?? action.payload.data.productType
+          ?? state.enterpriseProductType,
       };
     default:
       return state;

@@ -103,6 +103,32 @@ describe('portalConfiguration reducer', () => {
     })).toEqual(expected);
   });
 
+  it('accepts camelCase productType in portal configuration updates', () => {
+    expect(portalConfiguration(undefined, {
+      type: FETCH_PORTAL_CONFIGURATION_SUCCESS,
+      payload: {
+        data: {
+          ...enterpriseData,
+          product_type: undefined,
+          productType: 'Essentials',
+        },
+        enterpriseFeatures: mockEnterpriseFeatures,
+      },
+    }).enterpriseProductType).toBe('Essentials');
+
+    expect(portalConfiguration({
+      ...initialState,
+      enterpriseProductType: 'Teams',
+    }, {
+      type: 'UPDATE_PORTAL_CONFIGURATION',
+      payload: {
+        data: {
+          productType: 'Essentials',
+        },
+      },
+    }).enterpriseProductType).toBe('Essentials');
+  });
+
   it('updates fetch portal configuration failure state', () => {
     const failedState = { ...initialState };
     failedState.loading = false;
