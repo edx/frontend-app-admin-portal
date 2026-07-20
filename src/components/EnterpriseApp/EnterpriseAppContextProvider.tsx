@@ -96,7 +96,6 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
 
   const {
     data: enterpriseCustomer,
-    isLoading: isLoadingEnterpriseCustomer,
   } = useEnterpriseCustomer(enterpriseId);
 
   const { isLoading: isUpdatingActiveEnterprise } = useUpdateActiveEnterpriseForUser({
@@ -108,7 +107,6 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
     subsidyRequestsContext.isLoading
     || enterpriseSubsidiesContext.isLoading
     || enterpriseCurationContext.isLoading
-    || isLoadingEnterpriseCustomer
     || isUpdatingActiveEnterprise
   );
 
