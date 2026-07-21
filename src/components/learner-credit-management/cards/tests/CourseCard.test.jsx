@@ -1154,6 +1154,7 @@ describe('CourseCard', () => {
       expectedAssignableEnrollByDates: [
         originalData.courseRuns[0].enroll_by,
       ],
+      expectedNumCustomRunBadges: 0,
     },
     // The "mixed" case, i.e. course contains both restricted and unrestricted runs.
     {
@@ -1179,6 +1180,7 @@ describe('CourseCard', () => {
         originalData.courseRuns[0].enroll_by,
         dayjs.unix(enrollByTimestamp).add(10, 'days').unix(),
       ],
+      expectedNumCustomRunBadges: 1,
     },
     // The "unicorn course" case, i.e. course contains only restricted runs.
     {
@@ -1202,6 +1204,7 @@ describe('CourseCard', () => {
       expectedAssignableEnrollByDates: [
         dayjs.unix(enrollByTimestamp).add(10, 'days').unix(),
       ],
+      expectedNumCustomRunBadges: 1,
     },
     // Ensure skeletons appear when the contains_content_items API calls are still loading.
     {
@@ -1229,6 +1232,7 @@ describe('CourseCard', () => {
       // won't return them to be counted.
       expectedNumRunSkeletons: 1,
       expectedAssignableEnrollByDates: [],
+      expectedNumCustomRunBadges: 0,
     },
   ])('course card renders assignable restricted runs (%s)', async ({
     runs,
@@ -1237,6 +1241,7 @@ describe('CourseCard', () => {
     expectedCoursePriceSkeleton,
     expectedNumRunSkeletons,
     expectedAssignableEnrollByDates,
+    expectedNumCustomRunBadges,
   }) => {
     const user = userEvent.setup();
     getConfig.mockReturnValue({
@@ -1278,6 +1283,9 @@ describe('CourseCard', () => {
           )).toBeInTheDocument();
         });
       });
+      // Restricted (custom presentation) runs are labeled with a "Custom" badge;
+      // unrestricted runs are not.
+      expect(screen.queryAllByText('Custom')).toHaveLength(expectedNumCustomRunBadges);
     }
   });
 });
