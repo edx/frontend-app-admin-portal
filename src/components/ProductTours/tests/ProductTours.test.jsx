@@ -69,6 +69,12 @@ const LEARNER_CREDIT_PAGE_LOCATION = `/${ENTERPRISE_SLUG}/admin/${ROUTE_NAMES.le
 let onboardingEnabled = true;
 let lastLogin = null;
 
+const mockNavigate = jest.fn();
+jest.mock('react-router', () => ({
+  ...jest.requireActual('react-router'),
+  useNavigate: () => mockNavigate,
+}));
+
 jest.mock('../AdminOnboardingTours/data/useHydrateAdminOnboardingData');
 
 const ToursWithContext = ({
@@ -398,6 +404,16 @@ describe('<ProductTours/>', () => {
         expect(screen.queryByText('Track learner progress')).toBeTruthy();
         expect(screen.queryByText('Organize members')).toBeTruthy();
         expect(screen.queryByText('Set up preferences')).toBeTruthy();
+      });
+    });
+
+    it('navigates to the settings page when the "Set up preferences" step is selected', async () => {
+      global.localStorage.setItem(ONBOARDING_WELCOME_MODAL_COOKIE_NAME, 'true');
+      render(<ToursWithContext />);
+      const step = await screen.findByText('Set up preferences');
+      userEvent.click(step);
+      await waitFor(() => {
+        expect(mockNavigate).toHaveBeenCalledWith(`/${ENTERPRISE_SLUG}/admin/${ROUTE_NAMES.settings}/`);
       });
     });
 
