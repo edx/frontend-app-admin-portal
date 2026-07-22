@@ -60,6 +60,24 @@ export const SUBSCRIPTION_STATUS_BADGE_MAP = {
   [TRIAL]: { variant: 'info' },
 };
 
+// Billing subscription product types (from portalConfiguration.productType)
+export const ESSENTIALS = 'essentials';
+export const TEAMS = 'teams';
+
+// Maps a normalized productType value to its translated label message descriptor
+export const SUBSCRIPTION_TYPE_LABEL_MAP = {
+  [ESSENTIALS]: {
+    id: 'admin.portal.billing.subscription.type.essentials',
+    defaultMessage: 'Essentials',
+    description: 'Label for the Essentials subscription type',
+  },
+  [TEAMS]: {
+    id: 'admin.portal.billing.subscription.type.teams',
+    defaultMessage: 'Teams',
+    description: 'Label for the Teams subscription type',
+  },
+};
+
 // Self-service plan types
 export const SELF_SERVICE_TRIAL = 'self-service-trial';
 export const SELF_SERVICE_PAID = 'self-service-paid';

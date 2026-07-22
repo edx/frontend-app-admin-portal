@@ -23,7 +23,6 @@ import Hero from '../Hero';
 
 interface BillingPageProps {
   enterpriseId: string;
-  productType?: string | null;
 }
 
 /**
@@ -36,7 +35,7 @@ interface BillingPageProps {
  * - Transaction history
  * - Subscription lifecycle controls
  */
-const BillingPage = ({ enterpriseId, productType = null }: BillingPageProps) => {
+const BillingPage = ({ enterpriseId }: BillingPageProps) => {
   const [isAddPaymentMethodModalOpen, setIsAddPaymentMethodModalOpen] = useState(false);
   const [isAddBillingAddressModalOpen, setIsAddBillingAddressModalOpen] = useState(false);
   const [deleteModalState, setDeleteModalState] = useState<{
@@ -278,7 +277,6 @@ const BillingPage = ({ enterpriseId, productType = null }: BillingPageProps) => 
             {/* Subscription Lifecycle Section (Teams/Essentials only) */}
             <SubscriptionLifecycle
               enterpriseUuid={enterpriseId || ''}
-              productType={productType}
             />
           </Stack>
 

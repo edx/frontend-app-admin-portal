@@ -50,7 +50,7 @@ const portalConfiguration = (state = initialState, action) => {
         enterpriseId: action.payload.data.uuid,
         enterpriseName: action.payload.data.name,
         enterpriseSlug: action.payload.data.slug,
-        productType: action.payload.data.product_type || action.payload.data.productType || null,
+        productType: action.payload.data.product_type ?? action.payload.data.productType ?? null,
         enterpriseBranding: action.payload.data.branding_configuration,
         identityProvider: action.payload.data.identity_provider,
         disableExpiryMessagingForLearnerCredit: action.payload.data.disable_expiry_messaging_for_learner_credit,

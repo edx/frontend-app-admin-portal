@@ -1,4 +1,7 @@
 import React from 'react';
+import { Provider } from 'react-redux';
+import configureMockStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -10,6 +13,7 @@ import * as hooks from '../data/hooks';
 jest.mock('../data/hooks');
 
 const TEST_ENTERPRISE_UUID = 'test-enterprise-uuid';
+const mockStore = configureMockStore([thunk]);
 
 const mockSubscription = {
   yearlyAmount: 120000,
@@ -26,16 +30,22 @@ const renderSubscriptionLifecycle = (productType: string | null) => {
       mutations: { retry: false },
     },
   });
+  const store = mockStore({
+    portalConfiguration: {
+      productType,
+    },
+  });
 
   return render(
-    <QueryClientProvider client={queryClient}>
-      <IntlProvider locale="en">
-        <SubscriptionLifecycle
-          enterpriseUuid={TEST_ENTERPRISE_UUID}
-          productType={productType}
-        />
-      </IntlProvider>
-    </QueryClientProvider>,
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <IntlProvider locale="en">
+          <SubscriptionLifecycle
+            enterpriseUuid={TEST_ENTERPRISE_UUID}
+          />
+        </IntlProvider>
+      </QueryClientProvider>
+    </Provider>,
   );
 };
 
@@ -63,10 +73,17 @@ describe('SubscriptionLifecycle', () => {
     expect(screen.getByText('Essentials')).toBeInTheDocument();
   });
 
-  it('falls back to Teams when product type is missing', () => {
-    renderSubscriptionLifecycle(null);
+  it('renders Teams for teams product type', () => {
+    renderSubscriptionLifecycle('teams');
 
     expect(screen.getByText('Subscription Type')).toBeInTheDocument();
     expect(screen.getByText('Teams')).toBeInTheDocument();
+  });
+
+  it('falls back to Unknown when product type is missing', () => {
+    renderSubscriptionLifecycle(null);
+
+    expect(screen.getByText('Subscription Type')).toBeInTheDocument();
+    expect(screen.getByText('Unknown')).toBeInTheDocument();
   });
 });

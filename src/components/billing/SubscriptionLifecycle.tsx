@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 import {
   ActionRow, Alert, Button, Card, ModalDialog, Stack,
 } from '@openedx/paragon';
@@ -10,18 +11,25 @@ import {
 import CancelSubscriptionSuccessToast from './CancelSubscriptionSuccessToast';
 import ReinstateSubscriptionSuccessToast from './ReinstateSubscriptionSuccessToast';
 import SubscriptionErrorToast from './SubscriptionErrorToast';
+import { SUBSCRIPTION_TYPE_LABEL_MAP } from '../subscriptions/data/constants';
+
+const SUBSCRIPTION_TYPE_UNKNOWN_MESSAGE = {
+  id: 'admin.portal.billing.subscription.type.unknown',
+  defaultMessage: 'Unknown',
+  description: 'Fallback label for an unrecognized subscription type',
+};
 
 /**
  * SubscriptionLifecycle - Component for managing subscription cancellation and reinstatement
  *
  * Allows admins to cancel subscriptions (effective at period end) or reinstate cancelled subscriptions.
  */
-const SubscriptionLifecycle = ({
+const BaseSubscriptionLifecycle = ({
   enterpriseUuid,
   productType,
 }: {
   enterpriseUuid: string;
-  productType?: string | null;
+  productType?: 'essentials' | 'teams' | null;
 }) => {
   const intl = useIntl();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -125,7 +133,10 @@ const SubscriptionLifecycle = ({
   const formattedAmount = formatAmount(yearlyAmount, currency);
   const formattedPeriodEnd = formatDate(currentPeriodEnd);
   const normalizedProductType = productType?.toLowerCase();
-  const subscriptionTypeLabel = normalizedProductType === 'essentials' ? 'Essentials' : 'Teams';
+  const subscriptionTypeMessage = SUBSCRIPTION_TYPE_LABEL_MAP[normalizedProductType ?? ''];
+  const subscriptionTypeLabel = subscriptionTypeMessage
+    ? intl.formatMessage(subscriptionTypeMessage)
+    : intl.formatMessage(SUBSCRIPTION_TYPE_UNKNOWN_MESSAGE) ?? 'Unknown';
 
   return (
     <>
@@ -323,5 +334,11 @@ const SubscriptionLifecycle = ({
     </>
   );
 };
+
+const mapStateToProps = (state) => ({
+  productType: state.portalConfiguration.productType,
+});
+
+const SubscriptionLifecycle = connect(mapStateToProps)(BaseSubscriptionLifecycle);
 
 export default SubscriptionLifecycle;

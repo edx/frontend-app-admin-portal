@@ -33,13 +33,10 @@ jest.mock('../TransactionHistory', () => function MockTransactionHistory() {
   return <div data-testid="transaction-history">Transaction History Component</div>;
 });
 
-jest.mock('../SubscriptionLifecycle', () => function MockSubscriptionLifecycle({ productType }) {
-  const normalizedProductType = productType?.toLowerCase();
-  const subscriptionTypeLabel = normalizedProductType === 'essentials' ? 'Essentials' : 'Teams';
+jest.mock('../SubscriptionLifecycle', () => function MockSubscriptionLifecycle() {
   return (
     <div data-testid="subscription-lifecycle">
       Subscription Lifecycle Component
-      <span data-testid="subscription-type-label">{subscriptionTypeLabel}</span>
     </div>
   );
 });
@@ -146,7 +143,7 @@ const setupMocks = (overrides = {}) => {
   });
 };
 
-const renderBillingPage = (enterpriseId = 'test-enterprise-123', productType = null) => {
+const renderBillingPage = (enterpriseId = 'test-enterprise-123') => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -157,7 +154,7 @@ const renderBillingPage = (enterpriseId = 'test-enterprise-123', productType = n
   return renderWithRouter(
     <QueryClientProvider client={queryClient}>
       <IntlProvider locale="en">
-        <BillingPage enterpriseId={enterpriseId} productType={productType} />
+        <BillingPage enterpriseId={enterpriseId} />
       </IntlProvider>
     </QueryClientProvider>,
   );
@@ -304,26 +301,6 @@ describe('BillingPage', () => {
       expect(screen.getByTestId('payment-method-list')).toBeInTheDocument();
       expect(screen.getByTestId('transaction-history')).toBeInTheDocument();
       expect(screen.getByTestId('subscription-lifecycle')).toBeInTheDocument();
-    });
-  });
-
-  describe('Subscription Type Label', () => {
-    it('passes Teams subscription type for teams customers', () => {
-      renderBillingPage('test-enterprise-123', 'teams');
-
-      expect(screen.getByTestId('subscription-type-label')).toHaveTextContent('Teams');
-    });
-
-    it('passes Essentials subscription type for essentials customers', () => {
-      renderBillingPage('test-enterprise-123', 'essentials');
-
-      expect(screen.getByTestId('subscription-type-label')).toHaveTextContent('Essentials');
-    });
-
-    it('falls back to Teams when productType is missing', () => {
-      renderBillingPage('test-enterprise-123', null);
-
-      expect(screen.getByTestId('subscription-type-label')).toHaveTextContent('Teams');
     });
   });
 
