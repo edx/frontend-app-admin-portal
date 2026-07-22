@@ -9,6 +9,7 @@ import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { Provider } from 'react-redux';
 import configureStore from 'redux-mock-store';
+import thunk from 'redux-thunk';
 import { logError } from '@edx/frontend-platform/logging';
 import messages from '../messages';
 import TourCompleteModal from '../../TourCompleteModal';
@@ -22,7 +23,7 @@ const mockLogError = logError as jest.Mock;
 
 jest.mock('../data/images/CompletedModal.svg', () => 'mocked-image-path');
 
-const mockStore = configureStore([]);
+const mockStore = configureStore([thunk]);
 
 const renderComponent = (props = {}, storeState = {}) => {
   const defaultProps = {
@@ -40,13 +41,16 @@ const renderComponent = (props = {}, storeState = {}) => {
 
   const store = mockStore(defaultState);
 
-  return render(
-    <IntlProvider locale="en" messages={{}}>
-      <Provider store={store}>
-        <TourCompleteModal {...defaultProps} />
-      </Provider>
-    </IntlProvider>,
-  );
+  return {
+    store,
+    ...render(
+      <IntlProvider locale="en" messages={{}}>
+        <Provider store={store}>
+          <TourCompleteModal {...defaultProps} />
+        </Provider>
+      </IntlProvider>,
+    ),
+  };
 };
 
 describe('TourCompleteModal', () => {
@@ -87,6 +91,19 @@ describe('TourCompleteModal', () => {
     });
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('dispatches the onboarding tour completed action when done button is clicked', async () => {
+    const { store } = renderComponent();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+
+    await waitFor(() => {
+      expect(store.getActions()).toContainEqual({
+        type: 'SET_ONBOARDING_TOUR_COMPLETED',
+        payload: { completed: true },
+      });
+    });
   });
 
   it('logs error when updateCompletedTour fails', async () => {

@@ -4,6 +4,7 @@ import {
   FETCH_ENTERPRISE_CUSTOMER_ADMIN_SUCCESS,
   FETCH_ENTERPRISE_CUSTOMER_ADMIN_FAILURE,
   SET_ONBOARDING_TOUR_DISMISSED,
+  SET_ONBOARDING_TOUR_COMPLETED,
 } from '../constants/enterpriseCustomerAdmin';
 
 /**
@@ -81,6 +82,11 @@ const enterpriseCustomerAdmin = (
       return {
         ...state,
         onboardingTourDismissed: action.payload.dismissed,
+      };
+    case SET_ONBOARDING_TOUR_COMPLETED:
+      return {
+        ...state,
+        onboardingTourCompleted: action.payload.completed,
       };
     default:
       return state;
