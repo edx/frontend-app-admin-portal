@@ -560,6 +560,22 @@ describe('<Admin />', () => {
       });
     });
 
+    it('keeps enrollments CSV enabled without redux table data', async () => {
+      render(
+        <AdminWrapper
+          {...baseProps}
+          enterpriseId="test-enterprise-id"
+          table={{}}
+          location={{
+            pathname: '/',
+          }}
+        />,
+      );
+
+      const downloadButton = await screen.findByTestId('download-csv-btn');
+      expect(downloadButton).toBeEnabled();
+    });
+
     it('keeps enrolled learners CSV enabled without redux table data', async () => {
       render(
         <AdminWrapper

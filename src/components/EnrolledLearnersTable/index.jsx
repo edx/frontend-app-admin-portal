@@ -12,34 +12,15 @@ import { Error } from '@openedx/paragon/icons';
 import {
   DEFAULT_TABLE_ORDERING,
   DEFAULT_TABLE_PAGE_SIZE,
+  getSortStateFromOrdering,
+  getTableStateFromSearch,
   i18nFormatTimestamp,
   updateUrl,
 } from '../../utils';
 import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiService';
+import EmailCell from '../EmailCell';
 
 const TABLE_ID = 'enrolled-learners';
-
-const getTableStateFromSearch = (search) => {
-  const query = new URLSearchParams(search);
-  const page = parseInt(query.get('page'), 10);
-
-  return {
-    pageIndex: Number.isNaN(page) || page < 1 ? 0 : page - 1,
-    ordering: query.get('ordering') || DEFAULT_TABLE_ORDERING,
-  };
-};
-
-const getSortStateFromOrdering = ordering => ([{
-  id: (ordering || DEFAULT_TABLE_ORDERING).replace('-', ''),
-  desc: ordering?.startsWith('-') || false,
-}]);
-
-const EmailCell = ({ value }) => (
-  <span data-hj-suppress>{value}</span>
-);
-EmailCell.propTypes = {
-  value: PropTypes.string,
-};
 
 const renderErrorMessage = () => (
   <Alert variant="danger" icon={Error}>
@@ -65,7 +46,7 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const initialTableState = React.useMemo(
-    () => getTableStateFromSearch(location.search),
+    () => getTableStateFromSearch(location.search, DEFAULT_TABLE_ORDERING),
     [location.search],
   );
   const [data, setData] = React.useState([]);
@@ -109,7 +90,7 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
   ], [intl]);
 
   React.useEffect(() => {
-    const nextTableState = getTableStateFromSearch(location.search);
+    const nextTableState = getTableStateFromSearch(location.search, DEFAULT_TABLE_ORDERING);
 
     if (nextTableState.pageIndex !== pageIndex) {
       setPageIndex(nextTableState.pageIndex);
@@ -220,7 +201,7 @@ const EnrolledLearnersTable = ({ enterpriseId }) => {
       initialState={{
         pageSize: DEFAULT_TABLE_PAGE_SIZE,
         pageIndex,
-        sortBy: getSortStateFromOrdering(ordering),
+        sortBy: getSortStateFromOrdering(ordering, DEFAULT_TABLE_ORDERING),
       }}
       data={data}
       itemCount={itemCount}
