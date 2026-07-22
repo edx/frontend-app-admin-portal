@@ -792,6 +792,31 @@ function getFilteredQueryParams(queryString, expectedParams) {
   return filteredOptions;
 }
 
+// Allowed query params for filtering learner-report tables (search, CSV export, and filter reset).
+const FILTER_QUERY_PARAMS = ['search', 'search_course', 'search_start_date', 'budget_uuid', 'group_uuid', 'search_enrollment'];
+
+const getTableStateFromSearch = (search, defaultOrdering) => {
+  const query = new URLSearchParams(search);
+  const page = parseInt(query.get('page'), 10);
+
+  return {
+    pageIndex: Number.isNaN(page) || page < 1 ? 0 : page - 1,
+    ordering: query.get('ordering') || defaultOrdering,
+  };
+};
+
+// Assumes a single-field DRF ordering string (one optional leading `-` for descending, e.g.
+// `-current_grade`), matching every consumer's single-column manualSortBy usage. Not safe to
+// pass a multi-field ordering (e.g. `-grade,name`) — that would need a different return shape.
+const getSortStateFromOrdering = (ordering, defaultOrdering) => {
+  const effectiveOrdering = ordering || defaultOrdering;
+  const desc = effectiveOrdering.startsWith('-');
+  return [{
+    id: desc ? effectiveOrdering.slice(1) : effectiveOrdering,
+    desc,
+  }];
+};
+
 /**
  * Build a logout URL that returns the user to `/<enterpriseSlug>/admin/register`
  * on this app after logging out of edx-platform.
@@ -884,4 +909,7 @@ export {
   getFromLocalStorage,
   getFilteredQueryParams,
   getEnterpriseAdminRegisterLogoutUrl,
+  FILTER_QUERY_PARAMS,
+  getTableStateFromSearch,
+  getSortStateFromOrdering,
 };
