@@ -4,6 +4,7 @@ import {
   FETCH_ENTERPRISE_CUSTOMER_ADMIN_SUCCESS,
   FETCH_ENTERPRISE_CUSTOMER_ADMIN_FAILURE,
   SET_ONBOARDING_TOUR_DISMISSED,
+  SET_ONBOARDING_TOUR_COMPLETED,
 } from '../constants/enterpriseCustomerAdmin';
 
 const initialState: EnterpriseCustomerAdminState = {
@@ -131,6 +132,23 @@ describe('enterpriseCustomerAdmin reducer', () => {
     expect(enterpriseCustomerAdmin(prevState, {
       type: SET_ONBOARDING_TOUR_DISMISSED,
       payload: { dismissed: false },
+    })).toEqual(expected);
+  });
+
+  it('handles SET_ONBOARDING_TOUR_COMPLETED when completing the tour', () => {
+    const prevState = {
+      ...initialState,
+      onboardingTourCompleted: false,
+    };
+
+    const expected = {
+      ...prevState,
+      onboardingTourCompleted: true,
+    };
+
+    expect(enterpriseCustomerAdmin(prevState, {
+      type: SET_ONBOARDING_TOUR_COMPLETED,
+      payload: { completed: true },
     })).toEqual(expected);
   });
 });
