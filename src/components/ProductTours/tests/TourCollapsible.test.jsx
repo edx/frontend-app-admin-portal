@@ -273,6 +273,7 @@ describe('TourCollapsible', () => {
       },
       portalConfiguration: {
         enableAnalyticsScreen: true,
+        enablePeopleManagementScreen: true,
         enableReportingConfigScreen: true,
         enableSubscriptionManagementScreen: true,
       },
@@ -415,6 +416,36 @@ describe('TourCollapsible', () => {
     };
     setup(state, true);
     expect(screen.queryByText('Administer subscriptions')).not.toBeInTheDocument();
+  });
+
+  it('displays the organize members step when people management is enabled', () => {
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enablePeopleManagementScreen: true,
+      },
+    };
+    setup(state, true);
+    expect(screen.queryByText('Organize members')).toBeInTheDocument();
+  });
+
+  it('does not display organize members step when people management is disabled', () => {
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enablePeopleManagementScreen: false,
+      },
+    };
+    setup(state, true);
+    expect(screen.queryByText('Organize members')).not.toBeInTheDocument();
   });
 
   it('does not display administer subscriptions step when there are no subscription plans', () => {

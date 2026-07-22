@@ -42,6 +42,7 @@ interface Props {
   dismissOnboardingTour: (adminUuid: string) => void;
   editHighlightsEnabled: boolean;
   enableAnalyticsScreen: boolean;
+  enablePeopleManagementScreen: boolean;
   enableReportingConfigScreen: boolean;
   enableSubscriptionManagementScreen: boolean;
   onboardingTourCompleted: boolean;
@@ -65,6 +66,7 @@ const TourCollapsible: FC<Props> = (
     dismissOnboardingTour: dismissTour,
     editHighlightsEnabled,
     enableAnalyticsScreen,
+    enablePeopleManagementScreen,
     enableReportingConfigScreen,
     enableSubscriptionManagementScreen,
     onboardingTourCompleted,
@@ -200,6 +202,8 @@ const TourCollapsible: FC<Props> = (
           return features.ANALYTICS && enableAnalyticsScreen;
         case EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR:
           return isHighlightsAvailable;
+        case ORGANIZE_LEARNER_TARGETS.PEOPLE_MANAGEMENT_SIDEBAR:
+          return enablePeopleManagementScreen;
         default:
           return true;
       }
@@ -224,6 +228,7 @@ const TourCollapsible: FC<Props> = (
     customerAgreement?.subscriptions,
     enableAnalyticsScreen,
     editHighlightsEnabled,
+    enablePeopleManagementScreen,
     enableReportingConfigScreen,
     enableSubscriptionManagementScreen,
     isHighlightsAvailable,
@@ -289,6 +294,7 @@ const mapStateToProps = state => ({
   editHighlightsEnabled:
     (state.portalConfiguration.enterpriseFeatures?.enterpriseEditHighlightsEnabled ?? false) as boolean,
   enableAnalyticsScreen: state.portalConfiguration.enableAnalyticsScreen as boolean,
+  enablePeopleManagementScreen: state.portalConfiguration.enablePeopleManagementScreen as boolean,
   enableReportingConfigScreen: state.portalConfiguration.enableReportingConfigScreen as boolean,
   enableSubscriptionManagementScreen: state.portalConfiguration.enableSubscriptionManagementScreen as boolean,
   onboardingTourCompleted: state.enterpriseCustomerAdmin.onboardingTourCompleted as boolean,
