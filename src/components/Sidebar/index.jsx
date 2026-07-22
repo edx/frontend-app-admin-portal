@@ -41,6 +41,7 @@ const Sidebar = ({
   enableReportingConfigScreen,
   enableSubscriptionManagementScreen,
   enableAnalyticsScreen,
+  enablePeopleManagementScreen,
   onWidthChange,
   isMobile,
   onMount,
@@ -198,6 +199,7 @@ const Sidebar = ({
       id: TOUR_TARGETS.PEOPLE_MANAGEMENT,
       to: `${baseUrl}/admin/${ROUTE_NAMES.peopleManagement}`,
       icon: <Icon src={Person} />,
+      hidden: !enablePeopleManagementScreen,
     },
     {
       title: intl.formatMessage({
@@ -303,6 +305,7 @@ Sidebar.defaultProps = {
   enableReportingConfigScreen: false,
   enableSubscriptionManagementScreen: false,
   enableAnalyticsScreen: false,
+  enablePeopleManagementScreen: true,
   onWidthChange: () => {},
   isMobile: false,
 };
@@ -317,6 +320,7 @@ Sidebar.propTypes = {
   enableReportingConfigScreen: PropTypes.bool,
   enableSubscriptionManagementScreen: PropTypes.bool,
   enableAnalyticsScreen: PropTypes.bool,
+  enablePeopleManagementScreen: PropTypes.bool,
   onWidthChange: PropTypes.func,
   onMount: PropTypes.func.isRequired,
   isMobile: PropTypes.bool,

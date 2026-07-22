@@ -19,6 +19,7 @@ const initialState = {
   enableCodeManagementScreen: false,
   enableReportingConfigScreen: false,
   enableSubscriptionManagementScreen: false,
+  enablePeopleManagementScreen: false,
   enableIntegratedCustomerLearnerPortalSearch: false,
   enableApiCredentialGeneration: false,
   enableLearnerPortal: false,
@@ -54,6 +55,7 @@ const enterpriseData = {
   enable_subscription_managementScreen: false,
   enable_integrated_customer_learner_portal_search: false,
   enable_analytics_screen: true,
+  enable_people_management: true,
   enable_learner_portal: true,
   enable_portal_lms_configurations_screen: true,
   enable_universal_link: true,
@@ -88,6 +90,7 @@ describe('portalConfiguration reducer', () => {
       enableSubscriptionManagementScreen: enterpriseData.enable_portal_subscription_management_screen, // eslint-disable-line max-len
       enableSamlConfigurationScreen: enterpriseData.enable_portal_saml_configuration_screen,
       enableAnalyticsScreen: enterpriseData.enable_analytics_screen,
+      enablePeopleManagementScreen: enterpriseData.enable_people_management,
       enableLearnerPortal: enterpriseData.enable_learner_portal,
       enableLmsConfigurationsScreen: enterpriseData.enable_portal_lms_configurations_screen,
       enableUniversalLink: enterpriseData.enable_universal_link,

@@ -42,8 +42,10 @@ interface Props {
   dismissOnboardingTour: (adminUuid: string) => void;
   editHighlightsEnabled: boolean;
   enableAnalyticsScreen: boolean;
+  enablePeopleManagementScreen: boolean;
   enableReportingConfigScreen: boolean;
   enableSubscriptionManagementScreen: boolean;
+  onboardingTourCompleted: boolean;
   onTourSelect?: (targetId: string) => void;
   reopenOnboardingTour: (adminUuid: string) => void;
   showCollapsible: boolean;
@@ -64,8 +66,10 @@ const TourCollapsible: FC<Props> = (
     dismissOnboardingTour: dismissTour,
     editHighlightsEnabled,
     enableAnalyticsScreen,
+    enablePeopleManagementScreen,
     enableReportingConfigScreen,
     enableSubscriptionManagementScreen,
+    onboardingTourCompleted,
     onTourSelect,
     reopenOnboardingTour: reopenTour,
     showCollapsible,
@@ -198,6 +202,8 @@ const TourCollapsible: FC<Props> = (
           return features.ANALYTICS && enableAnalyticsScreen;
         case EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR:
           return isHighlightsAvailable;
+        case ORGANIZE_LEARNER_TARGETS.PEOPLE_MANAGEMENT_SIDEBAR:
+          return enablePeopleManagementScreen;
         default:
           return true;
       }
@@ -222,6 +228,7 @@ const TourCollapsible: FC<Props> = (
     customerAgreement?.subscriptions,
     enableAnalyticsScreen,
     editHighlightsEnabled,
+    enablePeopleManagementScreen,
     enableReportingConfigScreen,
     enableSubscriptionManagementScreen,
     isHighlightsAvailable,
@@ -242,6 +249,7 @@ const TourCollapsible: FC<Props> = (
         <FloatingCollapsible
           title={intl.formatMessage(messages.collapsibleTitle)}
           onDismiss={handleDismiss}
+          hideDismissButton={onboardingTourCompleted}
         >
           <p className="small">{intl.formatMessage(messages.collapsibleIntro)}</p>
           <Stack gap={2} className="mb-3">
@@ -286,6 +294,7 @@ const mapStateToProps = state => ({
   editHighlightsEnabled:
     (state.portalConfiguration.enterpriseFeatures?.enterpriseEditHighlightsEnabled ?? false) as boolean,
   enableAnalyticsScreen: state.portalConfiguration.enableAnalyticsScreen as boolean,
+  enablePeopleManagementScreen: state.portalConfiguration.enablePeopleManagementScreen as boolean,
   enableReportingConfigScreen: state.portalConfiguration.enableReportingConfigScreen as boolean,
   enableSubscriptionManagementScreen: state.portalConfiguration.enableSubscriptionManagementScreen as boolean,
   onboardingTourCompleted: state.enterpriseCustomerAdmin.onboardingTourCompleted as boolean,

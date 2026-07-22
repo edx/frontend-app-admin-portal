@@ -23,6 +23,7 @@ const initialState = {
   enableSamlConfigurationScreen: false,
   enableLmsConfigurationsScreen: false,
   enableAnalyticsScreen: false,
+  enablePeopleManagementScreen: false,
   enableIntegratedCustomerLearnerPortalSearch: false,
   enableLearnerPortal: false,
   enableUniversalLink: false,
@@ -59,6 +60,7 @@ const portalConfiguration = (state = initialState, action) => {
         enableSubscriptionManagementScreen: action.payload.data.enable_portal_subscription_management_screen, // eslint-disable-line max-len
         enableSamlConfigurationScreen: action.payload.data.enable_portal_saml_configuration_screen,
         enableAnalyticsScreen: action.payload.data.enable_analytics_screen,
+        enablePeopleManagementScreen: action.payload.data.enable_people_management,
         enableLearnerPortal: action.payload.data.enable_learner_portal,
         enableIntegratedCustomerLearnerPortalSearch: action.payload.data.enable_integrated_customer_learner_portal_search, // eslint-disable-line max-len
         enableLmsConfigurationsScreen: action.payload.data.enable_portal_lms_configurations_screen,
@@ -87,6 +89,7 @@ const portalConfiguration = (state = initialState, action) => {
         enableSubscriptionManagementScreen: false,
         enableSamlConfigurationScreen: false,
         enableAnalyticsScreen: false,
+        enablePeopleManagementScreen: false,
         enableLearnerPortal: false,
         enableIntegratedCustomerLearnerPortalSearch: false,
         enableLmsConfigurationsScreen: false,
@@ -113,6 +116,7 @@ const portalConfiguration = (state = initialState, action) => {
         enableSubscriptionManagementScreen: false,
         enableSamlConfigurationScreen: false,
         enableAnalyticsScreen: false,
+        enablePeopleManagementScreen: false,
         enableLearnerPortal: false,
         enableIntegratedCustomerLearnerPortalSearch: false,
         enableLmsConfigurationsScreen: false,

@@ -20,6 +20,15 @@ jest.mock('../AdvanceAnalyticsV2.0/AnalyticsPage', () => function RevisedAnalyti
 jest.mock('../billing/BillingPage', () => function BillingPageMock() {
   return <div data-testid="billing-page">BillingPage Mock Component</div>;
 });
+jest.mock('../PeopleManagement', () => function PeopleManagementPageMock() {
+  return <div data-testid="people-management-page">PeopleManagementPage Mock Component</div>;
+});
+jest.mock('../PeopleManagement/GroupDetailPage/GroupDetailPage', () => function GroupDetailPageMock() {
+  return <div data-testid="group-detail-page">GroupDetailPage Mock Component</div>;
+});
+jest.mock('../PeopleManagement/LearnerDetailPage/LearnerDetailPage', () => function LearnerDetailPageMock() {
+  return <div data-testid="learner-detail-page">LearnerDetailPage Mock Component</div>;
+});
 
 let mockEnterpriseAppPage = 'analytics';
 
@@ -53,6 +62,7 @@ describe('EnterpriseAppRoutes', () => {
     enableSubscriptionManagementPage: false,
     enableAnalyticsPage: true,
     enableContentHighlightsPage: false,
+    enablePeopleManagementPage: true,
   };
 
   it('renders FeatureNotSupportedPage when ANALYTICS_SUPPORTED is false', () => {
@@ -189,6 +199,22 @@ describe('EnterpriseAppRoutes', () => {
 
       // BillingPage should be rendered (checking that it exists confirms it received the enterpriseId)
       expect(screen.getByTestId('billing-page')).toBeInTheDocument();
+    });
+  });
+
+  describe('people management route access', () => {
+    beforeEach(() => {
+      mockEnterpriseAppPage = 'people-management';
+    });
+
+    it('renders PeopleManagementPage when enablePeopleManagementPage is true', () => {
+      renderWithProviders({ ...defaultProps, enablePeopleManagementPage: true });
+      expect(screen.getByTestId('people-management-page')).toBeInTheDocument();
+    });
+
+    it('does not render PeopleManagementPage when enablePeopleManagementPage is false', () => {
+      renderWithProviders({ ...defaultProps, enablePeopleManagementPage: false });
+      expect(screen.queryByTestId('people-management-page')).not.toBeInTheDocument();
     });
   });
 });

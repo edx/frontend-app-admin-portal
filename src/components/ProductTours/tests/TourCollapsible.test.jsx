@@ -29,10 +29,16 @@ jest.mock('@edx/frontend-platform/auth', () => ({
 
 // Mock FloatingCollapsible component
 jest.mock('../../FloatingCollapsible', () => {
-  const FloatingCollapsible = ({ children, title, onDismiss }) => (
+  const FloatingCollapsible = ({
+    children, title, onDismiss, hideDismissButton,
+  }) => (
     <div data-testid="floating-collapsible">
       <h3>{title}</h3>
-      <button type="button" data-testid="dismiss-button" onClick={onDismiss}>Dismiss</button>
+      {!hideDismissButton && (
+        <button type="button" data-testid="dismiss-button" onClick={onDismiss}>
+          Dismiss
+        </button>
+      )}
       {children}
     </div>
   );
@@ -199,6 +205,23 @@ describe('TourCollapsible', () => {
     expect(mockSetShowCollapsible).toHaveBeenCalledWith(false);
   });
 
+  it('hides the dismiss button when the onboarding tour is already completed', () => {
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: true,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enableSubscriptionManagementScreen: true,
+      },
+    };
+    // showCollapsible=true mirrors reopening a completed tour via the question icon button.
+    setup(state, true);
+
+    expect(screen.queryByTestId('dismiss-button')).toBeFalsy();
+  });
+
   it('reopens the tour when question icon is clicked', async () => {
     const state = {
       enterpriseCustomerAdmin: {
@@ -250,6 +273,7 @@ describe('TourCollapsible', () => {
       },
       portalConfiguration: {
         enableAnalyticsScreen: true,
+        enablePeopleManagementScreen: true,
         enableReportingConfigScreen: true,
         enableSubscriptionManagementScreen: true,
       },
@@ -392,6 +416,36 @@ describe('TourCollapsible', () => {
     };
     setup(state, true);
     expect(screen.queryByText('Administer subscriptions')).not.toBeInTheDocument();
+  });
+
+  it('displays the organize members step when people management is enabled', () => {
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enablePeopleManagementScreen: true,
+      },
+    };
+    setup(state, true);
+    expect(screen.queryByText('Organize members')).toBeInTheDocument();
+  });
+
+  it('does not display organize members step when people management is disabled', () => {
+    const state = {
+      enterpriseCustomerAdmin: {
+        onboardingTourCompleted: false,
+        onboardingTourDismissed: false,
+        uuid: 'test-uuid',
+      },
+      portalConfiguration: {
+        enablePeopleManagementScreen: false,
+      },
+    };
+    setup(state, true);
+    expect(screen.queryByText('Organize members')).not.toBeInTheDocument();
   });
 
   it('does not display administer subscriptions step when there are no subscription plans', () => {

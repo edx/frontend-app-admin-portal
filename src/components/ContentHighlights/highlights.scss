@@ -1,13 +1,18 @@
 .featured-courses-section {
   background-color: #F2F0EF !important;
-  th:first-child,
-  td:first-child {
-    width: 20%;
+  th:nth-child(1),
+  td:nth-child(1) {
+    width: 45%;
   }
 
-  th:last-child,
-  td:last-child {
-    width: 45%;
+  th:nth-child(2),
+  td:nth-child(2) {
+    width: 35%;
+  }
+
+  th:nth-child(3),
+  td:nth-child(3) {
+    width: 20%;
   }
 
   thead tr {
