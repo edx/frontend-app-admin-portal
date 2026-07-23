@@ -5,6 +5,7 @@ import {
   fetchLoggedInEnterpriseAdmin,
   dismissOnboardingTour,
   reopenOnboardingTour,
+  completeOnboardingTour,
 } from './enterpriseCustomerAdmin';
 
 import {
@@ -14,6 +15,7 @@ import {
   DISMISS_ONBOARDING_TOUR_SUCCESS,
   DISMISS_ONBOARDING_TOUR_FAILURE,
   SET_ONBOARDING_TOUR_DISMISSED,
+  SET_ONBOARDING_TOUR_COMPLETED,
 } from '../constants/enterpriseCustomerAdmin';
 
 import LmsApiService from '../services/LmsApiService';
@@ -25,6 +27,7 @@ jest.mock('@edx/frontend-platform/logging', () => ({
 jest.mock('../services/LmsApiService', () => ({
   fetchLoggedInEnterpriseAdminProfile: jest.fn(),
   postOnboardingTourDismissed: jest.fn(),
+  updateCompletedTour: jest.fn(),
 }));
 
 const mockStore = configureMockStore([thunk]);
@@ -121,6 +124,31 @@ describe('enterpriseCustomerAdmin actions', () => {
 
         await store.dispatch(dismissOnboardingTour(mockUuid));
         expect(store.getActions()).toEqual(expectedActions);
+      });
+    });
+
+    describe('completeOnboardingTour', () => {
+      it('sets completed state to true when API call succeeds', async () => {
+        (LmsApiService.updateCompletedTour as jest.Mock).mockResolvedValue({});
+
+        const expectedActions = [
+          {
+            type: SET_ONBOARDING_TOUR_COMPLETED,
+            payload: { completed: true },
+          },
+        ];
+
+        await store.dispatch(completeOnboardingTour(mockUuid));
+        expect(LmsApiService.updateCompletedTour).toHaveBeenCalledWith('test-uuid');
+        expect(store.getActions()).toEqual(expectedActions);
+      });
+
+      it('does not set completed state when API call fails', async () => {
+        const mockError = new Error('API not implemented');
+        (LmsApiService.updateCompletedTour as jest.Mock).mockRejectedValue(mockError);
+
+        await store.dispatch(completeOnboardingTour(mockUuid));
+        expect(store.getActions()).toEqual([]);
       });
     });
 

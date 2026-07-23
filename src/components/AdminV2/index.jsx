@@ -39,7 +39,12 @@ import { withLocation, withParams } from '../../hoc';
 import BudgetExpiryAlertAndModal from '../BudgetExpiryAlertAndModal';
 import LearnerReport from './LearnerReport';
 import SortableItem from './SortableItem';
-import { getFromLocalStorage, saveToLocalStorage, getFilteredQueryParams } from '../../utils';
+import {
+  FILTER_QUERY_PARAMS,
+  getFilteredQueryParams,
+  getFromLocalStorage,
+  saveToLocalStorage,
+} from '../../utils';
 import SubscriptionModal from './SubscriptionModal';
 import { SubscriptionData } from '../subscriptions';
 
@@ -49,6 +54,7 @@ import { features } from '../../config';
 // (not the legacy redux table slice). isTableDataMissing must not consult
 // state.table for them or the CSV download button stays permanently disabled.
 const LEARNER_ACTIVITY_TABLE_SLUGS = [
+  'enrollments',
   'enrolled-learners',
   'enrolled-learners-inactive-courses',
   'learners-active-week',
@@ -131,8 +137,7 @@ const Admin = ({
   }, [enterpriseId]);
 
   const getMetadataForAction = (actionSlugParam) => {
-    const expectedQueryParams = ['search', 'search_course', 'search_start_date', 'budget_uuid', 'group_uuid', 'search_enrollment'];
-    const filteredQueryParams = getFilteredQueryParams(location.search, expectedQueryParams);
+    const filteredQueryParams = getFilteredQueryParams(location.search, FILTER_QUERY_PARAMS);
 
     const defaultData = {
       title: intl.formatMessage({
@@ -311,7 +316,7 @@ const Admin = ({
 
   const displaySearchBar = () => !actionSlug;
 
-  const isTableDataMissing = (id) => {
+  const isTableDataMissing = (id = 'enrollments') => {
     if (LEARNER_ACTIVITY_TABLE_SLUGS.includes(id)) {
       // These report tables use local DataTable state, not the redux table slice.
       // Never disable the CSV button due to missing redux table data for these slugs.
@@ -374,7 +379,7 @@ const Admin = ({
     const { search: searchQuery, pathname } = location;
     // remove the querys from the path
     const queryParams = new URLSearchParams(searchQuery);
-    ['search', 'search_course', 'search_start_date', 'budget_uuid', 'group_uuid', 'search_enrollment'].forEach((searchTerm) => {
+    FILTER_QUERY_PARAMS.forEach((searchTerm) => {
       queryParams.delete(searchTerm);
     });
     const resetQuery = queryParams.toString();

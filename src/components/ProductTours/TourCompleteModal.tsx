@@ -4,20 +4,21 @@ import {
   Button, ModalDialog, useToggle, Image,
 } from '@openedx/paragon';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import { logError } from '@edx/frontend-platform/logging';
 import confetti from 'canvas-confetti';
 import messages from './AdminOnboardingTours/messages';
 import completeModal from './data/images/CompletedModal.svg';
-import LmsApiService from '../../data/services/LmsApiService';
+import { completeOnboardingTour } from '../../data/actions/enterpriseCustomerAdmin';
 
 interface TourCompleteModalProps {
   onboardingTourCompleted: boolean;
   adminUuid: string,
+  completeOnboardingTour: (adminUuid: string) => void;
 }
 
 const TourCompleteModal: React.FC<TourCompleteModalProps> = ({
   onboardingTourCompleted,
   adminUuid,
+  completeOnboardingTour: completeTour,
 }) => {
   const intl = useIntl();
   const [isOpen, open, close] = useToggle(true);
@@ -28,21 +29,17 @@ const TourCompleteModal: React.FC<TourCompleteModalProps> = ({
     }
   }, [onboardingTourCompleted, open]);
 
-  const handleDismiss = async () => {
-    try {
-      // Trigger confetti animation
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'],
-      });
+  const handleDismiss = () => {
+    // Trigger confetti animation
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#007bff', '#28a745', '#ffc107', '#dc3545', '#6f42c1'],
+    });
 
-      close();
-      await LmsApiService.updateCompletedTour(adminUuid);
-    } catch (error) {
-      logError(error);
-    }
+    close();
+    completeTour(adminUuid);
   };
 
   return (
@@ -89,4 +86,10 @@ const mapStateToProps = state => ({
   onboardingTourCompleted: state.enterpriseCustomerAdmin.onboardingTourCompleted as boolean,
 });
 
-export default connect(mapStateToProps)(TourCompleteModal);
+const mapDispatchToProps = dispatch => ({
+  completeOnboardingTour: (adminUuid: string) => {
+    dispatch(completeOnboardingTour(adminUuid));
+  },
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(TourCompleteModal);
