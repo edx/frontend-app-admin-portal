@@ -29,9 +29,22 @@ const mockJsonData = [
   { date: '2024-01-09', count: 90, enroll_type: 'certificate' },
   { date: '2024-01-10', count: 100, enroll_type: 'certificate' },
 ];
-let mockJsonAsCSV = 'date,count,enroll_type\n';
-for (let i = 0; i < mockJsonData.length; i++) {
-  mockJsonAsCSV += `${mockJsonData[i].date},${mockJsonData[i].count},${mockJsonData[i].enroll_type}\n`;
+// Mirrors DownloadCSVButton's jsonToCSV: each field is run through JSON.stringify (so
+// strings are quoted, numbers are not) and rows are joined with CRLF line endings.
+const mockJsonAsCSV = [
+  'date,count,enroll_type',
+  ...mockJsonData.map(
+    (row) => [row.date, row.count, row.enroll_type].map((value) => JSON.stringify(value)).join(','),
+  ),
+].join('\r\n');
+
+function readBlobBytes(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(new Uint8Array(reader.result));
+    reader.onerror = reject;
+    reader.readAsArrayBuffer(blob);
+  });
 }
 
 const mockTrackCsvDownloadClick = jest.fn();
@@ -75,10 +88,15 @@ describe('DownloadCSVButton', () => {
     // Click the download button.
     await user.click(screen.getByTestId('plotly-charts-download-csv-button'));
 
-    expect(saveAs).toHaveBeenCalledWith(
-      new Blob([mockJsonAsCSV], { type: 'text/csv' }),
-      'completions.csv',
-    );
+    expect(saveAs).toHaveBeenCalledTimes(1);
+    const [blobArg, filenameArg] = saveAs.mock.calls[0];
+    expect(filenameArg).toBe('completions.csv');
+    expect(blobArg).toBeInstanceOf(Blob);
+    // No manual BOM here: file-saver's saveAs auto-prepends one for this exact
+    // charset=utf-8 blob type, so adding one ourselves would double it up.
+    expect(blobArg.type).toBe('text/csv;charset=utf-8;');
+    const bytes = await readBlobBytes(blobArg);
+    expect(String.fromCharCode(...bytes)).toBe(mockJsonAsCSV);
 
     expect(mockTrackCsvDownloadClick).toHaveBeenCalledWith('test-entity');
   });

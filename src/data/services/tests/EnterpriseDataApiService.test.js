@@ -95,6 +95,46 @@ describe('EnterpriseDataApiService', () => {
     expect(response).toEqual(camelCaseObject(mockApiResponse));
   });
 
+  test('fetchAnalyticsCSV hits the CSV download URL and returns the raw response', async () => {
+    const requestOptions = { start_date: '2021-01-01', end_date: '2021-12-31' };
+    const baseURL = `${EnterpriseDataApiService.enterpriseAdminAnalyticsV2BaseUrl}${mockEnterpriseUUID}`;
+    const queryParams = new URLSearchParams({ ...requestOptions, response_type: 'csv' });
+    const expectedURL = `${baseURL}/engagements?${queryParams.toString()}`;
+    const mockCsvData = 'course_key,course_title\nkey,title';
+    axiosMock.onGet(expectedURL).reply(200, mockCsvData);
+
+    const response = await EnterpriseDataApiService.fetchAnalyticsCSV(
+      'engagementsTable',
+      mockEnterpriseUUID,
+      requestOptions,
+    );
+
+    expect(axiosMock.history.get[0].url).toBe(expectedURL);
+    expect(axiosMock.history.get[0].responseType).toBe('text');
+    expect(response.data).toBe(mockCsvData);
+  });
+
+  test('fetchAnalyticsCSV does not let a JSON-shaped CSV body get parsed into a non-string', async () => {
+    // A CSV body can coincidentally be valid JSON (e.g. an empty result set serialized
+    // as "[]"). Without forcing responseType: 'text', axios's default transformResponse
+    // would JSON.parse this into an actual array, and createUtf8CsvBlob would then write
+    // "[object Object]"-style garbage to the downloaded file instead of the raw text.
+    const requestOptions = { start_date: '2021-01-01', end_date: '2021-12-31' };
+    const baseURL = `${EnterpriseDataApiService.enterpriseAdminAnalyticsV2BaseUrl}${mockEnterpriseUUID}`;
+    const queryParams = new URLSearchParams({ ...requestOptions, response_type: 'csv' });
+    const expectedURL = `${baseURL}/engagements?${queryParams.toString()}`;
+    axiosMock.onGet(expectedURL).reply(200, '[]');
+
+    const response = await EnterpriseDataApiService.fetchAnalyticsCSV(
+      'engagementsTable',
+      mockEnterpriseUUID,
+      requestOptions,
+    );
+
+    expect(response.data).toBe('[]');
+    expect(typeof response.data).toBe('string');
+  });
+
   describe('getAnalyticsCSVDownloadURL demo data toggle', () => {
     let getStateSpy;
     const originalDemoUUID = configuration.DEMO_ENTEPRISE_UUID;

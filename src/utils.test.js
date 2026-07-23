@@ -5,6 +5,7 @@ import { saveAs } from 'file-saver';
 import {
   camelCaseDict,
   camelCaseDictArray,
+  createUtf8CsvBlob,
   defaultQueryClientRetryHandler,
   downloadCsv,
   getEnterpriseAdminRegisterLogoutUrl,
@@ -256,9 +257,21 @@ describe('utils', () => {
       downloadCsv(fileName, data, headers, dataEntryToRow);
       const expectedBlob = ['a,b,c,d\n2,3,4,5\napple,banana,"comma, please",donut'];
       expect(global.Blob).toHaveBeenCalledWith(expectedBlob, {
-        type: 'text/csv',
+        type: 'text/csv;charset=utf-8;',
       });
       expect(saveAs).toHaveBeenCalledWith({}, fileName);
+    });
+  });
+  describe('createUtf8CsvBlob', () => {
+    it('does not manually prepend a BOM', () => {
+      // file-saver's saveAs auto-prepends a BOM for any blob type matching
+      // text/*;charset=utf-8 (its `auto_bom` helper) — adding one here too would
+      // double it up in the downloaded file. See file-saver's FileSaver.js.
+      const csv = 'a,b\n1,2';
+      createUtf8CsvBlob(csv);
+      expect(global.Blob).toHaveBeenCalledWith([csv], {
+        type: 'text/csv;charset=utf-8;',
+      });
     });
   });
   describe('splitAndTrim', () => {

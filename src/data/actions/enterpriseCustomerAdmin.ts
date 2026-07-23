@@ -8,6 +8,7 @@ import {
   DISMISS_ONBOARDING_TOUR_SUCCESS,
   DISMISS_ONBOARDING_TOUR_FAILURE,
   SET_ONBOARDING_TOUR_DISMISSED,
+  SET_ONBOARDING_TOUR_COMPLETED,
 } from '../constants/enterpriseCustomerAdmin';
 import LmsApiService, { EnterpriseAdminPaginatedResponse } from '../services/LmsApiService';
 
@@ -41,6 +42,11 @@ const setOnboardingTourDismissed = (dismissed: boolean): AnyAction => ({
   payload: { dismissed },
 });
 
+const setOnboardingTourCompleted = (completed: boolean): AnyAction => ({
+  type: SET_ONBOARDING_TOUR_COMPLETED,
+  payload: { completed },
+});
+
 const toggleOnboardingTourDismissal = (value: boolean, adminUuid: string) => (
   async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
     try {
@@ -57,6 +63,17 @@ const toggleOnboardingTourDismissal = (value: boolean, adminUuid: string) => (
 
 const dismissOnboardingTour = (adminUuid:string) => toggleOnboardingTourDismissal(true, adminUuid);
 const reopenOnboardingTour = (adminUuid:string) => toggleOnboardingTourDismissal(false, adminUuid);
+
+const completeOnboardingTour = (adminUuid: string) => (
+  async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
+    try {
+      await LmsApiService.updateCompletedTour(adminUuid);
+      dispatch(setOnboardingTourCompleted(true));
+    } catch (error) {
+      logError(error);
+    }
+  }
+);
 
 const fetchLoggedInEnterpriseAdmin = () => (
   async (dispatch: ThunkDispatch<{}, {}, AnyAction>): Promise<void> => {
@@ -75,4 +92,5 @@ export {
   fetchLoggedInEnterpriseAdmin,
   dismissOnboardingTour,
   reopenOnboardingTour,
+  completeOnboardingTour,
 };

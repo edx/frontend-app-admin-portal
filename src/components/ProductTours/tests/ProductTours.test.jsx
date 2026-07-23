@@ -105,6 +105,7 @@ const ToursWithContext = ({
       enterpriseSlug: ENTERPRISE_SLUG,
       enterpriseId: ENTERPRISE_UUID,
       enableLearnerPortal,
+      enablePeopleManagementScreen: true,
       enterpriseFeatures: {
         enterpriseAdminOnboardingEnabled: onboardingEnabled,
       },

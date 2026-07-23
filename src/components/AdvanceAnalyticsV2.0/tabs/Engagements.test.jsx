@@ -434,8 +434,8 @@ describe('Rendering tests', () => {
       </Router>,
     );
 
-    const downloadLink = await screen.findByRole('link', { name: /download engagement csv/i });
-    await userEvent.click(downloadLink);
+    const downloadButton = await screen.findByRole('button', { name: /download engagement csv/i });
+    await userEvent.click(downloadButton);
 
     await waitFor(() => {
       expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
