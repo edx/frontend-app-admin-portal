@@ -34,11 +34,7 @@ jest.mock('../TransactionHistory', () => function MockTransactionHistory() {
 });
 
 jest.mock('../SubscriptionLifecycle', () => function MockSubscriptionLifecycle() {
-  return (
-    <div data-testid="subscription-lifecycle">
-      Subscription Lifecycle Component
-    </div>
-  );
+  return <div data-testid="subscription-lifecycle">Subscription Lifecycle Component</div>;
 });
 
 jest.mock('../AddPaymentMethodModal', () => function MockAddPaymentMethodModal({ isOpen, onClose }) {

@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import {
   ActionRow, Alert, Button, Card, ModalDialog, Stack,
 } from '@openedx/paragon';
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, defineMessages, useIntl } from '@edx/frontend-platform/i18n';
 
 import {
   useCancelSubscription, useReinstateSubscription, useSubscription,
@@ -13,11 +13,13 @@ import ReinstateSubscriptionSuccessToast from './ReinstateSubscriptionSuccessToa
 import SubscriptionErrorToast from './SubscriptionErrorToast';
 import { SUBSCRIPTION_TYPE_LABEL_MAP } from '../subscriptions/data/constants';
 
-const SUBSCRIPTION_TYPE_UNKNOWN_MESSAGE = {
-  id: 'admin.portal.billing.subscription.type.unknown',
-  defaultMessage: 'Unknown',
-  description: 'Fallback label for an unrecognized subscription type',
-};
+const messages = defineMessages({
+  unknownSubscriptionType: {
+    id: 'admin.portal.billing.subscription.type.unknown',
+    defaultMessage: 'Unknown',
+    description: 'Fallback label for an unrecognized subscription type',
+  },
+});
 
 /**
  * SubscriptionLifecycle - Component for managing subscription cancellation and reinstatement
@@ -29,7 +31,7 @@ const BaseSubscriptionLifecycle = ({
   productType,
 }: {
   enterpriseUuid: string;
-  productType?: 'essentials' | 'teams' | null;
+  productType?: string | null;
 }) => {
   const intl = useIntl();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -136,7 +138,7 @@ const BaseSubscriptionLifecycle = ({
   const subscriptionTypeMessage = SUBSCRIPTION_TYPE_LABEL_MAP[normalizedProductType ?? ''];
   const subscriptionTypeLabel = subscriptionTypeMessage
     ? intl.formatMessage(subscriptionTypeMessage)
-    : intl.formatMessage(SUBSCRIPTION_TYPE_UNKNOWN_MESSAGE) ?? 'Unknown';
+    : intl.formatMessage(messages.unknownSubscriptionType);
 
   return (
     <>
@@ -335,7 +337,7 @@ const BaseSubscriptionLifecycle = ({
   );
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: { portalConfiguration: { productType?: string | null } }) => ({
   productType: state.portalConfiguration.productType,
 });
 

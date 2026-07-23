@@ -1,3 +1,5 @@
+import { defineMessages } from '@edx/frontend-platform/i18n';
+
 export const PAGE_SIZE = 20;
 export const LPR_SUBSCRIPTION_PAGE_SIZE = 5;
 export const API_FIELDS_BY_TABLE_COLUMN_ACCESSOR = {
@@ -65,7 +67,7 @@ export const ESSENTIALS = 'essentials';
 export const TEAMS = 'teams';
 
 // Maps a normalized productType value to its translated label message descriptor
-export const SUBSCRIPTION_TYPE_LABEL_MAP = {
+export const SUBSCRIPTION_TYPE_LABEL_MAP = defineMessages({
   [ESSENTIALS]: {
     id: 'admin.portal.billing.subscription.type.essentials',
     defaultMessage: 'Essentials',
@@ -76,7 +78,7 @@ export const SUBSCRIPTION_TYPE_LABEL_MAP = {
     defaultMessage: 'Teams',
     description: 'Label for the Teams subscription type',
   },
-};
+});
 
 // Self-service plan types
 export const SELF_SERVICE_TRIAL = 'self-service-trial';

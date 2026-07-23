@@ -275,9 +275,7 @@ const BillingPage = ({ enterpriseId }: BillingPageProps) => {
             <TransactionHistory enterpriseUuid={enterpriseId || ''} />
 
             {/* Subscription Lifecycle Section (Teams/Essentials only) */}
-            <SubscriptionLifecycle
-              enterpriseUuid={enterpriseId || ''}
-            />
+            <SubscriptionLifecycle enterpriseUuid={enterpriseId || ''} />
           </Stack>
 
           {/* Add Payment Method Modal - Only mount StripeProvider when modal is open to avoid crashes */}
