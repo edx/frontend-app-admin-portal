@@ -14,6 +14,7 @@ const requestsDisabled = {
     subsidyRequestsEnabled: false,
     subsidyType: 'license',
   },
+  isLoadingCustomerAgreement: false,
 };
 
 const requestsEnabled = {
@@ -27,6 +28,21 @@ const customerAgreement = { subscriptions: [{ uuid: 'subscription-id' }] };
 
 const customerAgreement2Subs = { subscriptions: [{ uuid: 'subscription-id' }, { uuid: 'subscription-id-2' }] };
 
+const enterpriseSubsidiesSingleSub = {
+  customerAgreement,
+  isLoadingCustomerAgreement: false,
+};
+
+const enterpriseSubsidiesMultipleSubs = {
+  customerAgreement: customerAgreement2Subs,
+  isLoadingCustomerAgreement: false,
+};
+
+const enterpriseSubsidiesLoadingAgreement = {
+  customerAgreement: undefined,
+  isLoadingCustomerAgreement: true,
+};
+
 jest.mock('react-router', () => ({
   useParams: jest.fn(),
 }));
@@ -39,23 +55,19 @@ jest.mock('@2uinc/frontend-enterprise-utils', () => {
   });
 });
 
-// Mutated via `mockCustomerAgreement` before each render to simulate the
-// EnterpriseSubsidiesContext value provided at the top of the app.
-let enterpriseSubsidiesContextValue = { customerAgreement: customerAgreement2Subs, isLoadingCustomerAgreement: false };
-
-const mockCustomerAgreement = ({ customerAgreement: agreement, isLoading }) => {
-  enterpriseSubsidiesContextValue = { customerAgreement: agreement, isLoadingCustomerAgreement: isLoading };
-};
-
-const renderHookWithContext = (hookFn, subsidyRequestContextValue) => renderHook(hookFn, {
+const renderHookWithContext = (
+  hookFn,
+  subsidyRequestContextValue,
+  enterpriseSubsidiesContextValue = enterpriseSubsidiesMultipleSubs,
+) => renderHook(hookFn, {
   wrapper: ({ children }) => (
-    <SubsidyRequestsContext.Provider value={subsidyRequestContextValue}>
-      <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
+    <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
+      <SubsidyRequestsContext.Provider value={subsidyRequestContextValue}>
         <IntlProvider locale="en" messages={{}}>
           {children}
         </IntlProvider>
-      </EnterpriseSubsidiesContext.Provider>
-    </SubsidyRequestsContext.Provider>
+      </SubsidyRequestsContext.Provider>
+    </EnterpriseSubsidiesContext.Provider>
   ),
 });
 
@@ -63,7 +75,11 @@ const renderHookWithIntl = (hookFn) => renderHookWithContext(hookFn, requestsDis
 
 const renderHookWithCourseRequests = (hookFn) => renderHookWithContext(hookFn, requestsEnabled);
 
-const renderHookLoadingCustomerAgreement = (hookFn) => renderHookWithContext(hookFn, requestsEnabled);
+const renderHookLoadingCustomerAgreement = (hookFn) => renderHookWithContext(
+  hookFn,
+  requestsDisabled,
+  enterpriseSubsidiesLoadingAgreement,
+);
 
 describe('AdministerSubscriptionsFlow', () => {
   const mockHandleEndTour = jest.fn();
@@ -72,17 +88,12 @@ describe('AdministerSubscriptionsFlow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    enterpriseSubsidiesContextValue = { customerAgreement: customerAgreement2Subs, isLoadingCustomerAgreement: false };
   });
 
   describe('Main subscription page flow', () => {
     beforeEach(() => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
-      });
-      mockCustomerAgreement({
-        customerAgreement: customerAgreement2Subs,
-        isLoading: false,
       });
     });
 
@@ -168,10 +179,6 @@ describe('AdministerSubscriptionsFlow', () => {
     });
   });
   it('should return first step when loading customer agreement', () => {
-    mockCustomerAgreement({
-      customerAgreement: customerAgreement2Subs,
-      isLoading: true,
-    });
     const { result } = renderHookLoadingCustomerAgreement(() => AdministerSubscriptionsFlow({
       currentStep: 0,
       enterpriseId,
@@ -184,10 +191,6 @@ describe('AdministerSubscriptionsFlow', () => {
     expect(result.current[0].title).toBe('Administer subscriptions');
   });
   it('should call handleAdvanceTour on intermediate steps', () => {
-    mockCustomerAgreement({
-      customerAgreement: customerAgreement2Subs,
-      isLoading: false,
-    });
     const { result } = renderHookWithIntl(() => AdministerSubscriptionsFlow({
       currentStep: 0,
       enterpriseId,
@@ -207,10 +210,6 @@ describe('AdministerSubscriptionsFlow', () => {
     beforeEach(() => {
       useParams.mockReturnValue({
         '*': 'subscriptions/manage-learners/test-subscription-uuid',
-      });
-      mockCustomerAgreement({
-        customerAgreement: customerAgreement2Subs,
-        isLoading: false,
       });
     });
 
@@ -273,10 +272,6 @@ describe('AdministerSubscriptionsFlow', () => {
     it('should detect main page when no subscription UUID in URL', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
-      });
-      mockCustomerAgreement({
-        customerAgreement: customerAgreement2Subs,
-        isLoading: false,
       });
 
       const { result } = renderHookWithIntl(() => AdministerSubscriptionsFlow({
@@ -352,21 +347,17 @@ describe('AdministerSubscriptionsFlow', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
       });
-      mockCustomerAgreement({
-        customerAgreement,
-        isLoading: false,
-      });
     });
 
     it('should return main subscription page flow when on main page', () => {
-      const { result } = renderHookWithIntl(() => AdministerSubscriptionsFlow({
+      const { result } = renderHookWithContext(() => AdministerSubscriptionsFlow({
         currentStep: 0,
         enterpriseId,
         enterpriseSlug: enterpriseId,
         handleEndTour: mockHandleEndTour,
         setCurrentStep: mockSetCurrentStep,
         targetSelector: '',
-      }));
+      }), requestsDisabled, enterpriseSubsidiesSingleSub);
 
       expect(result.current).toHaveLength(4);
       expect(result.current[0].target).toBe('#subscriptions-sidebar');
@@ -375,14 +366,14 @@ describe('AdministerSubscriptionsFlow', () => {
       expect(result.current[3].target).toBe('#license-allocation-filters');
     });
     it('should have correct step properties for single subscription flow', () => {
-      const { result } = renderHookWithIntl(() => AdministerSubscriptionsFlow({
+      const { result } = renderHookWithContext(() => AdministerSubscriptionsFlow({
         currentStep: 0,
         enterpriseId,
         enterpriseSlug: enterpriseId,
         handleEndTour: mockHandleEndTour,
         setCurrentStep: mockSetCurrentStep,
         targetSelector: '',
-      }));
+      }), requestsDisabled, enterpriseSubsidiesSingleSub);
 
       expect(result.current[0].title).toBe('Administer subscriptions');
       expect(result.current[0].placement).toBe('right');
@@ -405,10 +396,6 @@ describe('AdministerSubscriptionsFlow', () => {
     it('should have correct step progression from main to detail flow', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
-      });
-      mockCustomerAgreement({
-        customerAgreement: customerAgreement2Subs,
-        isLoading: false,
       });
 
       const { result: mainFlow } = renderHookWithIntl(() => AdministerSubscriptionsFlow({

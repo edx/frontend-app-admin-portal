@@ -42,7 +42,6 @@ const AdminOnboardingTours: FC<AdminOnboardingToursProps> = ({
   const intl = useIntl();
   const location = useLocation();
   const [currentStep, setCurrentStep] = useState(0);
-  const [isTourReady, setIsTourReady] = useState(false);
   const prevPathnameRef = useRef(location.pathname);
   const adminOnboardingSteps = AdminOnboardingTour({
     enablePortalLearnerCreditManagementScreen,
@@ -60,13 +59,6 @@ const AdminOnboardingTours: FC<AdminOnboardingToursProps> = ({
     if (RESET_TARGETS.includes(targetSelector)) {
       setCurrentStep(0);
     }
-  }, [targetSelector]);
-
-  // Delay enabling so target elements on the newly-navigated page exist before Paragon counts steps.
-  useEffect(() => {
-    setIsTourReady(false);
-    const readyTimeoutId = setTimeout(() => setIsTourReady(true), 200);
-    return () => clearTimeout(readyTimeoutId);
   }, [targetSelector]);
 
   // Handle target setting for both page transitions and step changes
@@ -102,7 +94,7 @@ const AdminOnboardingTours: FC<AdminOnboardingToursProps> = ({
   const tours = [
     {
       tourId: 'admin-onboarding-tour',
-      enabled: isOpen && isTourReady,
+      enabled: isOpen,
       startingIndex: currentStep,
       advanceButtonText: intl.formatMessage({
         id: 'adminPortal.productTours.adminOnboarding.next',

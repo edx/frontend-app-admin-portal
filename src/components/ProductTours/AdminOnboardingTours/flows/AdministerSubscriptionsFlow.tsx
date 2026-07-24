@@ -13,6 +13,7 @@ import { configuration } from '../../../../config';
 
 interface CreateTourFlowsProps {
   currentStep: number;
+  enterpriseId: string;
   enterpriseSlug: string;
   handleEndTour: (endEventName: string, flowUuid?: string) => void;
   handleBackTour: (backEventName: string) => void;

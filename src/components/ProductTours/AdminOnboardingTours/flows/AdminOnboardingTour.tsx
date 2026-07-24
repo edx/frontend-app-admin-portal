@@ -80,7 +80,7 @@ const AdminOnboardingTour = (
   }
 
   const administerSubscriptionsFlow = AdministerSubscriptionsFlow({
-    currentStep, enterpriseSlug, handleEndTour, handleBackTour, setCurrentStep, targetSelector,
+    currentStep, enterpriseId, enterpriseSlug, handleEndTour, handleBackTour, setCurrentStep, targetSelector,
   });
   const analyticsV2Flow = AnalyticsV2Flow({
     handleAdvanceTour, handleBackTour, handleEndTour,
