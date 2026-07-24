@@ -5,16 +5,15 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 
 import { SubsidyRequestsContext } from '../../../subsidy-requests';
+import { EnterpriseSubsidiesContext } from '../../../EnterpriseSubsidiesContext';
 import AdministerSubscriptionsFlow from '../flows/AdministerSubscriptionsFlow';
 import { ADMIN_TOUR_EVENT_NAMES } from '../constants';
-import * as hooks from '../../../EnterpriseSubsidiesContext/data/hooks';
 
 const requestsDisabled = {
   subsidyRequestConfiguration: {
     subsidyRequestsEnabled: false,
     subsidyType: 'license',
   },
-  isLoadingCustomerAgreement: false,
 };
 
 const requestsEnabled = {
@@ -22,11 +21,6 @@ const requestsEnabled = {
     subsidyRequestsEnabled: true,
     subsidyType: 'license',
   },
-};
-
-const isLoadingSubsidyRequests = {
-  ...requestsEnabled,
-  isLoadingCustomerAgreement: true,
 };
 
 const customerAgreement = { subscriptions: [{ uuid: 'subscription-id' }] };
@@ -45,12 +39,22 @@ jest.mock('@2uinc/frontend-enterprise-utils', () => {
   });
 });
 
+// Mutated via `mockCustomerAgreement` before each render to simulate the
+// EnterpriseSubsidiesContext value provided at the top of the app.
+let enterpriseSubsidiesContextValue = { customerAgreement: customerAgreement2Subs, isLoadingCustomerAgreement: false };
+
+const mockCustomerAgreement = ({ customerAgreement: agreement, isLoading }) => {
+  enterpriseSubsidiesContextValue = { customerAgreement: agreement, isLoadingCustomerAgreement: isLoading };
+};
+
 const renderHookWithContext = (hookFn, subsidyRequestContextValue) => renderHook(hookFn, {
   wrapper: ({ children }) => (
     <SubsidyRequestsContext.Provider value={subsidyRequestContextValue}>
-      <IntlProvider locale="en" messages={{}}>
-        {children}
-      </IntlProvider>
+      <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
+        <IntlProvider locale="en" messages={{}}>
+          {children}
+        </IntlProvider>
+      </EnterpriseSubsidiesContext.Provider>
     </SubsidyRequestsContext.Provider>
   ),
 });
@@ -59,7 +63,7 @@ const renderHookWithIntl = (hookFn) => renderHookWithContext(hookFn, requestsDis
 
 const renderHookWithCourseRequests = (hookFn) => renderHookWithContext(hookFn, requestsEnabled);
 
-const renderHookLoadingCustomerAgreement = (hookFn) => renderHookWithContext(hookFn, isLoadingSubsidyRequests);
+const renderHookLoadingCustomerAgreement = (hookFn) => renderHookWithContext(hookFn, requestsEnabled);
 
 describe('AdministerSubscriptionsFlow', () => {
   const mockHandleEndTour = jest.fn();
@@ -68,6 +72,7 @@ describe('AdministerSubscriptionsFlow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    enterpriseSubsidiesContextValue = { customerAgreement: customerAgreement2Subs, isLoadingCustomerAgreement: false };
   });
 
   describe('Main subscription page flow', () => {
@@ -75,7 +80,7 @@ describe('AdministerSubscriptionsFlow', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
       });
-      jest.spyOn(hooks, 'useCustomerAgreement').mockReturnValue({
+      mockCustomerAgreement({
         customerAgreement: customerAgreement2Subs,
         isLoading: false,
       });
@@ -163,7 +168,7 @@ describe('AdministerSubscriptionsFlow', () => {
     });
   });
   it('should return first step when loading customer agreement', () => {
-    jest.spyOn(hooks, 'useCustomerAgreement').mockReturnValue({
+    mockCustomerAgreement({
       customerAgreement: customerAgreement2Subs,
       isLoading: true,
     });
@@ -179,7 +184,7 @@ describe('AdministerSubscriptionsFlow', () => {
     expect(result.current[0].title).toBe('Administer subscriptions');
   });
   it('should call handleAdvanceTour on intermediate steps', () => {
-    jest.spyOn(hooks, 'useCustomerAgreement').mockReturnValue({
+    mockCustomerAgreement({
       customerAgreement: customerAgreement2Subs,
       isLoading: false,
     });
@@ -203,7 +208,7 @@ describe('AdministerSubscriptionsFlow', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions/manage-learners/test-subscription-uuid',
       });
-      jest.spyOn(hooks, 'useCustomerAgreement').mockReturnValue({
+      mockCustomerAgreement({
         customerAgreement: customerAgreement2Subs,
         isLoading: false,
       });
@@ -269,7 +274,7 @@ describe('AdministerSubscriptionsFlow', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
       });
-      jest.spyOn(hooks, 'useCustomerAgreement').mockReturnValue({
+      mockCustomerAgreement({
         customerAgreement: customerAgreement2Subs,
         isLoading: false,
       });
@@ -347,7 +352,7 @@ describe('AdministerSubscriptionsFlow', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
       });
-      jest.spyOn(hooks, 'useCustomerAgreement').mockReturnValue({
+      mockCustomerAgreement({
         customerAgreement,
         isLoading: false,
       });
@@ -401,7 +406,7 @@ describe('AdministerSubscriptionsFlow', () => {
       useParams.mockReturnValue({
         '*': 'subscriptions',
       });
-      jest.spyOn(hooks, 'useCustomerAgreement').mockReturnValue({
+      mockCustomerAgreement({
         customerAgreement: customerAgreement2Subs,
         isLoading: false,
       });
