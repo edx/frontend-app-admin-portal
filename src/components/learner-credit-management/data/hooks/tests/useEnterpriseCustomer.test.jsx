@@ -3,7 +3,6 @@ import { renderHook, waitFor } from '@testing-library/react';
 
 import useEnterpriseCustomer from '../useEnterpriseCustomer';
 import LmsApiService from '../../../../../data/services/LmsApiService';
-import { PRODUCT_TYPES } from '../../../../EnterpriseApp/data/constants';
 import { queryClient } from '../../../../test/testUtils';
 
 const wrapper = ({ children }) => (
@@ -24,7 +23,6 @@ describe('useEnterpriseCustomer', () => {
         slug: 'test-slug',
         name: 'enterprise-customer-name',
         active_integrations: ['BLACKBOARD'],
-        product_type: PRODUCT_TYPES.TEAMS,
       },
     });
 
@@ -42,7 +40,6 @@ describe('useEnterpriseCustomer', () => {
         slug: 'test-slug',
         name: 'enterprise-customer-name',
         activeIntegrations: ['BLACKBOARD'],
-        productType: PRODUCT_TYPES.TEAMS,
       },
     );
   });

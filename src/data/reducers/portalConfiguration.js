@@ -52,7 +52,7 @@ const portalConfiguration = (state = initialState, action) => {
         enterpriseName: action.payload.data.name,
         enterpriseSlug: action.payload.data.slug,
         enterpriseBranding: action.payload.data.branding_configuration,
-        enterpriseProductType: action.payload.data.product_type ?? action.payload.data.productType ?? null,
+        enterpriseProductType: action.payload.data.product_type ?? null,
         identityProvider: action.payload.data.identity_provider,
         disableExpiryMessagingForLearnerCredit: action.payload.data.disable_expiry_messaging_for_learner_credit,
         enableCodeManagementScreen: action.payload.data.enable_portal_code_management_screen || false,
@@ -127,16 +127,11 @@ const portalConfiguration = (state = initialState, action) => {
         enableAuditDataReporting: false,
         enterpriseFeatures: {},
       };
-    case UPDATE_PORTAL_CONFIGURATION: {
-      // exclude product_type/productType from the spread so they don't persist as stray top-level
-      // state keys alongside the normalized enterpriseProductType below
-      const { product_type: productType, productType: camelProductType, ...updatedData } = action.payload.data;
+    case UPDATE_PORTAL_CONFIGURATION:
       return {
         ...state,
-        ...updatedData,
-        enterpriseProductType: productType ?? camelProductType ?? state.enterpriseProductType,
+        ...action.payload.data,
       };
-    }
     default:
       return state;
   }
