@@ -32,7 +32,7 @@ const EnterpriseListWrapper = () => (
 
 describe('EnterpriseList', () => {
   beforeAll(() => {
-    const getComputedStyleWithoutPseudoElement = (element) => originalGetComputedStyle(element);
+    const getComputedStyleWithoutPseudoElement = (element) => originalGetComputedStyle.call(window, element);
     window.getComputedStyle = getComputedStyleWithoutPseudoElement;
     global.getComputedStyle = getComputedStyleWithoutPseudoElement;
   });

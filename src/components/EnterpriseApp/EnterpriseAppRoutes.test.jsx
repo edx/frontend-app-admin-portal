@@ -39,7 +39,7 @@ jest.mock('react-router-dom', () => ({
   Routes: (props) => <span>{props.children}</span>,
   Route: ({ element }) => element,
   Navigate: ({ to }) => <div data-testid="redirect" data-to={to}>Navigate</div>,
-  useParams: () => ({ enterpriseAppPage: mockEnterpriseAppPage }),
+  useParams: () => ({ enterpriseAppPage: mockEnterpriseAppPage, enterpriseSlug: 'test-enterprise' }),
 }));
 
 const mockEnterpriseSubsidiesContextValue = {
@@ -54,7 +54,6 @@ const mockEnterpriseAppContextValue = {
     fetchError: null,
   },
   productType: PRODUCT_TYPES.TEAMS,
-  slug: 'test-enterprise',
 };
 
 const renderWithProviders = (props, enterpriseAppContextValue = mockEnterpriseAppContextValue) => render(
@@ -108,7 +107,6 @@ describe('EnterpriseAppRoutes', () => {
     renderWithProviders(defaultProps, {
       ...mockEnterpriseAppContextValue,
       productType: PRODUCT_TYPES.ESSENTIALS,
-      slug: 'test-enterprise',
     });
 
     expect(screen.getByTestId('redirect')).toHaveAttribute('data-to', '/test-enterprise/admin/learners');
@@ -134,7 +132,6 @@ describe('EnterpriseAppRoutes', () => {
     renderWithProviders(defaultProps, {
       ...mockEnterpriseAppContextValue,
       productType: PRODUCT_TYPES.ESSENTIALS,
-      slug: 'test-enterprise',
     });
 
     expect(screen.getByTestId('redirect')).toHaveAttribute('data-to', '/test-enterprise/admin/learners');
@@ -147,7 +144,6 @@ describe('EnterpriseAppRoutes', () => {
     renderWithProviders(defaultProps, {
       ...mockEnterpriseAppContextValue,
       productType: PRODUCT_TYPES.TEAMS,
-      slug: 'test-enterprise',
     });
 
     expect(screen.getByText('RevisedAnalyticsV2Page Mock Component')).toBeInTheDocument();

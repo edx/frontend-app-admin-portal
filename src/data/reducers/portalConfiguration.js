@@ -127,15 +127,16 @@ const portalConfiguration = (state = initialState, action) => {
         enableAuditDataReporting: false,
         enterpriseFeatures: {},
       };
-    case UPDATE_PORTAL_CONFIGURATION:
+    case UPDATE_PORTAL_CONFIGURATION: {
+      // exclude product_type/productType from the spread so they don't persist as stray top-level
+      // state keys alongside the normalized enterpriseProductType below
+      const { product_type: productType, productType: camelProductType, ...updatedData } = action.payload.data;
       return {
         ...state,
-        ...action.payload.data,
-        enterpriseProductType:
-          action.payload.data.product_type
-          ?? action.payload.data.productType
-          ?? state.enterpriseProductType,
+        ...updatedData,
+        enterpriseProductType: productType ?? camelProductType ?? state.enterpriseProductType,
       };
+    }
     default:
       return state;
   }

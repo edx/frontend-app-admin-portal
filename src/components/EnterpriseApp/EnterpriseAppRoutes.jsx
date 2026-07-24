@@ -40,8 +40,8 @@ const EnterpriseAppRoutes = ({
   enablePeopleManagementPage,
 }) => {
   const { canManageLearnerCredit, hasBillingSubscription } = useContext(EnterpriseSubsidiesContext);
-  const { productType, slug } = useContext(EnterpriseAppContext);
-  const { enterpriseAppPage } = useParams();
+  const { productType } = useContext(EnterpriseAppContext);
+  const { enterpriseAppPage, enterpriseSlug: slug } = useParams();
   const isEssentials = productType === PRODUCT_TYPES.ESSENTIALS;
 
   // Determine if billing features should be accessible

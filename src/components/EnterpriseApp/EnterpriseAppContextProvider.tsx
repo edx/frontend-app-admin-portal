@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { AppContext } from '@edx/frontend-platform/react';
-import { useParams } from 'react-router-dom';
 
 import { EnterpriseSubsidiesContext, useEnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
 import { SubsidyRequestsContext, useSubsidyRequestsContext } from '../subsidy-requests/SubsidyRequestsContext';
@@ -39,7 +38,6 @@ export type TEnterpriseCurationData = {
 export type TEnterpriseAppContext = {
   enterpriseCuration: TEnterpriseCurationData;
   productType?: string | null;
-  slug?: string;
 };
 
 interface EnterpriseAppContextProviderProps {
@@ -65,7 +63,6 @@ export const EnterpriseAppContext = createContext<TEnterpriseAppContext>({
     fetchError: null,
   },
   productType: null,
-  slug: '',
 });
 
 const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> = ({
@@ -76,7 +73,6 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
   children,
 }) => {
   const { authenticatedUser }: AppContextValue = useContext(AppContext);
-  const { enterpriseSlug } = useParams();
   // subsidies for the enterprise customer
   const enterpriseSubsidiesContext = useEnterpriseSubsidiesContext({
     enterpriseId,
@@ -112,8 +108,7 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
   const enterpriseAppContext = useMemo(() => ({
     enterpriseCuration: enterpriseCurationContext,
     productType: enterpriseProductType ?? null,
-    slug: enterpriseSlug ?? '',
-  } as TEnterpriseAppContext), [enterpriseCurationContext, enterpriseProductType, enterpriseSlug]);
+  } as TEnterpriseAppContext), [enterpriseCurationContext, enterpriseProductType]);
 
   if (isLoading) {
     return <EnterpriseAppSkeleton />;

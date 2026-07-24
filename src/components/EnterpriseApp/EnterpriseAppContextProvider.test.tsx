@@ -21,13 +21,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('./data/hooks');
-jest.mock('../learner-credit-management/data/hooks', () => ({
-  ...jest.requireActual('../learner-credit-management/data/hooks'),
-  useEnterpriseCustomer: jest.fn(() => ({
-    data: { productType: null },
-    isLoading: false,
-  })),
-}));
 
 describe('<EnterpriseAppContextProvider />', () => {
   it.each([{

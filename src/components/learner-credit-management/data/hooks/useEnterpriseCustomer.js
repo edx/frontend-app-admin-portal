@@ -18,8 +18,9 @@ const getEnterpriseCustomer = async (enterpriseCustomerUuid) => {
   const response = await LmsApiService.fetchEnterpriseCustomer(enterpriseCustomerUuid);
   const { product_type: productType, ...enterpriseCustomerData } = response.data;
   return {
-    ...camelCaseObject(enterpriseCustomerData),
+    // spread after productType so a camelCase productType from the API can't silently overwrite it
     productType,
+    ...camelCaseObject(enterpriseCustomerData),
   };
 };
 
