@@ -241,6 +241,11 @@ class EnterpriseDataApiService {
     );
     return `${tableURL}?${queryParams.toString()}`;
   }
+
+  static fetchAnalyticsCSV(key, enterpriseId, options) {
+    const url = EnterpriseDataApiService.getAnalyticsCSVDownloadURL(key, enterpriseId, options);
+    return EnterpriseDataApiService.apiClient().get(url, { responseType: 'text' });
+  }
 }
 
 export default EnterpriseDataApiService;

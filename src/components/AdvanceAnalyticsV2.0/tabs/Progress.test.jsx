@@ -42,6 +42,7 @@ const mockAnalyticsSkillsData = {
   topSkills: [],
   topSkillsByEnrollments: [],
   topSkillsByCompletions: [],
+  results: [{ id: 1 }],
 };
 
 jest.spyOn(EnterpriseDataApiService, 'fetchAdminAnalyticsData');
@@ -188,8 +189,8 @@ describe('Rendering tests', () => {
       </Router>,
     );
 
-    const downloadLink = await screen.findByRole('link', { name: /download.*csv/i });
-    await userEvent.click(downloadLink);
+    const downloadButton = await screen.findByRole('button', { name: /download completions csv/i });
+    await userEvent.click(downloadButton);
 
     await waitFor(() => {
       expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(

@@ -82,12 +82,14 @@ describe('<FeaturedContentSection />', () => {
         uuid: 'content-1',
         title: 'Course Alpha',
         contentKey: 'edX+Course1',
+        contentType: 'course',
         authoringOrganizations: [{ uuid: 'org-1', name: 'OrgA', logoImageUrl: 'https://example.com/logo.png' }],
       },
       {
         uuid: 'content-3',
         title: 'Course Gamma',
         contentKey: 'edX+Course3',
+        contentType: 'course',
         authoringOrganizations: [{ uuid: 'org-3', name: 'OrgC' }],
       },
     ];
@@ -98,19 +100,65 @@ describe('<FeaturedContentSection />', () => {
     expect(screen.getByText('OrgC')).toBeInTheDocument();
   });
 
-  it('renders partner logos when available', () => {
+  it('does not render partner logos, even when a logo url is available', () => {
     const starredItems = [
       {
         uuid: 'content-1',
         title: 'Course Alpha',
         contentKey: 'edX+Course1',
+        contentType: 'course',
         authoringOrganizations: [{ uuid: 'org-1', name: 'OrgA', logoImageUrl: 'https://example.com/logo.png' }],
       },
     ];
+    const { container } = renderWithIntl(<FeaturedContentSection {...defaultProps} starredItems={starredItems} />);
+    expect(screen.queryByAltText('OrgA')).not.toBeInTheDocument();
+    // No <img> element should render (scoped to images, not the Paragon star SVG icons).
+    expect(container.querySelector('img')).not.toBeInTheDocument();
+    expect(screen.getByText('OrgA')).toBeInTheDocument();
+  });
+
+  it('renders the content type label for each starred item', () => {
+    const starredItems = [
+      {
+        uuid: 'content-1',
+        title: 'Course Alpha',
+        contentKey: 'edX+Course1',
+        contentType: 'course',
+        authoringOrganizations: [{ uuid: 'org-1', name: 'OrgA' }],
+      },
+      {
+        uuid: 'content-2',
+        title: 'Program Beta',
+        contentKey: 'edX+Program1',
+        contentType: 'program',
+        authoringOrganizations: [{ uuid: 'org-2', name: 'OrgB' }],
+      },
+      {
+        uuid: 'content-3',
+        title: 'Pathway Gamma',
+        contentKey: 'edX+Pathway1',
+        contentType: 'learnerpathway',
+        authoringOrganizations: [{ uuid: 'org-3', name: 'OrgC' }],
+      },
+    ];
     renderWithIntl(<FeaturedContentSection {...defaultProps} starredItems={starredItems} />);
-    const logo = screen.getByAltText('OrgA');
-    expect(logo).toBeInTheDocument();
-    expect(logo).toHaveAttribute('src', 'https://example.com/logo.png');
+    expect(screen.getByText('Course')).toBeInTheDocument();
+    expect(screen.getByText('Program')).toBeInTheDocument();
+    expect(screen.getByText('Pathway')).toBeInTheDocument();
+  });
+
+  it('renders the content type label when the api returns capitalized content types', () => {
+    const starredItems = [
+      {
+        uuid: 'content-1',
+        title: 'Course Alpha',
+        contentKey: 'edX+Course1',
+        contentType: 'Course',
+        authoringOrganizations: [{ uuid: 'org-1', name: 'OrgA' }],
+      },
+    ];
+    renderWithIntl(<FeaturedContentSection {...defaultProps} starredItems={starredItems} />);
+    expect(screen.getByText('Course')).toBeInTheDocument();
   });
 
   it('shows loading row when loadingContentKey is provided', () => {
@@ -146,12 +194,15 @@ describe('<FeaturedContentSection />', () => {
         uuid: 'content-1',
         title: 'Course Alpha',
         contentKey: 'edX+Course1',
+        contentType: 'course',
         authoringOrganizations: [{ uuid: 'org-1', name: 'OrgA' }],
       },
     ];
     renderWithIntl(<FeaturedContentSection {...defaultProps} starredItems={starredItems} />);
-    expect(screen.getByText('Course Title')).toBeInTheDocument();
+    expect(screen.getByText('Title')).toBeInTheDocument();
     expect(screen.getByText('Educational Partner')).toBeInTheDocument();
+    expect(screen.getByText('Content Type')).toBeInTheDocument();
+    expect(screen.queryByText('Course Title')).not.toBeInTheDocument();
   });
 
   it('renders section with correct test id', () => {

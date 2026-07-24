@@ -407,6 +407,45 @@ describe('<Sidebar />', () => {
     expect(enableReportingConfigScreenLink).toHaveAttribute('href', '/test-enterprise-slug/admin/reporting');
   });
 
+  it('renders people management link by default (enablePeopleManagementScreen defaults to true)', () => {
+    const store = mockStore({
+      sidebar: {
+        ...initialState.sidebar,
+      },
+      portalConfiguration: {},
+    });
+    render(<SidebarWrapper store={store} />);
+    const peopleManagementLink = screen.getByRole('link', { name: 'People Management' });
+    expect(peopleManagementLink).toBeInTheDocument();
+    expect(peopleManagementLink).toHaveAttribute('href', '/test-enterprise-slug/admin/people-management');
+  });
+
+  it('hides people management link when enablePeopleManagementScreen is false', () => {
+    const store = mockStore({
+      sidebar: {
+        ...initialState.sidebar,
+      },
+      portalConfiguration: {
+        enablePeopleManagementScreen: false,
+      },
+    });
+    render(<SidebarWrapper store={store} />);
+    expect(screen.queryByRole('link', { name: 'People Management' })).not.toBeInTheDocument();
+  });
+
+  it('renders people management link when enablePeopleManagementScreen is explicitly true', () => {
+    const store = mockStore({
+      sidebar: {
+        ...initialState.sidebar,
+      },
+      portalConfiguration: {
+        enablePeopleManagementScreen: true,
+      },
+    });
+    render(<SidebarWrapper store={store} />);
+    expect(screen.getByRole('link', { name: 'People Management' })).toBeInTheDocument();
+  });
+
   it('renders settings link if the settings page has visible tabs.', () => {
     const store = mockStore({
       ...initialState,

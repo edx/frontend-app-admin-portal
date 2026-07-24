@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import {
-  render, screen, waitFor, within,
+  render, screen, waitFor, within, fireEvent,
 } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -18,6 +18,7 @@ import { accessibilitySettings } from '../../../../tests/accessibility-settings'
 
 jest.spyOn(EnterpriseDataApiService, 'fetchAdminAnalyticsData');
 jest.spyOn(EnterpriseDataApiService, 'getAnalyticsCSVDownloadURL').mockReturnValue('/mock.csv');
+jest.spyOn(EnterpriseDataApiService, 'fetchAnalyticsCSV').mockResolvedValue({ data: 'email,course_title\na@b.com,title' });
 
 const axiosMock = new MockAdapter(axios);
 getAuthenticatedHttpClient.mockReturnValue(axios);
@@ -63,7 +64,7 @@ describe('IndividualEngagementsTable Component', () => {
     expect(results).toHaveNoViolations();
   });
 
-  test('renders correct title, subtitle and download button', () => {
+  test('renders correct title, subtitle and download button', async () => {
     render(
       <Router>
         <QueryClientProvider client={queryClient()}>
@@ -82,8 +83,14 @@ describe('IndividualEngagementsTable Component', () => {
 
     expect(screen.getByText('Individual Engagements')).toBeInTheDocument();
     expect(screen.getByText('See the engagement levels of learners from your organization.')).toBeInTheDocument();
-    expect(screen.getByText('Download Engagement CSV')).toBeInTheDocument();
-    expect(EnterpriseDataApiService.getAnalyticsCSVDownloadURL).toHaveBeenCalledWith(
+    const downloadButton = screen.getByRole('button', { name: /download engagement csv/i });
+    expect(downloadButton).toBeInTheDocument();
+
+    // The button is disabled until the table's data finishes loading.
+    await waitFor(() => expect(downloadButton).not.toHaveAttribute('aria-disabled', 'true'));
+    fireEvent.click(downloadButton);
+
+    await waitFor(() => expect(EnterpriseDataApiService.fetchAnalyticsCSV).toHaveBeenCalledWith(
       'engagementsTable',
       TEST_ENTERPRISE_ID,
       expect.objectContaining({
@@ -92,7 +99,7 @@ describe('IndividualEngagementsTable Component', () => {
         course_type: 'special',
         budget_uuid: 'budget-xyz',
       }),
-    );
+    ));
   });
 
   test('renders the table rows with correct values incl. segmented columns', async () => {

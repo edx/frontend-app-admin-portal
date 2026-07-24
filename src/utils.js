@@ -668,6 +668,21 @@ function getTimeStampedFilename(suffix) {
 }
 
 /**
+ * Wraps CSV text in a Blob typed so spreadsheet apps (e.g. Excel) render non-Latin characters
+ * (e.g. Arabic course titles) correctly instead of as mojibake.
+ *
+ * Deliberately does NOT prepend a UTF-8 BOM itself: file-saver's `saveAs` already auto-prepends
+ * one for any blob type matching `text/*;charset=utf-8` (see its `auto_bom` helper). Adding one
+ * here too results in a double BOM in the downloaded file.
+ *
+ * @param {string} csv
+ * @returns {Blob}
+ */
+function createUtf8CsvBlob(csv) {
+  return new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+}
+
+/**
  * Transform data to csv format and save to file
  *
  * @param {string} fileName
@@ -688,9 +703,7 @@ function downloadCsv(fileName, data, headers, dataEntryToRow) {
 
   const body = data.map(generateCsvRow).join('\n');
   const csvText = `${headers}\n${body}`;
-  const blob = new Blob([csvText], {
-    type: 'text/csv',
-  });
+  const blob = createUtf8CsvBlob(csvText);
   saveAs(blob, fileName);
 }
 
@@ -779,6 +792,31 @@ function getFilteredQueryParams(queryString, expectedParams) {
   return filteredOptions;
 }
 
+// Allowed query params for filtering learner-report tables (search, CSV export, and filter reset).
+const FILTER_QUERY_PARAMS = ['search', 'search_course', 'search_start_date', 'budget_uuid', 'group_uuid', 'search_enrollment'];
+
+const getTableStateFromSearch = (search, defaultOrdering) => {
+  const query = new URLSearchParams(search);
+  const page = parseInt(query.get('page'), 10);
+
+  return {
+    pageIndex: Number.isNaN(page) || page < 1 ? 0 : page - 1,
+    ordering: query.get('ordering') || defaultOrdering,
+  };
+};
+
+// Assumes a single-field DRF ordering string (one optional leading `-` for descending, e.g.
+// `-current_grade`), matching every consumer's single-column manualSortBy usage. Not safe to
+// pass a multi-field ordering (e.g. `-grade,name`) — that would need a different return shape.
+const getSortStateFromOrdering = (ordering, defaultOrdering) => {
+  const effectiveOrdering = ordering || defaultOrdering;
+  const desc = effectiveOrdering.startsWith('-');
+  return [{
+    id: desc ? effectiveOrdering.slice(1) : effectiveOrdering,
+    desc,
+  }];
+};
+
 /**
  * Build a logout URL that returns the user to `/<enterpriseSlug>/admin/register`
  * on this app after logging out of edx-platform.
@@ -863,6 +901,7 @@ export {
   isFalsy,
   getTimeStampedFilename,
   downloadCsv,
+  createUtf8CsvBlob,
   splitAndTrim,
   removeStringsFromList,
   removeStringsFromListCaseInsensitive,
@@ -870,4 +909,7 @@ export {
   getFromLocalStorage,
   getFilteredQueryParams,
   getEnterpriseAdminRegisterLogoutUrl,
+  FILTER_QUERY_PARAMS,
+  getTableStateFromSearch,
+  getSortStateFromOrdering,
 };
