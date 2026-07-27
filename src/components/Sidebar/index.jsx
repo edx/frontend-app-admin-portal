@@ -62,8 +62,6 @@ const Sidebar = ({
   const hideHighlightsForGroups = hasBudgetGroup && !isEdxStaff;
   const intl = useIntl();
   const isEssentials = productType === PRODUCT_TYPES.ESSENTIALS;
-  
-  console.log('Sidebar: isEssentials', isEssentials, 'productType', productType, 'hasBillingSubscription', hasBillingSubscription);
 
   // Determine if billing features should be accessible
   // Note: All users of the enterprise admin portal are already authenticated as enterprise admins

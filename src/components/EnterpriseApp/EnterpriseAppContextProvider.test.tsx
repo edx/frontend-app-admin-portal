@@ -65,6 +65,7 @@ describe('<EnterpriseAppContextProvider />', () => {
       coupons: [],
       enterpriseSubsidyTypes: [],
       hasBillingSubscription: false,
+      productType: null,
       isLoadingCustomerAgreement: false,
     });
     const mockUseSubsidyRequestsContext = jest.spyOn(subsidyRequestsContext, 'useSubsidyRequestsContext').mockReturnValue(
