@@ -60,6 +60,7 @@ const LEARNER_ACTIVITY_TABLE_SLUGS = [
   'learners-active-week',
   'learners-inactive-week',
   'learners-inactive-month',
+  'completed-learners',
   'completed-learners-week',
 ];
 
