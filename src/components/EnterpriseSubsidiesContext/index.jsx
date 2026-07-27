@@ -16,6 +16,7 @@ import {
  *   canManageLearnerCredit: boolean;
  *   enterpriseSubsidyTypes: string[];
  *   hasBillingSubscription: boolean;
+ *   productType: string | null;
  *   isLoading: boolean;
  *   isLoadingCustomerAgreement: boolean;
  * }>}
@@ -26,6 +27,7 @@ export const EnterpriseSubsidiesContext = createContext({
   canManageLearnerCredit: false,
   enterpriseSubsidyTypes: [],
   hasBillingSubscription: false,
+  productType: null,
   isLoading: false,
   isLoadingCustomerAgreement: false,
 });
@@ -59,6 +61,7 @@ export const useEnterpriseSubsidiesContext = ({
 
   const {
     hasBillingSubscription,
+    productType,
     isLoading: isLoadingBillingSubscription,
   } = useBillingSubscriptionAvailable({ enterpriseId });
 
@@ -87,6 +90,7 @@ export const useEnterpriseSubsidiesContext = ({
     canManageLearnerCredit,
     enterpriseSubsidyTypes,
     hasBillingSubscription,
+    productType,
     isLoading,
     isLoadingCustomerAgreement,
   }), [
@@ -95,6 +99,7 @@ export const useEnterpriseSubsidiesContext = ({
     canManageLearnerCredit,
     enterpriseSubsidyTypes,
     hasBillingSubscription,
+    productType,
     isLoading,
     isLoadingCustomerAgreement,
   ]);

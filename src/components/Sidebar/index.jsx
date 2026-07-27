@@ -51,10 +51,10 @@ const Sidebar = ({
   const sidebarNavRef = useRef();
   const sidebarWidthRef = useRef();
   const {
-    enterpriseCuration: { enterpriseCuration, isNewArchivedContent }, productType,
+    enterpriseCuration: { enterpriseCuration, isNewArchivedContent },
   } = useContext(EnterpriseAppContext);
   const { subsidyRequestsCounts } = useContext(SubsidyRequestsContext);
-  const { canManageLearnerCredit, hasBillingSubscription } = useContext(EnterpriseSubsidiesContext);
+  const { canManageLearnerCredit, hasBillingSubscription, productType } = useContext(EnterpriseSubsidiesContext);
   const { FEATURE_CONTENT_HIGHLIGHTS } = getConfig();
   const authenticatedUser = getAuthenticatedUser();
   const isEdxStaff = authenticatedUser.administrator;
@@ -62,6 +62,8 @@ const Sidebar = ({
   const hideHighlightsForGroups = hasBudgetGroup && !isEdxStaff;
   const intl = useIntl();
   const isEssentials = productType === PRODUCT_TYPES.ESSENTIALS;
+  
+  console.log('Sidebar: isEssentials', isEssentials, 'productType', productType, 'hasBillingSubscription', hasBillingSubscription);
 
   // Determine if billing features should be accessible
   // Note: All users of the enterprise admin portal are already authenticated as enterprise admins

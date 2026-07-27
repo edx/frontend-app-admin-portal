@@ -45,6 +45,7 @@ jest.mock('react-router-dom', () => ({
 const mockEnterpriseSubsidiesContextValue = {
   canManageLearnerCredit: true,
   hasBillingSubscription: false,
+  productType: PRODUCT_TYPES.TEAMS,
 };
 
 const mockEnterpriseAppContextValue = {
@@ -53,13 +54,15 @@ const mockEnterpriseAppContextValue = {
     isLoading: false,
     fetchError: null,
   },
-  productType: PRODUCT_TYPES.TEAMS,
 };
 
-const renderWithProviders = (props, enterpriseAppContextValue = mockEnterpriseAppContextValue) => render(
+const renderWithProviders = (
+  props,
+  enterpriseSubsidiesContextValue = mockEnterpriseSubsidiesContextValue,
+) => render(
   <IntlProvider locale="en">
-    <EnterpriseAppContext.Provider value={enterpriseAppContextValue}>
-      <EnterpriseSubsidiesContext.Provider value={mockEnterpriseSubsidiesContextValue}>
+    <EnterpriseAppContext.Provider value={mockEnterpriseAppContextValue}>
+      <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
         <EnterpriseAppRoutes {...props} />
       </EnterpriseSubsidiesContext.Provider>
     </EnterpriseAppContext.Provider>
@@ -105,7 +108,7 @@ describe('EnterpriseAppRoutes', () => {
     features.ANALYTICS_SUPPORTED = true;
     features.ADMIN_V1 = true;
     renderWithProviders(defaultProps, {
-      ...mockEnterpriseAppContextValue,
+      ...mockEnterpriseSubsidiesContextValue,
       productType: PRODUCT_TYPES.ESSENTIALS,
     });
 
@@ -130,7 +133,7 @@ describe('EnterpriseAppRoutes', () => {
     mockEnterpriseAppPage = 'analytics';
     features.ANALYTICS_SUPPORTED = true;
     renderWithProviders(defaultProps, {
-      ...mockEnterpriseAppContextValue,
+      ...mockEnterpriseSubsidiesContextValue,
       productType: PRODUCT_TYPES.ESSENTIALS,
     });
 
@@ -142,7 +145,7 @@ describe('EnterpriseAppRoutes', () => {
     mockEnterpriseAppPage = 'analytics';
     features.ANALYTICS_SUPPORTED = true;
     renderWithProviders(defaultProps, {
-      ...mockEnterpriseAppContextValue,
+      ...mockEnterpriseSubsidiesContextValue,
       productType: PRODUCT_TYPES.TEAMS,
     });
 

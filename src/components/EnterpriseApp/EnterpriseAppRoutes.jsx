@@ -24,7 +24,6 @@ import PeopleManagementPage from '../PeopleManagement';
 import GroupDetailPage from '../PeopleManagement/GroupDetailPage/GroupDetailPage';
 import LearnerDetailPage from '../PeopleManagement/LearnerDetailPage/LearnerDetailPage';
 import { isBillingEnabled } from '../billing/data/utils';
-import { EnterpriseAppContext } from './EnterpriseAppContextProvider';
 import { PRODUCT_TYPES, ROUTE_NAMES } from './data/constants';
 import BillingPage from '../billing/BillingPage';
 
@@ -39,8 +38,7 @@ const EnterpriseAppRoutes = ({
   enableContentHighlightsPage,
   enablePeopleManagementPage,
 }) => {
-  const { canManageLearnerCredit, hasBillingSubscription } = useContext(EnterpriseSubsidiesContext);
-  const { productType } = useContext(EnterpriseAppContext);
+  const { canManageLearnerCredit, hasBillingSubscription, productType } = useContext(EnterpriseSubsidiesContext);
   const { enterpriseAppPage, enterpriseSlug: slug } = useParams();
   const isEssentials = productType === PRODUCT_TYPES.ESSENTIALS;
 

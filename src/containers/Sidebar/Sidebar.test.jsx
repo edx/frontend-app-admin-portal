@@ -67,7 +67,6 @@ const initialEnterpriseAppContextValue = {
     isLoading: false,
     fetchError: null,
   },
-  productType: null,
   slug: 'test-enterprise-slug',
 };
 
@@ -80,6 +79,7 @@ const initialSubsidyRequestsContextValue = {
 
 const initialEnterpriseSubsidiesContextValue = {
   canManageLearnerCredit: true,
+  productType: null,
 };
 
 const mockOnMount = jest.fn();
@@ -200,8 +200,8 @@ describe('<Sidebar />', () => {
   it('hides analytics for Essentials customers', () => {
     render(
       <SidebarWrapper
-        enterpriseAppContextValue={{
-          ...initialEnterpriseAppContextValue,
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
           productType: PRODUCT_TYPES.ESSENTIALS,
         }}
       />,
@@ -213,8 +213,8 @@ describe('<Sidebar />', () => {
   it('shows analytics for Teams customers', () => {
     render(
       <SidebarWrapper
-        enterpriseAppContextValue={{
-          ...initialEnterpriseAppContextValue,
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
           productType: PRODUCT_TYPES.TEAMS,
         }}
       />,
@@ -226,8 +226,8 @@ describe('<Sidebar />', () => {
   it('shows analytics when productType is null', () => {
     render(
       <SidebarWrapper
-        enterpriseAppContextValue={{
-          ...initialEnterpriseAppContextValue,
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
           productType: null,
         }}
       />,
@@ -239,8 +239,8 @@ describe('<Sidebar />', () => {
   it('shows analytics when productType is undefined', () => {
     render(
       <SidebarWrapper
-        enterpriseAppContextValue={{
-          ...initialEnterpriseAppContextValue,
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
           productType: undefined,
         }}
       />,
