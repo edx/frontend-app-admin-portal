@@ -13,7 +13,6 @@ import { configuration } from '../../../../config';
 
 interface CreateTourFlowsProps {
   currentStep: number;
-  enterpriseId: string;
   enterpriseSlug: string;
   handleEndTour: (endEventName: string, flowUuid?: string) => void;
   handleBackTour: (backEventName: string) => void;
@@ -36,8 +35,7 @@ const AdministerSubscriptionsFlow = ({
 
   const { subsidyRequestConfiguration } = useContext(SubsidyRequestsContext);
   const { customerAgreement, isLoadingCustomerAgreement } = useContext(EnterpriseSubsidiesContext);
-  // @ts-ignore
-  const hasMultipleSubscriptions = customerAgreement?.subscriptions.length > 1;
+  const hasMultipleSubscriptions = (customerAgreement?.subscriptions?.length ?? 0) > 1;
 
   const isSubsidyRequestsEnabled = subsidyRequestConfiguration?.subsidyRequestsEnabled;
   const subsidyType = subsidyRequestConfiguration?.subsidyType;
