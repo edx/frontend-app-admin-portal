@@ -87,7 +87,6 @@ class EnterpriseApp extends React.Component {
       enterpriseName,
       enterpriseFeatures,
       enterpriseBranding,
-      enterpriseProductType,
       loading,
     } = this.props;
     const { sidebarWidth } = this.state;
@@ -122,7 +121,6 @@ class EnterpriseApp extends React.Component {
         enterpriseId={enterpriseId}
         enterpriseName={enterpriseName}
         enterpriseFeatures={enterpriseFeatures}
-        enterpriseProductType={enterpriseProductType}
         enablePortalLearnerCreditManagementScreen={enablePortalLearnerCreditManagementScreen}
       >
         <BrandStyles enterpriseBranding={enterpriseBranding} />
@@ -184,7 +182,6 @@ EnterpriseApp.defaultProps = {
     secondary_color: SCHOLAR_THEME.banner,
     tertiary_color: SCHOLAR_THEME.accent,
   },
-  enterpriseProductType: null,
   error: null,
   enableCodeManagementScreen: false,
   enableSubscriptionManagementScreen: false,
@@ -207,7 +204,6 @@ EnterpriseApp.propTypes = {
     tertiary_color: PropTypes.string,
     logo: PropTypes.string,
   }),
-  enterpriseProductType: PropTypes.string,
   fetchEnterpriseAppData: PropTypes.func.isRequired,
   location: PropTypes.shape({
     pathname: PropTypes.string,

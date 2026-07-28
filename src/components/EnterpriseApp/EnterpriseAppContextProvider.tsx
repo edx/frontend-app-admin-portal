@@ -37,13 +37,11 @@ export type TEnterpriseCurationData = {
 
 export type TEnterpriseAppContext = {
   enterpriseCuration: TEnterpriseCurationData;
-  productType?: string | null;
 };
 
 interface EnterpriseAppContextProviderProps {
   enterpriseId: string;
   enterpriseName: string;
-  enterpriseProductType?: string | null;
   enablePortalLearnerCreditManagementScreen: boolean;
   children: React.ReactNode;
 }
@@ -62,13 +60,11 @@ export const EnterpriseAppContext = createContext<TEnterpriseAppContext>({
     isLoading: true,
     fetchError: null,
   },
-  productType: null,
 });
 
 const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> = ({
   enterpriseId,
   enterpriseName,
-  enterpriseProductType,
   enablePortalLearnerCreditManagementScreen,
   children,
 }) => {
@@ -107,8 +103,7 @@ const EnterpriseAppContextProvider: React.FC<EnterpriseAppContextProviderProps> 
   // into a singular `EnterpriseAppContext.Provider`.
   const enterpriseAppContext = useMemo(() => ({
     enterpriseCuration: enterpriseCurationContext,
-    productType: enterpriseProductType ?? null,
-  } as TEnterpriseAppContext), [enterpriseCurationContext, enterpriseProductType]);
+  } as TEnterpriseAppContext), [enterpriseCurationContext]);
 
   if (isLoading) {
     return <EnterpriseAppSkeleton />;
