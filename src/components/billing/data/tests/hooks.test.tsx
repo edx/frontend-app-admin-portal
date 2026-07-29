@@ -356,7 +356,10 @@ describe('Billing Query Hooks', () => {
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
-        expect(result.current.data).toEqual(mockSubscription);
+        expect(result.current.data).toEqual({
+          ...mockSubscription,
+          productType: 'teams',
+        });
       });
     });
   });

@@ -13,6 +13,7 @@ const initialState = {
   enterpriseId: null,
   enterpriseName: null,
   enterpriseSlug: null,
+  productType: null,
   enterpriseBranding: null,
   identityProvider: null,
   disableExpiryMessagingForLearnerCredit: false,
@@ -50,6 +51,14 @@ const portalConfiguration = (state = initialState, action) => {
         enterpriseId: action.payload.data.uuid,
         enterpriseName: action.payload.data.name,
         enterpriseSlug: action.payload.data.slug,
+
+        // The backend returns `product_type` (snake_case), while some frontend
+        // API paths may transform response keys to `productType` (camelCase).
+        // Support both formats temporarily for compatibility.
+        //
+        // TODO: Remove this fallback once all API responses consistently use
+        // a single key format.
+        productType: action.payload.data.product_type ?? action.payload.data.productType ?? null,
         enterpriseBranding: action.payload.data.branding_configuration,
         identityProvider: action.payload.data.identity_provider,
         disableExpiryMessagingForLearnerCredit: action.payload.data.disable_expiry_messaging_for_learner_credit,
@@ -78,6 +87,7 @@ const portalConfiguration = (state = initialState, action) => {
         enterpriseId: null,
         enterpriseName: null,
         enterpriseSlug: null,
+        productType: null,
         enterpriseBranding: null,
         identityProvider: null,
         disableExpiryMessagingForLearnerCredit: false,
@@ -104,6 +114,7 @@ const portalConfiguration = (state = initialState, action) => {
         enterpriseId: null,
         enterpriseName: null,
         enterpriseSlug: null,
+        productType: null,
         enterpriseBranding: null,
         identityProvider: null,
         disableExpiryMessagingForLearnerCredit: false,

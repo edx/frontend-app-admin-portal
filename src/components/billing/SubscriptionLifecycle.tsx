@@ -10,6 +10,7 @@ import {
 import CancelSubscriptionSuccessToast from './CancelSubscriptionSuccessToast';
 import ReinstateSubscriptionSuccessToast from './ReinstateSubscriptionSuccessToast';
 import SubscriptionErrorToast from './SubscriptionErrorToast';
+import { SUBSCRIPTION_TYPE_LABEL_MAP } from '../subscriptions/data/constants';
 
 /**
  * SubscriptionLifecycle - Component for managing subscription cancellation and reinstatement
@@ -118,10 +119,16 @@ const SubscriptionLifecycle = ({
     licenseCount,
     currentPeriodEnd,
     cancelAtPeriodEnd,
+    productType,
   } = subscription;
 
   const formattedAmount = formatAmount(yearlyAmount, currency);
   const formattedPeriodEnd = formatDate(currentPeriodEnd);
+  const normalizedProductType = productType?.toLowerCase();
+  const subscriptionTypeMessage = normalizedProductType === 'essentials'
+    ? SUBSCRIPTION_TYPE_LABEL_MAP.essentials
+    : SUBSCRIPTION_TYPE_LABEL_MAP.teams;
+  const subscriptionTypeLabel = intl.formatMessage(subscriptionTypeMessage);
 
   return (
     <>
@@ -173,6 +180,18 @@ const SubscriptionLifecycle = ({
           />
           <Card.Section>
             <Stack gap={3}>
+
+              {/* Subscription Type */}
+              <div>
+                <div className="small text-muted">
+                  <FormattedMessage
+                    id="admin.portal.billing.subscription.type.label"
+                    defaultMessage="Subscription Type"
+                    description="Label for subscription type field"
+                  />
+                </div>
+                <div className="font-weight-bold">{subscriptionTypeLabel}</div>
+              </div>
 
               {/* Current Period End */}
               <div>
