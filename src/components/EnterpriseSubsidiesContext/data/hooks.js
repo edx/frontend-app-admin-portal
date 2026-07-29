@@ -228,6 +228,7 @@ export const useCoupons = (options) => {
  */
 export const useBillingSubscriptionAvailable = ({ enterpriseId }) => {
   const [hasBillingSubscription, setHasBillingSubscription] = useState(false);
+  const [productType, setProductType] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -236,9 +237,11 @@ export const useBillingSubscriptionAvailable = ({ enterpriseId }) => {
         const response = await EnterpriseAccessApiService.getSubscription(enterpriseId);
         const subscriptionData = response.data.subscription ?? response.data;
         setHasBillingSubscription(!!subscriptionData);
+        setProductType(subscriptionData?.productType ?? null);
       } catch (error) {
         logError(error);
         setHasBillingSubscription(false);
+        setProductType(null);
       } finally {
         setIsLoading(false);
       }
@@ -249,6 +252,7 @@ export const useBillingSubscriptionAvailable = ({ enterpriseId }) => {
 
   return {
     hasBillingSubscription,
+    productType,
     isLoading,
   };
 };

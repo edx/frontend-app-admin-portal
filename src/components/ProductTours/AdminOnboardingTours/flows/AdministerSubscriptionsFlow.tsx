@@ -4,16 +4,15 @@ import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 import { useParams } from 'react-router';
 
 import { SubsidyRequestsContext } from '../../../subsidy-requests';
+import { EnterpriseSubsidiesContext } from '../../../EnterpriseSubsidiesContext';
 import { SUPPORTED_SUBSIDY_TYPES } from '../../../../data/constants/subsidyRequests';
 import { ADMINISTER_SUBSCRIPTIONS_TARGETS, ADMIN_TOUR_EVENT_NAMES } from '../constants';
 import messages from '../messages';
 import { TourStep } from '../../types';
 import { configuration } from '../../../../config';
-import { useCustomerAgreement } from '../../../EnterpriseSubsidiesContext/data/hooks';
 
 interface CreateTourFlowsProps {
   currentStep: number;
-  enterpriseId: string;
   enterpriseSlug: string;
   handleEndTour: (endEventName: string, flowUuid?: string) => void;
   handleBackTour: (backEventName: string) => void;
@@ -23,7 +22,6 @@ interface CreateTourFlowsProps {
 
 const AdministerSubscriptionsFlow = ({
   currentStep,
-  enterpriseId,
   enterpriseSlug,
   handleEndTour,
   handleBackTour,
@@ -35,10 +33,9 @@ const AdministerSubscriptionsFlow = ({
   const subscriptionUuid = params['*']?.split('/')[1];
   const isOnDetailPage = !!subscriptionUuid;
 
-  const { isLoadingCustomerAgreement, subsidyRequestConfiguration } = useContext(SubsidyRequestsContext);
-  const { customerAgreement, isLoading: isLoadingAgreement } = useCustomerAgreement({ enterpriseId });
-  // @ts-ignore
-  const hasMultipleSubscriptions = customerAgreement?.subscriptions.length > 1;
+  const { subsidyRequestConfiguration } = useContext(SubsidyRequestsContext);
+  const { customerAgreement, isLoadingCustomerAgreement } = useContext(EnterpriseSubsidiesContext);
+  const hasMultipleSubscriptions = (customerAgreement?.subscriptions?.length ?? 0) > 1;
 
   const isSubsidyRequestsEnabled = subsidyRequestConfiguration?.subsidyRequestsEnabled;
   const subsidyType = subsidyRequestConfiguration?.subsidyType;
@@ -83,7 +80,7 @@ const AdministerSubscriptionsFlow = ({
   const onBack = () => handleBackTour(ADMIN_TOUR_EVENT_NAMES.ADMINISTER_SUBSCRIPTIONS_BACK_EVENT_NAME);
 
   // Don't load the tour until we load the customer agreement
-  if (isLoadingCustomerAgreement || isLoadingAgreement) {
+  if (isLoadingCustomerAgreement) {
     return [
       {
         target: `#${ADMINISTER_SUBSCRIPTIONS_TARGETS.SIDEBAR}`,

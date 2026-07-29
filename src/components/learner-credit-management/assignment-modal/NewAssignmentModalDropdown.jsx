@@ -1,10 +1,13 @@
 import { defineMessages, useIntl } from '@edx/frontend-platform/i18n';
-import { Dropdown, Skeleton, Stack } from '@openedx/paragon';
+import {
+  Badge, Dropdown, Skeleton, Stack,
+} from '@openedx/paragon';
 import dayjs from 'dayjs';
 import PropTypes from 'prop-types';
 import { useState, useMemo, useCallback } from 'react';
 import classNames from 'classnames';
 import { SHORT_MONTH_DATE_FORMAT } from '../data';
+import { ENTERPRISE_RESTRICTION_TYPE } from '../data/constants';
 
 const messages = defineMessages({
   byDate: {
@@ -26,6 +29,11 @@ const messages = defineMessages({
     id: 'lcm.budget.detail.page.catalog.search.results.assign.dropdown.starts-date-item',
     defaultMessage: '{startLabel} {startDate}',
     description: 'Dropdown item for the catalog search results section on the lcm budget detail start date',
+  },
+  customBadge: {
+    id: 'lcm.budget.detail.page.catalog.search.results.assign.dropdown.custom-run-badge',
+    defaultMessage: 'Custom',
+    description: 'Badge label distinguishing a custom (restricted) course run from mainstream course runs in the assign dropdown',
   },
 });
 
@@ -77,10 +85,17 @@ const NewAssignmentModalDropdown = ({
               onMouseUp={() => setClickedDropdownItem(null)}
             >
               <Stack>
-                {intl.formatMessage(messages.startDate, {
-                  startLabel: getStartLabel(courseRun.start),
-                  startDate: dayjs(courseRun.start).format(SHORT_MONTH_DATE_FORMAT),
-                })}
+                <Stack direction="horizontal" gap={2}>
+                  {intl.formatMessage(messages.startDate, {
+                    startLabel: getStartLabel(courseRun.start),
+                    startDate: dayjs(courseRun.start).format(SHORT_MONTH_DATE_FORMAT),
+                  })}
+                  {courseRun.restrictionType === ENTERPRISE_RESTRICTION_TYPE && (
+                    <Badge variant="warning">
+                      {intl.formatMessage(messages.customBadge)}
+                    </Badge>
+                  )}
+                </Stack>
                 <span className={classNames('small', { 'text-muted': getDropdownItemClassName(courseRun) })}>
                   {intl.formatMessage(messages.enrollBy, {
                     enrollByDate: dayjs(courseRun.enrollBy).format(SHORT_MONTH_DATE_FORMAT),
@@ -102,6 +117,7 @@ NewAssignmentModalDropdown.propTypes = {
     key: PropTypes.string.isRequired,
     enrollBy: PropTypes.string,
     start: PropTypes.string,
+    restrictionType: PropTypes.string,
   })).isRequired,
   children: PropTypes.node.isRequired,
   isLoading: PropTypes.bool.isRequired,

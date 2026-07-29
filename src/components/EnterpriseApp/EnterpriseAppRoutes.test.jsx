@@ -5,8 +5,12 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { axe } from 'jest-axe';
 import { features } from '../../config';
 import EnterpriseAppRoutes from './EnterpriseAppRoutes';
+import { EnterpriseAppContext } from './EnterpriseAppContextProvider';
 import { EnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
+import { PRODUCT_TYPES } from './data/constants';
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
+
+let mockEnterpriseAppPage = 'analytics';
 
 jest.mock('../AdvanceAnalyticsV2/AnalyticsV2Page', () => function AnalyticsV2PageMock() {
   return <div>AnalyticsV2Page Mock Component</div>;
@@ -30,25 +34,38 @@ jest.mock('../PeopleManagement/LearnerDetailPage/LearnerDetailPage', () => funct
   return <div data-testid="learner-detail-page">LearnerDetailPage Mock Component</div>;
 });
 
-let mockEnterpriseAppPage = 'analytics';
-
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   Routes: (props) => <span>{props.children}</span>,
   Route: ({ element }) => element,
-  useParams: () => ({ enterpriseAppPage: mockEnterpriseAppPage }),
+  Navigate: ({ to }) => <div data-testid="redirect" data-to={to}>Navigate</div>,
+  useParams: () => ({ enterpriseAppPage: mockEnterpriseAppPage, enterpriseSlug: 'test-enterprise' }),
 }));
 
 const mockEnterpriseSubsidiesContextValue = {
   canManageLearnerCredit: true,
   hasBillingSubscription: false,
+  productType: PRODUCT_TYPES.TEAMS,
 };
 
-const renderWithProviders = (props) => render(
+const mockEnterpriseAppContextValue = {
+  enterpriseCuration: {
+    enterpriseCuration: null,
+    isLoading: false,
+    fetchError: null,
+  },
+};
+
+const renderWithProviders = (
+  props,
+  enterpriseSubsidiesContextValue = mockEnterpriseSubsidiesContextValue,
+) => render(
   <IntlProvider locale="en">
-    <EnterpriseSubsidiesContext.Provider value={mockEnterpriseSubsidiesContextValue}>
-      <EnterpriseAppRoutes {...props} />
-    </EnterpriseSubsidiesContext.Provider>
+    <EnterpriseAppContext.Provider value={mockEnterpriseAppContextValue}>
+      <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
+        <EnterpriseAppRoutes {...props} />
+      </EnterpriseSubsidiesContext.Provider>
+    </EnterpriseAppContext.Provider>
   </IntlProvider>,
 );
 
@@ -65,6 +82,13 @@ describe('EnterpriseAppRoutes', () => {
     enablePeopleManagementPage: true,
   };
 
+  beforeEach(() => {
+    mockEnterpriseAppPage = 'analytics';
+    features.ANALYTICS_SUPPORTED = true;
+    features.ADMIN_V1 = false;
+    features.ENABLE_NATIVE_BILLING = false;
+  });
+
   it('renders FeatureNotSupportedPage when ANALYTICS_SUPPORTED is false', () => {
     features.ANALYTICS_SUPPORTED = false;
     renderWithProviders(defaultProps);
@@ -79,6 +103,19 @@ describe('EnterpriseAppRoutes', () => {
     expect(screen.getByText('AnalyticsV2Page Mock Component')).toBeInTheDocument();
   });
 
+  it('redirects Essentials customers away from AnalyticsV2Page on analytics-v1', () => {
+    mockEnterpriseAppPage = 'analytics-v1';
+    features.ANALYTICS_SUPPORTED = true;
+    features.ADMIN_V1 = true;
+    renderWithProviders(defaultProps, {
+      ...mockEnterpriseSubsidiesContextValue,
+      productType: PRODUCT_TYPES.ESSENTIALS,
+    });
+
+    expect(screen.getByTestId('redirect')).toHaveAttribute('data-to', '/test-enterprise/admin/learners');
+    expect(screen.queryByText('AnalyticsV2Page Mock Component')).not.toBeInTheDocument();
+  });
+
   it('renders AdminPage when ANALYTICS_SUPPORTED is true', () => {
     mockEnterpriseAppPage = 'learners';
     features.ANALYTICS_SUPPORTED = true;
@@ -89,6 +126,29 @@ describe('EnterpriseAppRoutes', () => {
     mockEnterpriseAppPage = 'analytics';
     features.ANALYTICS_SUPPORTED = true;
     renderWithProviders(defaultProps);
+    expect(screen.getByText('RevisedAnalyticsV2Page Mock Component')).toBeInTheDocument();
+  });
+
+  it('redirects Essentials customers away from Analytics', () => {
+    mockEnterpriseAppPage = 'analytics';
+    features.ANALYTICS_SUPPORTED = true;
+    renderWithProviders(defaultProps, {
+      ...mockEnterpriseSubsidiesContextValue,
+      productType: PRODUCT_TYPES.ESSENTIALS,
+    });
+
+    expect(screen.getByTestId('redirect')).toHaveAttribute('data-to', '/test-enterprise/admin/learners');
+    expect(screen.queryByText('RevisedAnalyticsV2Page Mock Component')).not.toBeInTheDocument();
+  });
+
+  it('renders AnalyticsPage for Teams customers', () => {
+    mockEnterpriseAppPage = 'analytics';
+    features.ANALYTICS_SUPPORTED = true;
+    renderWithProviders(defaultProps, {
+      ...mockEnterpriseSubsidiesContextValue,
+      productType: PRODUCT_TYPES.TEAMS,
+    });
+
     expect(screen.getByText('RevisedAnalyticsV2Page Mock Component')).toBeInTheDocument();
   });
 

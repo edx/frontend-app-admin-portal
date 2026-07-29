@@ -65,6 +65,7 @@ describe('<EnterpriseAppContextProvider />', () => {
       coupons: [],
       enterpriseSubsidyTypes: [],
       hasBillingSubscription: false,
+      productType: null,
       isLoadingCustomerAgreement: false,
     });
     const mockUseSubsidyRequestsContext = jest.spyOn(subsidyRequestsContext, 'useSubsidyRequestsContext').mockReturnValue(
@@ -117,7 +118,7 @@ describe('<EnterpriseAppContextProvider />', () => {
         || isLoadingEnterpriseCuration
         || isLoadingUpdateActiveEnterpriseForUser
       ) {
-        expect(screen.getByText('Loading...'));
+        expect(screen.getByTestId('enterprise-app-skeleton')).toBeInTheDocument();
       } else {
         expect(screen.getByText('children'));
       }
