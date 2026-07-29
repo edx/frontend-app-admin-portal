@@ -1,5 +1,7 @@
 import React, { useContext } from 'react';
-import { Routes, Route, useParams } from 'react-router-dom';
+import {
+  Routes, Route, Navigate, useParams,
+} from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { features } from '../../config';
 
@@ -14,7 +16,6 @@ import { SubscriptionManagementPage } from '../subscriptions';
 import AnalyticsV2Page from '../AdvanceAnalyticsV2/AnalyticsV2Page';
 import RevisedAnalyticsV2Page from '../AdvanceAnalyticsV2.0/AnalyticsPage';
 import FeatureNotSupportedPage from '../FeatureNotSupportedPage';
-import { ROUTE_NAMES } from './data/constants';
 import BulkEnrollmentResultsDownloadPage from '../BulkEnrollmentResultsDownloadPage';
 import { EnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
 import ContentHighlights from '../ContentHighlights';
@@ -23,6 +24,7 @@ import PeopleManagementPage from '../PeopleManagement';
 import GroupDetailPage from '../PeopleManagement/GroupDetailPage/GroupDetailPage';
 import LearnerDetailPage from '../PeopleManagement/LearnerDetailPage/LearnerDetailPage';
 import { isBillingEnabled } from '../billing/data/utils';
+import { PRODUCT_TYPES, ROUTE_NAMES } from './data/constants';
 import BillingPage from '../billing/BillingPage';
 
 const EnterpriseAppRoutes = ({
@@ -36,11 +38,31 @@ const EnterpriseAppRoutes = ({
   enableContentHighlightsPage,
   enablePeopleManagementPage,
 }) => {
-  const { canManageLearnerCredit, hasBillingSubscription } = useContext(EnterpriseSubsidiesContext);
-  const { enterpriseAppPage } = useParams();
+  const { canManageLearnerCredit, hasBillingSubscription, productType } = useContext(EnterpriseSubsidiesContext);
+  const { enterpriseAppPage, enterpriseSlug: slug } = useParams();
+  const isEssentials = productType === PRODUCT_TYPES.ESSENTIALS;
 
   // Determine if billing features should be accessible
   const canAccessBilling = isBillingEnabled(hasBillingSubscription);
+
+  // Compute analytics element to avoid nested ternary
+  const getAnalyticsElement = () => {
+    if (isEssentials) {
+      return <Navigate to={`/${slug}/admin/${ROUTE_NAMES.learners}`} replace />;
+    }
+    return features.ANALYTICS_SUPPORTED
+      ? <RevisedAnalyticsV2Page enterpriseId={enterpriseId} />
+      : <FeatureNotSupportedPage />;
+  };
+
+  const getAnalyticsV1Element = () => {
+    if (isEssentials) {
+      return <Navigate to={`/${slug}/admin/${ROUTE_NAMES.learners}`} replace />;
+    }
+    return features.ANALYTICS_SUPPORTED
+      ? <AnalyticsV2Page enterpriseId={enterpriseId} />
+      : <FeatureNotSupportedPage />;
+  };
 
   return (
     <Routes>
@@ -100,20 +122,16 @@ const EnterpriseAppRoutes = ({
         <Route
           key="analytics"
           path="/"
-          element={features.ANALYTICS_SUPPORTED
-            ? <AnalyticsV2Page enterpriseId={enterpriseId} />
-            : <FeatureNotSupportedPage />}
+          element={getAnalyticsV1Element()}
         />
       )}
 
       {enableAnalyticsPage && enterpriseAppPage === ROUTE_NAMES.analytics && (
-      <Route
-        key="analytics"
-        path="/"
-        element={features.ANALYTICS_SUPPORTED
-          ? <RevisedAnalyticsV2Page enterpriseId={enterpriseId} />
-          : <FeatureNotSupportedPage />}
-      />
+        <Route
+          key="analytics"
+          path="/"
+          element={getAnalyticsElement()}
+        />
       )}
 
       {enterpriseAppPage === ROUTE_NAMES.bulkEnrollmentResults && (

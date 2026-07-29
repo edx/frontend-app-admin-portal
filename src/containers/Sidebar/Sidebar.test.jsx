@@ -22,6 +22,7 @@ import Sidebar from './index';
 import { SubsidyRequestsContext } from '../../components/subsidy-requests';
 import { EnterpriseSubsidiesContext } from '../../components/EnterpriseSubsidiesContext';
 import { EnterpriseAppContext } from '../../components/EnterpriseApp/EnterpriseAppContextProvider';
+import { PRODUCT_TYPES } from '../../components/EnterpriseApp/data/constants';
 import LmsApiService from '../../data/services/LmsApiService';
 import { features } from '../../config';
 
@@ -32,6 +33,7 @@ import {
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
 features.CODE_MANAGEMENT = true;
+features.ANALYTICS = true;
 
 jest.mock('@edx/frontend-platform/config', () => ({
   ...jest.requireActual('@edx/frontend-platform/config'),
@@ -65,6 +67,7 @@ const initialEnterpriseAppContextValue = {
     isLoading: false,
     fetchError: null,
   },
+  slug: 'test-enterprise-slug',
 };
 
 const initialSubsidyRequestsContextValue = {
@@ -76,6 +79,7 @@ const initialSubsidyRequestsContextValue = {
 
 const initialEnterpriseSubsidiesContextValue = {
   canManageLearnerCredit: true,
+  productType: null,
 };
 
 const mockOnMount = jest.fn();
@@ -191,6 +195,58 @@ describe('<Sidebar />', () => {
       ))
       .toJSON();
     expect(tree).toMatchSnapshot();
+  });
+
+  it('hides analytics for Essentials customers', () => {
+    render(
+      <SidebarWrapper
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
+          productType: PRODUCT_TYPES.ESSENTIALS,
+        }}
+      />,
+    );
+
+    expect(screen.queryByRole('link', { name: /Analytics/i })).not.toBeInTheDocument();
+  });
+
+  it('shows analytics for Teams customers', () => {
+    render(
+      <SidebarWrapper
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
+          productType: PRODUCT_TYPES.TEAMS,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /Analytics/i })).toBeInTheDocument();
+  });
+
+  it('shows analytics when productType is null', () => {
+    render(
+      <SidebarWrapper
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
+          productType: null,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /Analytics/i })).toBeInTheDocument();
+  });
+
+  it('shows analytics when productType is undefined', () => {
+    render(
+      <SidebarWrapper
+        enterpriseSubsidiesContextValue={{
+          ...initialEnterpriseSubsidiesContextValue,
+          productType: undefined,
+        }}
+      />,
+    );
+
+    expect(screen.getByRole('link', { name: /Analytics/i })).toBeInTheDocument();
   });
 
   describe('calls onWidthChange callback', () => {

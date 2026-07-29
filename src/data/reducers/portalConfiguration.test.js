@@ -41,6 +41,7 @@ const enterpriseData = {
     enterprise_slug: 'test-enterprise',
     logo: 'https://s3...',
   },
+  product_type: 'Essentials',
   contact_email: 'fake@example.com',
   identity_provider: {
     uuid: 'test-identity-provider-uuid',

@@ -16,7 +16,7 @@ import { logError } from '@edx/frontend-platform/logging';
 import IconLink from './IconLink';
 import { configuration, features } from '../../config';
 import { SubsidyRequestsContext } from '../subsidy-requests';
-import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
+import { ROUTE_NAMES, PRODUCT_TYPES } from '../EnterpriseApp/data/constants';
 import { TOUR_TARGETS } from '../ProductTours/constants';
 import {
   ANALYTICS_INSIGHTS_TARGETS,
@@ -50,15 +50,18 @@ const Sidebar = ({
   const sidebarContentRef = useRef();
   const sidebarNavRef = useRef();
   const sidebarWidthRef = useRef();
-  const { enterpriseCuration: { enterpriseCuration, isNewArchivedContent } } = useContext(EnterpriseAppContext);
+  const {
+    enterpriseCuration: { enterpriseCuration, isNewArchivedContent },
+  } = useContext(EnterpriseAppContext);
   const { subsidyRequestsCounts } = useContext(SubsidyRequestsContext);
-  const { canManageLearnerCredit, hasBillingSubscription } = useContext(EnterpriseSubsidiesContext);
+  const { canManageLearnerCredit, hasBillingSubscription, productType } = useContext(EnterpriseSubsidiesContext);
   const { FEATURE_CONTENT_HIGHLIGHTS } = getConfig();
   const authenticatedUser = getAuthenticatedUser();
   const isEdxStaff = authenticatedUser.administrator;
   const [hasBudgetGroup, setHasBudgetGroup] = useState(false);
   const hideHighlightsForGroups = hasBudgetGroup && !isEdxStaff;
   const intl = useIntl();
+  const isEssentials = productType === PRODUCT_TYPES.ESSENTIALS;
 
   // Determine if billing features should be accessible
   // Note: All users of the enterprise admin portal are already authenticated as enterprise admins
@@ -143,7 +146,7 @@ const Sidebar = ({
       }),
       to: `${baseUrl}/admin/${ROUTE_NAMES.analytics}`,
       icon: <Icon src={InsertChartOutlined} />,
-      hidden: !features.ANALYTICS || !enableAnalyticsScreen,
+      hidden: !features.ANALYTICS || !enableAnalyticsScreen || isEssentials,
       id: ANALYTICS_INSIGHTS_TARGETS.SIDEBAR,
     },
     {
