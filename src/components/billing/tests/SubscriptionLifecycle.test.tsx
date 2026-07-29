@@ -1,7 +1,4 @@
 import React from 'react';
-import { Provider } from 'react-redux';
-import configureMockStore from 'redux-mock-store';
-import thunk from 'redux-thunk';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -13,9 +10,8 @@ import * as hooks from '../data/hooks';
 jest.mock('../data/hooks');
 
 const TEST_ENTERPRISE_UUID = 'test-enterprise-uuid';
-const mockStore = configureMockStore([thunk]);
 
-const mockSubscription = {
+const baseMockSubscription = {
   yearlyAmount: 120000,
   currency: 'usd',
   licenseCount: 25,
@@ -23,29 +19,29 @@ const mockSubscription = {
   cancelAtPeriodEnd: false,
 };
 
-const renderSubscriptionLifecycle = (productType: string | null) => {
+const renderSubscriptionLifecycle = (productType: string | null | undefined) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
       mutations: { retry: false },
     },
   });
-  const store = mockStore({
-    portalConfiguration: {
+
+  (hooks.useSubscription as jest.Mock).mockReturnValue({
+    data: {
+      ...baseMockSubscription,
       productType,
     },
   });
 
   return render(
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <IntlProvider locale="en">
-          <SubscriptionLifecycle
-            enterpriseUuid={TEST_ENTERPRISE_UUID}
-          />
-        </IntlProvider>
-      </QueryClientProvider>
-    </Provider>,
+    <QueryClientProvider client={queryClient}>
+      <IntlProvider locale="en">
+        <SubscriptionLifecycle
+          enterpriseUuid={TEST_ENTERPRISE_UUID}
+        />
+      </IntlProvider>
+    </QueryClientProvider>,
   );
 };
 
@@ -54,7 +50,7 @@ describe('SubscriptionLifecycle', () => {
     jest.clearAllMocks();
 
     (hooks.useSubscription as jest.Mock).mockReturnValue({
-      data: mockSubscription,
+      data: baseMockSubscription,
     });
     (hooks.useCancelSubscription as jest.Mock).mockReturnValue({
       mutateAsync: jest.fn(),
@@ -66,24 +62,45 @@ describe('SubscriptionLifecycle', () => {
     });
   });
 
-  it('renders Essentials for essentials product type (case-insensitive)', () => {
-    renderSubscriptionLifecycle('ESSENTIALS');
+  it('renders Essentials for lowercase essentials product type', () => {
+    renderSubscriptionLifecycle('essentials');
 
     expect(screen.getByText('Subscription Type')).toBeInTheDocument();
     expect(screen.getByText('Essentials')).toBeInTheDocument();
   });
 
-  it('renders Teams for teams product type', () => {
+  it('renders Essentials for capitalized Essentials product type', () => {
+    renderSubscriptionLifecycle('Essentials');
+
+    expect(screen.getByText('Subscription Type')).toBeInTheDocument();
+    expect(screen.getByText('Essentials')).toBeInTheDocument();
+  });
+
+  it('renders Teams for lowercase teams product type', () => {
     renderSubscriptionLifecycle('teams');
 
     expect(screen.getByText('Subscription Type')).toBeInTheDocument();
     expect(screen.getByText('Teams')).toBeInTheDocument();
   });
 
-  it('falls back to Unknown when product type is missing', () => {
+  it('renders Teams for capitalized Teams product type', () => {
+    renderSubscriptionLifecycle('Teams');
+
+    expect(screen.getByText('Subscription Type')).toBeInTheDocument();
+    expect(screen.getByText('Teams')).toBeInTheDocument();
+  });
+
+  it('falls back to Teams when product type is null', () => {
     renderSubscriptionLifecycle(null);
 
     expect(screen.getByText('Subscription Type')).toBeInTheDocument();
-    expect(screen.getByText('Unknown')).toBeInTheDocument();
+    expect(screen.getByText('Teams')).toBeInTheDocument();
+  });
+
+  it('falls back to Teams when product type is undefined', () => {
+    renderSubscriptionLifecycle(undefined);
+
+    expect(screen.getByText('Subscription Type')).toBeInTheDocument();
+    expect(screen.getByText('Teams')).toBeInTheDocument();
   });
 });

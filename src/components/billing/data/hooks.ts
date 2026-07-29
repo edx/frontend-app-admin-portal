@@ -117,7 +117,11 @@ export const useSubscription = (enterpriseUuid: string) => useQuery({
   queryFn: async () => {
     const response = await EnterpriseAccessApiService.getSubscription(enterpriseUuid);
     // API returns subscription data at top level (not nested under 'subscription' key)
-    return response.data;
+    const { data } = response;
+    return {
+      ...data,
+      productType: data.product_type ?? data.productType ?? 'teams',
+    };
   },
 });
 

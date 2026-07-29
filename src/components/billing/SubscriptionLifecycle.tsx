@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { connect } from 'react-redux';
 import {
   ActionRow, Alert, Button, Card, ModalDialog, Stack,
 } from '@openedx/paragon';
-import { FormattedMessage, defineMessages, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 
 import {
   useCancelSubscription, useReinstateSubscription, useSubscription,
@@ -13,25 +12,15 @@ import ReinstateSubscriptionSuccessToast from './ReinstateSubscriptionSuccessToa
 import SubscriptionErrorToast from './SubscriptionErrorToast';
 import { SUBSCRIPTION_TYPE_LABEL_MAP } from '../subscriptions/data/constants';
 
-const messages = defineMessages({
-  unknownSubscriptionType: {
-    id: 'admin.portal.billing.subscription.type.unknown',
-    defaultMessage: 'Unknown',
-    description: 'Fallback label for an unrecognized subscription type',
-  },
-});
-
 /**
  * SubscriptionLifecycle - Component for managing subscription cancellation and reinstatement
  *
  * Allows admins to cancel subscriptions (effective at period end) or reinstate cancelled subscriptions.
  */
-const BaseSubscriptionLifecycle = ({
+const SubscriptionLifecycle = ({
   enterpriseUuid,
-  productType,
 }: {
   enterpriseUuid: string;
-  productType?: string | null;
 }) => {
   const intl = useIntl();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
@@ -130,15 +119,16 @@ const BaseSubscriptionLifecycle = ({
     licenseCount,
     currentPeriodEnd,
     cancelAtPeriodEnd,
+    productType,
   } = subscription;
 
   const formattedAmount = formatAmount(yearlyAmount, currency);
   const formattedPeriodEnd = formatDate(currentPeriodEnd);
   const normalizedProductType = productType?.toLowerCase();
-  const subscriptionTypeMessage = SUBSCRIPTION_TYPE_LABEL_MAP[normalizedProductType ?? ''];
-  const subscriptionTypeLabel = subscriptionTypeMessage
-    ? intl.formatMessage(subscriptionTypeMessage)
-    : intl.formatMessage(messages.unknownSubscriptionType);
+  const subscriptionTypeMessage = normalizedProductType === 'essentials'
+    ? SUBSCRIPTION_TYPE_LABEL_MAP.essentials
+    : SUBSCRIPTION_TYPE_LABEL_MAP.teams;
+  const subscriptionTypeLabel = intl.formatMessage(subscriptionTypeMessage);
 
   return (
     <>
@@ -336,11 +326,5 @@ const BaseSubscriptionLifecycle = ({
     </>
   );
 };
-
-const mapStateToProps = (state: { portalConfiguration: { productType?: string | null } }) => ({
-  productType: state.portalConfiguration.productType,
-});
-
-const SubscriptionLifecycle = connect(mapStateToProps)(BaseSubscriptionLifecycle);
 
 export default SubscriptionLifecycle;
