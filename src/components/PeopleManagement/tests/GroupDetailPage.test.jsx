@@ -165,6 +165,7 @@ describe('<GroupDetailPageWrapper >', () => {
   });
   it('edit flex group name', async () => {
     const user = userEvent.setup();
+    setupMockTableData();
     const spy = jest.spyOn(LmsApiService, 'updateEnterpriseGroup');
     LmsApiService.updateEnterpriseGroup.mockResolvedValueOnce({ status: 200 });
     render(<GroupDetailPageWrapper />);
@@ -181,10 +182,11 @@ describe('<GroupDetailPageWrapper >', () => {
     const formData = { name: 'new name!' };
     await waitFor(() => expect(spy).toHaveBeenCalledWith(TEST_GROUP.uuid, formData));
   });
-  it('edit flex group name error', async () => {
+  it('edit flex group name error shows the generic error message', async () => {
     const user = userEvent.setup();
+    setupMockTableData();
     const spy = jest.spyOn(LmsApiService, 'updateEnterpriseGroup');
-    LmsApiService.updateEnterpriseGroup.mockResolvedValueOnce({ status: 404 });
+    LmsApiService.updateEnterpriseGroup.mockRejectedValueOnce(new Error('network error'));
     render(<GroupDetailPageWrapper />);
     const editGroupNameIcon = screen.getByTestId('edit-modal-icon');
     await user.click(editGroupNameIcon);
@@ -198,8 +200,35 @@ describe('<GroupDetailPageWrapper >', () => {
 
     const formData = { name: 'new name!' };
     await waitFor(() => expect(spy).toHaveBeenCalledWith(TEST_GROUP.uuid, formData));
-    // error modal
+    // error modal falls back to the generic message for an unexpected error
     await waitFor(() => expect(screen.getByText('Something went wrong')).toBeInTheDocument());
+    expect(screen.getByText(
+      "We're sorry. Something went wrong behind the scenes. Please try again, or reach out to customer support for help.",
+    )).toBeInTheDocument();
+  });
+  it('edit flex group name error shows the duplicate name validation message', async () => {
+    const user = userEvent.setup();
+    setupMockTableData();
+    const spy = jest.spyOn(LmsApiService, 'updateEnterpriseGroup');
+    const duplicateNameMessage = 'A group with this name already exists. Please enter a unique name to create a new group.';
+    LmsApiService.updateEnterpriseGroup.mockRejectedValueOnce({
+      response: { data: { non_field_errors: [duplicateNameMessage] } },
+    });
+    render(<GroupDetailPageWrapper />);
+    const editGroupNameIcon = screen.getByTestId('edit-modal-icon');
+    await user.click(editGroupNameIcon);
+
+    expect(screen.getByText('Edit group name')).toBeInTheDocument();
+    const input = screen.getByTestId('group name input');
+    await user.clear(input);
+    await user.type(input, 'new name!');
+    await waitFor(() => expect(screen.getByTestId('group name input')).toHaveValue('new name!'));
+    await user.click(screen.getByText('Save'));
+
+    const formData = { name: 'new name!' };
+    await waitFor(() => expect(spy).toHaveBeenCalledWith(TEST_GROUP.uuid, formData));
+    // error modal shows the specific validation message instead of the generic one
+    await waitFor(() => expect(screen.getByText(duplicateNameMessage)).toBeInTheDocument());
   });
   it('delete flex group', async () => {
     const user = userEvent.setup();

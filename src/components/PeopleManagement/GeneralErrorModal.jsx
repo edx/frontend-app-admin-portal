@@ -4,7 +4,7 @@ import {
   ActionRow, Button, ModalDialog,
 } from '@openedx/paragon';
 
-const GeneralErrorModal = ({ isOpen, close }) => (
+const GeneralErrorModal = ({ isOpen, close, message }) => (
   <ModalDialog
     title="Something went wrong"
     isOpen={isOpen}
@@ -24,11 +24,13 @@ const GeneralErrorModal = ({ isOpen, close }) => (
     </ModalDialog.Header>
 
     <ModalDialog.Body>
-      <FormattedMessage
-        id="adminPortal.peopleManagement.errorModal.body"
-        defaultMessage="We're sorry. Something went wrong behind the scenes. Please try again, or reach out to customer support for help."
-        description="Message for error modal."
-      />
+      {message || (
+        <FormattedMessage
+          id="adminPortal.peopleManagement.errorModal.body"
+          defaultMessage="We're sorry. Something went wrong behind the scenes. Please try again, or reach out to customer support for help."
+          description="Message for error modal."
+        />
+      )}
     </ModalDialog.Body>
 
     <ModalDialog.Footer>
@@ -42,6 +44,11 @@ const GeneralErrorModal = ({ isOpen, close }) => (
 GeneralErrorModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   close: PropTypes.func.isRequired,
+  message: PropTypes.string,
+};
+
+GeneralErrorModal.defaultProps = {
+  message: null,
 };
 
 export default GeneralErrorModal;
