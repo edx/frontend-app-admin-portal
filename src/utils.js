@@ -708,6 +708,120 @@ function downloadCsv(fileName, data, headers, dataEntryToRow) {
 }
 
 /**
+ * Parses RFC4180-style CSV text (quoted fields, escaped "" quotes, commas/newlines inside
+ * quotes) into rows of cells. A quote only opens a quoted field at the start of a field —
+ * a stray quote appearing mid-field (malformed input) is treated as a literal character
+ * instead of derailing the rest of the row.
+ *
+ * @param {string} csvText
+ * @returns {Array<Array<string>>}
+ */
+function parseCsvRows(csvText) {
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < csvText.length; i += 1) {
+    const char = csvText[i];
+    if (inQuotes) {
+      if (char === '"' && csvText[i + 1] === '"') {
+        field += '"';
+        i += 1;
+      } else if (char === '"') {
+        inQuotes = false;
+      } else {
+        field += char;
+      }
+    } else if (char === '"' && field === '') {
+      inQuotes = true;
+    } else if (char === ',') {
+      row.push(field);
+      field = '';
+    } else if (char === '\n') {
+      row.push(field);
+      rows.push(row);
+      row = [];
+      field = '';
+    } else if (char !== '\r') {
+      field += char;
+    }
+  }
+  if (field.length > 0 || row.length > 0) {
+    row.push(field);
+    rows.push(row);
+  }
+
+  return rows;
+}
+
+/**
+ * Quotes a CSV cell if it contains a comma, quote, or newline/carriage return, doubling any
+ * internal quotes.
+ */
+function escapeCsvCell(cell) {
+  if (/[",\n\r]/.test(cell)) {
+    return `"${cell.replace(/"/g, '""')}"`;
+  }
+  return cell;
+}
+
+/**
+ * Removes a column from CSV text by matching its header (case-insensitive). Returns the
+ * original text unchanged if the header isn't found, rather than guessing a column
+ * position and risking removing the wrong data. Rows with fewer fields than the header
+ * (ragged/malformed rows) are left untouched rather than having an arbitrary field removed.
+ *
+ * @param {string} csvText
+ * @param {string} columnName
+ * @returns {string}
+ */
+function removeCsvColumn(csvText, columnName) {
+  if (!csvText) {
+    return csvText;
+  }
+
+  const rows = parseCsvRows(csvText);
+  if (rows.length === 0) {
+    return csvText;
+  }
+
+  const normalizedColumnName = columnName.trim().toLowerCase();
+  const headerLength = rows[0].length;
+  const columnIndex = rows[0].findIndex(
+    (header) => header.trim().toLowerCase() === normalizedColumnName,
+  );
+  if (columnIndex === -1) {
+    return csvText;
+  }
+
+  // A row with a different field count than the header is ragged/malformed — there's no
+  // reliable way to know which field is actually missing, so leave it untouched rather
+  // than guessing and risking removal of the wrong value.
+  return rows
+    .map((row) => {
+      const cells = row.length === headerLength
+        ? row.filter((_, index) => index !== columnIndex)
+        : row;
+      return cells.map(escapeCsvCell).join(',');
+    })
+    .join('\n');
+}
+
+/**
+ * Whether a feature/column should be disabled for a specific enterprise customer, per
+ * a single enterprise-customer-UUID config value — i.e
+ * DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER.
+ *
+ * @param {string} enterpriseCustomerUuid - The current enterprise customer's UUID.
+ * @param {string|null} disabledForUuid - The enterprise-customer-UUID config value.
+ * @returns {Boolean}
+ */
+function isEnterpriseCustomerInUuidAllowlist(enterpriseCustomerUuid, disabledForUuid) {
+  return !!enterpriseCustomerUuid && !!disabledForUuid && enterpriseCustomerUuid === disabledForUuid;
+}
+
+/**
  * Split a string by given separator, and return array of trimmed, non-blank string entries
  */
 function splitAndTrim(separator, str) {
@@ -902,6 +1016,8 @@ export {
   getTimeStampedFilename,
   downloadCsv,
   createUtf8CsvBlob,
+  removeCsvColumn,
+  isEnterpriseCustomerInUuidAllowlist,
   splitAndTrim,
   removeStringsFromList,
   removeStringsFromListCaseInsensitive,
