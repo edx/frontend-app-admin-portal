@@ -15,6 +15,7 @@ const EditGroupNameModal = ({
 }) => {
   const intl = useIntl();
   const [isErrorOpen, openError, closeError] = useToggle(false);
+  const [errorMessage, setErrorMessage] = useState(null);
   const [name, setName] = useState(group.name);
   const [nameLength, setNameLength] = useState(group.name.length || 0);
   const [buttonState, setButtonState] = useState('default');
@@ -39,12 +40,14 @@ const EditGroupNameModal = ({
 
   const editEnterpriseGroup = async () => {
     setButtonState('pending');
+    setErrorMessage(null);
     try {
       const formData = { name };
       const response = await LmsApiService.updateEnterpriseGroup(group.uuid, formData);
       handleCloseModal(response.data.name);
     } catch (error) {
       logError(error);
+      setErrorMessage(error?.response?.data?.non_field_errors?.[0] || null);
       openError();
     }
     setButtonState('default');
@@ -52,7 +55,7 @@ const EditGroupNameModal = ({
 
   return (
     <>
-      <GeneralErrorModal isOpen={isErrorOpen} close={closeError} />
+      <GeneralErrorModal isOpen={isErrorOpen} close={closeError} message={errorMessage} />
       <ModalDialog
         title="Edit group"
         isOpen={isOpen}
