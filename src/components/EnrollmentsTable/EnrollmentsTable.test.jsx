@@ -5,6 +5,7 @@ import renderer from 'react-test-renderer';
 import configureMockStore from 'redux-mock-store';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
+import { mergeConfig } from '@edx/frontend-platform/config';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import {
@@ -68,7 +69,7 @@ const EnrollmentsWrapper = props => (
   <MemoryRouter initialEntries={props.initialEntries || ['/']}>
     {props.navigateTo && <NavigationHelper to={props.navigateTo} />}
     <IntlProvider locale="en">
-      <Provider store={store}>
+      <Provider store={props.store || store}>
         <EnrollmentsTable
           {...props}
         />
@@ -91,6 +92,7 @@ describe('EnrollmentsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedFetchData = undefined;
+    mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: null });
     EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
       data: {
         count: 0,
@@ -368,6 +370,50 @@ describe('EnrollmentsTable', () => {
     expect(screen.getByText('Try refreshing your screen.')).toBeInTheDocument();
     expect(screen.queryByText('Bad request')).not.toBeInTheDocument();
     expect(logError).toHaveBeenCalled();
+  });
+
+  it('hides the Course Progress column for an enterprise in the disabled-columns allowlist', async () => {
+    const cepalEnterpriseId = '6396a958-df6a-42e9-b90b-770f394e8ced';
+    mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: cepalEnterpriseId });
+    const cepalStore = mockStore({
+      portalConfiguration: { enterpriseId: cepalEnterpriseId },
+    });
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
+      data: {
+        count: 1,
+        num_pages: 1,
+        results: [
+          {
+            id: 1,
+            user_email: 'test_user_1@example.com',
+            user_first_name: 'Test',
+            user_last_name: 'User',
+            course_title: 'Demo Course',
+            course_list_price: 100,
+            course_start_date: '2017-06-23',
+            course_end_date: '2017-12-23',
+            course_progress: 0.5,
+            course_passing_grade: 0.6,
+            current_grade: 0.77,
+            last_activity_date: '2018-01-15',
+          },
+        ],
+      },
+    });
+
+    const { container } = render(<EnrollmentsWrapper store={cepalStore} />);
+
+    await screen.findByText('test_user_1@example.com');
+
+    expect(screen.queryByText('Course Progress')).not.toBeInTheDocument();
+    expect(screen.queryByText('50%')).not.toBeInTheDocument();
+
+    [
+      'Email', 'First Name', 'Last Name', 'Course Title', 'Course Price', 'Start Date', 'End Date',
+      'Course Passing Grade', 'Current Grade', 'Last Activity Date',
+    ].forEach((columnTitle) => {
+      expect(container.textContent).toContain(columnTitle);
+    });
   });
 
   it('fetches next page when fetchData is called with pagination only (no sort)', async () => {

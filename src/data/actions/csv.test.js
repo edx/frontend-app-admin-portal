@@ -2,6 +2,7 @@ import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { saveAs } from 'file-saver/FileSaver';
 import { logError } from '@edx/frontend-platform/logging';
+import { mergeConfig } from '@edx/frontend-platform/config';
 
 import { fetchCsv, clearCsv } from './csv';
 import {
@@ -32,6 +33,7 @@ describe('csv actions', () => {
   beforeEach(() => {
     // Reset mocks before each test
     jest.clearAllMocks();
+    mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: null });
     // Mock the store state
     store.getState.mockReturnValue({
       portalConfiguration: { enterpriseId },
@@ -73,6 +75,53 @@ describe('csv actions', () => {
         reader.readAsText(blobArg);
       });
       expect(text).toBe(mockCsvData);
+    });
+
+    it('strips the course_progress column for an allowlisted enterprise on a report that has it', async () => {
+      const cepalEnterpriseId = '6396a958-df6a-42e9-b90b-770f394e8ced';
+      mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: cepalEnterpriseId });
+      store.getState.mockReturnValue({
+        portalConfiguration: { enterpriseId: cepalEnterpriseId },
+      });
+      const csvWithProgress = 'user_email,course_progress,current_grade\nlearner@example.com,50%,77%';
+      const mockFetchMethod = jest.fn().mockResolvedValue({ data: csvWithProgress });
+
+      const reduxStore = mockStore();
+      await reduxStore.dispatch(fetchCsv('enrollments', mockFetchMethod));
+
+      const blobArg = saveAs.mock.calls[0][0];
+      const reader = new FileReader();
+      const text = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsText(blobArg);
+      });
+      expect(text).toBe('user_email,current_grade\nlearner@example.com,77%');
+    });
+
+    it('leaves an unrelated report CSV untouched even for an allowlisted enterprise', async () => {
+      const cepalEnterpriseId = '6396a958-df6a-42e9-b90b-770f394e8ced';
+      mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: cepalEnterpriseId });
+      store.getState.mockReturnValue({
+        portalConfiguration: { enterpriseId: cepalEnterpriseId },
+      });
+      // A coupon-codes-style CSV that happens to contain a column literally named
+      // course_progress should never be stripped, since 'coupon-details' isn't one of
+      // the reports this fix targets.
+      const unrelatedCsv = 'code,course_progress\nABC123,unrelated-value';
+      const mockFetchMethod = jest.fn().mockResolvedValue({ data: unrelatedCsv });
+
+      const reduxStore = mockStore();
+      await reduxStore.dispatch(fetchCsv('coupon-details', mockFetchMethod));
+
+      const blobArg = saveAs.mock.calls[0][0];
+      const reader = new FileReader();
+      const text = await new Promise((resolve, reject) => {
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsText(blobArg);
+      });
+      expect(text).toBe(unrelatedCsv);
     });
 
     it('dispatches FAILURE action on fetch error', async () => {
