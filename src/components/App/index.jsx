@@ -29,6 +29,7 @@ import AuthenticatedEnterpriseApp from '../AuthenticatedEnterpriseApp';
 import AdminRegisterPage from '../AdminRegisterPage';
 import UserActivationPage from '../UserActivationPage';
 import NotFoundPage from '../NotFoundPage';
+import NonProductionBanner from '../../containers/NonProductionBanner';
 import { SystemWideWarningBanner } from '../system-wide-banner';
 
 import store from '../../data/store';
@@ -134,6 +135,7 @@ const AppWrapper = () => {
               {config.MAINTENANCE_ALERT_MESSAGE}
             </SystemWideWarningBanner>
           )}
+          <NonProductionBanner />
           <Header />
           <Routes>
             <Route
