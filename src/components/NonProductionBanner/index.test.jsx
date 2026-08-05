@@ -5,12 +5,15 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { axe } from 'jest-axe';
 
 import NonProductionBanner from '.';
-import { getNonProductionBannerDismissalStorageKey } from './constants';
+import {
+  getNonProductionBannerDismissalStorageKey,
+  NON_PRODUCTION_BANNER_DISMISSAL_DURATION_MS,
+} from './constants';
 import { accessibilitySettings } from '../../../tests/accessibility-settings';
 
 const TEST_ENTERPRISE_ID = 'e783bb19-277f-4dad-9b11-9d2ac6a53f37';
-const BANNER_TEXT = 'Non production Environment';
-const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const BANNER_TEXT = 'Non-Production Environment';
+const ONE_DAY_MS = NON_PRODUCTION_BANNER_DISMISSAL_DURATION_MS;
 const storageKey = getNonProductionBannerDismissalStorageKey(TEST_ENTERPRISE_ID);
 
 const renderBanner = (props = {}) => render(

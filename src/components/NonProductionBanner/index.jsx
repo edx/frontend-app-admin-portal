@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Icon, PageBanner } from '@openedx/paragon';
-import { WarningFilled } from '@openedx/paragon/icons';
+import { PageBanner } from '@openedx/paragon';
 import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
 import {
@@ -40,10 +39,9 @@ const NonProductionBanner = ({ enterpriseId, showNonProductionBanner }) => {
       dismissible
       onDismiss={handleDismiss}
     >
-      <Icon src={WarningFilled} className="mr-2" />
       <FormattedMessage
         id="adminPortal.pageBanner.nonProductionEnvironment"
-        defaultMessage="Non production Environment"
+        defaultMessage="Non-Production Environment"
         description="Banner message shown to administrators when their organization's portal is a non-production portal."
       />
     </PageBanner>
