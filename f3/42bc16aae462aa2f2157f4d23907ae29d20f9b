@@ -1,0 +1,23 @@
+src/components/NonProductionBanner/index.test.jsx
+  s_633092e181dade::t_7ddab38013fef2 15
+  s_633092e181dade::t_962be0f24fd204 16
+  s_633092e181dade::t_3a9d69615fa067 8-11
+src/components/NonProductionBanner/index.jsx
+  s_633092e181dade::t_c675c79cf5525b 46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "f342bc16aae462aa2f2157f4d23907ae29d20f9b",
+  "prompts": {},
+  "sessions": {
+    "s_633092e181dade": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a0490202-c745-49f3-a369-4f2fccbe33dd",
+        "model": "claude-haiku-4-5-20251001"
+      },
+      "human_author": "GitHub <noreply@github.com>"
+    }
+  }
+}
