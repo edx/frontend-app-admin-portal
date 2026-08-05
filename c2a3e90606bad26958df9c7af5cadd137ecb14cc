@@ -1,0 +1,31 @@
+src/components/Header/index.jsx
+  s_a18bf3d0a19f67::t_3a25d51d88b618 7,12,57
+src/components/AdminRegisterPage/AdminRegisterPage.test.jsx
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 6
+src/utils.js
+  s_a18bf3d0a19f67::t_3a25d51d88b618 13,768-790,847
+docs/decisions/0013-pending-invited-admin-bounce-via-logout.rst
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 51-60,63-79
+src/utils.test.js
+  s_a18bf3d0a19f67::t_3a25d51d88b618 10,26,288-312
+docs/references/admin-registration-and-activation.md
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 51,53,57-59,72-82
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "c2a3e90606bad26958df9c7af5cadd137ecb14cc",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}

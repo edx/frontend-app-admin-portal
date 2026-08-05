@@ -1,0 +1,50 @@
+docs/decisions/0013-pending-invited-admin-bounce-via-logout.rst
+  s_a18bf3d0a19f67::t_8b674dcac15941 1-135
+src/components/AdminRegisterPage/AdminRegisterPage.test.jsx
+  s_a18bf3d0a19f67::t_6657ea9dd42550 195-197,202-203,207,212,216,223,228,238,241,250
+  s_a18bf3d0a19f67::t_83453c573290b8 25,27-28
+  s_a18bf3d0a19f67::t_689fd85846214d 73
+  s_a18bf3d0a19f67::t_d1d18897b51e2c 48,51
+  s_a18bf3d0a19f67::t_6e2a7ce96e5ed8 198-201,204-206,208-211,213-215
+  s_a18bf3d0a19f67::t_f40e58a31c7272 65-68
+  s_a18bf3d0a19f67::t_e1ace21d5a5fd9 10
+  s_a18bf3d0a19f67::t_95c6011104ef42 72
+  s_a18bf3d0a19f67::t_8eba3f44b2d411 23-24,26
+  s_a18bf3d0a19f67::t_353c7cf71f20c0 184-193,217-222,224-227,229-237,239-240,242-249,251-252
+  s_a18bf3d0a19f67::t_c2b87ba230d26b 6
+  s_a18bf3d0a19f67::t_09a0ea63c2af69 71
+  s_a18bf3d0a19f67::t_d50a7c147fd917 194
+docs/references/admin-registration-and-activation.md
+  s_a18bf3d0a19f67::t_ed6e81664916f2 51,56
+  s_a18bf3d0a19f67::t_14815f9dd73d7e 46-50,52-53,57-61,69,76-84
+  s_a18bf3d0a19f67::t_4ecbc23737cbf5 62-68,70-75
+  s_a18bf3d0a19f67::t_ac3295cf99d8c2 166-169
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_83c611dc7c3a37 3,11
+  s_a18bf3d0a19f67::t_db52f1c5be8e5b 73-75,78-79,81,83-87,100,115,119-121
+  s_a18bf3d0a19f67::t_2025ffd99ed3ad 50-51
+  s_a18bf3d0a19f67::t_e82f8c4626dee2 5
+  s_a18bf3d0a19f67::t_b55e9d98d32fda 111-114,116
+  s_a18bf3d0a19f67::t_7884c154448da8 185
+  s_a18bf3d0a19f67::t_e97b04b804ba81 64-72,76-77,80,82
+  s_a18bf3d0a19f67::t_564cfe2e3a338a 27-36
+  s_a18bf3d0a19f67::t_7726521851d506 126
+  s_a18bf3d0a19f67::t_2f75f27bb4974a 8-10
+  s_a18bf3d0a19f67::t_25c2091fa5a1dd 179-184,186-195
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "1f26c52ce69b8b39a5853ba2265f8f7c56555690",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}

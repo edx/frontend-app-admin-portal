@@ -1,0 +1,39 @@
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_7726521851d506 106
+  s_a18bf3d0a19f67::t_25c2091fa5a1dd 159-175
+  s_a18bf3d0a19f67::t_2025ffd99ed3ad 48-49
+  s_a18bf3d0a19f67::t_b55e9d98d32fda 82-96
+  s_a18bf3d0a19f67::t_83c611dc7c3a37 3,9
+  s_a18bf3d0a19f67::t_e82f8c4626dee2 5
+  s_a18bf3d0a19f67::t_564cfe2e3a338a 25-34
+docs/references/admin-registration-and-activation.md
+  s_a18bf3d0a19f67::t_14815f9dd73d7e 46-53,56-76
+  s_a18bf3d0a19f67::t_ac3295cf99d8c2 158-161
+src/components/AdminRegisterPage/AdminRegisterPage.test.jsx
+  s_a18bf3d0a19f67::t_f40e58a31c7272 65-68
+  s_a18bf3d0a19f67::t_689fd85846214d 72
+  s_a18bf3d0a19f67::t_e1ace21d5a5fd9 10
+  s_a18bf3d0a19f67::t_d1d18897b51e2c 48,51
+  s_a18bf3d0a19f67::t_353c7cf71f20c0 183-192,196-202,204-217,221-231,233-234
+  s_a18bf3d0a19f67::t_f19b6fbb4e201d 203
+  s_a18bf3d0a19f67::t_8eba3f44b2d411 23-24,26
+  s_a18bf3d0a19f67::t_09a0ea63c2af69 71
+  s_a18bf3d0a19f67::t_83453c573290b8 25,27-28
+  s_a18bf3d0a19f67::t_d50a7c147fd917 193-195,218-220,232
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.4",
+  "base_commit_sha": "8b9989da38637c7bce44f0cc13bbebed5d5bef1c",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}

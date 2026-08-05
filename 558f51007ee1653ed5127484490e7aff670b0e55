@@ -1,0 +1,42 @@
+docs/decisions/0013-pending-invited-admin-bounce-via-logout.rst
+  s_a18bf3d0a19f67::t_7f4014d26165bb 75-79
+  s_a18bf3d0a19f67::t_a07d27a3d3d9f6 51-73
+src/components/Header/index.jsx
+  s_a18bf3d0a19f67::t_0a393731dbc6d4 7,12
+  s_a18bf3d0a19f67::t_03472c8373b37a 57
+src/utils.js
+  s_a18bf3d0a19f67::t_c0ae9763064630 768-790
+  s_a18bf3d0a19f67::t_42d0a8365a1eda 847
+  s_a18bf3d0a19f67::t_08ef12d7e6445b 13
+src/utils.test.js
+  s_a18bf3d0a19f67::t_f0df701e3748a6 10,26
+  s_a18bf3d0a19f67::t_7163d05215be4d 288-314
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_cf429d8bfe6c71 28-31
+  s_a18bf3d0a19f67::t_15ac85df0267f3 62-83
+  s_a18bf3d0a19f67::t_c5c8dfca079e2d 186
+  s_a18bf3d0a19f67::t_147fd76d1f6714 17
+docs/references/admin-registration-and-activation.md
+  s_a18bf3d0a19f67::t_754c31ab122002 72-82
+  s_a18bf3d0a19f67::t_74ebc3ef9769d1 51-53,56-59
+src/components/AdminRegisterPage/AdminRegisterPage.test.jsx
+  s_a18bf3d0a19f67::t_61308b507837a4 184-265
+  s_a18bf3d0a19f67::t_4d0f8e2511103a 15,23-28
+  s_a18bf3d0a19f67::t_006990abf25c50 71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "558f51007ee1653ed5127484490e7aff670b0e55",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}

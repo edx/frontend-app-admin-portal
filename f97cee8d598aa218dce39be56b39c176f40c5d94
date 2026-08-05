@@ -1,0 +1,59 @@
+src/components/algolia-search/useAlgoliaSearch.ts
+  s_677cb45ba31ff5::t_33db9fd0329111 133
+  s_677cb45ba31ff5::t_f6b01ccad54fcf 35,40
+  s_677cb45ba31ff5::t_aee135cac72529 102,105-107
+src/components/learner-credit-management/search/tests/CatalogSearch.test.tsx
+  s_677cb45ba31ff5::t_a3fc691e3a37f4 51
+src/components/BulkEnrollmentPage/stepper/ReviewStepCourseList.test.tsx
+  s_677cb45ba31ff5::t_bec3e8888d1bd2 39
+src/components/ContentHighlights/ContentHighlightsContext.tsx
+  s_677cb45ba31ff5::t_4af408df16ae59 81
+  s_677cb45ba31ff5::t_08c8637908f2d6 57
+  s_677cb45ba31ff5::t_9d8d853533a4ee 77
+  s_677cb45ba31ff5::t_8983acd219d300 21
+src/components/algolia-search/withAlgoliaSearch.tsx
+  s_677cb45ba31ff5::t_dc67c9d104269a 16-18
+  s_677cb45ba31ff5::t_f6fc723f645b51 10
+.env.development-stage
+  s_677cb45ba31ff5::t_c911ca3dfcc2c4 18
+src/components/BulkEnrollmentPage/stepper/ReviewStepCourseList.tsx
+  s_677cb45ba31ff5::t_e6c0d13ceb80e2 141
+src/components/BulkEnrollmentPage/stepper/AddCoursesStep.tsx
+  s_677cb45ba31ff5::t_345e4dd14fdf57 79
+src/components/ContentHighlights/HighlightStepper/HighlightStepperSelectContentSearch.tsx
+  s_677cb45ba31ff5::t_9fb458e7712e0e 180-183
+  s_677cb45ba31ff5::t_d9999b3e0411a5 238
+src/components/ContentHighlights/HighlightStepper/HighlightStepperConfirmContent.tsx
+  s_677cb45ba31ff5::t_a7cd2d9146af82 80-83
+  s_677cb45ba31ff5::t_48d1afcfd98d1d 162
+src/components/BulkEnrollmentPage/stepper/AddCoursesStep.test.tsx
+  s_677cb45ba31ff5::t_f9e84008bec16d 48
+src/components/algolia-search/withAlgoliaSearch.test.tsx
+  s_677cb45ba31ff5::t_f491045068b032 115
+  s_677cb45ba31ff5::t_c33c98041792df 54
+  s_677cb45ba31ff5::t_5b7a84c6fedc60 154-174
+  s_677cb45ba31ff5::t_8fa34e80aed900 38-39
+  s_677cb45ba31ff5::t_9b3331697fc8a9 73
+src/components/learner-credit-management/search/CatalogSearch.tsx
+  s_677cb45ba31ff5::t_ff1b451a66ccb6 93
+.env.development
+  s_677cb45ba31ff5::t_da4fb5599023fb 33
+src/config/index.js
+  s_677cb45ba31ff5::t_cc8d07f22da137 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.4",
+  "base_commit_sha": "f97cee8d598aa218dce39be56b39c176f40c5d94",
+  "prompts": {},
+  "sessions": {
+    "s_677cb45ba31ff5": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fa9704c4-0f93-49c9-8045-42735451da18",
+        "model": "claude-sonnet-4-6"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}

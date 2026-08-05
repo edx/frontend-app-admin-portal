@@ -1,0 +1,63 @@
+src/components/billing/data/tests/hooks.test.tsx
+  e0f80132b2de739e 29-38,640-641,685-693,695,698,700,727,730,733-744,749-750,752-756,758-763
+  0a4b223470617336 606-609,611,616,618,621-627,630,633,638-639,642,644-645,650-655,659,662,665
+  21b301212792640d 425,454,481,508-509,520-583,592,605,610,614-615,617,629,634,643,647-648,658,666
+src/components/billing/TransactionHistory.tsx
+  0a4b223470617336 18,157-160
+src/components/billing/TransactionHistory.scss
+  21b301212792640d 1-10
+  0a4b223470617336 11
+src/components/billing/BillingPage.tsx
+  21b301212792640d 151,200,249
+src/components/billing/tests/TransactionHistory.test.tsx
+  0a4b223470617336 1-73
+src/components/billing/data/hooks.ts
+  0a4b223470617336 253,265-268,270-284,287-288,290-299,306,318-321,323-337,339-341,343-352
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.18",
+  "base_commit_sha": "38db65229f628674ba3450c2f96efa5363ca15c8",
+  "prompts": {
+    "0a4b223470617336": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2c4497f5-1c8a-4c5c-9de2-4a85abfa4035",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>",
+      "messages": [],
+      "total_additions": 426,
+      "total_deletions": 102,
+      "accepted_lines": 174,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/d70a7f98268ae7accdfe38b36743e83810e715917a250a430a6d077c4f65a4e3"
+    },
+    "21b301212792640d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7bf65e57-96e1-4203-85f9-53bd60164af7",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 187,
+      "total_deletions": 81,
+      "accepted_lines": 186,
+      "overriden_lines": 0
+    },
+    "e0f80132b2de739e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d35d7161-c0a5-487b-a6e8-9897fd4cb285",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 122,
+      "total_deletions": 345,
+      "accepted_lines": 51,
+      "overriden_lines": 0
+    }
+  }
+}

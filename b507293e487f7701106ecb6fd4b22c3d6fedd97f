@@ -1,0 +1,40 @@
+src/components/billing/tests/AddPaymentMethodModal.test.tsx
+  9c4e9356fc03f49e 1-8,12-123,253
+  68b31f2841f4b02b 9-11,126-252
+src/components/billing/AddPaymentMethodModal.tsx
+  9c4e9356fc03f49e 15-24,53,57-58,87,91-103,144-155,229-230,253,279-280,282-298,318-326,377-385,421-429,450-458,477-485
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.20",
+  "base_commit_sha": "b507293e487f7701106ecb6fd4b22c3d6fedd97f",
+  "prompts": {
+    "68b31f2841f4b02b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f6002290-94a7-463b-8424-f93d14ac6d81",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 130,
+      "total_deletions": 0,
+      "accepted_lines": 130,
+      "overriden_lines": 0
+    },
+    "9c4e9356fc03f49e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a8d83fd9-9ef3-46d4-abb2-862821c8526f",
+        "model": "claude-opus-4-5-20251101"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>",
+      "messages": [],
+      "total_additions": 251,
+      "total_deletions": 25,
+      "accepted_lines": 227,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/573d5f6aedfe8161d931e8416fa9678a17b1009ab81a78f0479e1185801c951d"
+    }
+  }
+}

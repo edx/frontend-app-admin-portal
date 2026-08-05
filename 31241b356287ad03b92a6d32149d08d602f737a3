@@ -1,0 +1,24 @@
+src/components/PeopleManagement/tests/OrgInviteAdminCard.test.jsx
+  s_a18bf3d0a19f67::t_da1cadac309268 148
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_9f7e837bb4749b 32
+src/components/PeopleManagement/OrgInviteAdminCard.jsx
+  s_a18bf3d0a19f67::t_30b86c3f3bf4b3 29-33
+  s_a18bf3d0a19f67::t_539b874ef99fda 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "31241b356287ad03b92a6d32149d08d602f737a3",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": "Alexander Dusenbery <adusenbery@2u.com>"
+    }
+  }
+}

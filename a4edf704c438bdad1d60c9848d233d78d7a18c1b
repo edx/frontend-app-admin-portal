@@ -1,0 +1,27 @@
+src/components/PeopleManagement/OrgInviteAdminCard.jsx
+  s_a18bf3d0a19f67::t_539b874ef99fda 13
+  s_a18bf3d0a19f67::t_30b86c3f3bf4b3 30-33
+  s_a18bf3d0a19f67::t_107db7a2848a20 34-39
+  s_a18bf3d0a19f67::t_ad10e9a4a89ec9 15
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_9f7e837bb4749b 32
+src/components/PeopleManagement/tests/OrgInviteAdminCard.test.jsx
+  s_a18bf3d0a19f67::t_a094fb4e561aa2 149
+  s_a18bf3d0a19f67::t_d5231198d426d6 11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "a4edf704c438bdad1d60c9848d233d78d7a18c1b",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": null
+    }
+  }
+}

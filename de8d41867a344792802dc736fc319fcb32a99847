@@ -1,0 +1,42 @@
+src/utils.test.js
+  s_a18bf3d0a19f67::t_3a25d51d88b618 10,26,288-302,308,312-313,318
+  s_a18bf3d0a19f67::t_40810c795ab164 303-307,309-311,314-317,321-323,326-329,335-336
+  s_a18bf3d0a19f67::t_449d7fa01038ff 320,324-325,330-334,337
+src/components/AdminRegisterPage/index.jsx
+  s_a18bf3d0a19f67::t_403ca593f96cd7 82
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 8-9
+docs/references/admin-registration-and-activation.md
+  s_a18bf3d0a19f67::t_a594d38ff7c85c 72-74
+  s_a18bf3d0a19f67::t_9cf5ad2b595a27 51
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 53,57-59,75-82
+src/components/Header/index.jsx
+  s_a18bf3d0a19f67::t_3a25d51d88b618 7,12,57
+src/components/AdminRegisterPage/AdminRegisterPage.test.jsx
+  s_a18bf3d0a19f67::t_bba84c26b88e83 28-33
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 6
+  s_a18bf3d0a19f67::t_f8923e6402f8d9 252-254,266
+  s_a18bf3d0a19f67::t_f6274a9bb4402b 210-211,215,220-223,227,234-236
+src/utils.js
+  s_a18bf3d0a19f67::t_6b141c71e684ec 772-776,779-780,782,788,790-794,796-797
+  s_a18bf3d0a19f67::t_3a25d51d88b618 13,768-771,777-778,781,798-799,856
+  s_a18bf3d0a19f67::t_3e2c2b2d467f14 783-787,789,795
+docs/decisions/0013-pending-invited-admin-bounce-via-logout.rst
+  s_a18bf3d0a19f67::t_f44901b3a66833 52-59
+  s_a18bf3d0a19f67::t_d14274ab7f7ea0 51,60-62,65-81
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.4.8",
+  "base_commit_sha": "de8d41867a344792802dc736fc319fcb32a99847",
+  "prompts": {},
+  "sessions": {
+    "s_a18bf3d0a19f67": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4f2bedc2-64a5-401e-8aa0-7d03cc35468a",
+        "model": "claude-opus-4-7"
+      },
+      "human_author": null
+    }
+  }
+}
