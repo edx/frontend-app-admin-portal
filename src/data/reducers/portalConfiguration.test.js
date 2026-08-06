@@ -30,6 +30,7 @@ const initialState = {
   enablePortalLearnerCreditManagementScreen: false,
   enableDemoData: false,
   enableAuditDataReporting: false,
+  showNonProductionBanner: false,
   enterpriseFeatures: {},
 };
 
@@ -63,6 +64,7 @@ const enterpriseData = {
   enable_generation_of_api_credentials: true,
   enable_demo_data_for_analytics_and_lpr: true,
   enable_audit_data_reporting: true,
+  show_non_production_banner: true,
 };
 const mockEnterpriseFeatures = { featureA: true };
 
@@ -98,6 +100,7 @@ describe('portalConfiguration reducer', () => {
       enableApiCredentialGeneration: enterpriseData.enable_generation_of_api_credentials,
       enableDemoData: enterpriseData.enable_demo_data_for_analytics_and_lpr,
       enableAuditDataReporting: enterpriseData.enable_audit_data_reporting,
+      showNonProductionBanner: enterpriseData.show_non_production_banner,
       enterpriseFeatures: mockEnterpriseFeatures,
     };
     expect(portalConfiguration(undefined, {
@@ -119,6 +122,18 @@ describe('portalConfiguration reducer', () => {
     });
 
     expect(state.productType).toBe('teams');
+  });
+
+  it('defaults showNonProductionBanner to false when the API omits the field', () => {
+    const enterpriseDataWithoutBannerField = { ...enterpriseData };
+    delete enterpriseDataWithoutBannerField.show_non_production_banner;
+
+    const state = portalConfiguration(undefined, {
+      type: FETCH_PORTAL_CONFIGURATION_SUCCESS,
+      payload: { data: enterpriseDataWithoutBannerField, enterpriseFeatures: mockEnterpriseFeatures },
+    });
+
+    expect(state.showNonProductionBanner).toBe(false);
   });
 
   it('updates fetch portal configuration failure state', () => {
