@@ -1,4 +1,4 @@
-# frontend-app-admin-portal
+# frontend-app-admin-portal 
 
 ![Build Status](https://github.com/openedx/frontend-app-admin-portal/actions/workflows/ci.yml/badge.svg)
 ![Codecov](https://codecov.io/gh/edx/frontend-app-admin-portal/branch/master/graph/badge.svg)
