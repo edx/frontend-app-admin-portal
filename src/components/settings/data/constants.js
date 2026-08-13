@@ -32,7 +32,7 @@ export const HELP_CENTER_CANVAS = 'https://enterprise-support.edx.org/s/topic/0T
 export const HELP_CENTER_CORNERSTONE = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBvZOAW/cornerstone';
 export const HELP_CENTER_DEGREED = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBxBOAW/degreed';
 export const HELP_CENTER_MOODLE = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC21OAG/moodle';
-export const HELP_CENTER_SAP = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC5FOAW/success-factors ';
+export const HELP_CENTER_SAP = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC5FOAW/success-factors';
 export const HELP_CENTER_API_GUIDE = 'https://edx-enterprise-api.readthedocs.io/en/latest/index.html';
 
 export const HELP_CENTER_SAML_LINK = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC3dOAG/single-signon-sso';
