@@ -26,16 +26,16 @@ export const SSO_TAB = 'sso';
 export const APPEARANCE_TAB = 'appearance';
 export const API_CREDENTIALS_TAB = 'api_credentials';
 
-export const HELP_CENTER_LINK = 'https://business-support.edx.org/hc/en-us/categories/360000368453-Integrations';
-export const HELP_CENTER_BLACKBOARD = 'https://business-support.edx.org/hc/en-us/sections/4405096719895-Blackboard';
-export const HELP_CENTER_CANVAS = 'https://business-support.edx.org/hc/en-us/sections/1500002584121-Canvas';
-export const HELP_CENTER_CORNERSTONE = 'https://business-support.edx.org/hc/en-us/sections/1500002151021-Cornerstone';
-export const HELP_CENTER_DEGREED = 'https://business-support.edx.org/hc/en-us/sections/360000868494-Degreed';
-export const HELP_CENTER_MOODLE = 'https://business-support.edx.org/hc/en-us/sections/1500002758722-Moodle';
-export const HELP_CENTER_SAP = 'https://business-support.edx.org/hc/en-us/sections/360000868534-SuccessFactors';
+export const HELP_CENTER_LINK = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBp7OAG/integrations';
+export const HELP_CENTER_BLACKBOARD = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBsLOAW/blackboard';
+export const HELP_CENTER_CANVAS = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBtxOAG/canvas';
+export const HELP_CENTER_CORNERSTONE = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBvZOAW/cornerstone';
+export const HELP_CENTER_DEGREED = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBxBOAW/degreed';
+export const HELP_CENTER_MOODLE = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC21OAG/moodle';
+export const HELP_CENTER_SAP = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC5FOAW/success-factors ';
 export const HELP_CENTER_API_GUIDE = 'https://edx-enterprise-api.readthedocs.io/en/latest/index.html';
 
-export const HELP_CENTER_SAML_LINK = 'https://business-support.edx.org/hc/en-us/articles/360005421073-5-Implementing-Single-Sign-on-SSO-with-edX';
+export const HELP_CENTER_SAML_LINK = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC3dOAG/single-signon-sso';
 export const HELP_CENTER_SAP_IDP_LINK = 'https://business-support.edx.org/hc/en-us/articles/360005205314';
 export const HELP_CENTER_BRANDING_LINK = 'https://business-support.edx.org/hc/en-us/sections/8739219372183';
 export const HELP_CENTER_GROUPS_INVITE_LINK = 'https://enterprise-support.edx.org/s/';
