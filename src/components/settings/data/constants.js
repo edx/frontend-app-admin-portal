@@ -36,8 +36,8 @@ export const HELP_CENTER_SAP = 'https://enterprise-support.edx.org/s/topic/0TORc
 export const HELP_CENTER_API_GUIDE = 'https://edx-enterprise-api.readthedocs.io/en/latest/index.html';
 
 export const HELP_CENTER_SAML_LINK = 'https://enterprise-support.edx.org/s/topic/0TORc000000GC3dOAG/single-signon-sso';
-export const HELP_CENTER_SAP_IDP_LINK = 'https://business-support.edx.org/hc/en-us/articles/360005205314';
-export const HELP_CENTER_BRANDING_LINK = 'https://business-support.edx.org/hc/en-us/sections/8739219372183';
+export const HELP_CENTER_SAP_IDP_LINK = 'https://enterprise-support.edx.org/s/article/Step-2-Configuring-a-SuccessFactors-integration-using-the-Admin-Portal';
+export const HELP_CENTER_BRANDING_LINK = 'https://enterprise-support.edx.org/s/article/How-do-I-customize-my-portal-appearance';
 export const HELP_CENTER_GROUPS_INVITE_LINK = 'https://enterprise-support.edx.org/s/';
 
 export const API_CLIENT_DOCUMENTATION = 'https://edx-enterprise-api.readthedocs.io/en/latest/index.html';
