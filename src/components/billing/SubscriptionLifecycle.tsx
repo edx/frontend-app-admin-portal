@@ -120,6 +120,7 @@ const SubscriptionLifecycle = ({
     currentPeriodEnd,
     cancelAtPeriodEnd,
     productType,
+    academyName,
   } = subscription;
 
   const formattedAmount = formatAmount(yearlyAmount, currency);
@@ -192,6 +193,20 @@ const SubscriptionLifecycle = ({
                 </div>
                 <div className="font-weight-bold">{subscriptionTypeLabel}</div>
               </div>
+
+              {/* Academy Name */}
+              {academyName && (
+                <div>
+                  <div className="small text-muted">
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.academyName.label"
+                      defaultMessage="Academy"
+                      description="Label for academy name field"
+                    />
+                  </div>
+                  <div className="font-weight-bold">{academyName}</div>
+                </div>
+              )}
 
               {/* Current Period End */}
               <div>

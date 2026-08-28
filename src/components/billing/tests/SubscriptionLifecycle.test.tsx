@@ -19,7 +19,7 @@ const baseMockSubscription = {
   cancelAtPeriodEnd: false,
 };
 
-const renderSubscriptionLifecycle = (productType: string | null | undefined) => {
+const renderSubscriptionLifecycle = (productType: string | null | undefined, overrides = {}) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -31,6 +31,7 @@ const renderSubscriptionLifecycle = (productType: string | null | undefined) => 
     data: {
       ...baseMockSubscription,
       productType,
+      ...overrides,
     },
   });
 
@@ -102,5 +103,18 @@ describe('SubscriptionLifecycle', () => {
 
     expect(screen.getByText('Subscription Type')).toBeInTheDocument();
     expect(screen.getByText('Teams')).toBeInTheDocument();
+  });
+
+  it('renders the academy name field when academyName is present', () => {
+    renderSubscriptionLifecycle('essentials', { academyName: 'Supply Chain' });
+
+    expect(screen.getByText('Academy')).toBeInTheDocument();
+    expect(screen.getByText('Supply Chain')).toBeInTheDocument();
+  });
+
+  it('does not render the academy name field when academyName is absent', () => {
+    renderSubscriptionLifecycle('essentials');
+
+    expect(screen.queryByText('Academy')).not.toBeInTheDocument();
   });
 });
