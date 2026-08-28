@@ -16,9 +16,12 @@ import SubscriptionExpirationBanner from './expiration/SubscriptionExpirationBan
 import { MANAGE_LEARNERS_TAB, SELF_SERVICE_TRIAL, SELF_SERVICE_PAID } from './data/constants';
 import { ADMINISTER_SUBSCRIPTIONS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
 import ManageSubscriptionButton from './ManageSubscriptionButton';
+import { useSubscription } from '../billing/data/hooks';
 
 const SubscriptionDetails = ({
   enterpriseSlug,
+  enterpriseId,
+  enterpriseName,
 }) => {
   const intl = useIntl();
   const { forceRefresh } = useContext(SubscriptionContext);
@@ -27,6 +30,14 @@ const SubscriptionDetails = ({
     subscription,
     forceRefreshDetailView,
   } = useContext(SubscriptionDetailContext);
+  const { data: billingSubscription } = useSubscription(enterpriseId);
+  const {
+    licenseCount, currentPeriodEnd, academyName, status,
+  } = billingSubscription ?? {};
+
+  const subscriptionTitle = (licenseCount != null && currentPeriodEnd && academyName)
+    ? `${enterpriseName} ${licenseCount} SUBS ${dayjs.unix(currentPeriodEnd).format('MMMM YYYY')} - Essentials ${academyName} ${status === 'trialing' ? 'TRIAL' : 'PAID'}`
+    : subscription.title;
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const isSelfServiceSub = [SELF_SERVICE_PAID, SELF_SERVICE_TRIAL].includes(subscription.planType);
@@ -58,8 +69,8 @@ const SubscriptionDetails = ({
       <Row id={ADMINISTER_SUBSCRIPTIONS_TARGETS.SUBSCRIPTION_PLANS_DETAIL_SINGLE_PAGE} className="mb-4">
         <Col className="mb-3 mb-lg-0">
           <div className="d-flex justify-content-between mb-3">
-            <h2>{subscription.title}</h2>
-            <div className="text-md-right" id="invite-learners-button">
+            <h2 className="mr-3">{subscriptionTitle}</h2>
+            <div className="text-md-right text-nowrap flex-shrink-0" id="invite-learners-button">
               {isSelfServiceSub && (
                 <ManageSubscriptionButton className="mr-2" />
               )}
@@ -147,10 +158,14 @@ const SubscriptionDetails = ({
 
 SubscriptionDetails.propTypes = {
   enterpriseSlug: PropTypes.string.isRequired,
+  enterpriseId: PropTypes.string.isRequired,
+  enterpriseName: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = state => ({
   enterpriseSlug: state.portalConfiguration.enterpriseSlug,
+  enterpriseId: state.portalConfiguration.enterpriseId,
+  enterpriseName: state.portalConfiguration.enterpriseName,
 });
 
 export default connect(mapStateToProps)(SubscriptionDetails);

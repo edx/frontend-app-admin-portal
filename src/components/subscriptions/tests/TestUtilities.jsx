@@ -114,6 +114,7 @@ export const DEFAULT_STORE_STATE = {
   portalConfiguration: {
     enterpriseSlug: TEST_ENTERPRISE_CUSTOMER_SLUG,
     enterpriseId: TEST_ENTERPRISE_CUSTOMER_UUID,
+    enterpriseName: 'Test Company',
     enableSubscriptionManagementScreen: true,
     enableCodeManagementScreen: true,
   },
