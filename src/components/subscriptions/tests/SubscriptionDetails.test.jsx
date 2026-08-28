@@ -308,7 +308,11 @@ describe('SubscriptionDetails', () => {
       });
       render(
         <IntlProvider locale="en">
-          <SubscriptionManagementContext detailState={SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE}>
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-trial',
+          }}
+          >
             <SubscriptionDetails {...defaultProps} />
           </SubscriptionManagementContext>
         </IntlProvider>,
@@ -330,7 +334,11 @@ describe('SubscriptionDetails', () => {
       });
       render(
         <IntlProvider locale="en">
-          <SubscriptionManagementContext detailState={SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE}>
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-paid',
+          }}
+          >
             <SubscriptionDetails {...defaultProps} />
           </SubscriptionManagementContext>
         </IntlProvider>,
@@ -341,10 +349,36 @@ describe('SubscriptionDetails', () => {
       })).toBeInTheDocument();
     });
 
-    it('falls back to the plain subscription title when billing subscription data is unavailable', () => {
+    it('does not override the title for non-self-service plans even when billing data is present', () => {
+      useSubscription.mockReturnValue({
+        data: {
+          licenseCount: 50,
+          currentPeriodEnd: 1783051200,
+          academyName: 'Tech & Digital Transformation',
+          status: 'trialing',
+        },
+      });
       render(
         <IntlProvider locale="en">
           <SubscriptionManagementContext detailState={SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE}>
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByRole('heading', {
+        level: 2,
+        name: 'Test Subscription Plan',
+      })).toBeInTheDocument();
+    });
+
+    it('falls back to the plain subscription title when billing subscription data is unavailable', () => {
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-trial',
+          }}
+          >
             <SubscriptionDetails {...defaultProps} />
           </SubscriptionManagementContext>
         </IntlProvider>,

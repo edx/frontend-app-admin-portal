@@ -34,13 +34,17 @@ const SubscriptionDetails = ({
   const {
     licenseCount, currentPeriodEnd, academyName, status,
   } = billingSubscription ?? {};
-
-  const subscriptionTitle = (licenseCount != null && currentPeriodEnd && academyName)
-    ? `${enterpriseName} ${licenseCount} SUBS ${dayjs.unix(currentPeriodEnd).format('MMMM YYYY')} - Essentials ${academyName} ${status === 'trialing' ? 'TRIAL' : 'PAID'}`
-    : subscription.title;
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const isSelfServiceSub = [SELF_SERVICE_PAID, SELF_SERVICE_TRIAL].includes(subscription.planType);
+
+  const subscriptionTitle = (isSelfServiceSub && licenseCount != null && currentPeriodEnd && academyName)
+    ? `${enterpriseName} ${licenseCount} SUBS ${intl.formatDate(new Date(currentPeriodEnd * 1000), {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })} - Essentials ${academyName} ${status === 'trialing' ? 'TRIAL' : 'PAID'}`
+    : subscription.title;
 
   const hasLicensesAllocatedOrRevoked = subscription.licenses?.allocated > 0 || subscription.licenses?.revoked > 0;
   const shouldShowInviteLearnersButton = (
