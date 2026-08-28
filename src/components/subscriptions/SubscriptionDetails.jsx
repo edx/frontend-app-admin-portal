@@ -38,8 +38,13 @@ const SubscriptionDetails = ({
   const [toastMessage, setToastMessage] = useState('');
   const isSelfServiceSub = [SELF_SERVICE_PAID, SELF_SERVICE_TRIAL].includes(subscription.planType);
 
-  const subscriptionTitle = (isSelfServiceSub && licenseCount != null && currentPeriodEnd && academyName)
-    ? `${enterpriseName} ${licenseCount} SUBS ${intl.formatDate(new Date(currentPeriodEnd * 1000), {
+  const periodEndDate = typeof currentPeriodEnd === 'number'
+    ? new Date(currentPeriodEnd * 1000)
+    : new Date(currentPeriodEnd);
+  const hasValidPeriodEnd = !Number.isNaN(periodEndDate.getTime());
+
+  const subscriptionTitle = (isSelfServiceSub && licenseCount != null && hasValidPeriodEnd && academyName)
+    ? `${enterpriseName} ${licenseCount} SUBS ${intl.formatDate(periodEndDate, {
       month: 'long',
       year: 'numeric',
       timeZone: 'UTC',
