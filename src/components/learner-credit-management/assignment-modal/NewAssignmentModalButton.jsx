@@ -51,6 +51,7 @@ const NewAssignmentModalButton = ({ enterpriseId, course, children }) => {
   const [canAllocateAssignments, setCanAllocateAssignments] = useState(false);
   const [assignButtonState, setAssignButtonState] = useState('default');
   const [createAssignmentsErrorReason, setCreateAssignmentsErrorReason] = useState();
+  const [createAssignmentsErrorMessage, setCreateAssignmentsErrorMessage] = useState();
   const [assignmentRun, setAssignmentRun] = useState();
   const { data: enterpriseFlexGroups } = useEnterpriseFlexGroups(enterpriseId);
   const {
@@ -130,6 +131,8 @@ const NewAssignmentModalButton = ({ enterpriseId, course, children }) => {
   const handleCloseAssignmentModal = () => {
     close();
     setAssignButtonState('default');
+    setCreateAssignmentsErrorReason(null);
+    setCreateAssignmentsErrorMessage(null);
     setSuppressEmail(false);
   };
 
@@ -192,6 +195,7 @@ const NewAssignmentModalButton = ({ enterpriseId, course, children }) => {
     };
     setAssignButtonState('pending');
     setCreateAssignmentsErrorReason(null);
+    setCreateAssignmentsErrorMessage(null);
     mutate(mutationArgs, {
       onSuccess: (res) => {
         setAssignButtonState('complete');
@@ -225,13 +229,19 @@ const NewAssignmentModalButton = ({ enterpriseId, course, children }) => {
           httpErrorResponseData,
         } = err.customAttributes;
         let errorReason = 'system_error';
+        let errorMessage;
         if (httpErrorStatus === 422) {
-          const responseData = JSON.parse(httpErrorResponseData);
-          errorReason = responseData[0].reason;
-          setCreateAssignmentsErrorReason(errorReason);
-        } else {
-          setCreateAssignmentsErrorReason(errorReason);
+          try {
+            const responseData = JSON.parse(httpErrorResponseData);
+            const allocationError = Array.isArray(responseData) ? responseData[0] : responseData;
+            errorReason = allocationError?.reason || errorReason;
+            errorMessage = allocationError?.user_message || allocationError?.error_message;
+          } catch {
+            errorReason = 'system_error';
+          }
         }
+        setCreateAssignmentsErrorReason(errorReason);
+        setCreateAssignmentsErrorMessage(errorMessage);
         setAssignButtonState('error');
         sendEnterpriseTrackEvent(
           enterpriseId,
@@ -373,6 +383,7 @@ const NewAssignmentModalButton = ({ enterpriseId, course, children }) => {
       </FullscreenModal>
       <CreateAllocationErrorAlertModals
         errorReason={createAssignmentsErrorReason}
+        errorMessage={createAssignmentsErrorMessage}
         retry={handleAllocateContentAssignments}
         closeAssignmentModal={handleCloseAssignmentModal}
       />
