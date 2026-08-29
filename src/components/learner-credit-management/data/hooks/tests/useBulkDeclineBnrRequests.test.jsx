@@ -76,6 +76,7 @@ describe('useBulkDeclineBnrRequests', () => {
       enterpriseId: TEST_ENTERPRISE_ID,
       subsidyAccessPolicyId: TEST_SUBSIDY_ACCESS_POLICY_ID,
       declineReason: undefined,
+      options: {},
     });
     expect(EnterpriseAccessApiService.bulkDeclineBnrSubsidyRequests).not.toHaveBeenCalled();
     expect(logError).toBeCalledTimes(0);
@@ -107,6 +108,38 @@ describe('useBulkDeclineBnrRequests', () => {
       enterpriseId: TEST_ENTERPRISE_ID,
       subsidyAccessPolicyId: TEST_SUBSIDY_ACCESS_POLICY_ID,
       declineReason: 'Budget exhausted',
+      options: {},
+    });
+  });
+
+  it('should pass table filters to declineAllBnrSubsidyRequests when entire table is selected', async () => {
+    EnterpriseAccessApiService.declineAllBnrSubsidyRequests.mockResolvedValueOnce({
+      status: 202,
+      data: { declined: ['uuid-1', 'uuid-2'], non_declinable: [] },
+    });
+    const tableFilters = [
+      { id: 'requestDetails', value: 'learner@example.com' },
+      { id: 'learnerRequestState', value: ['requested'] },
+      { id: 'lastActionStatus', value: ['failed', 'reminded'] },
+    ];
+    const { result } = renderHook(
+      () => useBulkDeclineBnrRequests(TEST_ENTERPRISE_ID, [], true, tableFilters),
+      { wrapper },
+    );
+
+    await waitFor(() => result.current.declineBnrRequests('Budget exhausted'));
+
+    expect(
+      EnterpriseAccessApiService.declineAllBnrSubsidyRequests,
+    ).toHaveBeenCalledWith({
+      enterpriseId: TEST_ENTERPRISE_ID,
+      subsidyAccessPolicyId: TEST_SUBSIDY_ACCESS_POLICY_ID,
+      declineReason: 'Budget exhausted',
+      options: {
+        search: 'learner@example.com',
+        learner_request_state: 'requested',
+        latest_action_status__in: 'failed,reminded',
+      },
     });
   });
 

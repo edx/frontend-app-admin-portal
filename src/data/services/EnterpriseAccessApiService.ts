@@ -77,6 +77,7 @@ type DeclineAllBnrSubsidyRequestsParams = {
   enterpriseId: string;
   subsidyAccessPolicyId: string;
   declineReason?: string;
+  options?: Record<string, unknown>;
 };
 
 type DeclineAllBnrSubsidyRequestsResponseData = {
@@ -514,16 +515,19 @@ class EnterpriseAccessApiService {
    * @param params.enterpriseId - The UUID of the enterprise customer
    * @param params.subsidyAccessPolicyId - The UUID of the subsidy policy
    * @param params.declineReason - Optional reason applied to every declined request
+   * @param params.options - Additional options for filtering matching requests
    * @returns A promise that resolves with {declined, non_declinable}
    */
   static declineAllBnrSubsidyRequests({
     enterpriseId,
     subsidyAccessPolicyId,
     declineReason,
+    options: filterOptions = {},
   }: DeclineAllBnrSubsidyRequestsParams): Promise<DeclineAllBnrSubsidyRequestsResponse> {
     const options: Record<string, unknown> = {
       enterprise_customer_uuid: enterpriseId,
       policy_uuid: subsidyAccessPolicyId,
+      ...filterOptions,
     };
     if (declineReason) {
       options.decline_reason = declineReason;

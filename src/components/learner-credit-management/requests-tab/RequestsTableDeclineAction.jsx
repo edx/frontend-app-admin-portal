@@ -28,6 +28,7 @@ const RequestsTableDeclineAction = ({
   selectedFlatRows,
   isEntireTableSelected,
   requestStatusCounts,
+  tableInstance,
   enterpriseId,
   onRefresh,
 }) => {
@@ -37,10 +38,16 @@ const RequestsTableDeclineAction = ({
       === LEARNER_CREDIT_REQUEST_STATES.requested,
   );
   const requestUuids = declinableRows.map((row) => row.original.uuid);
+  const tableFilters = tableInstance?.state?.filters || [];
 
   const {
     declineButtonState, declineBnrRequests, close, isOpen, open,
-  } = useBulkDeclineBnrRequests(enterpriseId, requestUuids, isEntireTableSelected);
+  } = useBulkDeclineBnrRequests(
+    enterpriseId,
+    requestUuids,
+    isEntireTableSelected,
+    tableFilters,
+  );
 
   const selectedDeclinableRowCount = calculateTotalToDecline({
     requestUuids,
@@ -79,6 +86,7 @@ RequestsTableDeclineAction.defaultProps = {
   selectedFlatRows: [],
   isEntireTableSelected: false,
   requestStatusCounts: [],
+  tableInstance: undefined,
   onRefresh: undefined,
 };
 
@@ -92,6 +100,11 @@ RequestsTableDeclineAction.propTypes = {
       count: PropTypes.number.isRequired,
     }),
   ),
+  tableInstance: PropTypes.shape({
+    state: PropTypes.shape({
+      filters: PropTypes.arrayOf(PropTypes.shape()),
+    }),
+  }),
   onRefresh: PropTypes.func,
 };
 

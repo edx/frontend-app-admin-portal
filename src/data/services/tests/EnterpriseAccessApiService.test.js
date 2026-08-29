@@ -340,6 +340,26 @@ describe('EnterpriseAccessApiService', () => {
     });
   });
 
+  test('declineAllBnrSubsidyRequests forwards filter options when provided', () => {
+    EnterpriseAccessApiService.declineAllBnrSubsidyRequests({
+      enterpriseId: mockEnterpriseUUID,
+      subsidyAccessPolicyId: mockSubsidyAccessPolicyUUID,
+      declineReason: 'Budget exhausted',
+      options: {
+        learner_request_state: 'requested',
+        search: 'learner@example.com',
+      },
+    });
+
+    expect(axios.post).toBeCalledWith(`${enterpriseAccessBaseUrl}/api/v1/learner-credit-requests/decline-all/`, {
+      enterprise_customer_uuid: mockEnterpriseUUID,
+      policy_uuid: mockSubsidyAccessPolicyUUID,
+      learner_request_state: 'requested',
+      search: 'learner@example.com',
+      decline_reason: 'Budget exhausted',
+    });
+  });
+
   test('fetchBnrSubsidyRequests calls enterprise-access with enterpriseUUID and options', () => {
     const options = {
       page: 2,
