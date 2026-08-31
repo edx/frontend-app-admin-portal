@@ -51,7 +51,7 @@ const SubscriptionCard = ({
     ? new Date(currentPeriodEnd * 1000)
     : new Date(currentPeriodEnd);
   const hasValidPeriodEnd = !Number.isNaN(periodEndDate.getTime());
-  const cardTitle = (isSelfServiceSub && licenseCount != null && hasValidPeriodEnd && academyName)
+  const cardTitle = (isSelfServiceSub && enterpriseName && licenseCount != null && hasValidPeriodEnd && academyName)
     ? `${enterpriseName} ${licenseCount} SUBS ${intl.formatDate(periodEndDate, {
       month: 'long',
       year: 'numeric',
