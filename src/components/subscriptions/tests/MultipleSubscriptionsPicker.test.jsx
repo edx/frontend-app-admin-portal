@@ -12,6 +12,11 @@ import { DEFAULT_LEAD_TEXT, SELF_SERVICE_PAID } from '../data/constants';
 import MultipleSubscriptionsPicker from '../MultipleSubscriptionPicker';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
+jest.mock('../../billing/data/hooks', () => ({
+  ...jest.requireActual('../../billing/data/hooks'),
+  useSubscription: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
 const firstCatalogUuid = 'catalogID1';
 const firstEnterpriseUuid = 'ided';
 const defaultProps = {

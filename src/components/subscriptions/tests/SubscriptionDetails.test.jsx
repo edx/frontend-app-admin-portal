@@ -21,16 +21,23 @@ import {
   INVITE_LEARNERS_BUTTON_TEXT,
 } from '../buttons/InviteLearnersButton';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
+import { useSubscription } from '../../billing/data/hooks';
 
 jest.mock('../buttons/InviteLearnersButton');
+jest.mock('../../billing/data/hooks');
 
 const defaultProps = {
   enterpriseSlug: 'sluggy',
+  enterpriseId: 'test-enterprise-uuid',
 };
 
 const PURCHASE_DATE = 'Purchase Date';
 
 describe('SubscriptionDetails', () => {
+  beforeEach(() => {
+    useSubscription.mockReturnValue({ data: undefined });
+  });
+
   afterEach(() => {
     cleanup();
   });
@@ -286,6 +293,152 @@ describe('SubscriptionDetails', () => {
         </IntlProvider>,
       );
       expect(screen.queryByText(PURCHASE_DATE)).toBeInTheDocument();
+    });
+  });
+
+  describe('billing subscription title', () => {
+    it('renders the composed title when billing subscription data is present (trial)', () => {
+      useSubscription.mockReturnValue({
+        data: {
+          licenseCount: 50,
+          currentPeriodEnd: 1783051200, // July 1, 2026 (UTC)
+          academyName: 'Tech & Digital Transformation',
+          status: 'trialing',
+        },
+      });
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-trial',
+          }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByRole('heading', {
+        level: 2,
+        name: 'Test Company 50 SUBS July 2026 - Essentials Tech & Digital Transformation TRIAL',
+      })).toBeInTheDocument();
+    });
+
+    it('renders PAID when the billing subscription status is not trialing', () => {
+      useSubscription.mockReturnValue({
+        data: {
+          licenseCount: 50,
+          currentPeriodEnd: 1783051200,
+          academyName: 'Tech & Digital Transformation',
+          status: 'active',
+        },
+      });
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-paid',
+          }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByRole('heading', {
+        level: 2,
+        name: 'Test Company 50 SUBS July 2026 - Essentials Tech & Digital Transformation PAID',
+      })).toBeInTheDocument();
+    });
+
+    it('does not override the title for non-self-service plans even when billing data is present', () => {
+      useSubscription.mockReturnValue({
+        data: {
+          licenseCount: 50,
+          currentPeriodEnd: 1783051200,
+          academyName: 'Tech & Digital Transformation',
+          status: 'trialing',
+        },
+      });
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext detailState={SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE}>
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByRole('heading', {
+        level: 2,
+        name: 'Test Subscription Plan',
+      })).toBeInTheDocument();
+    });
+
+    it('renders the composed title when currentPeriodEnd is a date string', () => {
+      useSubscription.mockReturnValue({
+        data: {
+          licenseCount: 50,
+          currentPeriodEnd: '2026-07-01',
+          academyName: 'Tech & Digital Transformation',
+          status: 'trialing',
+        },
+      });
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-trial',
+          }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByRole('heading', {
+        level: 2,
+        name: 'Test Company 50 SUBS July 2026 - Essentials Tech & Digital Transformation TRIAL',
+      })).toBeInTheDocument();
+    });
+
+    it('falls back to the plain subscription title when currentPeriodEnd is invalid', () => {
+      useSubscription.mockReturnValue({
+        data: {
+          licenseCount: 50,
+          currentPeriodEnd: 'not-a-date',
+          academyName: 'Tech & Digital Transformation',
+          status: 'trialing',
+        },
+      });
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-trial',
+          }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByRole('heading', {
+        level: 2,
+        name: 'Test Subscription Plan',
+      })).toBeInTheDocument();
+    });
+
+    it('falls back to the plain subscription title when billing subscription data is unavailable', () => {
+      render(
+        <IntlProvider locale="en">
+          <SubscriptionManagementContext detailState={{
+            ...SUBSCRIPTION_PLAN_ASSIGNED_USER_STATE,
+            planType: 'self-service-trial',
+          }}
+          >
+            <SubscriptionDetails {...defaultProps} />
+          </SubscriptionManagementContext>
+        </IntlProvider>,
+      );
+      expect(screen.getByRole('heading', {
+        level: 2,
+        name: 'Test Subscription Plan',
+      })).toBeInTheDocument();
     });
   });
 });

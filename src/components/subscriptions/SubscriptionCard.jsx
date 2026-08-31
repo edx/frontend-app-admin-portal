@@ -6,23 +6,26 @@ import { Link } from 'react-router-dom';
 import {
   Badge, Button, Card, Col, Row, Stack,
 } from '@openedx/paragon';
-import { FormattedMessage, getLocale } from '@edx/frontend-platform/i18n';
+import { FormattedMessage, getLocale, useIntl } from '@edx/frontend-platform/i18n';
 
 import classNames from 'classnames';
 import {
-  ACTIVE, CANCELED, FREE_TRIAL_BADGE, SCHEDULED, SELF_SERVICE_TRIAL, SUBSCRIPTION_STATUS_BADGE_MAP,
+  ACTIVE, CANCELED, FREE_TRIAL_BADGE, SCHEDULED, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL, SUBSCRIPTION_STATUS_BADGE_MAP,
 } from './data/constants';
 import { SubscriptionContext } from './SubscriptionData';
 import { ADMINISTER_SUBSCRIPTIONS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
 import { makePlural } from '../../utils';
 import { getSubscriptionStatus } from './data/utils';
 import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
+import { useSubscription } from '../billing/data/hooks';
 
 const SubscriptionCard = ({
   enterpriseUuid,
+  enterpriseName,
   subscription,
   createActions,
 }) => {
+  const intl = useIntl();
   const {
     expirationDate,
     licenses = {},
@@ -32,12 +35,29 @@ const SubscriptionCard = ({
     uuid: subPlanUuid,
   } = subscription;
   const { stripeInfoByUuid } = useContext(SubscriptionContext);
+  const { data: billingSubscription } = useSubscription(enterpriseUuid);
+  const {
+    licenseCount, currentPeriodEnd, academyName,
+  } = billingSubscription ?? {};
   const loadingStripeSummary = !(subPlanUuid in (stripeInfoByUuid ?? {}));
   const { invoiceAmountDue = null, currency = null, canceledDate = null } = stripeInfoByUuid?.[subPlanUuid] ?? {};
   const formattedStartDate = dayjs(startDate).format('MMMM D, YYYY');
   const formattedExpirationDate = dayjs(expirationDate).format('MMMM D, YYYY');
   const formattedCanceledDate = canceledDate ? dayjs(canceledDate).format('MMMM D, YYYY') : null;
   const subscriptionStatus = getSubscriptionStatus(subscription, canceledDate);
+
+  const isSelfServiceSub = [SELF_SERVICE_PAID, SELF_SERVICE_TRIAL].includes(planType);
+  const periodEndDate = typeof currentPeriodEnd === 'number'
+    ? new Date(currentPeriodEnd * 1000)
+    : new Date(currentPeriodEnd);
+  const hasValidPeriodEnd = !Number.isNaN(periodEndDate.getTime());
+  const cardTitle = (isSelfServiceSub && enterpriseName && licenseCount != null && hasValidPeriodEnd && academyName)
+    ? `${enterpriseName} ${licenseCount} SUBS ${intl.formatDate(periodEndDate, {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'UTC',
+    })} - Essentials ${academyName} ${planType === SELF_SERVICE_TRIAL ? 'TRIAL' : 'PAID'}`
+    : title;
 
   let subscriptionUpcomingPrice;
   if (!loadingStripeSummary && invoiceAmountDue != null && currency) {
@@ -146,7 +166,7 @@ const SubscriptionCard = ({
         className={classNames({
           'pb-1': subscriptionStatus !== ACTIVE,
         })}
-        title={title}
+        title={cardTitle}
         subtitle={subtitle}
         actions={(
           <div>
@@ -199,14 +219,17 @@ const SubscriptionCard = ({
 
 const mapStateToProps = state => ({
   enterpriseUuid: state.portalConfiguration.enterpriseId,
+  enterpriseName: state.portalConfiguration.enterpriseName,
 });
 
 SubscriptionCard.defaultProps = {
   createActions: null,
+  enterpriseName: null,
 };
 
 SubscriptionCard.propTypes = {
   enterpriseUuid: PropTypes.string.isRequired,
+  enterpriseName: PropTypes.string,
   subscription: PropTypes.shape({
     expirationDate: PropTypes.string.isRequired,
     licenses: PropTypes.shape({
