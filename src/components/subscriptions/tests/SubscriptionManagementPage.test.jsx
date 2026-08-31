@@ -19,6 +19,11 @@ import { SUBSIDY_REQUESTS_TYPES } from '../../SubsidyRequestManagementTable/data
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 import { EnterpriseSubsidiesContext } from '../../EnterpriseSubsidiesContext';
 
+jest.mock('../../billing/data/hooks', () => ({
+  ...jest.requireActual('../../billing/data/hooks'),
+  useSubscription: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
 describe('SubscriptionManagementPage', () => {
   describe('multiple subscriptions', () => {
     const mockStore = createMockStore();

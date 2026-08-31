@@ -15,10 +15,13 @@ import { axe } from 'jest-axe';
 import { renderWithRouter } from '../../test/testUtils';
 import SubscriptionCard from '../SubscriptionCard';
 import {
-  CANCELED, ENDED, FREE_TRIAL_BADGE, SELF_SERVICE_TRIAL,
+  CANCELED, ENDED, FREE_TRIAL_BADGE, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL,
 } from '../data/constants';
 import { SubscriptionContext } from '../SubscriptionData';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
+import { useSubscription } from '../../billing/data/hooks';
+
+jest.mock('../../billing/data/hooks');
 
 const defaultSubscription = {
   uuid: 'ided',
@@ -127,8 +130,13 @@ const getMockStore = store => mockStore(store);
 const initialStoreState = {
   portalConfiguration: {
     enterpriseId: 'enterpriseUUID',
+    enterpriseName: 'Test Company',
   },
 };
+
+beforeEach(() => {
+  useSubscription.mockReturnValue({ data: undefined });
+});
 
 const SubscriptionCardWrapper = ({
   initialState = initialStoreState,
@@ -261,5 +269,45 @@ describe('SubscriptionCard', () => {
 
     // Ensure the active-trial billing warning is NOT shown
     expect(screen.queryByText('Your 14-day free trial will conclude')).not.toBeInTheDocument();
+  });
+
+  it('renders the composed title with academy name when billing subscription data is present', () => {
+    useSubscription.mockReturnValue({
+      data: {
+        licenseCount: 50,
+        currentPeriodEnd: 1783051200, // July 1, 2026 (UTC)
+        academyName: 'Tech & Digital Transformation',
+      },
+    });
+    renderWithRouter(
+      <SubscriptionCardWrapper
+        {...trialProps}
+        stripeInfoByUuid={{ [trialSubscription.uuid]: mockStripeInfoActive }}
+      />,
+    );
+    expect(screen.getByText(
+      'Test Company 50 SUBS July 2026 - Essentials Tech & Digital Transformation TRIAL',
+    )).toBeInTheDocument();
+  });
+
+  it('renders PAID in the composed title for a non-trial plan, independent of the shared billing status', () => {
+    useSubscription.mockReturnValue({
+      data: {
+        licenseCount: 50,
+        currentPeriodEnd: 1783051200, // July 1, 2026 (UTC)
+        academyName: 'Tech & Digital Transformation',
+        status: 'trialing',
+      },
+    });
+    renderWithRouter(
+      <SubscriptionCardWrapper
+        {...defaultProps}
+        subscription={{ ...defaultSubscription, planType: SELF_SERVICE_PAID }}
+        stripeInfoByUuid={{ [defaultSubscription.uuid]: mockStripeInfoActive }}
+      />,
+    );
+    expect(screen.getByText(
+      'Test Company 50 SUBS July 2026 - Essentials Tech & Digital Transformation PAID',
+    )).toBeInTheDocument();
   });
 });
