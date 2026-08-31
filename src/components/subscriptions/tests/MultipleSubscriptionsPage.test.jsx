@@ -18,6 +18,11 @@ import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import MultipleSubscriptionsPage from '../MultipleSubscriptionsPage';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
+jest.mock('../../billing/data/hooks', () => ({
+  ...jest.requireActual('../../billing/data/hooks'),
+  useSubscription: jest.fn().mockReturnValue({ data: undefined }),
+}));
+
 jest.mock('react-router-dom', () => {
   const mockNavigation = jest.fn();
 
