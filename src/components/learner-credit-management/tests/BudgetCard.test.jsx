@@ -70,12 +70,11 @@ const defaultEnterpriseSubsidiesContextValue = {
 };
 const BudgetCardWrapper = ({
   enterpriseSubsidiesContextValue = defaultEnterpriseSubsidiesContextValue,
-  mockStoreOverride = store,
   ...rest
 }) => (
   <QueryClientProvider client={queryClient()}>
     <MemoryRouter initialEntries={['/test-enterprise/admin/learner-credit']}>
-      <Provider store={mockStoreOverride}>
+      <Provider store={store}>
         <IntlProvider locale="en">
           <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
             <BudgetCard {...rest} />
