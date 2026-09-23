@@ -9,8 +9,10 @@ import {
   Badge,
   Stack,
 } from '@openedx/paragon';
+import { Add } from '@openedx/paragon/icons';
 
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { features } from '../../config';
 import { BUDGET_STATUSES, ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import {
   getBudgetStatus, getTranslatedBudgetStatus, getTranslatedBudgetTerm,
@@ -90,6 +92,9 @@ const BaseSubBudgetCard = ({
     },
   ) : undefined;
   const isRetiredOrExpired = isBudgetRetiredOrExpired(status);
+  // Once the top-up eligibility API is available, gate `canAddFunds` on the per-budget
+  // eligibility criteria returned by that API instead.
+  const canAddFunds = features.TOP_UP_LEARNER_CREDIT && !isRetiredOrExpired;
 
   const hasBudgetAggregatesSection = () => {
     const statusesWithoutAggregates = [
@@ -99,27 +104,42 @@ const BaseSubBudgetCard = ({
   };
 
   const renderActions = (budgetId) => (
-    <Button
-      data-testid="view-budget"
-      id={ALLOCATE_LEARNING_BUDGETS_TARGETS.VIEW_BUDGET}
-      as={Link}
-      to={`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}`}
-      variant={isRetiredOrExpired ? 'outline-primary' : 'primary'}
-    >
-      {isRetiredOrExpired ? (
-        <FormattedMessage
-          id="lcm.budgets.budget.card.view.budget.history"
-          defaultMessage="View budget history"
-          description="Button text to view budget history"
-        />
-      ) : (
-        <FormattedMessage
-          id="lcm.budgets.budget.card.view.budget"
-          defaultMessage="View budget"
-          description="Button text to view a budget"
-        />
+    <Stack direction="horizontal" gap={2}>
+      {canAddFunds && (
+        <Button
+          data-testid="add-funds"
+          variant="primary"
+          iconBefore={Add}
+        >
+          <FormattedMessage
+            id="lcm.budgets.budget.card.add.funds"
+            defaultMessage="Add Funds"
+            description="Button text to add funds to a budget"
+          />
+        </Button>
       )}
-    </Button>
+      <Button
+        data-testid="view-budget"
+        id={ALLOCATE_LEARNING_BUDGETS_TARGETS.VIEW_BUDGET}
+        as={Link}
+        to={`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}`}
+        variant={isRetiredOrExpired ? 'outline-primary' : 'primary'}
+      >
+        {isRetiredOrExpired ? (
+          <FormattedMessage
+            id="lcm.budgets.budget.card.view.budget.history"
+            defaultMessage="View budget history"
+            description="Button text to view budget history"
+          />
+        ) : (
+          <FormattedMessage
+            id="lcm.budgets.budget.card.view.budget"
+            defaultMessage="View budget"
+            description="Button text to view a budget"
+          />
+        )}
+      </Button>
+    </Stack>
   );
 
   const renderCardHeader = (budgetType, budgetId) => {
@@ -190,7 +210,6 @@ BaseSubBudgetCard.propTypes = {
   retiredAt: PropTypes.string,
 };
 
-BaseSubBudgetCard.defaultProps = {
-};
+BaseSubBudgetCard.defaultProps = {};
 
 export default connect(mapStateToProps)(BaseSubBudgetCard);
