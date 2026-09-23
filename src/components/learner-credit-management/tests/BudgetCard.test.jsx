@@ -89,9 +89,6 @@ const BudgetCardWrapper = ({
 describe('<BudgetCard />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
     features.TOP_UP_LEARNER_CREDIT = false;
   });
 
