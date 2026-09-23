@@ -14,6 +14,7 @@ import '@testing-library/jest-dom/extend-expect';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { axe } from 'jest-axe';
+import { features } from '../../../config';
 import BudgetCard from '../BudgetCard';
 import { formatPrice, useSubsidySummaryAnalyticsApi, useBudgetRedemptions } from '../data';
 import { BUDGET_STATUSES, BUDGET_TYPES } from '../../EnterpriseApp/data/constants';
@@ -69,11 +70,12 @@ const defaultEnterpriseSubsidiesContextValue = {
 };
 const BudgetCardWrapper = ({
   enterpriseSubsidiesContextValue = defaultEnterpriseSubsidiesContextValue,
+  mockStoreOverride = store,
   ...rest
 }) => (
   <QueryClientProvider client={queryClient()}>
     <MemoryRouter initialEntries={['/test-enterprise/admin/learner-credit']}>
-      <Provider store={store}>
+      <Provider store={mockStoreOverride}>
         <IntlProvider locale="en">
           <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
             <BudgetCard {...rest} />
@@ -87,6 +89,10 @@ const BudgetCardWrapper = ({
 describe('<BudgetCard />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    features.TOP_UP_LEARNER_CREDIT = false;
   });
 
   it('has no accessibility violations', async () => {
@@ -439,6 +445,9 @@ describe('<BudgetCard />', () => {
     expect(screen.getByText(formatPrice(mockBudgetAggregates.available))).toBeInTheDocument();
     expect(screen.getByText('Spent')).toBeInTheDocument();
     expect(screen.getByText(formatPrice(mockBudgetAggregates.spent))).toBeInTheDocument();
+
+    // Add Funds should not display by default (feature flag off)
+    expect(screen.queryByText('Add Funds')).not.toBeInTheDocument();
   });
 
   it('displays correctly for a current Subsidy (enterprise-subsidy)', () => {
@@ -623,6 +632,68 @@ describe('<BudgetCard />', () => {
     }
     expect(screen.getByText('Spent')).toBeInTheDocument();
     expect(screen.getByText(formatPrice(mockBudgetAggregates.spent))).toBeInTheDocument();
+  });
+
+  it('displays the Add Funds CTA for a current budget when the top-up feature is enabled', () => {
+    const mockBudgetAggregates = {
+      total: 5000,
+      spent: 200,
+      available: 4800,
+    };
+    const mockBudget = {
+      id: mockBudgetUuid,
+      name: mockBudgetDisplayName,
+      start: '2022-01-01',
+      end: '3023-01-01',
+      source: BUDGET_TYPES.policy,
+      aggregates: mockBudgetAggregates,
+      isAssignable: false,
+      enterpriseSlug,
+      enterpriseUUID,
+    };
+    useSubsidySummaryAnalyticsApi.mockReturnValue({
+      isLoading: false,
+      subsidySummary: undefined,
+    });
+    features.TOP_UP_LEARNER_CREDIT = true;
+
+    render(<BudgetCardWrapper
+      original={mockBudget}
+    />);
+
+    const addFundsCTA = screen.getByTestId('add-funds');
+    expect(addFundsCTA).toBeInTheDocument();
+    expect(addFundsCTA).toHaveTextContent('Add Funds');
+  });
+
+  it('does not display the Add Funds CTA for an expired budget even when the top-up feature is enabled', () => {
+    const mockBudgetAggregates = {
+      total: 5000,
+      spent: 200,
+      available: 4800,
+    };
+    const mockBudget = {
+      id: mockBudgetUuid,
+      name: mockBudgetDisplayName,
+      start: '2022-01-01',
+      end: '2023-01-01',
+      source: BUDGET_TYPES.policy,
+      aggregates: mockBudgetAggregates,
+      isAssignable: false,
+      enterpriseSlug,
+      enterpriseUUID,
+    };
+    useSubsidySummaryAnalyticsApi.mockReturnValue({
+      isLoading: false,
+      subsidySummary: undefined,
+    });
+    features.TOP_UP_LEARNER_CREDIT = true;
+
+    render(<BudgetCardWrapper
+      original={mockBudget}
+    />);
+
+    expect(screen.queryByText('Add Funds')).not.toBeInTheDocument();
   });
 
   it('displays correctly for a retired Policy (enterprise-access) (%s)', () => {
