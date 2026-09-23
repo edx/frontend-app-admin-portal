@@ -106,10 +106,13 @@ const BaseSubBudgetCard = ({
   const renderActions = (budgetId) => (
     <Stack direction="horizontal" gap={2}>
       {canAddFunds && (
+        // TODO: disabled until the top-up flow (destination/handler) is built. Remove `disabled`
+        // once this is wired up to the actual add-funds flow.
         <Button
           data-testid="add-funds"
           variant="primary"
           iconBefore={Add}
+          disabled
         >
           <FormattedMessage
             id="lcm.budgets.budget.card.add.funds"

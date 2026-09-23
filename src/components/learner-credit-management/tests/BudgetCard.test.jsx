@@ -664,6 +664,8 @@ describe('<BudgetCard />', () => {
     const addFundsCTA = screen.getByTestId('add-funds');
     expect(addFundsCTA).toBeInTheDocument();
     expect(addFundsCTA).toHaveTextContent('Add Funds');
+    // Disabled until the add-funds flow (handler) is built.
+    expect(addFundsCTA).toBeDisabled();
   });
 
   it('does not display the Add Funds CTA for an expired budget even when the top-up feature is enabled', () => {
