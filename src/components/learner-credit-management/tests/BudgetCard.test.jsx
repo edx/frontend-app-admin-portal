@@ -693,11 +693,12 @@ describe('<BudgetCard />', () => {
     });
 
     it.each([
-      { status: 'current', dates: currentDates },
-      { status: 'expiring', dates: expiringDates },
-    ])('displays a disabled Add funds CTA for a $status Policy (enterprise-access)', ({ dates }) => {
+      { status: BUDGET_STATUSES.active, dates: currentDates },
+      { status: BUDGET_STATUSES.expiring, dates: expiringDates },
+    ])('displays a disabled Add funds CTA for a $status Policy (enterprise-access)', ({ status, dates }) => {
       renderBudgetCard({ source: BUDGET_TYPES.policy, ...dates });
 
+      expect(screen.getByText(status)).toBeInTheDocument();
       const addFundsCTA = screen.getByRole('button', { name: 'Add funds' });
       // Disabled until the add-funds flow (handler) is built.
       expect(addFundsCTA).toBeDisabled();
@@ -705,18 +706,25 @@ describe('<BudgetCard />', () => {
     });
 
     it.each([
-      { status: 'expired', source: BUDGET_TYPES.policy, budget: expiredDates },
+      { status: BUDGET_STATUSES.expired, source: BUDGET_TYPES.policy, budget: expiredDates },
       {
-        status: 'retired',
+        status: BUDGET_STATUSES.retired,
         source: BUDGET_TYPES.policy,
         budget: { ...currentDates, isRetired: true, retiredAt: '2022-05-01' },
       },
-      { status: 'scheduled', source: BUDGET_TYPES.policy, budget: scheduledDates },
-      { status: 'current', source: BUDGET_TYPES.ecommerce, budget: currentDates },
-      { status: 'current', source: BUDGET_TYPES.subsidy, budget: currentDates },
-    ])('does not display the Add funds CTA for a $status $source budget', ({ source, budget }) => {
+      { status: BUDGET_STATUSES.scheduled, source: BUDGET_TYPES.policy, budget: scheduledDates },
+      { status: BUDGET_STATUSES.active, source: BUDGET_TYPES.ecommerce, budget: currentDates },
+      { status: BUDGET_STATUSES.active, source: BUDGET_TYPES.subsidy, budget: currentDates },
+    ])('does not display the Add funds CTA for a $status $source budget', ({ status, source, budget }) => {
       renderBudgetCard({ source, ...budget });
 
+      // Ensure the card rendered with the intended status, and that only the CTA was suppressed.
+      expect(screen.getByText(mockBudgetDisplayName)).toBeInTheDocument();
+      expect(screen.getByText(status)).toBeInTheDocument();
+      if (status !== BUDGET_STATUSES.scheduled) {
+        // Scheduled budgets render no header actions at all.
+        expect(screen.getByText(/View budget/)).toBeInTheDocument();
+      }
       expect(screen.queryByRole('button', { name: 'Add funds' })).not.toBeInTheDocument();
     });
   });
