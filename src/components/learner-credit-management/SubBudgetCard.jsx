@@ -9,9 +9,11 @@ import {
   Badge,
   Stack,
 } from '@openedx/paragon';
+import { Add } from '@openedx/paragon/icons';
 
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import { BUDGET_STATUSES, ROUTE_NAMES } from '../EnterpriseApp/data/constants';
+import { features } from '../../config';
+import { BUDGET_STATUSES, BUDGET_TYPES, ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import {
   getBudgetStatus, getTranslatedBudgetStatus, getTranslatedBudgetTerm,
 } from './data';
@@ -65,6 +67,7 @@ const BaseSubBudgetCard = ({
   isBnREnabled,
   isRetired,
   retiredAt,
+  source,
 }) => {
   const { isFetching: isFetchingBudgets } = useEnterpriseBudgets({
     enablePortalLearnerCreditManagementScreen,
@@ -90,6 +93,13 @@ const BaseSubBudgetCard = ({
     },
   ) : undefined;
   const isRetiredOrExpired = isBudgetRetiredOrExpired(status);
+  // Once the top-up eligibility API is available, gate `canAddFunds` on the per-budget
+  // eligibility criteria returned by that API instead.
+  const canAddFunds = (
+    features.TOP_UP_LEARNER_CREDIT
+    && source === BUDGET_TYPES.policy
+    && !isRetiredOrExpired
+  );
 
   const hasBudgetAggregatesSection = () => {
     const statusesWithoutAggregates = [
@@ -99,27 +109,45 @@ const BaseSubBudgetCard = ({
   };
 
   const renderActions = (budgetId) => (
-    <Button
-      data-testid="view-budget"
-      id={ALLOCATE_LEARNING_BUDGETS_TARGETS.VIEW_BUDGET}
-      as={Link}
-      to={`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}`}
-      variant={isRetiredOrExpired ? 'outline-primary' : 'primary'}
-    >
-      {isRetiredOrExpired ? (
-        <FormattedMessage
-          id="lcm.budgets.budget.card.view.budget.history"
-          defaultMessage="View budget history"
-          description="Button text to view budget history"
-        />
-      ) : (
-        <FormattedMessage
-          id="lcm.budgets.budget.card.view.budget"
-          defaultMessage="View budget"
-          description="Button text to view a budget"
-        />
+    <Stack direction="horizontal" gap={2}>
+      {canAddFunds && (
+        // TODO: disabled until the top-up flow (destination/handler) is built. Remove `disabled`
+        // once this is wired up to the actual add-funds flow.
+        <Button
+          data-testid="add-funds"
+          variant="outline-primary"
+          iconBefore={Add}
+          disabled
+        >
+          <FormattedMessage
+            id="lcm.budgets.budget.card.add.funds"
+            defaultMessage="Add funds"
+            description="Button text to add funds to a budget"
+          />
+        </Button>
       )}
-    </Button>
+      <Button
+        data-testid="view-budget"
+        id={ALLOCATE_LEARNING_BUDGETS_TARGETS.VIEW_BUDGET}
+        as={Link}
+        to={`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}`}
+        variant={isRetiredOrExpired ? 'outline-primary' : 'primary'}
+      >
+        {isRetiredOrExpired ? (
+          <FormattedMessage
+            id="lcm.budgets.budget.card.view.budget.history"
+            defaultMessage="View budget history"
+            description="Button text to view budget history"
+          />
+        ) : (
+          <FormattedMessage
+            id="lcm.budgets.budget.card.view.budget"
+            defaultMessage="View budget"
+            description="Button text to view a budget"
+          />
+        )}
+      </Button>
+    </Stack>
   );
 
   const renderCardHeader = (budgetType, budgetId) => {
@@ -188,6 +216,7 @@ BaseSubBudgetCard.propTypes = {
   isBnREnabled: PropTypes.bool,
   isRetired: PropTypes.bool,
   retiredAt: PropTypes.string,
+  source: PropTypes.oneOf(Object.values(BUDGET_TYPES)),
 };
 
 BaseSubBudgetCard.defaultProps = {
