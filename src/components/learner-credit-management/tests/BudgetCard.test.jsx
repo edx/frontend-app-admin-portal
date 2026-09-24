@@ -442,8 +442,8 @@ describe('<BudgetCard />', () => {
     expect(screen.getByText('Spent')).toBeInTheDocument();
     expect(screen.getByText(formatPrice(mockBudgetAggregates.spent))).toBeInTheDocument();
 
-    // Add Funds should not display by default (feature flag off)
-    expect(screen.queryByText('Add Funds')).not.toBeInTheDocument();
+    // Add funds should not display by default (feature flag off)
+    expect(screen.queryByRole('button', { name: 'Add funds' })).not.toBeInTheDocument();
   });
 
   it('displays correctly for a current Subsidy (enterprise-subsidy)', () => {
@@ -630,68 +630,95 @@ describe('<BudgetCard />', () => {
     expect(screen.getByText(formatPrice(mockBudgetAggregates.spent))).toBeInTheDocument();
   });
 
-  it('displays the Add Funds CTA for a current budget when the top-up feature is enabled', () => {
+  describe('Add funds CTA (top-up feature enabled)', () => {
     const mockBudgetAggregates = {
       total: 5000,
       spent: 200,
       available: 4800,
     };
-    const mockBudget = {
-      id: mockBudgetUuid,
-      name: mockBudgetDisplayName,
-      start: '2022-01-01',
-      end: '3023-01-01',
-      source: BUDGET_TYPES.policy,
-      aggregates: mockBudgetAggregates,
-      isAssignable: false,
-      enterpriseSlug,
-      enterpriseUUID,
+    const currentDates = { start: '2022-01-01', end: '3023-01-01' };
+    const expiringDates = { start: '2022-01-01', end: dayjs().add(30, 'day').format('YYYY-MM-DD') };
+    const expiredDates = { start: '2022-01-01', end: '2023-01-01' };
+    const scheduledDates = { start: '3022-01-01', end: '3023-01-01' };
+
+    const renderBudgetCard = ({
+      source,
+      start,
+      end,
+      isRetired = false,
+      retiredAt = null,
+    }) => {
+      useSubsidySummaryAnalyticsApi.mockReturnValue({
+        isLoading: false,
+        subsidySummary: source === BUDGET_TYPES.policy ? undefined : {
+          totalFunds: mockBudgetAggregates.total,
+          redeemedFunds: mockBudgetAggregates.spent,
+          remainingFunds: mockBudgetAggregates.available,
+          percentUtilized: mockBudgetAggregates.spent / mockBudgetAggregates.total,
+          offerType: 'Site',
+          offerId: mockEnterpriseOfferId,
+          budgetsSummary: source === BUDGET_TYPES.subsidy ? [
+            {
+              id: 'test-subsidy-uuid',
+              start,
+              end,
+              remainingFunds: mockBudgetAggregates.available,
+              redeemedFunds: mockBudgetAggregates.spent,
+              enterpriseSlug,
+              subsidyAccessPolicyDisplayName: mockBudgetDisplayName,
+              subsidyAccessPolicyUuid: mockBudgetUuid,
+            },
+          ] : [],
+        },
+      });
+      render(<BudgetCardWrapper
+        original={{
+          id: source === BUDGET_TYPES.policy ? mockBudgetUuid : mockEnterpriseOfferId,
+          name: mockBudgetDisplayName,
+          start,
+          end,
+          source,
+          aggregates: mockBudgetAggregates,
+          isAssignable: false,
+          isRetired,
+          retiredAt,
+          enterpriseSlug,
+          enterpriseUUID,
+        }}
+      />);
     };
-    useSubsidySummaryAnalyticsApi.mockReturnValue({
-      isLoading: false,
-      subsidySummary: undefined,
+
+    beforeEach(() => {
+      features.TOP_UP_LEARNER_CREDIT = true;
     });
-    features.TOP_UP_LEARNER_CREDIT = true;
 
-    render(<BudgetCardWrapper
-      original={mockBudget}
-    />);
+    it.each([
+      { status: 'current', dates: currentDates },
+      { status: 'expiring', dates: expiringDates },
+    ])('displays a disabled Add funds CTA for a $status Policy (enterprise-access)', ({ dates }) => {
+      renderBudgetCard({ source: BUDGET_TYPES.policy, ...dates });
 
-    const addFundsCTA = screen.getByTestId('add-funds');
-    expect(addFundsCTA).toBeInTheDocument();
-    expect(addFundsCTA).toHaveTextContent('Add Funds');
-    // Disabled until the add-funds flow (handler) is built.
-    expect(addFundsCTA).toBeDisabled();
-  });
-
-  it('does not display the Add Funds CTA for an expired budget even when the top-up feature is enabled', () => {
-    const mockBudgetAggregates = {
-      total: 5000,
-      spent: 200,
-      available: 4800,
-    };
-    const mockBudget = {
-      id: mockBudgetUuid,
-      name: mockBudgetDisplayName,
-      start: '2022-01-01',
-      end: '2023-01-01',
-      source: BUDGET_TYPES.policy,
-      aggregates: mockBudgetAggregates,
-      isAssignable: false,
-      enterpriseSlug,
-      enterpriseUUID,
-    };
-    useSubsidySummaryAnalyticsApi.mockReturnValue({
-      isLoading: false,
-      subsidySummary: undefined,
+      const addFundsCTA = screen.getByRole('button', { name: 'Add funds' });
+      // Disabled until the add-funds flow (handler) is built.
+      expect(addFundsCTA).toBeDisabled();
+      expect(screen.getByText('View budget')).toBeInTheDocument();
     });
-    features.TOP_UP_LEARNER_CREDIT = true;
 
-    render(<BudgetCardWrapper
-      original={mockBudget}
-    />);
+    it.each([
+      { status: 'expired', source: BUDGET_TYPES.policy, budget: expiredDates },
+      {
+        status: 'retired',
+        source: BUDGET_TYPES.policy,
+        budget: { ...currentDates, isRetired: true, retiredAt: '2022-05-01' },
+      },
+      { status: 'scheduled', source: BUDGET_TYPES.policy, budget: scheduledDates },
+      { status: 'current', source: BUDGET_TYPES.ecommerce, budget: currentDates },
+      { status: 'current', source: BUDGET_TYPES.subsidy, budget: currentDates },
+    ])('does not display the Add funds CTA for a $status $source budget', ({ source, budget }) => {
+      renderBudgetCard({ source, ...budget });
 
-    expect(screen.queryByText('Add Funds')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Add funds' })).not.toBeInTheDocument();
+    });
   });
 
   it('displays correctly for a retired Policy (enterprise-access) (%s)', () => {
