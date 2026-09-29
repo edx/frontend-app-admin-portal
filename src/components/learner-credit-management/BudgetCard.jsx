@@ -51,6 +51,7 @@ const BudgetCard = ({ original }) => {
         pending={aggregates.pending}
         displayName={name}
         enterpriseSlug={enterpriseSlug}
+        source={source}
         isAssignable={isAssignable}
         isBnREnabled={isBnREnabled}
         isRetired={isRetired}
@@ -71,6 +72,7 @@ const BudgetCard = ({ original }) => {
         spent={subsidySummaryAnalyticsApi?.redeemedFunds}
         displayName={name}
         enterpriseSlug={enterpriseSlug}
+        source={source}
       />
     );
   }
@@ -93,6 +95,7 @@ const BudgetCard = ({ original }) => {
       spent={subBudget.redeemedFunds}
       displayName={subBudget.subsidyAccessPolicyDisplayName}
       enterpriseSlug={enterpriseSlug}
+      source={source}
     />
   ));
 };
