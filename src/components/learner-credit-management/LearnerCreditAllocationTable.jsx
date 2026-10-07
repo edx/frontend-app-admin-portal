@@ -20,6 +20,7 @@ const LearnerCreditAllocationTable = ({
   isLoading,
   tableData,
   fetchTableData,
+  tableActions,
 }) => {
   const intl = useIntl();
   return (
@@ -33,6 +34,7 @@ const LearnerCreditAllocationTable = ({
       isLoading={isLoading}
       defaultColumnValues={{ Filter: TableTextFilter }}
       FilterStatusComponent={FilterStatus}
+      tableActions={tableActions}
       columns={[
         {
           Header:
@@ -115,6 +117,11 @@ LearnerCreditAllocationTable.propTypes = {
     pageCount: PropTypes.number.isRequired,
   }).isRequired,
   fetchTableData: PropTypes.func.isRequired,
+  tableActions: PropTypes.arrayOf(PropTypes.node),
+};
+
+LearnerCreditAllocationTable.defaultProps = {
+  tableActions: [],
 };
 
 export default LearnerCreditAllocationTable;

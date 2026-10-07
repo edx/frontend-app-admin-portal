@@ -6,6 +6,7 @@ import { getConfig } from '@edx/frontend-platform/config';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import LearnerCreditAllocationTable from './LearnerCreditAllocationTable';
+import SpentTransactionsCsvDownloadTableAction from './SpentTransactionsCsvDownloadTableAction';
 import {
   getBudgetStatus, useBudgetId, useBudgetRedemptions, useEnterpriseOffer, useSubsidyAccessPolicy,
 } from './data';
@@ -119,6 +120,7 @@ const BudgetDetailRedemptions = ({ enterpriseFeatures, enterpriseUUID }) => {
         isLoading={isLoading}
         tableData={budgetRedemptions}
         fetchTableData={fetchBudgetRedemptions}
+        tableActions={subsidyAccessPolicyId ? [<SpentTransactionsCsvDownloadTableAction key="spent-csv-download" />] : []}
       />
     </section>
   );
