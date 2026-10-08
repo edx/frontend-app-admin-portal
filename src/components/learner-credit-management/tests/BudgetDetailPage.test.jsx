@@ -2405,6 +2405,64 @@ describe('<BudgetDetailPage />', () => {
     expect(pendingSection.getByRole('table')).toBeInTheDocument();
   });
 
+  it.each([
+    {
+      budgetType: 'subsidy access policy',
+      budgetId: mockSubsidyAccessPolicyUUID,
+      subsidyAccessPolicy: mockAssignableSubsidyAccessPolicy,
+      enterpriseOfferMetadata: undefined,
+      isDownloadVisible: true,
+    },
+    {
+      budgetType: 'enterprise offer',
+      budgetId: mockEnterpriseOfferId,
+      subsidyAccessPolicy: undefined,
+      enterpriseOfferMetadata: mockEnterpriseOfferMetadata,
+      isDownloadVisible: false,
+    },
+  ])('only shows the spent table download for subsidy access policy budgets ($budgetType)', async ({
+    budgetId,
+    subsidyAccessPolicy,
+    enterpriseOfferMetadata,
+    isDownloadVisible,
+  }) => {
+    useParams.mockReturnValue({
+      enterpriseSlug: 'test-enterprise-slug',
+      enterpriseAppPage: 'test-enterprise-page',
+      budgetId,
+      activeTabKey: 'activity',
+    });
+    useSubsidyAccessPolicy.mockReturnValue({
+      isInitialLoading: false,
+      data: subsidyAccessPolicy,
+    });
+    useEnterpriseOffer.mockReturnValue({
+      isLoading: false,
+      data: enterpriseOfferMetadata,
+    });
+    useSubsidySummaryAnalyticsApi.mockReturnValue({
+      isLoading: false,
+      subsidySummary: enterpriseOfferMetadata ? mockSubsidySummary : undefined,
+    });
+    useBudgetDetailActivityOverview.mockReturnValue({
+      isLoading: false,
+      data: mockBudgetDetailActivityOverviewWithSpend,
+    });
+    useEnterpriseRemovedGroupMembers.mockReturnValue({
+      isRemovedMembersLoading: false,
+      removedGroupMembersCount: 0,
+    });
+    renderWithRouter(<BudgetDetailPageWrapper />);
+
+    const spentSection = await screen.findByTestId('spent-section');
+    const downloadButton = within(spentSection).queryByRole('button', { name: 'Download' });
+    if (isDownloadVisible) {
+      expect(downloadButton).toBeInTheDocument();
+    } else {
+      expect(downloadButton).not.toBeInTheDocument();
+    }
+  });
+
   it('renders budget detail activity tab contents with different states', async () => {
     // Test when there are no approved requests but there are assignments
     useParams.mockReturnValue({

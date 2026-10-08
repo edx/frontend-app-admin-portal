@@ -939,3 +939,19 @@ export const calculateTotalToCancelApprovedRequests = ({
   }
   return requestUuids.length;
 };
+
+/**
+ * Builds the file name for a CSV exported from a budget, e.g. "MyBudget-spent-2026-1-15.csv".
+ * @param {string} displayName The budget's display name; whitespace is removed.
+ * @param {string} [suffix] Optional label appended after the budget name.
+ * @returns {string} The CSV file name, dated with today's UTC date.
+ */
+export const getBudgetCsvFileName = (displayName, suffix) => {
+  const titleNoWhitespace = (displayName || 'budget').replace(/\s+/g, '');
+  const currentDate = new Date();
+  const year = currentDate.getUTCFullYear();
+  const month = currentDate.getUTCMonth() + 1;
+  const day = currentDate.getUTCDate();
+  const prefix = suffix ? `${titleNoWhitespace}-${suffix}` : titleNoWhitespace;
+  return `${prefix}-${year}-${month}-${day}.csv`;
+};

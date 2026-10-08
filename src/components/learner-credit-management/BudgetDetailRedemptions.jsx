@@ -120,7 +120,9 @@ const BudgetDetailRedemptions = ({ enterpriseFeatures, enterpriseUUID }) => {
         isLoading={isLoading}
         tableData={budgetRedemptions}
         fetchTableData={fetchBudgetRedemptions}
-        tableActions={subsidyAccessPolicyId ? [<SpentTransactionsCsvDownloadTableAction key="spent-csv-download" />] : []}
+        tableActions={[
+          <SpentTransactionsCsvDownloadTableAction key="spent-csv-download" enterpriseUUID={enterpriseUUID} />,
+        ]}
       />
     </section>
   );

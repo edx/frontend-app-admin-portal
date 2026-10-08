@@ -7,7 +7,7 @@ import { snakeCase } from 'lodash-es';
 import { saveAs } from 'file-saver';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
-import { useBudgetId, useSubsidyAccessPolicy } from '../data';
+import { getBudgetCsvFileName, useBudgetId, useSubsidyAccessPolicy } from '../data';
 
 const GroupMembersCsvDownloadTableAction = ({
   isEntireTableSelected,
@@ -21,15 +21,6 @@ const GroupMembersCsvDownloadTableAction = ({
   const { subsidyAccessPolicyId } = useBudgetId();
   const { data: subsidyAccessPolicy } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
   const groupId = subsidyAccessPolicy.groupAssociations[0];
-
-  const getCsvFileName = () => {
-    const titleNoWhitespace = subsidyAccessPolicy.displayName.replace(/\s+/g, '');
-    const currentDate = new Date();
-    const year = currentDate.getUTCFullYear();
-    const month = currentDate.getUTCMonth() + 1;
-    const day = currentDate.getUTCDate();
-    return `${titleNoWhitespace}-${year}-${month}-${day}.csv`;
-  };
 
   const csvDownloadOnClick = () => {
     const options = {
@@ -64,7 +55,7 @@ const GroupMembersCsvDownloadTableAction = ({
       const blob = new Blob([response.data], {
         type: 'text/csv',
       });
-      saveAs(blob, getCsvFileName());
+      saveAs(blob, getBudgetCsvFileName(subsidyAccessPolicy.displayName));
     }).catch(err => {
       logError(err);
       setAlertModalOpen(true);

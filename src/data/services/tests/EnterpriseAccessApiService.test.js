@@ -197,22 +197,18 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
-  test('exportSubsidyTransactions forwards optional filters', () => {
+  test('exportSubsidyTransactions forwards the optional budget and search filters', () => {
     EnterpriseAccessApiService.exportSubsidyTransactions({
       enterpriseCustomerUuid: mockEnterpriseUUID,
       subsidyUuid: 'test-subsidy-uuid',
       subsidyAccessPolicyUuid: mockSubsidyAccessPolicyUUID,
       search: 'learner@example.com',
-      startDate: '2026-01-01',
-      endDate: '2026-06-30',
     });
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: mockEnterpriseUUID,
       subsidy_uuid: 'test-subsidy-uuid',
       subsidy_access_policy_uuid: mockSubsidyAccessPolicyUUID,
       search: 'learner@example.com',
-      start_date: '2026-01-01',
-      end_date: '2026-06-30',
     });
     expect(axios.get).toBeCalledWith(
       `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/transactions/export/?${queryParams.toString()}`,

@@ -288,8 +288,6 @@ class EnterpriseAccessApiService {
    * @param {String} args.subsidyUuid The subsidy whose spent transactions should be exported.
    * @param {String} [args.subsidyAccessPolicyUuid] Only export spend from this policy (budget).
    * @param {String} [args.search] Free-text search filter (e.g., learner email or course title).
-   * @param {String} [args.startDate] Only include transactions created on/after this date (YYYY-MM-DD).
-   * @param {String} [args.endDate] Only include transactions created on/before this date (YYYY-MM-DD).
    * @returns {Promise<AxiosResponse<Blob>>} The CSV report as a Blob.
    */
   static exportSubsidyTransactions({
@@ -297,15 +295,11 @@ class EnterpriseAccessApiService {
     subsidyUuid,
     subsidyAccessPolicyUuid,
     search,
-    startDate,
-    endDate,
   }: {
     enterpriseCustomerUuid: string;
     subsidyUuid: string;
     subsidyAccessPolicyUuid?: string;
     search?: string;
-    startDate?: string;
-    endDate?: string;
   }): Promise<AxiosResponse<Blob>> {
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerUuid,
@@ -316,12 +310,6 @@ class EnterpriseAccessApiService {
     }
     if (search) {
       queryParams.append('search', search);
-    }
-    if (startDate) {
-      queryParams.append('start_date', startDate);
-    }
-    if (endDate) {
-      queryParams.append('end_date', endDate);
     }
     const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/transactions/export/?${queryParams.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url, { responseType: 'blob' });

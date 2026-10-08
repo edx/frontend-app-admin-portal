@@ -4,6 +4,7 @@ import {
   calculateTotalToCancelApprovedRequests,
   calculateTotalToRemindApprovedRequests,
   getAssignableCourseRuns,
+  getBudgetCsvFileName,
   getBudgetStatus,
   getLearnerRequestStateCountsByState,
   getNormalizedStartDate,
@@ -976,5 +977,23 @@ describe('calculateTotalToCancelApprovedRequests', () => {
     });
 
     expect(result).toBe(0);
+  });
+});
+
+describe('getBudgetCsvFileName', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-01-05T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it.each([
+    { displayName: 'My Budget', suffix: 'spent', expected: 'MyBudget-spent-2026-1-5.csv' },
+    { displayName: 'My Budget', suffix: undefined, expected: 'MyBudget-2026-1-5.csv' },
+    { displayName: undefined, suffix: 'spent', expected: 'budget-spent-2026-1-5.csv' },
+  ])('returns $expected', ({ displayName, suffix, expected }) => {
+    expect(getBudgetCsvFileName(displayName, suffix)).toEqual(expected);
   });
 });

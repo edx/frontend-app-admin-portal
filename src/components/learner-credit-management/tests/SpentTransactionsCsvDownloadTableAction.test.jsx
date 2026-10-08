@@ -2,9 +2,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
-import { Provider } from 'react-redux';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import configureMockStore from 'redux-mock-store';
 import { saveAs } from 'file-saver';
 
 import SpentTransactionsCsvDownloadTableAction from '../SpentTransactionsCsvDownloadTableAction';
@@ -26,11 +24,6 @@ const mockEnterpriseUUID = 'test-enterprise-uuid';
 const mockPolicyUUID = 'test-policy-uuid';
 const mockSubsidyUUID = 'test-subsidy-uuid';
 
-const mockStore = configureMockStore();
-const store = mockStore({
-  portalConfiguration: { enterpriseId: mockEnterpriseUUID },
-});
-
 const defaultTableInstance = {
   itemCount: 2,
   state: { filters: [] },
@@ -38,9 +31,7 @@ const defaultTableInstance = {
 
 const renderAction = (tableInstance = defaultTableInstance) => render(
   <IntlProvider locale="en">
-    <Provider store={store}>
-      <SpentTransactionsCsvDownloadTableAction tableInstance={tableInstance} />
-    </Provider>
+    <SpentTransactionsCsvDownloadTableAction enterpriseUUID={mockEnterpriseUUID} tableInstance={tableInstance} />
   </IntlProvider>,
 );
 
@@ -93,8 +84,27 @@ describe('<SpentTransactionsCsvDownloadTableAction />', () => {
     expect(saveAs).not.toHaveBeenCalled();
   });
 
-  it('is disabled when there are no spent transactions', () => {
-    renderAction({ itemCount: 0, state: { filters: [] } });
+  it('is disabled while the download is pending', async () => {
+    let resolveExport;
+    EnterpriseAccessApiService.exportSubsidyTransactions.mockReturnValue(
+      new Promise((resolve) => { resolveExport = resolve; }),
+    );
+    renderAction();
+
+    userEvent.click(screen.getByRole('button', { name: 'Download' }));
+
+    // StatefulButton marks its disabled states with aria-disabled rather than the disabled attribute.
+    expect(await screen.findByRole('button', { name: 'Downloading' })).toHaveAttribute('aria-disabled', 'true');
+    resolveExport({ data: 'Learner Email\n' });
+    expect(await screen.findByRole('button', { name: 'Download' })).toHaveAttribute('aria-disabled', 'false');
+    expect(saveAs).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { description: 'there are no spent transactions', filters: [] },
+    { description: 'the search filter matches no transactions', filters: [{ id: 'enrollmentDetails', value: 'nobody' }] },
+  ])('is disabled when $description', ({ filters }) => {
+    renderAction({ itemCount: 0, state: { filters } });
     expect(screen.getByRole('button', { name: 'Download' })).toBeDisabled();
   });
 

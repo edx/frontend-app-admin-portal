@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 import {
   ActionRow, AlertModal, Button, StatefulButton,
 } from '@openedx/paragon';
@@ -9,16 +8,7 @@ import { logError } from '@edx/frontend-platform/logging';
 import { saveAs } from 'file-saver';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import EnterpriseAccessApiService from '../../data/services/EnterpriseAccessApiService';
-import { useBudgetId, useSubsidyAccessPolicy } from './data';
-
-export const getSpentCsvFileName = (displayName) => {
-  const titleNoWhitespace = (displayName || 'budget').replace(/\s+/g, '');
-  const currentDate = new Date();
-  const year = currentDate.getUTCFullYear();
-  const month = currentDate.getUTCMonth() + 1;
-  const day = currentDate.getUTCDate();
-  return `${titleNoWhitespace}-spent-${year}-${month}-${day}.csv`;
-};
+import { getBudgetCsvFileName, useBudgetId, useSubsidyAccessPolicy } from './data';
 
 const SpentTransactionsCsvDownloadTableAction = ({
   enterpriseUUID,
@@ -43,11 +33,11 @@ const SpentTransactionsCsvDownloadTableAction = ({
         search,
       });
       const blob = new Blob([response.data], { type: 'text/csv' });
-      saveAs(blob, getSpentCsvFileName(subsidyAccessPolicy.displayName));
+      saveAs(blob, getBudgetCsvFileName(subsidyAccessPolicy.displayName, 'spent'));
       setDownloadState('default');
     } catch (err) {
       logError(err);
-      setIsRateLimited(err?.customAttributes?.httpErrorStatus === 429 || err?.response?.status === 429);
+      setIsRateLimited(err?.customAttributes?.httpErrorStatus === 429);
       setIsErrorModalOpen(true);
       setDownloadState('default');
     }
@@ -141,8 +131,4 @@ SpentTransactionsCsvDownloadTableAction.defaultProps = {
   },
 };
 
-const mapStateToProps = state => ({
-  enterpriseUUID: state.portalConfiguration.enterpriseId,
-});
-
-export default connect(mapStateToProps)(SpentTransactionsCsvDownloadTableAction);
+export default SpentTransactionsCsvDownloadTableAction;
