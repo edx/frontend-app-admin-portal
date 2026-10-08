@@ -2456,10 +2456,15 @@ describe('<BudgetDetailPage />', () => {
 
     const spentSection = await screen.findByTestId('spent-section');
     const downloadButton = within(spentSection).queryByRole('button', { name: 'Download' });
+    // Paragon renders the table actions container (and, on small screens, an "Actions" overflow menu)
+    // whenever any action is passed, so the action must not be passed at all for enterprise offers.
+    const tableActions = within(spentSection).queryByTestId('table-actions');
     if (isDownloadVisible) {
       expect(downloadButton).toBeInTheDocument();
+      expect(tableActions).toBeInTheDocument();
     } else {
       expect(downloadButton).not.toBeInTheDocument();
+      expect(tableActions).not.toBeInTheDocument();
     }
   });
 

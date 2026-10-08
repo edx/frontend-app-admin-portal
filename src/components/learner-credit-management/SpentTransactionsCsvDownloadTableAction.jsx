@@ -1,51 +1,61 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  ActionRow, AlertModal, Button, StatefulButton,
+  ActionRow, AlertModal, Button, Spinner, StatefulButton,
 } from '@openedx/paragon';
 import { Download } from '@openedx/paragon/icons';
 import { logError } from '@edx/frontend-platform/logging';
 import { saveAs } from 'file-saver';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 import EnterpriseAccessApiService from '../../data/services/EnterpriseAccessApiService';
-import { getBudgetCsvFileName, useBudgetId, useSubsidyAccessPolicy } from './data';
+import EVENT_NAMES from '../../eventTracking';
+import { getBudgetCsvFileName, getSpentTableSearchQuery } from './data';
 
 const SpentTransactionsCsvDownloadTableAction = ({
   enterpriseUUID,
-  tableInstance,
+  subsidyAccessPolicy,
+  tableInstance = { itemCount: 0, state: {} },
 }) => {
   const intl = useIntl();
   const [downloadState, setDownloadState] = useState('default');
   const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
   const [isRateLimited, setIsRateLimited] = useState(false);
-  const { subsidyAccessPolicyId } = useBudgetId();
-  const { data: subsidyAccessPolicy } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
 
   const csvDownloadOnClick = async () => {
     // Apply the table's search filter so the export matches what the admin is looking at.
-    const search = tableInstance.state?.filters?.find(filter => filter.id === 'enrollmentDetails')?.value;
+    const search = getSpentTableSearchQuery(tableInstance.state?.filters);
+    // Only track whether a search was applied; the search text may contain learner emails.
+    const trackDownload = (properties) => sendEnterpriseTrackEvent(
+      enterpriseUUID,
+      EVENT_NAMES.LEARNER_CREDIT_MANAGEMENT.BUDGET_DETAILS_SPENT_DATATABLE_CSV_DOWNLOAD,
+      {
+        subsidyAccessPolicyId: subsidyAccessPolicy.uuid,
+        isSearchApplied: !!search,
+        ...properties,
+      },
+    );
     setDownloadState('pending');
     try {
       const response = await EnterpriseAccessApiService.exportSubsidyTransactions({
         enterpriseCustomerUuid: enterpriseUUID,
         subsidyUuid: subsidyAccessPolicy.subsidyUuid,
-        subsidyAccessPolicyUuid: subsidyAccessPolicyId,
+        subsidyAccessPolicyUuid: subsidyAccessPolicy.uuid,
         search,
       });
-      const blob = new Blob([response.data], { type: 'text/csv' });
-      saveAs(blob, getBudgetCsvFileName(subsidyAccessPolicy.displayName, 'spent'));
+      // response.data is already a Blob because the request uses responseType: 'blob'.
+      saveAs(response.data, getBudgetCsvFileName(subsidyAccessPolicy.displayName, 'spent'));
+      trackDownload({ status: 'success' });
       setDownloadState('default');
     } catch (err) {
       logError(err);
-      setIsRateLimited(err?.customAttributes?.httpErrorStatus === 429);
+      const httpErrorStatus = err?.customAttributes?.httpErrorStatus;
+      trackDownload({ status: 'error', httpErrorStatus });
+      setIsRateLimited(httpErrorStatus === 429);
       setIsErrorModalOpen(true);
       setDownloadState('default');
     }
   };
-
-  if (!subsidyAccessPolicy?.subsidyUuid) {
-    return null;
-  }
 
   return (
     <>
@@ -93,7 +103,10 @@ const SpentTransactionsCsvDownloadTableAction = ({
         className="border rounded-0 border-dark-500"
         disabled={tableInstance.itemCount === 0}
         disabledStates={['pending']}
-        icons={{ default: <Download />, pending: <Download /> }}
+        icons={{
+          default: <Download />,
+          pending: <Spinner animation="border" variant="primary" size="sm" />,
+        }}
         labels={{
           default: intl.formatMessage({
             id: 'lcm.budget.detail.page.spent.table.download',
@@ -113,6 +126,11 @@ const SpentTransactionsCsvDownloadTableAction = ({
 
 SpentTransactionsCsvDownloadTableAction.propTypes = {
   enterpriseUUID: PropTypes.string.isRequired,
+  subsidyAccessPolicy: PropTypes.shape({
+    uuid: PropTypes.string.isRequired,
+    subsidyUuid: PropTypes.string.isRequired,
+    displayName: PropTypes.string,
+  }).isRequired,
   tableInstance: PropTypes.shape({
     itemCount: PropTypes.number,
     state: PropTypes.shape({
@@ -122,13 +140,6 @@ SpentTransactionsCsvDownloadTableAction.propTypes = {
       })),
     }),
   }),
-};
-
-SpentTransactionsCsvDownloadTableAction.defaultProps = {
-  tableInstance: {
-    itemCount: 0,
-    state: {},
-  },
 };
 
 export default SpentTransactionsCsvDownloadTableAction;

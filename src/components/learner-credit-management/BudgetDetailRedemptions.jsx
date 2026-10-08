@@ -120,9 +120,16 @@ const BudgetDetailRedemptions = ({ enterpriseFeatures, enterpriseUUID }) => {
         isLoading={isLoading}
         tableData={budgetRedemptions}
         fetchTableData={fetchBudgetRedemptions}
-        tableActions={[
-          <SpentTransactionsCsvDownloadTableAction key="spent-csv-download" enterpriseUUID={enterpriseUUID} />,
-        ]}
+        // Only pass the action when there is a subsidy to export from (not for enterprise offers). Paragon
+        // shows table actions based on the array length, so an action that renders nothing would still
+        // leave an empty "Actions" overflow menu on small screens.
+        tableActions={subsidyAccessPolicy?.subsidyUuid ? [
+          <SpentTransactionsCsvDownloadTableAction
+            key="spent-csv-download"
+            enterpriseUUID={enterpriseUUID}
+            subsidyAccessPolicy={subsidyAccessPolicy}
+          />,
+        ] : []}
       />
     </section>
   );

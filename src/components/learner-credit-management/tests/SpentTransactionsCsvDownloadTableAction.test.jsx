@@ -4,15 +4,15 @@ import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { saveAs } from 'file-saver';
+import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 
 import SpentTransactionsCsvDownloadTableAction from '../SpentTransactionsCsvDownloadTableAction';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
-import { useBudgetId, useSubsidyAccessPolicy } from '../data';
+import EVENT_NAMES from '../../../eventTracking';
 
-jest.mock('../data', () => ({
-  ...jest.requireActual('../data'),
-  useBudgetId: jest.fn(),
-  useSubsidyAccessPolicy: jest.fn(),
+jest.mock('@2uinc/frontend-enterprise-utils', () => ({
+  ...jest.requireActual('@2uinc/frontend-enterprise-utils'),
+  sendEnterpriseTrackEvent: jest.fn(),
 }));
 jest.mock('../../../data/services/EnterpriseAccessApiService');
 jest.mock('file-saver', () => ({
@@ -23,6 +23,11 @@ jest.mock('file-saver', () => ({
 const mockEnterpriseUUID = 'test-enterprise-uuid';
 const mockPolicyUUID = 'test-policy-uuid';
 const mockSubsidyUUID = 'test-subsidy-uuid';
+const mockSubsidyAccessPolicy = {
+  uuid: mockPolicyUUID,
+  subsidyUuid: mockSubsidyUUID,
+  displayName: 'My Budget',
+};
 
 const defaultTableInstance = {
   itemCount: 2,
@@ -31,21 +36,22 @@ const defaultTableInstance = {
 
 const renderAction = (tableInstance = defaultTableInstance) => render(
   <IntlProvider locale="en">
-    <SpentTransactionsCsvDownloadTableAction enterpriseUUID={mockEnterpriseUUID} tableInstance={tableInstance} />
+    <SpentTransactionsCsvDownloadTableAction
+      enterpriseUUID={mockEnterpriseUUID}
+      subsidyAccessPolicy={mockSubsidyAccessPolicy}
+      tableInstance={tableInstance}
+    />
   </IntlProvider>,
 );
 
 describe('<SpentTransactionsCsvDownloadTableAction />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    useBudgetId.mockReturnValue({ subsidyAccessPolicyId: mockPolicyUUID });
-    useSubsidyAccessPolicy.mockReturnValue({
-      data: { subsidyUuid: mockSubsidyUUID, displayName: 'My Budget' },
-    });
   });
 
   it('downloads the CSV for the budget, applying the table search filter', async () => {
-    EnterpriseAccessApiService.exportSubsidyTransactions.mockResolvedValue({ data: 'Learner Email\n' });
+    const csvBlob = new Blob(['Learner Email\n'], { type: 'text/csv' });
+    EnterpriseAccessApiService.exportSubsidyTransactions.mockResolvedValue({ data: csvBlob });
     renderAction({
       itemCount: 2,
       state: { filters: [{ id: 'enrollmentDetails', value: 'learner@example.com' }] },
@@ -60,7 +66,13 @@ describe('<SpentTransactionsCsvDownloadTableAction />', () => {
       subsidyAccessPolicyUuid: mockPolicyUUID,
       search: 'learner@example.com',
     });
-    expect(saveAs.mock.calls[0][1]).toMatch(/^MyBudget-spent-\d{4}-\d{1,2}-\d{1,2}\.csv$/);
+    expect(saveAs.mock.calls[0][0]).toBe(csvBlob);
+    expect(saveAs.mock.calls[0][1]).toMatch(/^MyBudget-spent-\d{4}-\d{2}-\d{2}\.csv$/);
+    expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+      mockEnterpriseUUID,
+      EVENT_NAMES.LEARNER_CREDIT_MANAGEMENT.BUDGET_DETAILS_SPENT_DATATABLE_CSV_DOWNLOAD,
+      { subsidyAccessPolicyId: mockPolicyUUID, isSearchApplied: true, status: 'success' },
+    );
   });
 
   it.each([
@@ -82,6 +94,16 @@ describe('<SpentTransactionsCsvDownloadTableAction />', () => {
 
     expect(await screen.findByText(expectedMessage, { exact: false })).toBeInTheDocument();
     expect(saveAs).not.toHaveBeenCalled();
+    expect(sendEnterpriseTrackEvent).toHaveBeenCalledWith(
+      mockEnterpriseUUID,
+      EVENT_NAMES.LEARNER_CREDIT_MANAGEMENT.BUDGET_DETAILS_SPENT_DATATABLE_CSV_DOWNLOAD,
+      {
+        subsidyAccessPolicyId: mockPolicyUUID,
+        isSearchApplied: false,
+        status: 'error',
+        httpErrorStatus: error.customAttributes.httpErrorStatus,
+      },
+    );
   });
 
   it('is disabled while the download is pending', async () => {
@@ -106,11 +128,5 @@ describe('<SpentTransactionsCsvDownloadTableAction />', () => {
   ])('is disabled when $description', ({ filters }) => {
     renderAction({ itemCount: 0, state: { filters } });
     expect(screen.getByRole('button', { name: 'Download' })).toBeDisabled();
-  });
-
-  it('renders nothing when the budget has no subsidy', () => {
-    useSubsidyAccessPolicy.mockReturnValue({ data: undefined });
-    renderAction();
-    expect(screen.queryByRole('button', { name: 'Download' })).not.toBeInTheDocument();
   });
 });
