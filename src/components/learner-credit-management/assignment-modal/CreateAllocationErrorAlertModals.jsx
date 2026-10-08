@@ -11,6 +11,7 @@ import EVENT_NAMES from '../../../eventTracking';
 const CreateAllocationErrorAlertModals = ({
   enterpriseId,
   errorReason,
+  errorMessage,
   retry,
   closeAssignmentModal,
 }) => {
@@ -82,6 +83,7 @@ const CreateAllocationErrorAlertModals = ({
         isErrorModalOpen={isSystemError}
         closeErrorModal={closeSystemErrorModal}
         closeAssignmentModal={closeAssignmentModalWithTrackEvent}
+        message={errorMessage}
         retry={handleErrorRetry}
       />
     </>
@@ -93,6 +95,7 @@ CreateAllocationErrorAlertModals.propTypes = {
   closeAssignmentModal: PropTypes.func.isRequired,
   retry: PropTypes.func.isRequired,
   errorReason: PropTypes.string,
+  errorMessage: PropTypes.string,
 };
 
 const mapStateToProps = state => ({
