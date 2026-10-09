@@ -22,6 +22,10 @@ export const API_FIELDS_BY_TABLE_COLUMN_ACCESSOR = {
   courseListPrice: 'course_list_price',
 };
 
+// Column accessor of the Spent table's search filter. The table, its data fetching, and the
+// spent transactions CSV export all read the search query from this filter.
+export const SPENT_TABLE_SEARCH_COLUMN_ACCESSOR = 'enrollmentDetails';
+
 // Course pace text
 export const COURSE_PACING_MAP = {
   SELF_PACED: 'self_paced',

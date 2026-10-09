@@ -282,6 +282,40 @@ class EnterpriseAccessApiService {
   }
 
   /**
+   * Export a subsidy's Learner Credit spent transactions as a CSV file.
+   * @param {Object} args
+   * @param {String} args.enterpriseCustomerUuid The enterprise customer that owns the subsidy.
+   * @param {String} args.subsidyUuid The subsidy whose spent transactions should be exported.
+   * @param {String} [args.subsidyAccessPolicyUuid] Only export spend from this policy (budget).
+   * @param {String} [args.search] Free-text search filter (e.g., learner email or course title).
+   * @returns {Promise<AxiosResponse<Blob>>} The CSV report as a Blob.
+   */
+  static exportSubsidyTransactions({
+    enterpriseCustomerUuid,
+    subsidyUuid,
+    subsidyAccessPolicyUuid,
+    search,
+  }: {
+    enterpriseCustomerUuid: string;
+    subsidyUuid: string;
+    subsidyAccessPolicyUuid?: string;
+    search?: string;
+  }): Promise<AxiosResponse<Blob>> {
+    const queryParams = new URLSearchParams({
+      enterprise_customer_uuid: enterpriseCustomerUuid,
+      subsidy_uuid: subsidyUuid,
+    });
+    if (subsidyAccessPolicyUuid) {
+      queryParams.append('subsidy_access_policy_uuid', subsidyAccessPolicyUuid);
+    }
+    if (search) {
+      queryParams.append('search', search);
+    }
+    const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/transactions/export/?${queryParams.toString()}`;
+    return EnterpriseAccessApiService.apiClient().get(url, { responseType: 'blob' });
+  }
+
+  /**
    * Cancel content assignments for a specific AssignmentConfiguration.
    */
   static cancelContentAssignments(assignmentConfigurationUUID, assignmentUuids) {

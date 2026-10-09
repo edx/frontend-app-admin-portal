@@ -18,6 +18,7 @@ import {
   LEARNER_CREDIT_REQUEST_STATE_LABELS,
   LOW_REMAINING_BALANCE_PERCENT_THRESHOLD,
   NO_BALANCE_REMAINING_DOLLAR_THRESHOLD,
+  SPENT_TABLE_SEARCH_COLUMN_ACCESSOR,
   START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS,
 } from './constants';
 import { capitalizeFirstLetter } from '../../../utils';
@@ -938,4 +939,30 @@ export const calculateTotalToCancelApprovedRequests = ({
     return waitingCount + remindedCount;
   }
   return requestUuids.length;
+};
+
+/**
+ * Returns the search query entered in the Spent table, if any.
+ * @param {Array<{id: string, value: any}>} [filters] The DataTable's filters state.
+ * @returns {string|undefined} The search query.
+ */
+export const getSpentTableSearchQuery = (filters) => (
+  filters?.find(filter => filter.id === SPENT_TABLE_SEARCH_COLUMN_ACCESSOR)?.value
+);
+
+/**
+ * Builds the file name for a CSV exported from a budget, e.g. "MyBudget-spent-2026-01-05.csv".
+ * @param {string} displayName The budget's display name; whitespace and characters that are
+ *   invalid in file names are removed, but non-ASCII letters are kept.
+ * @param {string} [suffix] Optional label appended after the budget name.
+ * @returns {string} The CSV file name, dated with today's UTC date (zero-padded so files sort by date).
+ */
+export const getBudgetCsvFileName = (displayName, suffix) => {
+  const title = (displayName || '').replace(/[\s\\/:*?"<>|]+/g, '') || 'budget';
+  const currentDate = new Date();
+  const year = currentDate.getUTCFullYear();
+  const month = String(currentDate.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(currentDate.getUTCDate()).padStart(2, '0');
+  const prefix = suffix ? `${title}-${suffix}` : title;
+  return `${prefix}-${year}-${month}-${day}.csv`;
 };

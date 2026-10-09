@@ -4,6 +4,8 @@ import {
   calculateTotalToCancelApprovedRequests,
   calculateTotalToRemindApprovedRequests,
   getAssignableCourseRuns,
+  getBudgetCsvFileName,
+  getSpentTableSearchQuery,
   getBudgetStatus,
   getLearnerRequestStateCountsByState,
   getNormalizedStartDate,
@@ -976,5 +978,37 @@ describe('calculateTotalToCancelApprovedRequests', () => {
     });
 
     expect(result).toBe(0);
+  });
+});
+
+describe('getBudgetCsvFileName', () => {
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-01-05T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it.each([
+    { displayName: 'My Budget', suffix: 'spent', expected: 'MyBudget-spent-2026-01-05.csv' },
+    { displayName: 'My Budget', suffix: undefined, expected: 'MyBudget-2026-01-05.csv' },
+    { displayName: undefined, suffix: 'spent', expected: 'budget-spent-2026-01-05.csv' },
+    { displayName: 'Q1/Q2: Sales*?"<>|\\', suffix: 'spent', expected: 'Q1Q2Sales-spent-2026-01-05.csv' },
+    { displayName: 'Presupuesto Año', suffix: 'spent', expected: 'PresupuestoAño-spent-2026-01-05.csv' },
+    { displayName: ' / : ', suffix: 'spent', expected: 'budget-spent-2026-01-05.csv' },
+  ])('returns $expected', ({ displayName, suffix, expected }) => {
+    expect(getBudgetCsvFileName(displayName, suffix)).toEqual(expected);
+  });
+});
+
+describe('getSpentTableSearchQuery', () => {
+  it.each([
+    { filters: [{ id: 'enrollmentDetails', value: 'learner@example.com' }], expected: 'learner@example.com' },
+    { filters: [{ id: 'courseProductLine', value: 'OCM' }], expected: undefined },
+    { filters: [], expected: undefined },
+    { filters: undefined, expected: undefined },
+  ])('returns $expected for filters $filters', ({ filters, expected }) => {
+    expect(getSpentTableSearchQuery(filters)).toEqual(expected);
   });
 });

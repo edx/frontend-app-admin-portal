@@ -10,6 +10,7 @@ import SpendTableEnrollmentDetails from './SpendTableEnrollmentDetails';
 import {
   PAGE_SIZE,
   DEFAULT_PAGE,
+  SPENT_TABLE_SEARCH_COLUMN_ACCESSOR,
   formatDate,
 } from './data';
 import SpendTableAmountContents from './SpendTableAmountContents';
@@ -20,6 +21,7 @@ const LearnerCreditAllocationTable = ({
   isLoading,
   tableData,
   fetchTableData,
+  tableActions = [],
 }) => {
   const intl = useIntl();
   return (
@@ -33,6 +35,7 @@ const LearnerCreditAllocationTable = ({
       isLoading={isLoading}
       defaultColumnValues={{ Filter: TableTextFilter }}
       FilterStatusComponent={FilterStatus}
+      tableActions={tableActions}
       columns={[
         {
           Header:
@@ -52,7 +55,7 @@ const LearnerCreditAllocationTable = ({
             defaultMessage: 'Enrollment details',
             description: 'Column header for the Enrollment details column in the Learner Credit Allocation table',
           }),
-          accessor: 'enrollmentDetails',
+          accessor: SPENT_TABLE_SEARCH_COLUMN_ACCESSOR,
           Cell: SpendTableEnrollmentDetails,
           disableSortBy: true,
         },
@@ -115,6 +118,7 @@ LearnerCreditAllocationTable.propTypes = {
     pageCount: PropTypes.number.isRequired,
   }).isRequired,
   fetchTableData: PropTypes.func.isRequired,
+  tableActions: PropTypes.arrayOf(PropTypes.node),
 };
 
 export default LearnerCreditAllocationTable;

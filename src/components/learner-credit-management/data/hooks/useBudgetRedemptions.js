@@ -9,7 +9,11 @@ import { debounce } from 'lodash-es';
 import EnterpriseDataApiService from '../../../../data/services/EnterpriseDataApiService';
 import SubsidyApiService from '../../../../data/services/EnterpriseSubsidyApiService';
 import { API_FIELDS_BY_TABLE_COLUMN_ACCESSOR } from '../constants';
-import { transformUtilizationTableResults, transformUtilizationTableSubsidyTransactionResults } from '../utils';
+import {
+  getSpentTableSearchQuery,
+  transformUtilizationTableResults,
+  transformUtilizationTableSubsidyTransactionResults,
+} from '../utils';
 import useSubsidyAccessPolicy from './useSubsidyAccessPolicy';
 import EVENT_NAMES from '../../../../eventTracking';
 
@@ -31,7 +35,7 @@ const applySortByToOptions = (sortBy, options) => {
 
 const applyFiltersToOptions = (filters, options, shouldFetchSubsidyTransactions = false) => {
   const courseProductLineSearchQuery = filters?.find(filter => filter.id === 'courseProductLine')?.value;
-  const searchQuery = filters?.find(filter => filter.id === 'enrollmentDetails')?.value;
+  const searchQuery = getSpentTableSearchQuery(filters);
 
   if (courseProductLineSearchQuery) {
     Object.assign(options, { courseProductLine: courseProductLineSearchQuery });

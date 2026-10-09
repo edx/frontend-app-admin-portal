@@ -186,6 +186,36 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('exportSubsidyTransactions calls enterprise-access to export spent transactions as a blob', () => {
+    EnterpriseAccessApiService.exportSubsidyTransactions({
+      enterpriseCustomerUuid: mockEnterpriseUUID,
+      subsidyUuid: 'test-subsidy-uuid',
+    });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/transactions/export/?enterprise_customer_uuid=${mockEnterpriseUUID}&subsidy_uuid=test-subsidy-uuid`,
+      { responseType: 'blob' },
+    );
+  });
+
+  test('exportSubsidyTransactions forwards the optional budget and search filters', () => {
+    EnterpriseAccessApiService.exportSubsidyTransactions({
+      enterpriseCustomerUuid: mockEnterpriseUUID,
+      subsidyUuid: 'test-subsidy-uuid',
+      subsidyAccessPolicyUuid: mockSubsidyAccessPolicyUUID,
+      search: 'learner@example.com',
+    });
+    const queryParams = new URLSearchParams({
+      enterprise_customer_uuid: mockEnterpriseUUID,
+      subsidy_uuid: 'test-subsidy-uuid',
+      subsidy_access_policy_uuid: mockSubsidyAccessPolicyUUID,
+      search: 'learner@example.com',
+    });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/transactions/export/?${queryParams.toString()}`,
+      { responseType: 'blob' },
+    );
+  });
+
   test('retrieveSubsidyAccessPolicy calls enterprise-access to fetch subsidy access policy', () => {
     EnterpriseAccessApiService.retrieveSubsidyAccessPolicy(mockSubsidyAccessPolicyUUID);
     expect(axios.get).toBeCalledWith(
