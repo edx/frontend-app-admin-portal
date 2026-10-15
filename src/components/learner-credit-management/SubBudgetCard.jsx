@@ -21,6 +21,7 @@ import { isBudgetRetiredOrExpired } from './data/utils';
 import { useEnterpriseBudgets } from '../EnterpriseSubsidiesContext/data/hooks';
 import SubBudgetCardUtilization from './SubBudgetCardUtilization';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
+import { ADD_FUNDS_ROUTE_SEGMENT } from './add-funds/data';
 
 const BaseBackgroundFetchingWrapper = ({
   enterpriseId,
@@ -111,13 +112,12 @@ const BaseSubBudgetCard = ({
   const renderActions = (budgetId) => (
     <Stack direction="horizontal" gap={2}>
       {canAddFunds && (
-        // TODO: disabled until the top-up flow (destination/handler) is built. Remove `disabled`
-        // once this is wired up to the actual add-funds flow.
         <Button
           data-testid="add-funds"
+          as={Link}
+          to={`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}/${ADD_FUNDS_ROUTE_SEGMENT}`}
           variant="outline-primary"
           iconBefore={Add}
-          disabled
         >
           <FormattedMessage
             id="lcm.budgets.budget.card.add.funds"
