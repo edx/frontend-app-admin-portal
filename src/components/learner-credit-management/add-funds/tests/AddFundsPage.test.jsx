@@ -103,10 +103,10 @@ describe('AddFundsPage', () => {
   it('matches the add-funds route instead of treating it as a budget detail tab', () => {
     renderAddFunds();
     expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
   });
 
-  it('renders breadcrumbs, stepper and an empty order summary', () => {
+  it('renders breadcrumbs and the stepper', () => {
     renderAddFunds();
     expect(screen.getByRole('link', { name: 'Learner Credit' })).toHaveAttribute(
       'href',
@@ -116,12 +116,11 @@ describe('AddFundsPage', () => {
       'href',
       `/${enterpriseSlug}/admin/learner-credit/${mockBudgetUuid}`,
     );
-    ['Select Amount', 'Payment Method', 'Payment Details', 'Confirmation'].forEach((label) => {
+    ['Payment Method', 'Payment Details', 'Confirmation'].forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
-    expect(screen.getByText('$1,800.00')).toBeInTheDocument();
-    expect(screen.getByText('March 15, 3027')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
+    expect(screen.getByText(/This step is under development/)).toBeInTheDocument();
   });
 
   it('shows a loading state', () => {
@@ -138,7 +137,7 @@ describe('AddFundsPage', () => {
       error: { customAttributes: { httpErrorStatus: 404 } },
     });
     renderAddFunds();
-    expect(screen.queryByRole('heading', { name: 'Select an Amount' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Select Amount' })).not.toBeInTheDocument();
     expect(screen.getByText(/404/)).toBeInTheDocument();
   });
 
@@ -167,51 +166,17 @@ describe('AddFundsPage', () => {
     setup?.();
     renderAddFunds({ budgetId });
     expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Select an Amount' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Select Amount' })).not.toBeInTheDocument();
   });
 
-  it('selects a preset amount and updates the order summary', async () => {
-    const user = userEvent.setup();
-    renderAddFunds();
-
-    const presetButton = screen.getByRole('button', { name: '$5,000' });
-    await user.click(presetButton);
-
-    expect(presetButton).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('$5,000.00')).toBeInTheDocument();
-    expect(screen.getByText('-$500.00')).toBeInTheDocument();
-    expect(screen.getByText('$4,500.00')).toBeInTheDocument();
-    expect(screen.getByText('$6,800.00')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
-  });
-
-  it('validates the custom amount against the min and max limits', async () => {
-    const user = userEvent.setup();
-    renderAddFunds();
-    const input = screen.getByLabelText('Custom amount');
-
-    await user.type(input, '100');
-    expect(screen.getByText('Enter an amount between $500 and $20,000.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
-
-    await user.clear(input);
-    await user.type(input, '1500');
-    expect(screen.queryByText('Enter an amount between $500 and $20,000.')).not.toBeInTheDocument();
-    expect(screen.getByText('$1,500.00')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
-  });
-
-  it('gives each step its own URL, preserves the selection, and moves focus to each step heading', async () => {
+  it('gives each step its own URL and moves focus to each step heading', async () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount' });
     expectPath('select-amount');
 
-    await user.click(screen.getByRole('button', { name: '$1,000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-
     expectPath('payment-method');
     expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
-    expect(screen.getByText(/This step is under development/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expectPath('payment-details');
@@ -223,32 +188,32 @@ describe('AddFundsPage', () => {
     expectPath('payment-method');
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expectPath('select-amount');
-    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toHaveFocus();
-    expect(screen.getByRole('button', { name: '$1,000' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('heading', { name: 'Select Amount' })).toHaveFocus();
   });
 
   it('supports browser history navigation between steps', async () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount' });
 
-    await user.click(screen.getByRole('button', { name: '$2,500' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expectPath('payment-method');
 
     await user.click(screen.getByRole('button', { name: 'Browser back' }));
     expectPath('select-amount');
-    expect(screen.getByRole('button', { name: '$2,500' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it.each([
     { scenario: 'no step is given', step: undefined },
     { scenario: 'the step is unknown', step: 'not-a-step' },
-    { scenario: 'deep linking to a later step without completing earlier ones', step: 'payment-method' },
-    { scenario: 'deep linking to confirmation', step: 'confirmation' },
   ])('redirects to the select amount step when $scenario', ({ step }) => {
     renderAddFunds({ step });
     expectPath('select-amount');
-    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
+  });
+
+  it('redirects a deep link to confirmation back to the first incomplete step', () => {
+    renderAddFunds({ step: 'confirmation' });
+    expectPath('payment-details');
   });
 
   it('returns to budget detail when Back is clicked on the first step', async () => {

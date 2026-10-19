@@ -1,37 +1,25 @@
-import {
-  ADD_FUNDS_STEP_KEYS,
-  ADD_FUNDS_STEPS,
-  MAX_TOP_UP_AMOUNT,
-  MIN_TOP_UP_AMOUNT,
-  TOP_UP_DISCOUNT_RATE,
-} from './constants';
+import { ADD_FUNDS_STEP_KEYS, ADD_FUNDS_STEPS } from './constants';
 import type { AddFundsStepKey } from './constants';
 import type { AddFundsFormData } from './types';
 
-export const isValidTopUpAmount = (amount: number | null): amount is number => (
-  typeof amount === 'number'
-  && Number.isFinite(amount)
-  && amount >= MIN_TOP_UP_AMOUNT
-  && amount <= MAX_TOP_UP_AMOUNT
-);
+type StepCompletionRule = (formData: AddFundsFormData) => boolean;
 
 /**
- * Whether the user may advance past the given step. Steps that are not yet implemented
- * return `true` so the flow can be navigated end-to-end while they are being built.
+ * Per-step rules for whether the user may advance past a step. Steps without a rule (not yet
+ * implemented) are treated as complete so the flow can be navigated end-to-end while they are
+ * being built. Add a rule here when building a step; it drives both the Continue button and the
+ * deep-link step guard.
  */
-export const canProceedFromStep = (stepKey: AddFundsStepKey, formData: AddFundsFormData): boolean => {
-  switch (stepKey) {
-    case ADD_FUNDS_STEP_KEYS.selectAmount:
-      return isValidTopUpAmount(formData.amount);
-    case ADD_FUNDS_STEP_KEYS.paymentDetails:
-      // TODO: Confirmation must only be reachable after a payment is submitted (or, on a Stripe
-      // return redirect, verified against the backend by session id). Until payment is built,
-      // nothing can complete this step, so Confirmation stays unreachable.
-      return false;
-    default:
-      return true;
-  }
+const STEP_COMPLETION_RULES: Partial<Record<AddFundsStepKey, StepCompletionRule>> = {
+  // TODO: Confirmation must only be reachable after a payment is submitted (or, on a Stripe
+  // return redirect, verified against the backend by session id). Until payment is built,
+  // nothing can complete this step, so Confirmation stays unreachable.
+  [ADD_FUNDS_STEP_KEYS.paymentDetails]: () => false,
 };
+
+export const canProceedFromStep = (stepKey: AddFundsStepKey, formData: AddFundsFormData): boolean => (
+  STEP_COMPLETION_RULES[stepKey]?.(formData) ?? true
+);
 
 /**
  * Index of the furthest step the user may currently be on: the first step whose requirements
@@ -60,27 +48,4 @@ export const getAddFundsStepRedirect = (
     return ADD_FUNDS_STEPS[firstIncompleteIndex];
   }
   return null;
-};
-
-export type TopUpOrderSummary = {
-  creditAmount: number;
-  discount: number;
-  totalCost: number;
-  newBalance: number;
-};
-
-export const calculateOrderSummary = (
-  amount: number | null,
-  currentBalance: number,
-): TopUpOrderSummary | null => {
-  if (!isValidTopUpAmount(amount)) {
-    return null;
-  }
-  const discount = amount * TOP_UP_DISCOUNT_RATE;
-  return {
-    creditAmount: amount,
-    discount,
-    totalCost: amount - discount,
-    newBalance: currentBalance + amount,
-  };
 };

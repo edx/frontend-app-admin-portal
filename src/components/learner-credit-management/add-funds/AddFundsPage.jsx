@@ -82,11 +82,7 @@ const AddFundsPage = ({ enterpriseSlug }) => {
           budgetDisplayName={subsidyAccessPolicy.displayName || 'Overview'}
         />
         <AddFundsContextProvider basePath={addFundsBasePath}>
-          <AddFundsStepper
-            currentBalance={subsidyAccessPolicy.aggregates?.spendAvailableUsd ?? 0}
-            expirationDate={subsidyAccessPolicy.subsidyExpirationDatetime}
-            onExit={() => navigate(budgetDetailPath)}
-          />
+          <AddFundsStepper onExit={() => navigate(budgetDetailPath)} />
         </AddFundsContextProvider>
       </Stack>
     </BudgetDetailPageWrapper>
