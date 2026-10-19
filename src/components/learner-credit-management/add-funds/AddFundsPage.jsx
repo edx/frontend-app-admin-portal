@@ -40,7 +40,7 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     return <Navigate to={budgetDetailPath} replace />;
   }
 
-  if (isInitialLoading) {
+  if (isInitialLoading || (!subsidyAccessPolicy && !isError)) {
     return (
       <BudgetDetailPageWrapper includeHero={false}>
         <Skeleton height={25} />
