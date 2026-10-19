@@ -2,17 +2,15 @@ import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
 import {
-  ActionRow, Button, Card, Col, Row, Stepper,
+  ActionRow, Button, Card, Stepper,
 } from '@openedx/paragon';
 import { useIntl } from '@edx/frontend-platform/i18n';
 
-import { ADD_FUNDS_STEP_KEYS, ADD_FUNDS_STEPS, useAddFunds } from './data';
-import SelectAmountStep from './steps/SelectAmountStep';
+import { ADD_FUNDS_STEPS, useAddFunds } from './data';
 import StepComingSoon from './steps/StepComingSoon';
-import OrderSummary from './OrderSummary';
 import messages from './messages';
 
-const AddFundsStepper = ({ currentBalance, expirationDate, onExit }) => {
+const AddFundsStepper = ({ onExit }) => {
   const intl = useIntl();
   const {
     currentStepKey,
@@ -41,14 +39,9 @@ const AddFundsStepper = ({ currentBalance, expirationDate, onExit }) => {
   }, [currentStepKey, stepRedirect]);
 
   // TODO: replace each `StepComingSoon` with the real step component as it is built.
-  const renderStepContent = (stepKey) => {
-    switch (stepKey) {
-      case ADD_FUNDS_STEP_KEYS.selectAmount:
-        return <SelectAmountStep />;
-      default:
-        return <StepComingSoon title={intl.formatMessage(messages[stepKey])} />;
-    }
-  };
+  const renderStepContent = (stepKey) => (
+    <StepComingSoon title={intl.formatMessage(messages[stepKey])} />
+  );
 
   // Guard: unknown/missing steps, and steps ahead of what the user has completed (deep links,
   // refreshes that cleared in-memory selections), are redirected to the furthest allowed step.
@@ -63,27 +56,20 @@ const AddFundsStepper = ({ currentBalance, expirationDate, onExit }) => {
       <Card className="mb-3">
         <Stepper.Header />
       </Card>
-      <Row>
-        <Col lg={8} className="mb-3">
-          <Card className="h-100">
-            <Card.Section ref={stepContentRef}>
-              {ADD_FUNDS_STEPS.map((stepKey, index) => (
-                <Stepper.Step
-                  key={stepKey}
-                  eventKey={stepKey}
-                  index={index}
-                  title={intl.formatMessage(messages[stepKey])}
-                >
-                  {renderStepContent(stepKey)}
-                </Stepper.Step>
-              ))}
-            </Card.Section>
-          </Card>
-        </Col>
-        <Col lg={4} className="mb-3">
-          <OrderSummary currentBalance={currentBalance} expirationDate={expirationDate} />
-        </Col>
-      </Row>
+      <Card className="mb-3">
+        <Card.Section ref={stepContentRef}>
+          {ADD_FUNDS_STEPS.map((stepKey, index) => (
+            <Stepper.Step
+              key={stepKey}
+              eventKey={stepKey}
+              index={index}
+              title={intl.formatMessage(messages[stepKey])}
+            >
+              {renderStepContent(stepKey)}
+            </Stepper.Step>
+          ))}
+        </Card.Section>
+      </Card>
       <Card>
         <Card.Section>
           <ActionRow>
@@ -104,13 +90,7 @@ const AddFundsStepper = ({ currentBalance, expirationDate, onExit }) => {
 };
 
 AddFundsStepper.propTypes = {
-  currentBalance: PropTypes.number.isRequired,
-  expirationDate: PropTypes.string,
   onExit: PropTypes.func.isRequired,
-};
-
-AddFundsStepper.defaultProps = {
-  expirationDate: undefined,
 };
 
 export default AddFundsStepper;
