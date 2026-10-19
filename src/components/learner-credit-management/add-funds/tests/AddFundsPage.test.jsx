@@ -129,6 +129,13 @@ describe('AddFundsPage', () => {
     expect(screen.getByText('Loading add funds')).toBeInTheDocument();
   });
 
+  it('keeps showing the loading state when the policy query is paused (e.g., offline)', () => {
+    useSubsidyAccessPolicy.mockReturnValue({ data: undefined, isInitialLoading: false, isError: false });
+    renderAddFunds();
+    expect(screen.getByText('Loading add funds')).toBeInTheDocument();
+    expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
+  });
+
   it('shows the not found page when the budget does not exist', () => {
     useSubsidyAccessPolicy.mockReturnValue({
       data: undefined,
