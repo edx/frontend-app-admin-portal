@@ -12,12 +12,11 @@ import {
 import { Add } from '@openedx/paragon/icons';
 
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import { features } from '../../config';
 import { BUDGET_STATUSES, BUDGET_TYPES, ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import {
   getBudgetStatus, getTranslatedBudgetStatus, getTranslatedBudgetTerm,
 } from './data';
-import { isBudgetRetiredOrExpired } from './data/utils';
+import { canTopUpBudget, isBudgetRetiredOrExpired } from './data/utils';
 import { useEnterpriseBudgets } from '../EnterpriseSubsidiesContext/data/hooks';
 import SubBudgetCardUtilization from './SubBudgetCardUtilization';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
@@ -94,13 +93,7 @@ const BaseSubBudgetCard = ({
     },
   ) : undefined;
   const isRetiredOrExpired = isBudgetRetiredOrExpired(status);
-  // Once the top-up eligibility API is available, gate `canAddFunds` on the per-budget
-  // eligibility criteria returned by that API instead.
-  const canAddFunds = (
-    features.TOP_UP_LEARNER_CREDIT
-    && source === BUDGET_TYPES.policy
-    && !isRetiredOrExpired
-  );
+  const canAddFunds = canTopUpBudget({ isPolicy: source === BUDGET_TYPES.policy, status });
 
   const hasBudgetAggregatesSection = () => {
     const statusesWithoutAggregates = [

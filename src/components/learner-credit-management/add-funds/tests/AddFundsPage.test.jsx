@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import {
   MemoryRouter, Route, Routes, useLocation, useNavigate,
 } from 'react-router-dom';
@@ -65,7 +65,7 @@ const BrowserBackButton = () => {
   return <button type="button" onClick={() => navigate(-1)}>Browser back</button>;
 };
 
-const renderAddFunds = ({ budgetId = mockBudgetUuid, step } = {}) => render(
+const renderAddFunds = ({ budgetId = mockBudgetUuid, step, wrapper } = {}) => render(
   <QueryClientProvider client={queryClient()}>
     <IntlProvider locale="en">
       <Provider store={store}>
@@ -79,6 +79,7 @@ const renderAddFunds = ({ budgetId = mockBudgetUuid, step } = {}) => render(
       </Provider>
     </IntlProvider>
   </QueryClientProvider>,
+  { wrapper },
 );
 
 const expectPath = (step) => {
@@ -151,18 +152,16 @@ describe('AddFundsPage', () => {
   it.each([
     { scenario: 'the feature flag is off', setup: () => { features.TOP_UP_LEARNER_CREDIT = false; } },
     { scenario: 'the budget is not a policy', budgetId: '123' },
-    {
-      scenario: 'the budget is retired or expired',
+    ...[
+      { status: 'retired', overrides: { retired: true, isRetiredOrExpired: true } },
+      { status: 'expired', overrides: { subsidyExpirationDatetime: '2024-06-01T00:00:00Z', isRetiredOrExpired: true } },
+      { status: 'scheduled', overrides: { subsidyActiveDatetime: '3026-01-01T00:00:00Z' } },
+    ].map(({ status, overrides }) => ({
+      scenario: `the budget is ${status}`,
       setup: () => useSubsidyAccessPolicy.mockReturnValue({
-        data: mockPolicy({ isRetiredOrExpired: true }), isInitialLoading: false, isError: false,
+        data: mockPolicy(overrides), isInitialLoading: false, isError: false,
       }),
-    },
-    {
-      scenario: 'the budget is scheduled',
-      setup: () => useSubsidyAccessPolicy.mockReturnValue({
-        data: mockPolicy({ subsidyActiveDatetime: '3026-01-01T00:00:00Z' }), isInitialLoading: false, isError: false,
-      }),
-    },
+    })),
     {
       scenario: 'the budget fails to load',
       setup: () => useSubsidyAccessPolicy.mockReturnValue({
@@ -196,6 +195,15 @@ describe('AddFundsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expectPath('select-amount');
     expect(screen.getByRole('heading', { name: 'Select Amount' })).toHaveFocus();
+  });
+
+  it('does not move focus to the step heading on initial load under StrictMode', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'select-amount', wrapper: StrictMode });
+    expect(screen.getByRole('heading', { name: 'Select Amount' })).not.toHaveFocus();
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
   });
 
   it('supports browser history navigation between steps', async () => {

@@ -6,9 +6,11 @@ import { Skeleton, Stack } from '@openedx/paragon';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 
 import { features } from '../../../config';
-import { BUDGET_STATUSES, ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
+import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import NotFoundPage from '../../NotFoundPage';
-import { getBudgetStatus, useBudgetId, useSubsidyAccessPolicy } from '../data';
+import {
+  canTopUpBudget, getBudgetStatus, useBudgetId, useSubsidyAccessPolicy,
+} from '../data';
 import BudgetDetailPageWrapper from '../BudgetDetailPageWrapper';
 import AddFundsBreadcrumbs from './AddFundsBreadcrumbs';
 import AddFundsStepper from './AddFundsStepper';
@@ -17,11 +19,8 @@ import { ADD_FUNDS_ROUTE_SEGMENT, AddFundsContextProvider } from './data';
 /**
  * Route entry point for the Learner Credit Top Up ("Add Funds") flow at
  * `/:enterpriseSlug/admin/learner-credit/:budgetId/add-funds/:step?`. Each step has its own URL;
- * step-level redirects (unknown or not-yet-reachable steps) are handled by `AddFundsStepper`.
- *
- * Mirrors the `canAddFunds` rules in `SubBudgetCard`: users who reach this route for a budget
- * that can't be topped up (flag off, non-policy, scheduled, retired or expired) are redirected
- * back to the budget detail page.
+ * step-level redirects are handled by `AddFundsStepper`. Budgets that fail `canTopUpBudget`
+ * redirect back to budget detail.
  */
 const AddFundsPage = ({ enterpriseSlug }) => {
   const intl = useIntl();
@@ -70,7 +69,7 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     endDateStr: subsidyAccessPolicy.subsidyExpirationDatetime,
     isBudgetRetired: subsidyAccessPolicy.retired,
   });
-  if (subsidyAccessPolicy.isRetiredOrExpired || status === BUDGET_STATUSES.scheduled) {
+  if (!canTopUpBudget({ isPolicy: true, status })) {
     return <Navigate to={budgetDetailPath} replace />;
   }
 
