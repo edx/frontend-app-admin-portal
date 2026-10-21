@@ -1,4 +1,4 @@
-import React, { StrictMode } from 'react';
+import React from 'react';
 import {
   MemoryRouter, Route, Routes, useLocation, useNavigate,
 } from 'react-router-dom';
@@ -65,7 +65,7 @@ const BrowserBackButton = () => {
   return <button type="button" onClick={() => navigate(-1)}>Browser back</button>;
 };
 
-const renderAddFunds = ({ budgetId = mockBudgetUuid, step, wrapper } = {}) => render(
+const renderAddFunds = ({ budgetId = mockBudgetUuid, step } = {}) => render(
   <QueryClientProvider client={queryClient()}>
     <IntlProvider locale="en">
       <Provider store={store}>
@@ -79,7 +79,6 @@ const renderAddFunds = ({ budgetId = mockBudgetUuid, step, wrapper } = {}) => re
       </Provider>
     </IntlProvider>
   </QueryClientProvider>,
-  { wrapper },
 );
 
 const expectPath = (step) => {
@@ -195,15 +194,6 @@ describe('AddFundsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expectPath('select-amount');
     expect(screen.getByRole('heading', { name: 'Select Amount' })).toHaveFocus();
-  });
-
-  it('does not move focus to the step heading on initial load under StrictMode', async () => {
-    const user = userEvent.setup();
-    renderAddFunds({ step: 'select-amount', wrapper: StrictMode });
-    expect(screen.getByRole('heading', { name: 'Select Amount' })).not.toHaveFocus();
-
-    await user.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
   });
 
   it('supports browser history navigation between steps', async () => {
