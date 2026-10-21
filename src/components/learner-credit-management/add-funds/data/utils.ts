@@ -25,7 +25,7 @@ export const canProceedFromStep = (stepKey: AddFundsStepKey, formData: AddFundsF
  * Index of the furthest step the user may currently be on: the first step whose requirements
  * are not yet met (or the last step if all are met).
  */
-export const getFirstIncompleteStepIndex = (formData: AddFundsFormData): number => {
+const getFirstIncompleteStepIndex = (formData: AddFundsFormData): number => {
   const index = ADD_FUNDS_STEPS.findIndex((stepKey) => !canProceedFromStep(stepKey, formData));
   return index === -1 ? ADD_FUNDS_STEPS.length - 1 : index;
 };
