@@ -307,13 +307,17 @@ describe('AddFundsPage', () => {
 
   it('returns to budget detail when Back is clicked on the first step, leaving the flow', async () => {
     const user = userEvent.setup();
-    renderAddFunds();
+    renderAddFunds({ step: 'select-amount', previousEntries: [`${learnerCreditPath}/${mockBudgetUuid}`] });
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.click(screen.getByRole('button', { name: 'Back' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
 
-    // The flow is replaced in history, so browser Back doesn't re-enter it.
+    // Back popped the step Continue pushed and leaving replaced the remaining flow entry, so
+    // browser Back doesn't re-enter the flow.
     await user.click(screen.getByRole('button', { name: 'Browser back' }));
-    expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
+    expect(screen.getByTestId('location')).not.toHaveTextContent('/add-funds');
   });
 
   it('is accessible', async () => {
