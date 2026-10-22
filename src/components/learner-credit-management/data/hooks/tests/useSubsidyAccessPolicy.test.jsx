@@ -5,6 +5,7 @@ import { IntlProvider } from '@edx/frontend-platform/i18n';
 import useSubsidyAccessPolicy from '../useSubsidyAccessPolicy'; // Import the hook
 import EnterpriseAccessApiService from '../../../../../data/services/EnterpriseAccessApiService';
 import { queryClient } from '../../../../test/testUtils';
+import { BUDGET_STATUSES } from '../../../../EnterpriseApp/data/constants';
 
 const mockSubsidyAccessPolicyUUID = '9af340a9-48de-4d94-976d-e2282b9eb7f3';
 const mockAssignmentConfiguration = { uuid: 'test-assignment-configuration-uuid' };
@@ -58,6 +59,7 @@ describe('useSubsidyAccessPolicy', () => {
       policyType: isAssignable ? 'AssignedLearnerCreditAccessPolicy' : 'PerLearnerCreditSpendLimitAccessPolicy',
       isAssignable,
       assignmentConfiguration: isAssignable ? mockAssignmentConfiguration : undefined,
+      status: BUDGET_STATUSES.expired,
       isRetiredOrExpired: true,
       // Other expected properties...
     });
@@ -91,6 +93,7 @@ describe('useSubsidyAccessPolicy', () => {
         policyType: 'AssignedLearnerCreditAccessPolicy',
         assignmentConfiguration: mockAssignmentConfiguration,
         isAssignable: true,
+        status: BUDGET_STATUSES.expired,
         isRetiredOrExpired: true,
         // Other expected properties...
       },

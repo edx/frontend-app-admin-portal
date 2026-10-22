@@ -22,6 +22,7 @@ import {
   START_DATE_DEFAULT_TO_TODAY_THRESHOLD_DAYS,
 } from './constants';
 import { capitalizeFirstLetter } from '../../../utils';
+import { features } from '../../../config';
 
 /**
  * Transforms subsidy (offer or Subsidy) summary from API for display in the UI, guarding
@@ -821,6 +822,18 @@ export const getAssignableCourseRuns = ({
  * @returns {boolean} True if the budget is retired or expired, false otherwise
  */
 export const isBudgetRetiredOrExpired = (status) => [BUDGET_STATUSES.retired, BUDGET_STATUSES.expired].includes(status);
+
+/**
+ * Whether the Add Funds (Learner Credit Top Up) flow is available for a budget. Shared by the
+ * "Add funds" CTA on `SubBudgetCard` and the guard in `AddFundsPage` so the two can't drift.
+ * Once the top-up eligibility API is available, gate this on its per-budget response instead.
+ * Allowlist, so any new budget status is ineligible until explicitly added.
+ */
+export const canTopUpBudget = ({ isPolicy, status }) => (
+  !!features.TOP_UP_LEARNER_CREDIT
+  && isPolicy
+  && [BUDGET_STATUSES.active, BUDGET_STATUSES.expiring].includes(status)
+);
 
 export const transformRequestOverview = (requestStates) => {
   const allowedStates = ['requested', 'cancelled', 'declined'];
