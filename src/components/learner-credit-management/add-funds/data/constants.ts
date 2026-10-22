@@ -20,3 +20,11 @@ export const ADD_FUNDS_STEPS: readonly AddFundsStepKey[] = [
   ADD_FUNDS_STEP_KEYS.paymentDetails,
   ADD_FUNDS_STEP_KEYS.confirmation,
 ];
+
+export const PRESET_TOP_UP_AMOUNTS = [500, 1000, 2500, 5000];
+export const MIN_TOP_UP_AMOUNT = 500;
+export const MAX_TOP_UP_AMOUNT = 20000;
+
+// TODO: placeholder until the top-up quote/pricing API exists. Pricing (including any discount)
+// must ultimately come from the backend, not be computed client-side.
+export const TOP_UP_DISCOUNT_RATE = 0.1;

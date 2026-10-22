@@ -74,7 +74,11 @@ const AddFundsPage = ({ enterpriseSlug }) => {
         />
         {/* Keyed by budget so selections don't carry over when only `:budgetId` changes. */}
         <AddFundsContextProvider key={budgetId} basePath={addFundsBasePath}>
-          <AddFundsStepper onExit={() => navigate(budgetDetailPath, { replace: true })} />
+          <AddFundsStepper
+            currentBalance={subsidyAccessPolicy.aggregates?.spendAvailableUsd ?? 0}
+            expirationDate={subsidyAccessPolicy.subsidyExpirationDatetime}
+            onExit={() => navigate(budgetDetailPath, { replace: true })}
+          />
         </AddFundsContextProvider>
       </Stack>
     </BudgetDetailPageWrapper>
