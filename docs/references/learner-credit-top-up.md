@@ -7,8 +7,9 @@ Tracking doc for the Learner Credit Top Up feature
 
 The "Add Funds" CTA on `SubBudgetCard` (`src/components/learner-credit-management/SubBudgetCard.jsx`)
 is currently gated behind a single frontend-only rollout flag, `features.TOP_UP_LEARNER_CREDIT` in
-`src/config/index.js` (env var `FEATURE_TOP_UP_LEARNER_CREDIT` or waffle-style
-`?TOP_UP_LEARNER_CREDIT=true` override).
+`src/config/index.js` (env var `FEATURE_TOP_UP_LEARNER_CREDIT='true'`, or the URL override
+`?feature=TOP_UP_LEARNER_CREDIT`; `hasFeatureFlagEnabled` reads the repeated `feature` query
+parameter, so `?TOP_UP_LEARNER_CREDIT=true` does not work).
 
 The eventual source of truth is meant to be a backend-driven, per-enterprise flag read from Redux:
 
@@ -67,7 +68,8 @@ Route: `/:enterpriseSlug/admin/learner-credit/:budgetId/add-funds/:step?`, regis
 budget id is not a policy UUID, the policy is scheduled/retired/expired, or the policy fails its
 initial load (404 shows `NotFoundPage`). A failed background refetch keeps the cached policy and
 does not exit the flow, so selections survive a flaky network. The budget-level rule is `canTopUpBudget` in `data/utils.js`,
-shared with the `SubBudgetCard` CTA; the page derives the budget status with `getBudgetStatus`.
+shared with the `SubBudgetCard` CTA. The page reads the budget status from `subsidyAccessPolicy.status`,
+which `useSubsidyAccessPolicy`'s `select` derives once with `getBudgetStatus`; don't recompute it.
 
 **Step guard** (`AddFundsStepper.jsx` + `getAddFundsStepRedirect` in `data/utils.ts`): a missing
 or unknown `:step` redirects to `select-amount`; a step ahead of what the user has completed

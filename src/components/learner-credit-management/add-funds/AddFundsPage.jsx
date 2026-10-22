@@ -3,14 +3,12 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { Skeleton, Stack } from '@openedx/paragon';
-import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
+import { FormattedMessage } from '@edx/frontend-platform/i18n';
 
 import { features } from '../../../config';
 import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import NotFoundPage from '../../NotFoundPage';
-import {
-  canTopUpBudget, getBudgetStatus, useBudgetId, useSubsidyAccessPolicy,
-} from '../data';
+import { canTopUpBudget, useBudgetId, useSubsidyAccessPolicy } from '../data';
 import BudgetDetailPageWrapper from '../BudgetDetailPageWrapper';
 import AddFundsBreadcrumbs from './AddFundsBreadcrumbs';
 import AddFundsStepper from './AddFundsStepper';
@@ -23,7 +21,6 @@ import { ADD_FUNDS_ROUTE_SEGMENT, AddFundsContextProvider } from './data';
  * redirect back to budget detail.
  */
 const AddFundsPage = ({ enterpriseSlug }) => {
-  const intl = useIntl();
   const navigate = useNavigate();
   const { budgetId, subsidyAccessPolicyId } = useBudgetId();
   const {
@@ -64,13 +61,7 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     return <Navigate to={budgetDetailPath} replace />;
   }
 
-  const { status } = getBudgetStatus({
-    intl,
-    startDateStr: subsidyAccessPolicy.subsidyActiveDatetime,
-    endDateStr: subsidyAccessPolicy.subsidyExpirationDatetime,
-    isBudgetRetired: subsidyAccessPolicy.retired,
-  });
-  if (!canTopUpBudget({ isPolicy: true, status })) {
+  if (!canTopUpBudget({ isPolicy: true, status: subsidyAccessPolicy.status })) {
     return <Navigate to={budgetDetailPath} replace />;
   }
 

@@ -23,19 +23,20 @@ const AddFundsStepper = ({ onExit }) => {
     goToPreviousStep,
     stepHeadingRef,
   } = useAddFunds();
-  const isInitialRender = useRef(true);
+  const focusedStepKey = useRef(null);
 
   // Move focus to the new step's heading on step change (but not on first load) so keyboard and
-  // screen reader users are taken to the new content.
+  // screen reader users are taken to the new content. Comparing against the last step seen, rather
+  // than a "first render" flag, keeps StrictMode's double-run effects from focusing on load.
   useEffect(() => {
     if (stepRedirect) {
       return;
     }
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
-      return;
+    const previousStepKey = focusedStepKey.current;
+    focusedStepKey.current = currentStepKey;
+    if (previousStepKey && previousStepKey !== currentStepKey) {
+      stepHeadingRef.current?.focus();
     }
-    stepHeadingRef.current?.focus();
   }, [currentStepKey, stepRedirect, stepHeadingRef]);
 
   // TODO: replace each `StepComingSoon` with the real step component as it is built.

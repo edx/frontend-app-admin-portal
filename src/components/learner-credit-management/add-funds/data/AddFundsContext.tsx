@@ -1,7 +1,7 @@
 import React, {
   createContext, useCallback, useContext, useMemo, useReducer, useRef,
 } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 import { ADD_FUNDS_STEPS } from './constants';
 import type { AddFundsStepKey } from './constants';
@@ -26,6 +26,9 @@ export type AddFundsContextValue = AddFundsState & {
   updateFormData: (payload: Partial<AddFundsFormData>) => void;
 };
 
+/** History state set by Continue, recording the step the user came from. */
+const PREVIOUS_STEP_STATE_KEY = 'addFundsPreviousStep';
+
 const AddFundsContext = createContext<AddFundsContextValue | undefined>(undefined);
 
 export type AddFundsContextProviderProps = {
@@ -48,6 +51,7 @@ export const AddFundsContextProvider = ({
   basePath,
 }: AddFundsContextProviderProps) => {
   const { step } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const [state, dispatch] = useReducer(
@@ -72,15 +76,27 @@ export const AddFundsContextProvider = ({
       getStepPath,
       goToNextStep: () => {
         const nextStepKey = ADD_FUNDS_STEPS[currentStepIndex + 1];
-        if (nextStepKey) { navigate(getStepPath(nextStepKey)); }
+        if (nextStepKey) {
+          navigate(getStepPath(nextStepKey), { state: { [PREVIOUS_STEP_STATE_KEY]: currentStepKey } });
+        }
       },
+      // Back pops history when the previous step is the entry right behind this one (reached via
+      // Continue), so the flow never grows the history stack and leaving it from the first step
+      // (which replaces the remaining entry) doesn't leave flow entries for browser Back to reopen.
+      // Otherwise (deep link, refresh without history), replace the current entry.
       goToPreviousStep: () => {
         const previousStepKey = ADD_FUNDS_STEPS[currentStepIndex - 1];
-        if (previousStepKey) { navigate(getStepPath(previousStepKey)); }
+        if (!previousStepKey) { return; }
+        const locationState = location.state as Record<string, unknown> | null;
+        if (locationState?.[PREVIOUS_STEP_STATE_KEY] === previousStepKey) {
+          navigate(-1);
+        } else {
+          navigate(getStepPath(previousStepKey), { replace: true });
+        }
       },
       updateFormData: (payload: Partial<AddFundsFormData>) => dispatch({ type: 'UPDATE_FORM_DATA', payload }),
     };
-  }, [state, step, navigate, getStepPath]);
+  }, [state, step, location.state, navigate, getStepPath]);
 
   return (
     <AddFundsContext.Provider value={value}>
