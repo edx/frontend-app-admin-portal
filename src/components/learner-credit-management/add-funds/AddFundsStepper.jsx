@@ -21,8 +21,8 @@ const AddFundsStepper = ({ onExit }) => {
     canProceed,
     goToNextStep,
     goToPreviousStep,
+    stepHeadingRef,
   } = useAddFunds();
-  const stepContentRef = useRef(null);
   const isInitialRender = useRef(true);
 
   // Move focus to the new step's heading on step change (but not on first load) so keyboard and
@@ -35,8 +35,8 @@ const AddFundsStepper = ({ onExit }) => {
       isInitialRender.current = false;
       return;
     }
-    stepContentRef.current?.querySelector('[data-add-funds-step-heading]')?.focus();
-  }, [currentStepKey, stepRedirect]);
+    stepHeadingRef.current?.focus();
+  }, [currentStepKey, stepRedirect, stepHeadingRef]);
 
   // TODO: replace each `StepComingSoon` with the real step component as it is built.
   const renderStepContent = (stepKey) => (
@@ -57,7 +57,7 @@ const AddFundsStepper = ({ onExit }) => {
         <Stepper.Header />
       </Card>
       <Card className="mb-3">
-        <Card.Section ref={stepContentRef}>
+        <Card.Section>
           {ADD_FUNDS_STEPS.map((stepKey, index) => (
             <Stepper.Step
               key={stepKey}

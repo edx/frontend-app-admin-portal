@@ -1037,6 +1037,9 @@ describe('canTopUpBudget', () => {
       flag: true, isPolicy: true, status: 'Expired', expected: false,
     },
     {
+      flag: true, isPolicy: true, status: 'SomeFutureStatus', expected: false,
+    },
+    {
       flag: true, isPolicy: false, status: 'Active', expected: false,
     },
     {

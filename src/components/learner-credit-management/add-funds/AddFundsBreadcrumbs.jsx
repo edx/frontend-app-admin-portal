@@ -14,10 +14,13 @@ const AddFundsBreadcrumbs = ({ enterpriseSlug, budgetId, budgetDisplayName }) =>
   return (
     <div className="small">
       <Breadcrumb
-        ariaLabel="Add funds breadcrumb navigation"
+        ariaLabel={intl.formatMessage(messages.breadcrumbAriaLabel)}
         links={[
           { label: intl.formatMessage(messages.learnerCreditBreadcrumb), to: learnerCreditPath },
-          { label: budgetDisplayName, to: `${learnerCreditPath}/${budgetId}` },
+          {
+            label: budgetDisplayName || intl.formatMessage(messages.budgetFallbackName),
+            to: `${learnerCreditPath}/${budgetId}`,
+          },
         ]}
         linkAs={Link}
         activeLabel={intl.formatMessage(messages.pageBreadcrumb)}
@@ -29,7 +32,11 @@ const AddFundsBreadcrumbs = ({ enterpriseSlug, budgetId, budgetDisplayName }) =>
 AddFundsBreadcrumbs.propTypes = {
   enterpriseSlug: PropTypes.string.isRequired,
   budgetId: PropTypes.string.isRequired,
-  budgetDisplayName: PropTypes.string.isRequired,
+  budgetDisplayName: PropTypes.string,
+};
+
+AddFundsBreadcrumbs.defaultProps = {
+  budgetDisplayName: undefined,
 };
 
 const mapStateToProps = state => ({
