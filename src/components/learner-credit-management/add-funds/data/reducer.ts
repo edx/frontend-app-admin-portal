@@ -16,8 +16,6 @@ export const addFundsReducer = (state: AddFundsState, action: AddFundsAction): A
   switch (action.type) {
     case 'UPDATE_FORM_DATA':
       return { ...state, formData: { ...state.formData, ...action.payload } };
-    case 'RESET':
-      return initialAddFundsState;
     default:
       return state;
   }

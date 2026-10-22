@@ -20,7 +20,7 @@ import { canTopUpBudget, isBudgetRetiredOrExpired } from './data/utils';
 import { useEnterpriseBudgets } from '../EnterpriseSubsidiesContext/data/hooks';
 import SubBudgetCardUtilization from './SubBudgetCardUtilization';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
-import { ADD_FUNDS_ROUTE_SEGMENT } from './add-funds/data';
+import { ADD_FUNDS_ROUTE_SEGMENT } from './add-funds/data/constants';
 
 const BaseBackgroundFetchingWrapper = ({
   enterpriseId,

@@ -7,6 +7,16 @@ const messages = defineMessages({
     defaultMessage: 'Add Funds',
     description: 'Breadcrumb label for the Add Funds page of a learner credit budget',
   },
+  breadcrumbAriaLabel: {
+    id: 'lcm.budget.add.funds.breadcrumb.aria.label',
+    defaultMessage: 'Add funds breadcrumb navigation',
+    description: 'Accessible label for the breadcrumb navigation on the Add Funds page',
+  },
+  budgetFallbackName: {
+    id: 'lcm.budget.add.funds.breadcrumb.budget.fallback',
+    defaultMessage: 'Overview',
+    description: 'Breadcrumb label for the budget when it has no display name',
+  },
   learnerCreditBreadcrumb: {
     id: 'lcm.budget.add.funds.breadcrumb.learner.credit',
     defaultMessage: 'Learner Credit',

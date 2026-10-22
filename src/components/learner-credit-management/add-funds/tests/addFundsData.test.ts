@@ -9,13 +9,10 @@ import {
 const emptyFormData = { amount: null, paymentMethod: null };
 
 describe('addFundsReducer', () => {
-  it('merges form data updates and resets', () => {
+  it('merges form data updates', () => {
     let state = addFundsReducer(initialAddFundsState, { type: 'UPDATE_FORM_DATA', payload: { amount: 1000 } });
     state = addFundsReducer(state, { type: 'UPDATE_FORM_DATA', payload: { paymentMethod: 'card' } });
     expect(state.formData).toEqual({ amount: 1000, paymentMethod: 'card' });
-
-    state = addFundsReducer(state, { type: 'RESET' });
-    expect(state).toEqual(initialAddFundsState);
   });
 });
 

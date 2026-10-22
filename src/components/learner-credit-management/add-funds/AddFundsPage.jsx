@@ -41,7 +41,7 @@ const AddFundsPage = ({ enterpriseSlug }) => {
 
   if (isInitialLoading || (!subsidyAccessPolicy && !isError)) {
     return (
-      <BudgetDetailPageWrapper includeHero={false}>
+      <BudgetDetailPageWrapper>
         <Skeleton height={25} />
         <Skeleton height={60} />
         <Skeleton height={360} />
@@ -56,7 +56,8 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     );
   }
 
-  if (isError) {
+  // A failed background refetch keeps the cached budget; only an initial load failure exits the flow.
+  if (isError && !subsidyAccessPolicy) {
     if (error?.customAttributes?.httpErrorStatus === 404) {
       return <NotFoundPage />;
     }
@@ -78,10 +79,11 @@ const AddFundsPage = ({ enterpriseSlug }) => {
       <Stack gap={3}>
         <AddFundsBreadcrumbs
           budgetId={budgetId}
-          budgetDisplayName={subsidyAccessPolicy.displayName || 'Overview'}
+          budgetDisplayName={subsidyAccessPolicy.displayName}
         />
-        <AddFundsContextProvider basePath={addFundsBasePath}>
-          <AddFundsStepper onExit={() => navigate(budgetDetailPath)} />
+        {/* Keyed by budget so selections don't carry over when only `:budgetId` changes. */}
+        <AddFundsContextProvider key={budgetId} basePath={addFundsBasePath}>
+          <AddFundsStepper onExit={() => navigate(budgetDetailPath, { replace: true })} />
         </AddFundsContextProvider>
       </Stack>
     </BudgetDetailPageWrapper>

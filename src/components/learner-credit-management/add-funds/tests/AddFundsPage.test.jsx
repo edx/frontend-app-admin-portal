@@ -123,16 +123,41 @@ describe('AddFundsPage', () => {
     expect(screen.getByText(/This step is under development/)).toBeInTheDocument();
   });
 
+  it('falls back to "Overview" in the breadcrumb when the budget has no display name', () => {
+    useSubsidyAccessPolicy.mockReturnValue({
+      data: mockPolicy({ displayName: null }), isInitialLoading: false, isError: false,
+    });
+    renderAddFunds();
+    expect(screen.getByRole('link', { name: 'Overview' })).toHaveAttribute(
+      'href',
+      `/${enterpriseSlug}/admin/learner-credit/${mockBudgetUuid}`,
+    );
+  });
+
   it('shows a loading state', () => {
     useSubsidyAccessPolicy.mockReturnValue({ data: undefined, isInitialLoading: true, isError: false });
     renderAddFunds();
     expect(screen.getByText('Loading add funds')).toBeInTheDocument();
+    // The Hero renders while loading too, so it doesn't pop in (layout shift) once the budget loads.
+    expect(screen.getByText('Learner Credit Management')).toBeInTheDocument();
   });
 
   it('keeps showing the loading state when the policy query is paused (e.g., offline)', () => {
     useSubsidyAccessPolicy.mockReturnValue({ data: undefined, isInitialLoading: false, isError: false });
     renderAddFunds();
     expect(screen.getByText('Loading add funds')).toBeInTheDocument();
+    expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
+  });
+
+  it('stays on the flow when a background refetch fails but budget data is cached', () => {
+    useSubsidyAccessPolicy.mockReturnValue({
+      data: mockPolicy(),
+      isInitialLoading: false,
+      isError: true,
+      error: { customAttributes: { httpErrorStatus: 500 } },
+    });
+    renderAddFunds({ step: 'select-amount' });
+    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
     expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
   });
 
@@ -221,10 +246,14 @@ describe('AddFundsPage', () => {
     expectPath('payment-details');
   });
 
-  it('returns to budget detail when Back is clicked on the first step', async () => {
+  it('returns to budget detail when Back is clicked on the first step, leaving the flow', async () => {
     const user = userEvent.setup();
     renderAddFunds();
     await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
+
+    // The flow is replaced in history, so browser Back doesn't re-enter it.
+    await user.click(screen.getByRole('button', { name: 'Browser back' }));
     expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
   });
 

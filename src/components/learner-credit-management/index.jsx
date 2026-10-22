@@ -3,7 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import MultipleBudgetsPage from './MultipleBudgetsPage';
 import BudgetDetailPage from './BudgetDetailPage';
 import AddFundsPage from './add-funds';
-import { ADD_FUNDS_ROUTE_SEGMENT } from './add-funds/data';
+import { ADD_FUNDS_ROUTE_SEGMENT } from './add-funds/data/constants';
 
 const LearnerCreditManagementRoutes = () => (
   <main className="learner-credit-management">

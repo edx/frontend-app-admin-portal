@@ -827,11 +827,12 @@ export const isBudgetRetiredOrExpired = (status) => [BUDGET_STATUSES.retired, BU
  * Whether the Add Funds (Learner Credit Top Up) flow is available for a budget. Shared by the
  * "Add funds" CTA on `SubBudgetCard` and the guard in `AddFundsPage` so the two can't drift.
  * Once the top-up eligibility API is available, gate this on its per-budget response instead.
+ * Allowlist, so any new budget status is ineligible until explicitly added.
  */
 export const canTopUpBudget = ({ isPolicy, status }) => (
   !!features.TOP_UP_LEARNER_CREDIT
   && isPolicy
-  && ![BUDGET_STATUSES.scheduled, BUDGET_STATUSES.retired, BUDGET_STATUSES.expired].includes(status)
+  && [BUDGET_STATUSES.active, BUDGET_STATUSES.expiring].includes(status)
 );
 
 export const transformRequestOverview = (requestStates) => {
