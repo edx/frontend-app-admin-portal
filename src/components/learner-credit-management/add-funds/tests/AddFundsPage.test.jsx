@@ -67,10 +67,15 @@ const BrowserBackButton = () => {
   return <button type="button" onClick={() => navigate(-1)}>Browser back</button>;
 };
 
+const BrowserForwardButton = () => {
+  const navigate = useNavigate();
+  return <button type="button" onClick={() => navigate(1)}>Browser forward</button>;
+};
+
 const learnerCreditPath = `/${enterpriseSlug}/admin/learner-credit`;
 
 const renderAddFunds = ({
-  budgetId = mockBudgetUuid, step, previousEntries = [], wrapper,
+  budgetId = mockBudgetUuid, step, previousEntries = [], nextEntries = [], wrapper,
 } = {}) => render(
   <QueryClientProvider client={queryClient()}>
     <IntlProvider locale="en">
@@ -79,13 +84,16 @@ const renderAddFunds = ({
           initialEntries={[
             ...previousEntries,
             step ? `${addFundsBasePath(budgetId)}/${step}` : addFundsBasePath(budgetId),
+            ...nextEntries,
           ]}
+          initialIndex={previousEntries.length}
         >
           <Routes>
             <Route path="/:enterpriseSlug/admin/learner-credit/*" element={<LearnerCreditManagementRoutes />} />
           </Routes>
           <LocationDisplay />
           <BrowserBackButton />
+          <BrowserForwardButton />
         </MemoryRouter>
       </Provider>
     </IntlProvider>
@@ -115,10 +123,10 @@ describe('AddFundsPage', () => {
   it('matches the add-funds route instead of treating it as a budget detail tab', () => {
     renderAddFunds();
     expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toBeInTheDocument();
   });
 
-  it('renders breadcrumbs and the stepper', () => {
+  it('renders breadcrumbs, stepper and an empty order summary', () => {
     renderAddFunds();
     expect(screen.getByRole('link', { name: 'Learner Credit' })).toHaveAttribute(
       'href',
@@ -128,11 +136,12 @@ describe('AddFundsPage', () => {
       'href',
       `/${enterpriseSlug}/admin/learner-credit/${mockBudgetUuid}`,
     );
-    ['Payment Method', 'Payment Details', 'Confirmation'].forEach((label) => {
+    ['Select Amount', 'Payment Method', 'Payment Details', 'Confirmation'].forEach((label) => {
       expect(screen.getByText(label)).toBeInTheDocument();
     });
-    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
-    expect(screen.getByText(/This step is under development/)).toBeInTheDocument();
+    expect(screen.getByText('$1,800.00')).toBeInTheDocument();
+    expect(screen.getByText('March 15, 3027')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
   });
 
   it('falls back to "Overview" in the breadcrumb when the budget has no display name', () => {
@@ -169,7 +178,7 @@ describe('AddFundsPage', () => {
       error: { customAttributes: { httpErrorStatus: 500 } },
     });
     renderAddFunds({ step: 'select-amount' });
-    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toBeInTheDocument();
     expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
   });
 
@@ -181,7 +190,7 @@ describe('AddFundsPage', () => {
       error: { customAttributes: { httpErrorStatus: 404 } },
     });
     renderAddFunds();
-    expect(screen.queryByRole('heading', { name: 'Select Amount' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Select an Amount' })).not.toBeInTheDocument();
     expect(screen.getByText(/404/)).toBeInTheDocument();
   });
 
@@ -208,17 +217,76 @@ describe('AddFundsPage', () => {
     setup?.();
     renderAddFunds({ budgetId });
     expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Select Amount' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Select an Amount' })).not.toBeInTheDocument();
   });
 
-  it('gives each step its own URL and moves focus to each step heading', async () => {
+  it('selects a preset amount and updates the order summary', async () => {
+    const user = userEvent.setup();
+    renderAddFunds();
+
+    const presetButton = screen.getByRole('button', { name: '$ 5000' });
+    await user.click(presetButton);
+
+    expect(presetButton).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByText('$5,000.00')).toBeInTheDocument();
+    expect(screen.getByText('-$500.00')).toBeInTheDocument();
+    expect(screen.getByText('$4,500.00')).toBeInTheDocument();
+    expect(screen.getByText('$6,800.00')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+  });
+
+  it('validates the custom amount against the min and max limits', async () => {
+    const user = userEvent.setup();
+    renderAddFunds();
+    const input = screen.getByLabelText('Custom amount');
+
+    await user.type(input, '100');
+    expect(screen.getByText('Enter an amount between $500 and $20,000.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+
+    await user.clear(input);
+    await user.type(input, '1500');
+    expect(screen.queryByText('Enter an amount between $500 and $20,000.')).not.toBeInTheDocument();
+    expect(screen.getByText('$1,500.00')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+  });
+
+  it('rejects custom amounts just outside the limits and non-whole-dollar amounts', async () => {
+    const user = userEvent.setup();
+    renderAddFunds();
+    const input = screen.getByLabelText('Custom amount');
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const value of ['499', '20001', '500.5']) {
+      // eslint-disable-next-line no-await-in-loop
+      await user.clear(input);
+      // eslint-disable-next-line no-await-in-loop
+      await user.type(input, value);
+      expect(screen.getByText('Enter an amount between $500 and $20,000.')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+    }
+
+    // eslint-disable-next-line no-restricted-syntax
+    for (const value of ['500', '20000']) {
+      // eslint-disable-next-line no-await-in-loop
+      await user.clear(input);
+      // eslint-disable-next-line no-await-in-loop
+      await user.type(input, value);
+      expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+    }
+  });
+
+  it('gives each step its own URL, preserves the selection, and moves focus to each step heading', async () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount' });
     expectPath('select-amount');
 
+    await user.click(screen.getByRole('button', { name: '$ 1000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
+
     expectPath('payment-method');
     expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
+    expect(screen.getByText(/This step is under development/)).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expectPath('payment-details');
@@ -230,14 +298,16 @@ describe('AddFundsPage', () => {
     expectPath('payment-method');
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expectPath('select-amount');
-    expect(screen.getByRole('heading', { name: 'Select Amount' })).toHaveFocus();
+    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toHaveFocus();
+    expect(screen.getByRole('button', { name: '$ 1000' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('does not move focus to the step heading on initial load under StrictMode', async () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount', wrapper: StrictMode });
-    expect(screen.getByRole('heading', { name: 'Select Amount' })).not.toHaveFocus();
+    expect(screen.getByRole('heading', { name: 'Select an Amount' })).not.toHaveFocus();
 
+    await user.click(screen.getByRole('button', { name: '$ 1000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
   });
@@ -246,6 +316,7 @@ describe('AddFundsPage', () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount', previousEntries: [learnerCreditPath] });
 
+    await user.click(screen.getByRole('button', { name: '$ 1000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expectPath('payment-method');
     await user.click(screen.getByRole('button', { name: 'Back' }));
@@ -260,6 +331,7 @@ describe('AddFundsPage', () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount', previousEntries: [learnerCreditPath] });
 
+    await user.click(screen.getByRole('button', { name: '$ 1000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
@@ -271,11 +343,22 @@ describe('AddFundsPage', () => {
 
   it('replaces the current entry on Back when the previous step is not behind it in history', async () => {
     const user = userEvent.setup();
-    renderAddFunds({ step: 'payment-method', previousEntries: [learnerCreditPath] });
+    renderAddFunds({
+      step: 'select-amount',
+      previousEntries: [learnerCreditPath],
+      nextEntries: [`${addFundsBasePath()}/payment-method`],
+    });
+    await user.click(screen.getByRole('button', { name: '$ 1000' }));
+    // Arrive at payment-method through history, not Continue, so there is no "came from" state.
+    await user.click(screen.getByRole('button', { name: 'Browser forward' }));
+    expectPath('payment-method');
 
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expectPath('select-amount');
 
+    // Back replaced the entry instead of pushing one, so browser Back does not return to payment-method.
+    await user.click(screen.getByRole('button', { name: 'Browser back' }));
+    expectPath('select-amount');
     await user.click(screen.getByRole('button', { name: 'Browser back' }));
     expect(screen.getByTestId('multiple-budgets-page')).toBeInTheDocument();
   });
@@ -284,31 +367,31 @@ describe('AddFundsPage', () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount' });
 
+    await user.click(screen.getByRole('button', { name: '$ 2500' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expectPath('payment-method');
 
     await user.click(screen.getByRole('button', { name: 'Browser back' }));
     expectPath('select-amount');
+    expect(screen.getByRole('button', { name: '$ 2500' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it.each([
     { scenario: 'no step is given', step: undefined },
     { scenario: 'the step is unknown', step: 'not-a-step' },
+    { scenario: 'deep linking to a later step without completing earlier ones', step: 'payment-method' },
+    { scenario: 'deep linking to confirmation', step: 'confirmation' },
   ])('redirects to the select amount step when $scenario', ({ step }) => {
     renderAddFunds({ step });
     expectPath('select-amount');
-    expect(screen.getByRole('heading', { name: 'Select Amount' })).toBeInTheDocument();
-  });
-
-  it('redirects a deep link to confirmation back to the first incomplete step', () => {
-    renderAddFunds({ step: 'confirmation' });
-    expectPath('payment-details');
+    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toBeInTheDocument();
   });
 
   it('returns to budget detail when Back is clicked on the first step, leaving the flow', async () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount', previousEntries: [`${learnerCreditPath}/${mockBudgetUuid}`] });
 
+    await user.click(screen.getByRole('button', { name: '$ 1000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
