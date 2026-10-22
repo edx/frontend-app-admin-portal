@@ -5,20 +5,26 @@ import type { AddFundsFormData } from './types';
 type StepCompletionRule = (formData: AddFundsFormData) => boolean;
 
 /**
- * Per-step rules for whether the user may advance past a step. Steps without a rule (not yet
- * implemented) are treated as complete so the flow can be navigated end-to-end while they are
- * being built. Add a rule here when building a step; it drives both the Continue button and the
- * deep-link step guard.
+ * Per-step rules for whether the user may advance past a step. They drive both the Continue
+ * button and the deep-link step guard. Every step must have a rule (enforced by the type), and a
+ * step without one is treated as incomplete, so a forgotten rule blocks progress rather than
+ * allowing a step to be skipped. This is a client-side check only; the server must verify payment.
  */
-const STEP_COMPLETION_RULES: Partial<Record<AddFundsStepKey, StepCompletionRule>> = {
+const STEP_COMPLETION_RULES: Record<AddFundsStepKey, StepCompletionRule> = {
+  // TODO: replace with the real rule when the Select Amount step is built.
+  [ADD_FUNDS_STEP_KEYS.selectAmount]: () => true,
+  // TODO: replace with the real rule when the Payment Method step is built.
+  [ADD_FUNDS_STEP_KEYS.paymentMethod]: () => true,
   // TODO: Confirmation must only be reachable after a payment is submitted (or, on a Stripe
   // return redirect, verified against the backend by session id). Until payment is built,
   // nothing can complete this step, so Confirmation stays unreachable.
   [ADD_FUNDS_STEP_KEYS.paymentDetails]: () => false,
+  // Final step; there is nothing to proceed to.
+  [ADD_FUNDS_STEP_KEYS.confirmation]: () => false,
 };
 
 export const canProceedFromStep = (stepKey: AddFundsStepKey, formData: AddFundsFormData): boolean => (
-  STEP_COMPLETION_RULES[stepKey]?.(formData) ?? true
+  STEP_COMPLETION_RULES[stepKey]?.(formData) ?? false
 );
 
 /**

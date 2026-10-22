@@ -27,6 +27,10 @@ describe('canProceedFromStep', () => {
   it('never allows proceeding past payment details until payment is implemented', () => {
     expect(canProceedFromStep(ADD_FUNDS_STEP_KEYS.paymentDetails, { amount: 1000, paymentMethod: 'card' })).toBe(false);
   });
+
+  it('treats a step without a completion rule as incomplete', () => {
+    expect(canProceedFromStep('not-a-step' as any, emptyFormData)).toBe(false);
+  });
 });
 
 describe('getAddFundsStepRedirect', () => {

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { StrictMode } from 'react';
 import {
   MemoryRouter, Route, Routes, useLocation, useNavigate,
 } from 'react-router-dom';
@@ -13,6 +13,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { axe } from 'jest-axe';
 
 import { features } from '../../../../config';
+import { BUDGET_STATUSES } from '../../../EnterpriseApp/data/constants';
 import LearnerCreditManagementRoutes from '../..';
 import { useSubsidyAccessPolicy } from '../../data';
 import { queryClient } from '../../../test/testUtils';
@@ -48,6 +49,7 @@ const mockPolicy = (overrides = {}) => ({
   subsidyActiveDatetime: '2024-01-01T00:00:00Z',
   subsidyExpirationDatetime: '3027-03-15T00:00:00Z',
   retired: false,
+  status: BUDGET_STATUSES.active,
   isRetiredOrExpired: false,
   aggregates: { spendAvailableUsd: 1800 },
   ...overrides,
@@ -65,11 +67,20 @@ const BrowserBackButton = () => {
   return <button type="button" onClick={() => navigate(-1)}>Browser back</button>;
 };
 
-const renderAddFunds = ({ budgetId = mockBudgetUuid, step } = {}) => render(
+const learnerCreditPath = `/${enterpriseSlug}/admin/learner-credit`;
+
+const renderAddFunds = ({
+  budgetId = mockBudgetUuid, step, previousEntries = [], wrapper,
+} = {}) => render(
   <QueryClientProvider client={queryClient()}>
     <IntlProvider locale="en">
       <Provider store={store}>
-        <MemoryRouter initialEntries={[step ? `${addFundsBasePath(budgetId)}/${step}` : addFundsBasePath(budgetId)]}>
+        <MemoryRouter
+          initialEntries={[
+            ...previousEntries,
+            step ? `${addFundsBasePath(budgetId)}/${step}` : addFundsBasePath(budgetId),
+          ]}
+        >
           <Routes>
             <Route path="/:enterpriseSlug/admin/learner-credit/*" element={<LearnerCreditManagementRoutes />} />
           </Routes>
@@ -79,6 +90,7 @@ const renderAddFunds = ({ budgetId = mockBudgetUuid, step } = {}) => render(
       </Provider>
     </IntlProvider>
   </QueryClientProvider>,
+  { wrapper },
 );
 
 const expectPath = (step) => {
@@ -177,9 +189,9 @@ describe('AddFundsPage', () => {
     { scenario: 'the feature flag is off', setup: () => { features.TOP_UP_LEARNER_CREDIT = false; } },
     { scenario: 'the budget is not a policy', budgetId: '123' },
     ...[
-      { status: 'retired', overrides: { retired: true, isRetiredOrExpired: true } },
-      { status: 'expired', overrides: { subsidyExpirationDatetime: '2024-06-01T00:00:00Z', isRetiredOrExpired: true } },
-      { status: 'scheduled', overrides: { subsidyActiveDatetime: '3026-01-01T00:00:00Z' } },
+      { status: 'retired', overrides: { status: BUDGET_STATUSES.retired, isRetiredOrExpired: true } },
+      { status: 'expired', overrides: { status: BUDGET_STATUSES.expired, isRetiredOrExpired: true } },
+      { status: 'scheduled', overrides: { status: BUDGET_STATUSES.scheduled } },
     ].map(({ status, overrides }) => ({
       scenario: `the budget is ${status}`,
       setup: () => useSubsidyAccessPolicy.mockReturnValue({
@@ -221,6 +233,53 @@ describe('AddFundsPage', () => {
     expect(screen.getByRole('heading', { name: 'Select Amount' })).toHaveFocus();
   });
 
+  it('does not move focus to the step heading on initial load under StrictMode', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'select-amount', wrapper: StrictMode });
+    expect(screen.getByRole('heading', { name: 'Select Amount' })).not.toHaveFocus();
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
+  });
+
+  it('steps back through history instead of adding entries when Back is clicked', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'select-amount', previousEntries: [learnerCreditPath] });
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expectPath('payment-method');
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expectPath('select-amount');
+
+    // Browser Back leaves the flow rather than returning to payment-method.
+    await user.click(screen.getByRole('button', { name: 'Browser back' }));
+    expect(screen.getByTestId('multiple-budgets-page')).toBeInTheDocument();
+  });
+
+  it('does not re-enter the flow on browser Back after leaving it from a later step', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'select-amount', previousEntries: [learnerCreditPath] });
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Browser back' }));
+    expect(screen.getByTestId('multiple-budgets-page')).toBeInTheDocument();
+  });
+
+  it('replaces the current entry on Back when the previous step is not behind it in history', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'payment-method', previousEntries: [learnerCreditPath] });
+
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expectPath('select-amount');
+
+    await user.click(screen.getByRole('button', { name: 'Browser back' }));
+    expect(screen.getByTestId('multiple-budgets-page')).toBeInTheDocument();
+  });
+
   it('supports browser history navigation between steps', async () => {
     const user = userEvent.setup();
     renderAddFunds({ step: 'select-amount' });
@@ -259,11 +318,16 @@ describe('AddFundsPage', () => {
 
   it('is accessible', async () => {
     const { container } = renderAddFunds();
-    // Paragon's <Breadcrumb> renders `<li role="presentation">` separators inside its <ol>, which
-    // trips axe's `list` rule. That markup is owned by Paragon, so exclude it from this audit
-    // rather than disabling the rule globally.
-    container.querySelector('.pgn__breadcrumb')?.remove();
-    const results = await axe(container, accessibilitySettings);
+    const results = await axe(container, {
+      ...accessibilitySettings,
+      rules: {
+        ...accessibilitySettings.rules,
+        // TODO(ENT-XXXXX): Paragon's <Breadcrumb> renders `<li role="presentation">` separators
+        // inside its <ol>, which trips axe's `list` rule. This is Paragon-owned markup, so the rule
+        // is disabled for this test only; the rest of the breadcrumb is still audited.
+        list: { enabled: false },
+      },
+    });
     expect(results).toHaveNoViolations();
   });
 });
