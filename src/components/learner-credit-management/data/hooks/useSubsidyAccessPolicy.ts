@@ -35,7 +35,7 @@ const useSubsidyAccessPolicy = (subsidyAccessPolicyId) => {
         return data;
       }
 
-      // Calculate if the budget is retired or expired using getBudgetStatus for consistency
+      // Derive the budget status once here so consumers read it instead of recomputing it.
       const { status } = getBudgetStatus({
         intl,
         startDateStr: data.subsidyActiveDatetime,
@@ -45,6 +45,7 @@ const useSubsidyAccessPolicy = (subsidyAccessPolicyId) => {
 
       return {
         ...data,
+        status,
         isRetiredOrExpired: isBudgetRetiredOrExpired(status),
       };
     },
