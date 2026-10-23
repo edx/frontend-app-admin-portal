@@ -142,3 +142,8 @@ Select Amount step, not in the core flow.
 - **Accessibility test:** Paragon's `<Breadcrumb>` trips axe's `list` rule
   (`<li role="presentation">` separators inside its `<ol>`). `AddFundsPage.test.jsx` disables
   only that rule, only in that test, per the exception process in `tests/accessibility-settings.ts`.
+
+## Decision record
+
+The one-URL-per-step pattern, and why this flow does not use `FormWorkflow`, is recorded in
+[ADR 0014](../decisions/0014-add-funds-one-url-per-step.rst).
