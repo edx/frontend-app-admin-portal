@@ -138,6 +138,10 @@ The admin portal integrates with several Open edX backend services:
 - Requires devstack (LMS, enterprise services) running locally
 - `STRIPE_PUBLISHABLE_KEY` must be set in `.env.development` for local testing of billing features
 
+### Local Stage Development
+- Runs on `localhost.stage.edx.org`
+- Start with: `npm run start:stage`
+
 ### Key Configuration
 - Feature flags in `src/config/index.js` control functionality
 - Environment-based configuration for different deployment targets
