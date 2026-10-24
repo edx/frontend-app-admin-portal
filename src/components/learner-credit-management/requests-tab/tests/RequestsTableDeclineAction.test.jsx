@@ -1,5 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import {
+  render, screen, fireEvent, waitFor, within,
+} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { Provider } from 'react-redux';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -14,11 +16,14 @@ import { BudgetDetailPageContext } from '../../BudgetDetailPageWrapper';
 import { queryClient } from '../../../test/testUtils';
 import { LEARNER_CREDIT_REQUEST_STATES } from '../../data';
 import { accessibilitySettings } from '../../../../../tests/accessibility-settings';
+import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
+
+jest.mock('../../../../data/services/EnterpriseAccessApiService');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useParams: () => ({
-    budgetId: 'test-policy-id',
+    budgetId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
   }),
 }));
 
@@ -171,6 +176,42 @@ describe('RequestsTableDeclineAction', () => {
     expect(
       screen.getByText(/decline enrollment requests\?/i),
     ).toBeInTheDocument();
+  });
+
+  it('passes table filters when declining the entire table', async () => {
+    EnterpriseAccessApiService.declineAllBnrSubsidyRequests.mockResolvedValueOnce({
+      status: 202,
+      data: { declined: ['request-1', 'request-2'], non_declinable: [] },
+    });
+    const filters = [{ id: 'learnerRequestState', value: ['requested'] }];
+
+    renderWithProviders({
+      isEntireTableSelected: true,
+      requestStatusCounts: [
+        { learnerRequestState: LEARNER_CREDIT_REQUEST_STATES.requested, count: 2 },
+      ],
+      tableInstance: { state: { filters } },
+    });
+
+    fireEvent.click(screen.getByRole('button', {
+      name: /decline \(2\)/i,
+    }));
+
+    const dialog = screen.getByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', {
+      name: /decline \(2\)/i,
+    }));
+
+    await waitFor(() => {
+      expect(EnterpriseAccessApiService.declineAllBnrSubsidyRequests).toHaveBeenCalledWith({
+        enterpriseId: 'test-enterprise-id',
+        subsidyAccessPolicyId: 'a52e6548-649f-4576-b73f-c5c2bee25e9c',
+        declineReason: '',
+        options: {
+          learner_request_state: LEARNER_CREDIT_REQUEST_STATES.requested,
+        },
+      });
+    });
   });
 
   it('renders with empty selectedFlatRows', () => {
