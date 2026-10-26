@@ -29,7 +29,8 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     isError,
     error,
   } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
-  const budgetDetailPath = `/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}`;
+  const learnerCreditPath = `/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}`;
+  const budgetDetailPath = `${learnerCreditPath}/${budgetId}`;
   const addFundsBasePath = `${budgetDetailPath}/${ADD_FUNDS_ROUTE_SEGMENT}`;
 
   if (!features.TOP_UP_LEARNER_CREDIT || !subsidyAccessPolicyId) {
@@ -69,7 +70,8 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     <BudgetDetailPageWrapper subsidyAccessPolicy={subsidyAccessPolicy}>
       <Stack gap={3}>
         <AddFundsBreadcrumbs
-          budgetId={budgetId}
+          learnerCreditPath={learnerCreditPath}
+          budgetDetailPath={budgetDetailPath}
           budgetDisplayName={subsidyAccessPolicy.displayName}
         />
         {/* Keyed by budget so selections don't carry over when only `:budgetId` changes. */}

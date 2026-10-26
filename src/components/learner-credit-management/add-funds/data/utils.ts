@@ -6,9 +6,9 @@ type StepCompletionRule = (formData: AddFundsFormData) => boolean;
 
 /**
  * Per-step rules for whether the user may advance past a step. They drive both the Continue
- * button and the deep-link step guard. Every step must have a rule (enforced by the type), and a
- * step without one is treated as incomplete, so a forgotten rule blocks progress rather than
- * allowing a step to be skipped. This is a client-side check only; the server must verify payment.
+ * button and the deep-link step guard. The type requires a rule for every step, so a new step
+ * can't be added without deciding when it is complete. This is a client-side check only; the
+ * server must verify payment.
  */
 const STEP_COMPLETION_RULES: Record<AddFundsStepKey, StepCompletionRule> = {
   // TODO: replace with the real rule when the Select Amount step is built.
@@ -24,7 +24,7 @@ const STEP_COMPLETION_RULES: Record<AddFundsStepKey, StepCompletionRule> = {
 };
 
 export const canProceedFromStep = (stepKey: AddFundsStepKey, formData: AddFundsFormData): boolean => (
-  STEP_COMPLETION_RULES[stepKey]?.(formData) ?? false
+  STEP_COMPLETION_RULES[stepKey](formData)
 );
 
 /**

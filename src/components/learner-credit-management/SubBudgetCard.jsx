@@ -46,7 +46,6 @@ BaseBackgroundFetchingWrapper.defaultProps = {
 const mapStateToProps = state => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
   enablePortalLearnerCreditManagementScreen: state.portalConfiguration.enablePortalLearnerCreditManagementScreen,
-  enterpriseFeatures: state.features,
 });
 
 const BackgroundFetchingWrapper = connect(mapStateToProps)(BaseBackgroundFetchingWrapper);

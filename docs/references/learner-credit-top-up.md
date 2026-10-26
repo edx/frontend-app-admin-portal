@@ -11,51 +11,22 @@ is currently gated behind a single frontend-only rollout flag, `features.TOP_UP_
 `?feature=TOP_UP_LEARNER_CREDIT`; `hasFeatureFlagEnabled` reads the repeated `feature` query
 parameter, so `?TOP_UP_LEARNER_CREDIT=true` does not work).
 
-The eventual source of truth is meant to be a backend-driven, per-enterprise flag read from Redux:
-
-```
-state.portalConfiguration.enterpriseFeatures.topUpLearnerCreditEnabled
-```
-
-following the same pattern used by other per-enterprise flags in this codebase (e.g.
-`enterpriseEditHighlightsEnabled`, `enterpriseAdminOnboardingEnabled`) — sourced from the
-`enterprise_features` field returned by the LMS enterprise-customer API
-(`src/data/services/LmsApiService.ts`, owned by the **edx-enterprise** repo).
-
-**That Redux read is intentionally not wired into `SubBudgetCard` yet** — the `enterprise_features`
-field it depends on doesn't exist in edx-enterprise yet, so it would always evaluate to `false`
-today (dead weight). Re-add `mapStateToProps` reading
-`!!state.portalConfiguration.enterpriseFeatures?.topUpLearnerCreditEnabled` and OR it with
-`features.TOP_UP_LEARNER_CREDIT` in `canTopUpBudget` (`learner-credit-management/data/utils.js`) once that backend field ships in edx-enterprise.
-
 The CTA only renders when the flag is on, the budget source is `BUDGET_TYPES.policy`
 (enterprise-access Learner Credit policies — not legacy ecommerce offers or enterprise-subsidy
 sub-budgets; `BudgetCard` passes `source` through to `SubBudgetCard`), **and** `canTopUpBudget`
 allows its status: Active or Expiring only, so scheduled, retired, expired and any unknown future
 status are excluded (it never appears alongside "View budget history"). It uses `outline-primary` so
 "View budget" remains the single primary action on the card, and links to the Add Funds flow
-described below. Once the top-up eligibility API is ready, visibility should also depend on that
-API's per-budget eligibility response (see `canTopUpBudget` in `learner-credit-management/data/utils.js`).
-
-### Rollout plan: flags vs. eligibility
-
-Both flags are **rollout gates only** ("is this feature live"), not business authorization ("who
-qualifies, and for how much"). Once the top-up eligibility API exists:
-
-- `canTopUpBudget` should be gated on the per-budget eligibility criteria returned by that API.
-- The flags should either be retired, or kept narrowly as an engineering kill-switch layered on top
-  of the eligibility check (e.g. `eligibleFromApi && flagStillOn && isActiveOrExpiring`) — they
-  should not remain the primary authorization mechanism long-term.
-- The backend per-enterprise flag in edx-enterprise should not be extended with more business logic
-  (e.g. contract type, remaining cap) — that belongs in the eligibility API's response, not in a
-  boolean per-enterprise toggle.
+described below. The flag is a rollout gate ("is this feature live"), not business eligibility.
 
 ## Add Funds flow (multi-step checkout)
 
 Route: `/:enterpriseSlug/admin/learner-credit/:budgetId/add-funds/:step?`, registered in
 `src/components/learner-credit-management/index.jsx`. **Each step has its own URL** (e.g.
 `.../add-funds/select-amount`), matching frontend-app-enterprise-checkout. Code lives in
-`src/components/learner-credit-management/add-funds/`.
+`src/components/learner-credit-management/add-funds/`. Why this flow uses one URL per step
+instead of the existing `FormWorkflow` modal pattern is recorded in
+[ADR 0014](../decisions/0014-url-per-step-for-add-funds-flow.rst).
 
 | Step | Key | Status |
 | --- | --- | --- |
@@ -93,48 +64,27 @@ covers this. Don't add a budget detail tab named `add-funds`.
   `useReducer` + React Context (not Redux) holding `formData` (`amount`, `paymentMethod`).
   In-memory only — a refresh mid-flow clears it and the step guard sends the user back to the
   first incomplete step, by design (no payment data in browser storage).
-- *Server state* — react-query. Budget data comes from the existing `useSubsidyAccessPolicy`.
-  New top-up APIs (eligibility, quote, checkout) should be react-query hooks with keys nested
-  under `learnerCreditManagementQueryKeys.budget(budgetId)` so invalidating the budget after a
-  successful top-up refreshes everything.
+- *Server state* — react-query. Budget data comes from the existing `useSubsidyAccessPolicy`,
+  so the cache is shared with the budget detail page.
 
 **Confirmation is currently unreachable**: the `payment-details` completion rule returns `false` until payment submission exists, so Continue is disabled there and deep links
 to `confirmation` are redirected.
-
-**Stripe return redirects (to build with steps 3–4):** Stripe `confirm()` may leave the app for
-3-D Secure authentication and return via a full page reload to `returnUrl` (e.g.
-`.../add-funds/confirmation?session_id=...`). That reload wipes context, react-query and Redux
-state, so:
-- Confirmation must rebuild from the backend (session status + amount by session id), never from
-  context or Stripe's `redirect_status` query param (user-editable).
-- Exempt Confirmation from the form-data step guard when a session id is present, or the guard
-  will bounce a paying user to step 1.
-- Handle `succeeded` / `processing` / `failed` outcomes (card only, per ADR 0012); poll until final,
-  then invalidate the budget query (webhook may lag).
-- Enter Confirmation with `navigate(..., { replace: true })` and make it read-only, so refresh or
-  browser Back can't resubmit payment.
-- Requires an enterprise-access endpoint for top-up session status — not yet in the tech spec.
 
 **Adding/building a step:**
 1. Steps are ordered by `ADD_FUNDS_STEPS` in `data/constants.ts`; labels are in `messages.js`.
 2. Replace the `StepComingSoon` fallback for the step in `AddFundsStepper.jsx#renderStepContent`.
 3. Replace the step's placeholder completion rule in `STEP_COMPLETION_RULES` (`data/utils.ts`) —
-   this drives both the Continue button and the deep-link step guard. Rules fail closed: the
-   type requires a rule for every step, and a step without one counts as incomplete. Today's
+   this drives both the Continue button and the deep-link step guard. The type requires a rule
+   for every step, so the compiler rejects a step added without one. Today's
    placeholder steps are marked complete explicitly (`() => true`) and must get real rules.
    This is a client-side check only; the server must verify payment before showing success.
 4. Start the step with `AddFundsStepHeading`; the stepper moves focus to it on step change.
 
-**Order Summary sidebar:** shown in the designs next to the step content; it lands with the
-Select Amount step, not in the core flow.
+This doc covers only what has shipped. Planned work and its design live in ENT-12396 and the
+tech spec; add each part here when it lands.
 
 ## Gotchas
 
-- `SubBudgetCard.jsx`'s `BackgroundFetchingWrapper` maps `enterpriseFeatures: state.features`.
-  That is the wrong Redux slice (`state.features` is unrelated) and the prop is never used, so
-  don't build the per-enterprise flag on it; read
-  `state.portalConfiguration.enterpriseFeatures?.topUpLearnerCreditEnabled` instead, once the
-  backend field exists (see "Current state" above).
 - **Focus on step change** (`AddFundsStepper.jsx`): the stepper compares against the last step
   it saw rather than using a "first render" flag. The app renders in `<StrictMode>`, which runs
   mount effects twice while keeping refs, so a first-render flag would focus the heading on load
