@@ -262,7 +262,7 @@ export const useStripeEventsBySubscription = ({ subscriptions, subscriptionsLoad
     const fetchAll = async () => {
       // Only self-service plans are purchased through Stripe; sales-provisioned plans never have Stripe data.
       const uuids = subscriptions.results
-        .filter(s => [SELF_SERVICE_TRIAL, SELF_SERVICE_PAID].includes(s.planType))
+        .filter(s => [SELF_SERVICE_PAID, SELF_SERVICE_TRIAL].includes(s.planType))
         .map(s => s.uuid);
       const settled = await Promise.allSettled(
         uuids.map(uuid => EnterpriseAccessApiService.fetchStripeEvent(uuid)),
