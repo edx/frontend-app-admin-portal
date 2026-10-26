@@ -12,15 +12,15 @@ import {
 import { Add } from '@openedx/paragon/icons';
 
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import { features } from '../../config';
 import { BUDGET_STATUSES, BUDGET_TYPES, ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import {
   getBudgetStatus, getTranslatedBudgetStatus, getTranslatedBudgetTerm,
 } from './data';
-import { isBudgetRetiredOrExpired } from './data/utils';
+import { canTopUpBudget, isBudgetRetiredOrExpired } from './data/utils';
 import { useEnterpriseBudgets } from '../EnterpriseSubsidiesContext/data/hooks';
 import SubBudgetCardUtilization from './SubBudgetCardUtilization';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
+import { ADD_FUNDS_ROUTE_SEGMENT } from './add-funds/data/constants';
 
 const BaseBackgroundFetchingWrapper = ({
   enterpriseId,
@@ -46,7 +46,6 @@ BaseBackgroundFetchingWrapper.defaultProps = {
 const mapStateToProps = state => ({
   enterpriseId: state.portalConfiguration.enterpriseId,
   enablePortalLearnerCreditManagementScreen: state.portalConfiguration.enablePortalLearnerCreditManagementScreen,
-  enterpriseFeatures: state.features,
 });
 
 const BackgroundFetchingWrapper = connect(mapStateToProps)(BaseBackgroundFetchingWrapper);
@@ -93,13 +92,7 @@ const BaseSubBudgetCard = ({
     },
   ) : undefined;
   const isRetiredOrExpired = isBudgetRetiredOrExpired(status);
-  // Once the top-up eligibility API is available, gate `canAddFunds` on the per-budget
-  // eligibility criteria returned by that API instead.
-  const canAddFunds = (
-    features.TOP_UP_LEARNER_CREDIT
-    && source === BUDGET_TYPES.policy
-    && !isRetiredOrExpired
-  );
+  const canAddFunds = canTopUpBudget({ isPolicy: source === BUDGET_TYPES.policy, status });
 
   const hasBudgetAggregatesSection = () => {
     const statusesWithoutAggregates = [
@@ -111,13 +104,12 @@ const BaseSubBudgetCard = ({
   const renderActions = (budgetId) => (
     <Stack direction="horizontal" gap={2}>
       {canAddFunds && (
-        // TODO: disabled until the top-up flow (destination/handler) is built. Remove `disabled`
-        // once this is wired up to the actual add-funds flow.
         <Button
           data-testid="add-funds"
+          as={Link}
+          to={`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}/${ADD_FUNDS_ROUTE_SEGMENT}`}
           variant="outline-primary"
           iconBefore={Add}
-          disabled
         >
           <FormattedMessage
             id="lcm.budgets.budget.card.add.funds"

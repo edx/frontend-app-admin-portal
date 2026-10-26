@@ -443,7 +443,7 @@ describe('<BudgetCard />', () => {
     expect(screen.getByText(formatPrice(mockBudgetAggregates.spent))).toBeInTheDocument();
 
     // Add funds should not display by default (feature flag off)
-    expect(screen.queryByRole('button', { name: 'Add funds' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
   });
 
   it('displays correctly for a current Subsidy (enterprise-subsidy)', () => {
@@ -695,13 +695,15 @@ describe('<BudgetCard />', () => {
     it.each([
       { status: BUDGET_STATUSES.active, dates: currentDates },
       { status: BUDGET_STATUSES.expiring, dates: expiringDates },
-    ])('displays a disabled Add funds CTA for a $status Policy (enterprise-access)', ({ status, dates }) => {
+    ])('displays an Add funds CTA linking to the add funds flow for a $status Policy (enterprise-access)', ({ status, dates }) => {
       renderBudgetCard({ source: BUDGET_TYPES.policy, ...dates });
 
       expect(screen.getByText(status)).toBeInTheDocument();
-      const addFundsCTA = screen.getByRole('button', { name: 'Add funds' });
-      // Disabled until the add-funds flow (handler) is built.
-      expect(addFundsCTA).toBeDisabled();
+      const addFundsCTA = screen.getByRole('link', { name: 'Add funds' });
+      expect(addFundsCTA).toHaveAttribute(
+        'href',
+        `/${enterpriseSlug}/admin/learner-credit/${mockBudgetUuid}/add-funds`,
+      );
       expect(screen.getByText('View budget')).toBeInTheDocument();
     });
 
@@ -725,7 +727,7 @@ describe('<BudgetCard />', () => {
         // Scheduled budgets render no header actions at all.
         expect(screen.getByText(/View budget/)).toBeInTheDocument();
       }
-      expect(screen.queryByRole('button', { name: 'Add funds' })).not.toBeInTheDocument();
+      expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
     });
   });
 
