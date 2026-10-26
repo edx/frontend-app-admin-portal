@@ -8,8 +8,6 @@ import {
   isValidTopUpAmount,
 } from '../data';
 
-const emptyFormData = { amount: null, paymentMethod: null };
-
 describe('addFundsReducer', () => {
   it('merges form data updates', () => {
     let state = addFundsReducer(initialAddFundsState, { type: 'UPDATE_FORM_DATA', payload: { amount: 1000 } });
