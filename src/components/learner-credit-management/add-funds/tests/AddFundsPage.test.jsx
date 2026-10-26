@@ -228,9 +228,9 @@ describe('AddFundsPage', () => {
     await user.click(presetButton);
 
     expect(presetButton).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByText('$5,000.00')).toBeInTheDocument();
-    expect(screen.getByText('-$500.00')).toBeInTheDocument();
-    expect(screen.getByText('$4,500.00')).toBeInTheDocument();
+    // No discount is set yet, so credit amount and total cost are both the full amount.
+    expect(screen.getAllByText('$5,000.00')).toHaveLength(2);
+    expect(screen.queryByText(/Discount/)).not.toBeInTheDocument();
     expect(screen.getByText('$6,800.00')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
   });
@@ -247,7 +247,23 @@ describe('AddFundsPage', () => {
     await user.clear(input);
     await user.type(input, '1500');
     expect(screen.queryByText('Enter an amount between $500 and $20,000.')).not.toBeInTheDocument();
-    expect(screen.getByText('$1,500.00')).toBeInTheDocument();
+    expect(screen.getAllByText('$1,500.00')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+  });
+
+  it('selects the matching preset for a custom amount and restores both when returning to the step', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'select-amount' });
+
+    await user.type(screen.getByLabelText('Custom amount'), '1000');
+    expect(screen.getByRole('button', { name: '$ 1000' })).toHaveAttribute('aria-pressed', 'true');
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expectPath('payment-method');
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expectPath('select-amount');
+
+    expect(screen.getByLabelText('Custom amount')).toHaveValue(1000);
+    expect(screen.getByRole('button', { name: '$ 1000' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
   });
 

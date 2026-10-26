@@ -5,7 +5,8 @@ import { Card } from '@openedx/paragon';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 
 import { formatPrice } from '../data';
-import { calculateOrderSummary, TOP_UP_DISCOUNT_RATE, useAddFunds } from './data';
+import { calculateOrderSummary, useAddFunds } from './data';
+import messages from './messages';
 
 const formatCurrency = (value) => formatPrice(value, { minimumFractionDigits: 2 });
 
@@ -37,68 +38,38 @@ const OrderSummary = ({ currentBalance, expirationDate, discountRate }) => {
     <Card className="bg-light-300" data-testid="add-funds-order-summary">
       <Card.Section aria-live="polite">
         <h3 className="h4 mb-3">
-          <FormattedMessage
-            id="lcm.budget.add.funds.order.summary.title"
-            defaultMessage="Order Summary"
-            description="Heading for the order summary panel in the Add Funds flow"
-          />
+          <FormattedMessage {...messages.orderSummaryTitle} />
         </h3>
         <hr className="mt-0 mb-3" />
         <dl className="mb-0">
           <SummaryRow
-            label={(
-              <FormattedMessage
-                id="lcm.budget.add.funds.order.summary.credit.amount"
-                defaultMessage="Credit Amount"
-                description="Label for the amount of credit being added to the budget"
-              />
-              )}
+            label={<FormattedMessage {...messages.creditAmount} />}
             value={summary ? formatCurrency(summary.creditAmount) : EMPTY_VALUE}
           />
           {discountRate !== null && (
             <SummaryRow
               label={(
                 <FormattedMessage
-                  id="lcm.budget.add.funds.order.summary.discount"
-                  defaultMessage="Discount ({discountPercent})"
-                  description="Label for the discount applied to the top-up purchase"
+                  {...messages.discount}
                   values={{ discountPercent: intl.formatNumber(discountRate, { style: 'percent' }) }}
                 />
-                )}
+              )}
               value={summary ? `-${formatCurrency(summary.discount ?? 0)}` : EMPTY_VALUE}
             />
           )}
           <SummaryRow
-            label={(
-              <FormattedMessage
-                id="lcm.budget.add.funds.order.summary.total.cost"
-                defaultMessage="Total Cost"
-                description="Label for the total cost of the top-up purchase after discount"
-              />
-              )}
+            label={<FormattedMessage {...messages.totalCost} />}
             value={summary ? formatCurrency(summary.totalCost) : EMPTY_VALUE}
           />
         </dl>
         <hr className="my-3" />
         <dl className="mb-0">
           <SummaryRow
-            label={(
-              <FormattedMessage
-                id="lcm.budget.add.funds.order.summary.current.balance"
-                defaultMessage="Current Balance"
-                description="Label for the budget's current available balance"
-              />
-              )}
+            label={<FormattedMessage {...messages.currentBalance} />}
             value={formatCurrency(currentBalance)}
           />
           <SummaryRow
-            label={(
-              <FormattedMessage
-                id="lcm.budget.add.funds.order.summary.new.balance"
-                defaultMessage="New Balance"
-                description="Label for the budget's balance after the top-up is applied"
-              />
-              )}
+            label={<FormattedMessage {...messages.newBalance} />}
             value={summary ? formatCurrency(summary.newBalance) : EMPTY_VALUE}
             valueClassName={summary ? 'text-success' : ''}
           />
@@ -108,9 +79,7 @@ const OrderSummary = ({ currentBalance, expirationDate, discountRate }) => {
         <Card.Footer className="bg-transparent border-0 pt-0">
           <div className="d-flex justify-content-center w-100 small font-weight-bold text-gray-700 bg-white rounded p-3">
             <FormattedMessage
-              id="lcm.budget.add.funds.order.summary.plan.expires"
-              defaultMessage="Plan Expires {expirationDate}"
-              description="The date the learner credit plan expires"
+              {...messages.planExpires}
               values={{
                 expirationDate: (
                   <strong className="ml-2 text-black">
@@ -134,8 +103,8 @@ OrderSummary.propTypes = {
 
 OrderSummary.defaultProps = {
   expirationDate: undefined,
-  // TODO: replace with the backend-provided rate (`null` when none is on record).
-  discountRate: TOP_UP_DISCOUNT_RATE,
+  // TODO: pass the backend-provided rate once the top-up pricing API exists; `null` hides the discount row.
+  discountRate: null,
 };
 
 export default OrderSummary;

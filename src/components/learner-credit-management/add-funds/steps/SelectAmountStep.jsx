@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button, Form, Stack } from '@openedx/paragon';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 
@@ -10,59 +10,39 @@ import {
   PRESET_TOP_UP_AMOUNTS,
   useAddFunds,
 } from '../data';
+import messages from '../messages';
 import AddFundsStepHeading from './AddFundsStepHeading';
-
-const getInitialCustomInput = (amount) => (
-  amount !== null && !PRESET_TOP_UP_AMOUNTS.includes(amount) ? String(amount) : ''
-);
 
 const SelectAmountStep = () => {
   const intl = useIntl();
-  const { formData: { amount }, updateFormData } = useAddFunds();
-  // The raw input is kept locally so partially-typed or invalid values can be shown and validated;
-  // only a parsed numeric amount is stored in the shared flow state.
-  const [customInput, setCustomInput] = useState(() => getInitialCustomInput(amount));
+  const { formData: { amount, customAmountInput: customInput }, updateFormData } = useAddFunds();
 
   const handlePresetClick = (presetAmount) => {
-    setCustomInput('');
-    updateFormData({ amount: presetAmount });
+    updateFormData({ amount: presetAmount, customAmountInput: '' });
   };
 
   const handleCustomChange = (e) => {
     const { value } = e.target;
-    setCustomInput(value);
     const parsed = value.trim() === '' ? null : Number(value);
-    updateFormData({ amount: Number.isFinite(parsed) ? parsed : null });
+    updateFormData({ amount: Number.isFinite(parsed) ? parsed : null, customAmountInput: value });
   };
 
   const isCustomInvalid = customInput !== '' && !isValidTopUpAmount(amount);
-  const limitsMessage = intl.formatMessage({
-    id: 'lcm.budget.add.funds.select.amount.limits',
-    defaultMessage: 'Minimum {min} · Maximum {max}',
-    description: 'Helper text describing the minimum and maximum top-up amount',
-  }, { min: formatPrice(MIN_TOP_UP_AMOUNT), max: formatPrice(MAX_TOP_UP_AMOUNT) });
+  const limits = { min: formatPrice(MIN_TOP_UP_AMOUNT), max: formatPrice(MAX_TOP_UP_AMOUNT) };
 
   return (
     <Stack gap={4}>
       <AddFundsStepHeading>
-        <FormattedMessage
-          id="lcm.budget.add.funds.select.amount.title"
-          defaultMessage="Select an Amount"
-          description="Heading for the step where the admin chooses how much to add to the budget"
-        />
+        <FormattedMessage {...messages.selectAmountTitle} />
       </AddFundsStepHeading>
-      <div className="d-flex flex-column" style={{ width: 'fit-content', maxWidth: '100%', gap: '1.5rem' }}>
+      <Stack gap={4} className="align-self-start mw-100">
         <fieldset>
           <legend className="h5">
-            <FormattedMessage
-              id="lcm.budget.add.funds.select.amount.preset.label"
-              defaultMessage="Choose a preset amount"
-              description="Label for the group of preset top-up amount buttons"
-            />
+            <FormattedMessage {...messages.presetAmountLabel} />
           </legend>
           <Stack direction="horizontal" gap={3} className="flex-wrap">
             {PRESET_TOP_UP_AMOUNTS.map((presetAmount) => {
-              const isSelected = customInput === '' && amount === presetAmount;
+              const isSelected = amount === presetAmount;
               return (
                 <Button
                   key={presetAmount}
@@ -80,51 +60,38 @@ const SelectAmountStep = () => {
         <div className="d-flex align-items-center w-100 small font-weight-bold text-gray-700" aria-hidden>
           <hr className="flex-grow-1" />
           <span className="px-3">
-            <FormattedMessage
-              id="lcm.budget.add.funds.select.amount.divider"
-              defaultMessage="Or enter a custom amount"
-              description="Divider text between preset amounts and the custom amount input"
-            />
+            <FormattedMessage {...messages.customAmountDivider} />
           </span>
           <hr className="flex-grow-1" />
         </div>
         <Form.Group isInvalid={isCustomInvalid} className="mb-0 w-100">
           <Form.Label className="sr-only">
-            <FormattedMessage
-              id="lcm.budget.add.funds.select.amount.custom.label"
-              defaultMessage="Custom amount"
-              description="Accessible label for the custom top-up amount input"
-            />
+            <FormattedMessage {...messages.customAmountLabel} />
           </Form.Label>
           <Form.Control
             className="w-100 border-gray-500 font-weight-bold"
             type="number"
-            inputMode="decimal"
+            inputMode="numeric"
             min={MIN_TOP_UP_AMOUNT}
             max={MAX_TOP_UP_AMOUNT}
             leadingElement="$"
-            placeholder={intl.formatMessage({
-              id: 'lcm.budget.add.funds.select.amount.custom.placeholder',
-              defaultMessage: 'e.g. 1500',
-              description: 'Placeholder for the custom top-up amount input',
-            })}
+            placeholder={intl.formatMessage(messages.customAmountPlaceholder)}
             value={customInput}
             onChange={handleCustomChange}
+            // Stop the mouse wheel from silently changing the amount while the field is focused.
+            onWheel={(e) => e.currentTarget.blur()}
           />
           {isCustomInvalid ? (
             <Form.Control.Feedback type="invalid">
-              <FormattedMessage
-                id="lcm.budget.add.funds.select.amount.custom.invalid"
-                defaultMessage="Enter an amount between {min} and {max}."
-                description="Validation error when the custom top-up amount is out of range"
-                values={{ min: formatPrice(MIN_TOP_UP_AMOUNT), max: formatPrice(MAX_TOP_UP_AMOUNT) }}
-              />
+              <FormattedMessage {...messages.customAmountInvalid} values={limits} />
             </Form.Control.Feedback>
           ) : (
-            <Form.Control.Feedback type="default">{limitsMessage}</Form.Control.Feedback>
+            <Form.Control.Feedback type="default">
+              {intl.formatMessage(messages.amountLimits, limits)}
+            </Form.Control.Feedback>
           )}
         </Form.Group>
-      </div>
+      </Stack>
     </Stack>
   );
 };

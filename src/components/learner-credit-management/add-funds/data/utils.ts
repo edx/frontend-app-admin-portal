@@ -3,7 +3,6 @@ import {
   ADD_FUNDS_STEPS,
   MAX_TOP_UP_AMOUNT,
   MIN_TOP_UP_AMOUNT,
-  TOP_UP_DISCOUNT_RATE,
 } from './constants';
 import type { AddFundsStepKey } from './constants';
 import type { AddFundsFormData } from './types';
@@ -79,7 +78,7 @@ export type TopUpOrderSummary = {
 export const calculateOrderSummary = (
   amount: number | null,
   currentBalance: number,
-  discountRate: number | null = TOP_UP_DISCOUNT_RATE,
+  discountRate: number | null,
 ): TopUpOrderSummary | null => {
   if (!isValidTopUpAmount(amount)) {
     return null;

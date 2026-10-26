@@ -3,6 +3,8 @@ export type PaymentMethodType = 'card';
 
 export type AddFundsFormData = {
   amount: number | null;
+  // Raw custom input text, kept so it is restored when returning to the step.
+  customAmountInput: string;
   paymentMethod: PaymentMethodType | null;
 };
 
