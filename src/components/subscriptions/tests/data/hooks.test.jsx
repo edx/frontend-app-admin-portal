@@ -10,6 +10,7 @@ import {
   useSubscriptionUsersOverview,
   useStripeEventsBySubscription,
 } from '../../data/hooks';
+import { SELF_SERVICE_PAID, SELF_SERVICE_TRIAL } from '../../data/constants';
 
 const TEST_SUBSCRIPTION_PLAN_UUID = 'test-plan-uuid-1';
 
@@ -245,9 +246,14 @@ describe('useStripeEventsBySubscription', () => {
     cleanup();
   });
 
+  const trialSub = uuid => ({ uuid, planType: SELF_SERVICE_TRIAL });
   const makeSubscriptions = (uuids) => ({
-    results: uuids.map(uuid => ({ uuid })),
+    results: uuids.map(trialSub),
   });
+  const make404Error = () => Object.assign(
+    new Error('Axios Error (Response): 404 - See custom attributes for details.'),
+    { customAttributes: { httpErrorStatus: 404 } },
+  );
 
   test('fetches Stripe info for all subscriptions in parallel', async () => {
     const uuid1 = 'uuid-1';
@@ -302,7 +308,7 @@ describe('useStripeEventsBySubscription', () => {
     });
 
     // Subscriptions finish loading with results — loading should remain true until Stripe resolves
-    rerender({ subs: { results: [{ uuid: 'uuid-1' }] }, subsLoading: false });
+    rerender({ subs: { results: [trialSub('uuid-1')] }, subsLoading: false });
     expect(result.current.loadingStripeInfo).toBe(true);
 
     await waitFor(() => {
@@ -355,7 +361,7 @@ describe('useStripeEventsBySubscription', () => {
       .mockResolvedValue(stripeResponseUuid2);
 
     const setErrors = jest.fn();
-    let subscriptions = { results: [{ uuid: uuid1 }] };
+    let subscriptions = { results: [trialSub(uuid1)] };
     const { result, rerender } = renderHook(
       ({ subs }) => useStripeEventsBySubscription({ subscriptions: subs, setErrors }),
       { initialProps: { subs: subscriptions } },
@@ -369,7 +375,7 @@ describe('useStripeEventsBySubscription', () => {
     await waitFor(() => expect(result.current.loadingStripeInfo).toBe(false));
 
     // Re-render with new subscriptions — loadingStripeInfo must go back to true
-    subscriptions = { results: [{ uuid: uuid2 }] };
+    subscriptions = { results: [trialSub(uuid2)] };
     rerender({ subs: subscriptions });
     expect(result.current.loadingStripeInfo).toBe(true);
 
@@ -399,11 +405,11 @@ describe('useStripeEventsBySubscription', () => {
     const setErrors = jest.fn();
     const { result, rerender } = renderHook(
       ({ subs }) => useStripeEventsBySubscription({ subscriptions: subs, setErrors }),
-      { initialProps: { subs: { results: [{ uuid: uuid1 }] } } },
+      { initialProps: { subs: { results: [trialSub(uuid1)] } } },
     );
 
     // Change subscriptions before the first fetch resolves — triggers cleanup
-    rerender({ subs: { results: [{ uuid: uuid2 }] } });
+    rerender({ subs: { results: [trialSub(uuid2)] } });
 
     await waitFor(() => expect(result.current.loadingStripeInfo).toBe(false));
 
@@ -528,9 +534,9 @@ describe('useStripeEventsBySubscription', () => {
     });
   });
 
-  test('stores null for subscriptions when API returns no data (e.g. 404)', async () => {
+  test('stores null for subscriptions when API returns no data', async () => {
     const uuid1 = 'uuid-no-data';
-    EnterpriseAccessApiService.fetchStripeEvent.mockResolvedValue({ status: 404 });
+    EnterpriseAccessApiService.fetchStripeEvent.mockResolvedValue({});
 
     const setErrors = jest.fn();
     const subscriptions = makeSubscriptions([uuid1]);
@@ -540,11 +546,96 @@ describe('useStripeEventsBySubscription', () => {
     }));
 
     await waitFor(() => {
-      // 404 response has no .data, so uuid1 is stored as null (key present, value null)
+      // A response with no .data stores uuid1 as null (key present, value null)
       // This allows SubscriptionCard to detect the fetch completed (not still loading)
       expect(result.current.stripeInfoByUuid).toHaveProperty(uuid1, null);
       expect(result.current.loadingStripeInfo).toBe(false);
     });
+  });
+
+  test('stores null without logging or setting an error when the API responds 404', async () => {
+    const uuid1 = 'uuid-404';
+    EnterpriseAccessApiService.fetchStripeEvent.mockRejectedValue(make404Error());
+
+    const setErrors = jest.fn();
+    const subscriptions = makeSubscriptions([uuid1]);
+    const { result } = renderHook(() => useStripeEventsBySubscription({
+      subscriptions,
+      setErrors,
+    }));
+
+    await waitFor(() => {
+      expect(result.current.stripeInfoByUuid).toHaveProperty(uuid1, null);
+      expect(result.current.loadingStripeInfo).toBe(false);
+    });
+    expect(logError).not.toHaveBeenCalled();
+    expect(setErrors).not.toHaveBeenCalled();
+  });
+
+  test('only fetches Stripe info for self-service plans and stores null for sales-provisioned plans', async () => {
+    const trialUuid = 'uuid-ssp-trial';
+    const paidUuid = 'uuid-ssp-paid';
+    const salesUuid = 'uuid-sales';
+    EnterpriseAccessApiService.fetchStripeEvent.mockImplementation(uuid => (
+      uuid === trialUuid
+        ? Promise.resolve({
+          data: {
+            upcoming_invoice_amount_due: 5000,
+            currency: 'usd',
+            canceled_date: null,
+            is_canceled: false,
+            renewed_subscription_plan_uuid: paidUuid,
+          },
+        })
+        : Promise.reject(make404Error())
+    ));
+
+    const setErrors = jest.fn();
+    const subscriptions = {
+      results: [
+        { uuid: trialUuid, planType: SELF_SERVICE_TRIAL },
+        { uuid: paidUuid, planType: SELF_SERVICE_PAID },
+        { uuid: salesUuid, planType: 'Standard Paid' },
+      ],
+    };
+    const { result } = renderHook(() => useStripeEventsBySubscription({
+      subscriptions,
+      setErrors,
+    }));
+
+    await waitFor(() => {
+      expect(result.current.loadingStripeInfo).toBe(false);
+    });
+    expect(EnterpriseAccessApiService.fetchStripeEvent).toHaveBeenCalledTimes(2);
+    expect(EnterpriseAccessApiService.fetchStripeEvent).toHaveBeenCalledWith(trialUuid);
+    expect(EnterpriseAccessApiService.fetchStripeEvent).toHaveBeenCalledWith(paidUuid);
+    expect(EnterpriseAccessApiService.fetchStripeEvent).not.toHaveBeenCalledWith(salesUuid);
+    expect(result.current.stripeInfoByUuid[trialUuid]).toMatchObject({ invoiceAmountDue: 50 });
+    expect(result.current.stripeInfoByUuid).toHaveProperty(paidUuid, null);
+    expect(result.current.stripeInfoByUuid).toHaveProperty(salesUuid, null);
+    expect(logError).not.toHaveBeenCalled();
+    expect(setErrors).not.toHaveBeenCalled();
+  });
+
+  test('stores null for every plan without fetching when no plans are self-service', async () => {
+    const setErrors = jest.fn();
+    const subscriptions = {
+      results: [
+        { uuid: 'uuid-sales-1', planType: 'Standard Paid' },
+        { uuid: 'uuid-sales-2', planType: 'Trial' },
+      ],
+    };
+    const { result } = renderHook(() => useStripeEventsBySubscription({
+      subscriptions,
+      setErrors,
+    }));
+
+    await waitFor(() => {
+      expect(result.current.loadingStripeInfo).toBe(false);
+      expect(result.current.stripeInfoByUuid).toEqual({ 'uuid-sales-1': null, 'uuid-sales-2': null });
+    });
+    expect(EnterpriseAccessApiService.fetchStripeEvent).not.toHaveBeenCalled();
+    expect(setErrors).not.toHaveBeenCalled();
   });
 });
 
@@ -562,7 +653,7 @@ describe('useSubscriptionData', () => {
     data: {
       results: [
         {
-          subscriptions: [{ uuid: trialUuid, expiration_date: expirationDate }],
+          subscriptions: [{ uuid: trialUuid, expiration_date: expirationDate, plan_type: SELF_SERVICE_TRIAL }],
           disable_expiration_notifications: false,
           net_days_until_expiration: 10,
         },

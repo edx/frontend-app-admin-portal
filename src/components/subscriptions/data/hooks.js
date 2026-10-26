@@ -8,6 +8,8 @@ import { camelCaseObject } from '@edx/frontend-platform/utils';
 import LicenseManagerApiService from '../../../data/services/LicenseManagerAPIService';
 import {
   NETWORK_ERROR_MESSAGE,
+  SELF_SERVICE_PAID,
+  SELF_SERVICE_TRIAL,
   STRIPE_EVENT_SUMMARY,
   SUBSCRIPTION_USERS,
   SUBSCRIPTION_USERS_OVERVIEW,
@@ -232,9 +234,10 @@ const normalizeStripeInfo = (data) => {
 };
 
 /**
- * Fetches Stripe payment event for each subscription simultaneously.
- * Builds a lookup table mapping each subscription UUID to its Stripe data,
- * or null if the request failed. Returns that lookup table and a loading flag.
+ * Fetches Stripe payment event for each self-service subscription simultaneously.
+ * Builds a lookup table mapping each subscription UUID to its Stripe data, or null if
+ * the plan has no Stripe data (sales-provisioned plans, 404s) or the request failed.
+ * Returns that lookup table and a loading flag.
  * @param {Object} subscriptions - The subscriptions object with a `results` array.
  * @param {boolean} subscriptionsLoading - Whether the subscriptions fetch is still in-flight.
  *   Keeping loadingStripeInfo=true while subscriptions are loading prevents a brief combined
@@ -257,22 +260,23 @@ export const useStripeEventsBySubscription = ({ subscriptions, subscriptionsLoad
     }
     setLoadingStripeInfo(true);
     const fetchAll = async () => {
-      const uuids = subscriptions.results.map(s => s.uuid);
+      // Only self-service plans are purchased through Stripe; sales-provisioned plans never have Stripe data.
+      const uuids = subscriptions.results
+        .filter(s => [SELF_SERVICE_TRIAL, SELF_SERVICE_PAID].includes(s.planType))
+        .map(s => s.uuid);
       const settled = await Promise.allSettled(
         uuids.map(uuid => EnterpriseAccessApiService.fetchStripeEvent(uuid)),
       );
       if (cancelled) { return; }
-      const infoMap = {};
+      const infoMap = Object.fromEntries(subscriptions.results.map(s => [s.uuid, null]));
       let hasError = false;
+      // A 404 means the plan has no Stripe data, so it stays null without being reported as an error.
       settled.forEach((result, idx) => {
         if (result.status === 'fulfilled' && result.value?.data) {
           infoMap[uuids[idx]] = normalizeStripeInfo(camelCaseObject(result.value.data));
-        } else {
-          if (result.status === 'rejected') {
-            logError(result.reason);
-            hasError = true;
-          }
-          infoMap[uuids[idx]] = null;
+        } else if (result.status === 'rejected' && result.reason?.customAttributes?.httpErrorStatus !== 404) {
+          logError(result.reason);
+          hasError = true;
         }
       });
       if (hasError) {
