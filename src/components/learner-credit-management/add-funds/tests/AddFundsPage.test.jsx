@@ -228,7 +228,7 @@ describe('AddFundsPage', () => {
     await user.click(presetButton);
 
     expect(presetButton).toHaveAttribute('aria-pressed', 'true');
-    // No discount is set yet, so credit amount and total cost are both the full amount.
+    // Until backend pricing exists, total cost is the credit amount.
     expect(screen.getAllByText('$5,000.00')).toHaveLength(2);
     expect(screen.queryByText(/Discount/)).not.toBeInTheDocument();
     expect(screen.getByText('$6,800.00')).toBeInTheDocument();
@@ -241,8 +241,8 @@ describe('AddFundsPage', () => {
     const input = screen.getByLabelText('Custom amount');
 
     await user.type(input, '100');
-    expect(screen.getByText('Enter an amount between $500 and $20,000.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+    expect(screen.getByRole('alert')).toHaveTextContent('Enter an amount between $500 and $20,000.');
 
     await user.clear(input);
     await user.type(input, '1500');
@@ -262,9 +262,50 @@ describe('AddFundsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Back' }));
     expectPath('select-amount');
 
-    expect(screen.getByLabelText('Custom amount')).toHaveValue(1000);
+    expect(screen.getByLabelText('Custom amount')).toHaveValue('1000');
     expect(screen.getByRole('button', { name: '$ 1000' })).toHaveAttribute('aria-pressed', 'true');
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+  });
+
+  it.each(['1e3', '1234567e', '+1000', '-500'])('shows an error for the non-digit custom amount "%s"', async (value) => {
+    const user = userEvent.setup();
+    renderAddFunds();
+    const input = screen.getByLabelText('Custom amount');
+
+    await user.type(input, value);
+
+    expect(input).toHaveValue(value);
+    expect(screen.getByText('Enter an amount between $500 and $20,000.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '$ 1000' })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeDisabled();
+  });
+
+  it('clears the custom amount when a preset is picked', async () => {
+    const user = userEvent.setup();
+    renderAddFunds();
+    const input = screen.getByLabelText('Custom amount');
+
+    await user.type(input, '1500');
+    await user.click(screen.getByRole('button', { name: '$ 2500' }));
+
+    expect(input).toHaveValue('');
+    expect(screen.getByRole('button', { name: '$ 2500' })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getAllByText('$2,500.00')).toHaveLength(2);
+  });
+
+  it('shows no balance instead of $0 when the budget has no aggregates', async () => {
+    useSubsidyAccessPolicy.mockReturnValue({
+      data: mockPolicy({ aggregates: undefined }),
+      isInitialLoading: false,
+      isError: false,
+    });
+    const user = userEvent.setup();
+    renderAddFunds();
+    await user.click(screen.getByRole('button', { name: '$ 1000' }));
+
+    expect(screen.queryByText('$0.00')).not.toBeInTheDocument();
+    expect(screen.getByText('Current Balance').nextElementSibling).toHaveTextContent('-');
+    expect(screen.getByText('New Balance').nextElementSibling).toHaveTextContent('-');
   });
 
   it('rejects custom amounts just outside the limits and non-whole-dollar amounts', async () => {
@@ -419,8 +460,19 @@ describe('AddFundsPage', () => {
     expect(screen.getByTestId('location')).not.toHaveTextContent('/add-funds');
   });
 
-  it('is accessible', async () => {
+  it.each([
+    { state: 'empty', act: async () => {} },
+    { state: 'with a populated order summary', act: async (user) => user.click(screen.getByRole('button', { name: '$ 1000' })) },
+    {
+      state: 'with an invalid custom amount',
+      act: async (user) => {
+        await user.type(screen.getByLabelText('Custom amount'), '100');
+      },
+    },
+  ])('is accessible when $state', async ({ act }) => {
+    const user = userEvent.setup();
     const { container } = renderAddFunds();
+    await act(user);
     const results = await axe(container, {
       ...accessibilitySettings,
       rules: {

@@ -97,15 +97,10 @@ const messages = defineMessages({
     defaultMessage: 'Credit Amount',
     description: 'Label for the amount of credit being added to the budget',
   },
-  discount: {
-    id: 'lcm.budget.add.funds.order.summary.discount',
-    defaultMessage: 'Discount ({discountPercent})',
-    description: 'Label for the discount applied to the top-up purchase',
-  },
   totalCost: {
     id: 'lcm.budget.add.funds.order.summary.total.cost',
     defaultMessage: 'Total Cost',
-    description: 'Label for the total cost of the top-up purchase after discount',
+    description: 'Label for the total cost of the top-up purchase',
   },
   currentBalance: {
     id: 'lcm.budget.add.funds.order.summary.current.balance',
@@ -116,6 +111,16 @@ const messages = defineMessages({
     id: 'lcm.budget.add.funds.order.summary.new.balance',
     defaultMessage: 'New Balance',
     description: "Label for the budget's balance after the top-up is applied",
+  },
+  newBalanceAnnouncement: {
+    id: 'lcm.budget.add.funds.order.summary.new.balance.announcement',
+    defaultMessage: 'Adding {amount}. New balance: {newBalance}.',
+    description: 'Screen reader announcement when a valid top-up amount updates the order summary',
+  },
+  notAvailable: {
+    id: 'lcm.budget.add.funds.order.summary.not.available',
+    defaultMessage: 'Not available',
+    description: 'Screen reader text for an order summary value that cannot be shown yet',
   },
   planExpires: {
     id: 'lcm.budget.add.funds.order.summary.plan.expires',

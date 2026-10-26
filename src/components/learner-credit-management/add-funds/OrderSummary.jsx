@@ -27,16 +27,22 @@ SummaryRow.defaultProps = {
   valueClassName: '',
 };
 
-const EMPTY_VALUE = '-';
+const EmptyValue = () => (
+  <>
+    <span aria-hidden>-</span>
+    <span className="sr-only"><FormattedMessage {...messages.notAvailable} /></span>
+  </>
+);
 
-const OrderSummary = ({ currentBalance, expirationDate, discountRate }) => {
+const OrderSummary = ({ currentBalance, expirationDate }) => {
   const intl = useIntl();
   const { formData } = useAddFunds();
-  const summary = calculateOrderSummary(formData.amount, currentBalance, discountRate);
+  const summary = calculateOrderSummary(formData.amount, currentBalance);
+  const hasNewBalance = summary?.newBalance != null;
 
   return (
     <Card className="bg-light-300" data-testid="add-funds-order-summary">
-      <Card.Section aria-live="polite">
+      <Card.Section>
         <h3 className="h4 mb-3">
           <FormattedMessage {...messages.orderSummaryTitle} />
         </h3>
@@ -44,36 +50,32 @@ const OrderSummary = ({ currentBalance, expirationDate, discountRate }) => {
         <dl className="mb-0">
           <SummaryRow
             label={<FormattedMessage {...messages.creditAmount} />}
-            value={summary ? formatCurrency(summary.creditAmount) : EMPTY_VALUE}
+            value={summary ? formatCurrency(summary.creditAmount) : <EmptyValue />}
           />
-          {discountRate !== null && (
-            <SummaryRow
-              label={(
-                <FormattedMessage
-                  {...messages.discount}
-                  values={{ discountPercent: intl.formatNumber(discountRate, { style: 'percent' }) }}
-                />
-              )}
-              value={summary ? `-${formatCurrency(summary.discount ?? 0)}` : EMPTY_VALUE}
-            />
-          )}
           <SummaryRow
             label={<FormattedMessage {...messages.totalCost} />}
-            value={summary ? formatCurrency(summary.totalCost) : EMPTY_VALUE}
+            value={summary ? formatCurrency(summary.totalCost) : <EmptyValue />}
           />
         </dl>
         <hr className="my-3" />
         <dl className="mb-0">
           <SummaryRow
             label={<FormattedMessage {...messages.currentBalance} />}
-            value={formatCurrency(currentBalance)}
+            value={currentBalance === undefined ? <EmptyValue /> : formatCurrency(currentBalance)}
           />
           <SummaryRow
             label={<FormattedMessage {...messages.newBalance} />}
-            value={summary ? formatCurrency(summary.newBalance) : EMPTY_VALUE}
-            valueClassName={summary ? 'text-success' : ''}
+            value={hasNewBalance ? formatCurrency(summary.newBalance) : <EmptyValue />}
+            valueClassName={hasNewBalance ? 'text-success' : ''}
           />
         </dl>
+        {/* One labelled sentence, announced only when a valid amount changes the summary. */}
+        <p className="sr-only" role="status" data-testid="add-funds-order-summary-status">
+          {hasNewBalance && intl.formatMessage(messages.newBalanceAnnouncement, {
+            amount: formatCurrency(summary.creditAmount),
+            newBalance: formatCurrency(summary.newBalance),
+          })}
+        </p>
       </Card.Section>
       {expirationDate && (
         <Card.Footer className="bg-transparent border-0 pt-0">
@@ -96,15 +98,13 @@ const OrderSummary = ({ currentBalance, expirationDate, discountRate }) => {
 };
 
 OrderSummary.propTypes = {
-  currentBalance: PropTypes.number.isRequired,
+  currentBalance: PropTypes.number,
   expirationDate: PropTypes.string,
-  discountRate: PropTypes.number,
 };
 
 OrderSummary.defaultProps = {
+  currentBalance: undefined,
   expirationDate: undefined,
-  // TODO: pass the backend-provided rate once the top-up pricing API exists; `null` hides the discount row.
-  discountRate: null,
 };
 
 export default OrderSummary;

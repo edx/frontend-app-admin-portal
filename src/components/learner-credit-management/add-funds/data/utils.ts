@@ -69,26 +69,23 @@ export const getAddFundsStepRedirect = (
 
 export type TopUpOrderSummary = {
   creditAmount: number;
-  /** `null` when no discount is on record, in which case the discount row is hidden. */
-  discount: number | null;
   totalCost: number;
-  newBalance: number;
+  /** `null` when the current balance is unknown. */
+  newBalance: number | null;
 };
 
 export const calculateOrderSummary = (
   amount: number | null,
-  currentBalance: number,
-  discountRate: number | null,
+  currentBalance: number | undefined,
 ): TopUpOrderSummary | null => {
   if (!isValidTopUpAmount(amount)) {
     return null;
   }
-  // A `null` rate means no discount is on record; a rate of 0 is a real 0% discount.
-  const discount = discountRate === null ? null : amount * discountRate;
   return {
     creditAmount: amount,
-    discount,
-    totalCost: amount - (discount ?? 0),
-    newBalance: currentBalance + amount,
+    // TODO: show the backend top-up quote's charge amount once the pricing API exists; never
+    // compute discounts or prices in the browser.
+    totalCost: amount,
+    newBalance: currentBalance === undefined ? null : currentBalance + amount,
   };
 };

@@ -21,20 +21,25 @@ const renderOrderSummary = ({ amount = 1000, ...props } = {}) => {
 };
 
 describe('OrderSummary', () => {
-  it('hides the discount row by default', () => {
+  it('shows the amount as the total cost, with no discount row', () => {
     renderOrderSummary();
 
     expect(screen.queryByText(/Discount/)).not.toBeInTheDocument();
-    // Credit amount and total cost are both the full amount.
-    expect(screen.getAllByText('$1,000.00')).toHaveLength(2);
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$1,000.00');
+    expect(screen.getByText('Total Cost').nextElementSibling).toHaveTextContent('$1,000.00');
+    expect(screen.getByText('New Balance').nextElementSibling).toHaveTextContent('$2,800.00');
   });
 
-  it('shows the discount row when a discount rate is passed', () => {
-    renderOrderSummary({ discountRate: 0.1 });
+  it('announces one labelled sentence for a valid amount', () => {
+    renderOrderSummary();
 
-    expect(screen.getByText('Discount (10%)')).toBeInTheDocument();
-    expect(screen.getByText('-$100.00')).toBeInTheDocument();
-    expect(screen.getByText('$900.00')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Adding $1,000.00. New balance: $2,800.00.');
+  });
+
+  it('announces nothing while the amount is invalid', () => {
+    renderOrderSummary({ amount: 100 });
+
+    expect(screen.getByRole('status')).toBeEmptyDOMElement();
   });
 
   it('shows the plan expiry when an expiration date is passed', () => {
@@ -52,7 +57,17 @@ describe('OrderSummary', () => {
   it('shows placeholders until the amount is valid', () => {
     renderOrderSummary({ amount: null });
 
-    expect(screen.getAllByText('-').length).toBeGreaterThan(0);
-    expect(screen.getByText('$1,800.00')).toBeInTheDocument();
+    ['Credit Amount', 'Total Cost', 'New Balance'].forEach((label) => {
+      expect(screen.getByText(label).nextElementSibling).toHaveTextContent('-Not available');
+    });
+    expect(screen.getByText('Current Balance').nextElementSibling).toHaveTextContent('$1,800.00');
+  });
+
+  it('shows no current or new balance when the balance is unknown', () => {
+    renderOrderSummary({ currentBalance: undefined });
+
+    expect(screen.getByText('Current Balance').nextElementSibling).toHaveTextContent('-Not available');
+    expect(screen.getByText('New Balance').nextElementSibling).toHaveTextContent('-Not available');
+    expect(screen.getByText('Total Cost').nextElementSibling).toHaveTextContent('$1,000.00');
   });
 });

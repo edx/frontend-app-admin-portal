@@ -23,8 +23,9 @@ const SelectAmountStep = () => {
 
   const handleCustomChange = (e) => {
     const { value } = e.target;
-    const parsed = value.trim() === '' ? null : Number(value);
-    updateFormData({ amount: Number.isFinite(parsed) ? parsed : null, customAmountInput: value });
+    // Digits only, so number-input forms like `1e3` aren't accepted as 1000.
+    const amountValue = /^\d+$/.test(value.trim()) ? Number(value) : null;
+    updateFormData({ amount: amountValue, customAmountInput: value });
   };
 
   const isCustomInvalid = customInput !== '' && !isValidTopUpAmount(amount);
@@ -70,20 +71,22 @@ const SelectAmountStep = () => {
           </Form.Label>
           <Form.Control
             className="w-100 border-gray-500 font-weight-bold"
-            type="number"
+            // Text, not `type="number"`: number inputs accept `e`, `+`, `-` and `.`, and report
+            // incomplete values like `100e` as empty, so they could never show an error.
+            type="text"
             inputMode="numeric"
-            min={MIN_TOP_UP_AMOUNT}
-            max={MAX_TOP_UP_AMOUNT}
+            autoComplete="off"
             leadingElement="$"
             placeholder={intl.formatMessage(messages.customAmountPlaceholder)}
             value={customInput}
             onChange={handleCustomChange}
-            // Stop the mouse wheel from silently changing the amount while the field is focused.
-            onWheel={(e) => e.currentTarget.blur()}
           />
           {isCustomInvalid ? (
             <Form.Control.Feedback type="invalid">
-              <FormattedMessage {...messages.customAmountInvalid} values={limits} />
+              {/* Feedback is only linked via aria-describedby, so announce the error when it appears. */}
+              <span role="alert">
+                <FormattedMessage {...messages.customAmountInvalid} values={limits} />
+              </span>
             </Form.Control.Feedback>
           ) : (
             <Form.Control.Feedback type="default">

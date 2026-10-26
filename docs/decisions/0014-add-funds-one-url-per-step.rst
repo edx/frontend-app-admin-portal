@@ -91,4 +91,4 @@ References
 - Feature notes: ``docs/references/learner-credit-top-up.md``
 - Card-only payments: ``docs/decisions/0012-credit-card-only-payment-methods.rst``
 - Existing multi-step pattern: ``src/components/forms/FormWorkflow.tsx``
-- Ticket: ENT-12396
+

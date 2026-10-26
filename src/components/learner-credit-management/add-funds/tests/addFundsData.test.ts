@@ -70,25 +70,18 @@ describe('getAddFundsStepRedirect', () => {
 
 describe('calculateOrderSummary', () => {
   it('returns null without a valid amount', () => {
-    expect(calculateOrderSummary(null, 1800, 0.1)).toBeNull();
+    expect(calculateOrderSummary(null, 1800)).toBeNull();
   });
 
-  it('computes discount, total cost and new balance', () => {
-    expect(calculateOrderSummary(5000, 1800, 0.1)).toEqual({
+  it('computes total cost and new balance', () => {
+    expect(calculateOrderSummary(5000, 1800)).toEqual({
       creditAmount: 5000,
-      discount: 500,
-      totalCost: 4500,
+      totalCost: 5000,
       newBalance: 6800,
     });
   });
 
-  it('omits the discount when no rate is on record, and treats 0 as a real rate', () => {
-    expect(calculateOrderSummary(1000, 1800, null)).toEqual({
-      creditAmount: 1000,
-      discount: null,
-      totalCost: 1000,
-      newBalance: 2800,
-    });
-    expect(calculateOrderSummary(1000, 1800, 0)?.discount).toEqual(0);
+  it('returns no new balance when the current balance is unknown', () => {
+    expect(calculateOrderSummary(1000, undefined)?.newBalance).toBeNull();
   });
 });

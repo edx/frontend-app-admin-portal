@@ -109,12 +109,13 @@ const AddFundsStepper = ({ currentBalance, expirationDate, onExit }) => {
 };
 
 AddFundsStepper.propTypes = {
-  currentBalance: PropTypes.number.isRequired,
+  currentBalance: PropTypes.number,
   expirationDate: PropTypes.string,
   onExit: PropTypes.func.isRequired,
 };
 
 AddFundsStepper.defaultProps = {
+  currentBalance: undefined,
   expirationDate: undefined,
 };
 

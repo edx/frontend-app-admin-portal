@@ -22,5 +22,6 @@ export const ADD_FUNDS_STEPS: readonly AddFundsStepKey[] = [
 ];
 
 export const PRESET_TOP_UP_AMOUNTS = [500, 1000, 2500, 5000];
+// Must match the server-side limits (top-up tech spec R-02); the server validates again.
 export const MIN_TOP_UP_AMOUNT = 500;
 export const MAX_TOP_UP_AMOUNT = 20000;
