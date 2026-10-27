@@ -26,11 +26,11 @@ Route: `/:enterpriseSlug/admin/learner-credit/:budgetId/add-funds/:step?`, regis
 `.../add-funds/select-amount`), matching frontend-app-enterprise-checkout. Code lives in
 `src/components/learner-credit-management/add-funds/`. Why this flow uses one URL per step
 instead of the existing `FormWorkflow` modal pattern is recorded in
-[ADR 0014](../decisions/0014-url-per-step-for-add-funds-flow.rst).
+[ADR 0014](../decisions/0014-add-funds-one-url-per-step.rst).
 
 | Step | Key | Status |
 | --- | --- | --- |
-| 1. Select Amount | `select-amount` | Placeholder (`StepComingSoon`) |
+| 1. Select Amount | `select-amount` | Built (`steps/SelectAmountStep.jsx`), see below |
 | 2. Payment Method | `payment-method` | Placeholder (`StepComingSoon`) |
 | 3. Payment Details | `payment-details` | Placeholder (`StepComingSoon`) |
 | 4. Confirmation | `confirmation` | Placeholder (`StepComingSoon`) |
@@ -61,11 +61,30 @@ covers this. Don't add a budget detail tab named `add-funds`.
   Back on the first step replaces the remaining flow entry with budget detail, so browser Back
   after leaving does not reopen the flow. Don't change Back to push entries.
 - *User selections* — `AddFundsContextProvider` (`data/AddFundsContext.tsx`), a typed
-  `useReducer` + React Context (not Redux) holding `formData` (`amount`, `paymentMethod`).
+  `useReducer` + React Context (not Redux) holding `formData` (`amount`, `customAmountInput`, `paymentMethod`).
   In-memory only — a refresh mid-flow clears it and the step guard sends the user back to the
   first incomplete step, by design (no payment data in browser storage).
 - *Server state* — react-query. Budget data comes from the existing `useSubsidyAccessPolicy`,
   so the cache is shared with the budget detail page.
+
+**Step 1, Select Amount** (`steps/SelectAmountStep.jsx`):
+- Preset buttons (`PRESET_TOP_UP_AMOUNTS`) or a custom amount. The custom amount must be whole
+  dollars (a text input with `inputMode="numeric"`, digits only, so `1e3` is rejected) from `MIN_TOP_UP_AMOUNT` to `MAX_TOP_UP_AMOUNT`
+  ($500 to $20,000, tech spec R-02); the server validates again. The range error updates as the
+  admin types.
+- A custom amount equal to a preset also selects that preset. Picking a preset clears the custom
+  input. The raw text is kept in `customAmountInput` so it is restored on return to the step.
+
+**Order Summary** (`OrderSummary.jsx`, values from `calculateOrderSummary` in `data/utils.ts`):
+- Current balance is the budget's `aggregates.spendAvailableUsd`. When it is missing, Current and
+  New Balance show `-` rather than $0.
+- Plan Expires is the budget's `subsidyExpirationDatetime`; the footer is hidden when it is missing.
+- There is no Discount row yet, and Total Cost equals the credit amount. Pricing (any discount and
+  the amount charged) must come from the backend top-up quote once it exists; don't compute
+  prices or discounts in the browser.
+- Screen readers get one labelled `role="status"` sentence ("Adding $X. New balance: $Y."), set
+  only when the amount is valid; the card itself is not a live region. Empty values (`-`) have
+  hidden "Not available" text. The custom amount error uses `role="alert"`.
 
 **Confirmation is currently unreachable**: the `payment-details` completion rule returns `false` until payment submission exists, so Continue is disabled there and deep links
 to `confirmation` are redirected.

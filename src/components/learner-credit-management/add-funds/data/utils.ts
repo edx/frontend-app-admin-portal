@@ -1,6 +1,18 @@
-import { ADD_FUNDS_STEP_KEYS, ADD_FUNDS_STEPS } from './constants';
+import {
+  ADD_FUNDS_STEP_KEYS,
+  ADD_FUNDS_STEPS,
+  MAX_TOP_UP_AMOUNT,
+  MIN_TOP_UP_AMOUNT,
+} from './constants';
 import type { AddFundsStepKey } from './constants';
 import type { AddFundsFormData } from './types';
+
+export const isValidTopUpAmount = (amount: number | null): amount is number => (
+  typeof amount === 'number'
+  && Number.isInteger(amount)
+  && amount >= MIN_TOP_UP_AMOUNT
+  && amount <= MAX_TOP_UP_AMOUNT
+);
 
 type StepCompletionRule = (formData: AddFundsFormData) => boolean;
 
@@ -11,8 +23,7 @@ type StepCompletionRule = (formData: AddFundsFormData) => boolean;
  * server must verify payment.
  */
 const STEP_COMPLETION_RULES: Record<AddFundsStepKey, StepCompletionRule> = {
-  // TODO: replace with the real rule when the Select Amount step is built.
-  [ADD_FUNDS_STEP_KEYS.selectAmount]: () => true,
+  [ADD_FUNDS_STEP_KEYS.selectAmount]: ({ amount }) => isValidTopUpAmount(amount),
   // TODO: replace with the real rule when the Payment Method step is built.
   [ADD_FUNDS_STEP_KEYS.paymentMethod]: () => true,
   // TODO: Confirmation must only be reachable after a payment is submitted (or, on a Stripe
@@ -54,4 +65,27 @@ export const getAddFundsStepRedirect = (
     return ADD_FUNDS_STEPS[firstIncompleteIndex];
   }
   return null;
+};
+
+export type TopUpOrderSummary = {
+  creditAmount: number;
+  totalCost: number;
+  /** `null` when the current balance is unknown. */
+  newBalance: number | null;
+};
+
+export const calculateOrderSummary = (
+  amount: number | null,
+  currentBalance: number | undefined,
+): TopUpOrderSummary | null => {
+  if (!isValidTopUpAmount(amount)) {
+    return null;
+  }
+  return {
+    creditAmount: amount,
+    // TODO: show the backend top-up quote's charge amount once the pricing API exists; never
+    // compute discounts or prices in the browser.
+    totalCost: amount,
+    newBalance: currentBalance === undefined ? null : currentBalance + amount,
+  };
 };

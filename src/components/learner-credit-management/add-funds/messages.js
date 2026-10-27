@@ -52,6 +52,81 @@ const messages = defineMessages({
     defaultMessage: 'Confirmation',
     description: 'Stepper label for the final confirmation step of the Add Funds flow',
   },
+  selectAmountTitle: {
+    id: 'lcm.budget.add.funds.select.amount.title',
+    defaultMessage: 'Select an Amount',
+    description: 'Heading for the step where the admin chooses how much to add to the budget',
+  },
+  presetAmountLabel: {
+    id: 'lcm.budget.add.funds.select.amount.preset.label',
+    defaultMessage: 'Choose a preset amount',
+    description: 'Label for the group of preset top-up amount buttons',
+  },
+  customAmountDivider: {
+    id: 'lcm.budget.add.funds.select.amount.divider',
+    defaultMessage: 'Or enter a custom amount',
+    description: 'Divider text between preset amounts and the custom amount input',
+  },
+  customAmountLabel: {
+    id: 'lcm.budget.add.funds.select.amount.custom.label',
+    defaultMessage: 'Custom amount',
+    description: 'Accessible label for the custom top-up amount input',
+  },
+  customAmountPlaceholder: {
+    id: 'lcm.budget.add.funds.select.amount.custom.placeholder',
+    defaultMessage: 'e.g. 1500',
+    description: 'Placeholder for the custom top-up amount input',
+  },
+  customAmountInvalid: {
+    id: 'lcm.budget.add.funds.select.amount.custom.invalid',
+    defaultMessage: 'Enter an amount between {min} and {max}.',
+    description: 'Validation error when the custom top-up amount is out of range',
+  },
+  amountLimits: {
+    id: 'lcm.budget.add.funds.select.amount.limits',
+    defaultMessage: 'Minimum {min} · Maximum {max}',
+    description: 'Helper text describing the minimum and maximum top-up amount',
+  },
+  orderSummaryTitle: {
+    id: 'lcm.budget.add.funds.order.summary.title',
+    defaultMessage: 'Order Summary',
+    description: 'Heading for the order summary panel in the Add Funds flow',
+  },
+  creditAmount: {
+    id: 'lcm.budget.add.funds.order.summary.credit.amount',
+    defaultMessage: 'Credit Amount',
+    description: 'Label for the amount of credit being added to the budget',
+  },
+  totalCost: {
+    id: 'lcm.budget.add.funds.order.summary.total.cost',
+    defaultMessage: 'Total Cost',
+    description: 'Label for the total cost of the top-up purchase',
+  },
+  currentBalance: {
+    id: 'lcm.budget.add.funds.order.summary.current.balance',
+    defaultMessage: 'Current Balance',
+    description: "Label for the budget's current available balance",
+  },
+  newBalance: {
+    id: 'lcm.budget.add.funds.order.summary.new.balance',
+    defaultMessage: 'New Balance',
+    description: "Label for the budget's balance after the top-up is applied",
+  },
+  newBalanceAnnouncement: {
+    id: 'lcm.budget.add.funds.order.summary.new.balance.announcement',
+    defaultMessage: 'Adding {amount}. New balance: {newBalance}.',
+    description: 'Screen reader announcement when a valid top-up amount updates the order summary',
+  },
+  notAvailable: {
+    id: 'lcm.budget.add.funds.order.summary.not.available',
+    defaultMessage: 'Not available',
+    description: 'Screen reader text for an order summary value that cannot be shown yet',
+  },
+  planExpires: {
+    id: 'lcm.budget.add.funds.order.summary.plan.expires',
+    defaultMessage: 'Plan Expires {expirationDate}',
+    description: 'The date the learner credit plan expires',
+  },
 });
 
 export default messages;

@@ -3,6 +3,7 @@ import type { AddFundsAction, AddFundsState } from './types';
 export const initialAddFundsState: AddFundsState = {
   formData: {
     amount: null,
+    customAmountInput: '',
     paymentMethod: null,
   },
 };
