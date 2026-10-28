@@ -1,5 +1,4 @@
 import { logError } from '@edx/frontend-platform/logging';
-import { getConfig } from '@edx/frontend-platform/config';
 import { saveAs } from 'file-saver/FileSaver';
 
 import {
@@ -9,18 +8,6 @@ import {
   CLEAR_CSV,
 } from '../constants/csv';
 import store from '../store';
-import { removeCsvColumn, isEnterpriseCustomerInUuidAllowlist } from '../../utils';
-
-// Hides the course_progress column for the enterprise customer configured via
-// DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER, scoped to report types known to include it.
-const COURSE_PROGRESS_CSV_HEADER = 'course_progress';
-const CSV_IDS_WITH_COURSE_PROGRESS_COLUMN = [
-  'enrollments',
-  'learners-active-week',
-  'learners-inactive-week',
-  'learners-inactive-month',
-  'completed-learners-week',
-];
 
 const fetchCsvRequest = csvId => ({
   type: FETCH_CSV_REQUEST,
@@ -44,16 +31,8 @@ const fetchCsv = (csvId, fetchMethod) => (
     dispatch(fetchCsvRequest(csvId));
     return fetchMethod(enterpriseId)
       .then((response) => {
-        let csvData = response.data;
-        const disabledFor = getConfig().DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER;
-        if (
-          CSV_IDS_WITH_COURSE_PROGRESS_COLUMN.includes(csvId)
-          && isEnterpriseCustomerInUuidAllowlist(enterpriseId, disabledFor)
-        ) {
-          csvData = removeCsvColumn(csvData, COURSE_PROGRESS_CSV_HEADER);
-        }
         // Create blob with explicit MIME type
-        const blob = new Blob([csvData], {
+        const blob = new Blob([response.data], {
           type: 'text/csv;charset=utf-8;',
         });
         saveAs(blob, `${enterpriseId}_progress_report.csv`);
