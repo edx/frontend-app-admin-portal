@@ -44,7 +44,7 @@ const getMockData = (count) => {
       course_name: `Course ${i}`,
       module_name: `Module ${i}`,
       module_grade: `Module Grade ${i}`,
-      percentage_completed_activities: `${(i % 100)}%`,
+      percentage_completed_graded_activities: `${(i % 100)}.00`,
       hours_online: `${i} Hours Online`,
       log_viewed: `${i} Log Views`,
       avg_before_lo_score: 3.00,
@@ -83,7 +83,7 @@ describe('ModuleActivityReport', () => {
     expect(screen.getByText('Course Title')).toBeInTheDocument();
     expect(screen.getByText('Module')).toBeInTheDocument();
     expect(screen.getByText('Grade')).toBeInTheDocument();
-    expect(screen.getByText('% Activities Complete')).toBeInTheDocument();
+    expect(screen.getByText('% Graded Activities Complete')).toBeInTheDocument();
     expect(screen.getByText('Learning Hours')).toBeInTheDocument();
     expect(screen.getByText('Log Views')).toBeInTheDocument();
     expect(screen.getByText('Learning Outcomes: Before')).toBeInTheDocument();
@@ -122,6 +122,29 @@ describe('ModuleActivityReport', () => {
     expect(screen.getByText('Module Grade 1')).toBeInTheDocument();
     expect(screen.getByText('1 Hours Online')).toBeInTheDocument();
     expect(screen.getByText('1 Log Views')).toBeInTheDocument();
+  });
+
+  it('renders the graded activities percentage', () => {
+    mockUseModuleActivityReport.mockReturnValue(mockHookData(getMockData(2), 2, 1));
+
+    render(<ModuleActivityReportWrapper {...DEFAULT_PROPS} />);
+
+    expect(screen.getByText('0.00 %')).toBeInTheDocument();
+    expect(screen.getByText('1.00 %')).toBeInTheDocument();
+  });
+
+  it('renders blank instead of "null %" for modules without graded activities', () => {
+    const data = [{
+      ...getMockData(1)[0],
+      percentage_completed_activities: '90.00',
+      percentage_completed_graded_activities: null,
+    }];
+    mockUseModuleActivityReport.mockReturnValue(mockHookData(data, 1, 1));
+
+    render(<ModuleActivityReportWrapper {...DEFAULT_PROPS} />);
+
+    expect(screen.queryByText(/null/)).not.toBeInTheDocument();
+    expect(screen.queryByText('90.00 %')).not.toBeInTheDocument();
   });
 
   it('renders the search bar with correct props', () => {

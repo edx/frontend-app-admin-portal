@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { DataTable } from '@openedx/paragon';
 import {
-  debounce, isEmpty, isEqual, isNumber,
+  debounce, isEmpty, isEqual, isNil, isNumber,
 } from 'lodash-es';
 import PropTypes from 'prop-types';
 import { useIntl } from '@edx/frontend-platform/i18n';
@@ -119,12 +119,14 @@ const ModuleActivityReport = ({ enterpriseId }) => {
           },
           {
             Header: intl.formatMessage({
-              id: 'adminPortal.LPR.moduleActivityReport.table.header.percentageCompletedActivities',
-              defaultMessage: '% Activities Complete',
-              description: 'Header for the percentage of activities completed column in the module activity report table',
+              id: 'adminPortal.LPR.moduleActivityReport.table.header.percentageCompletedGradedActivities',
+              defaultMessage: '% Graded Activities Complete',
+              description: 'Header for the percentage of graded activities completed column in the module activity report table',
             }),
+            // Modules without graded activities (e.g. orientation, honor code) return null; show blank.
             Cell: ({ row }) => (
-              `${row.original.percentage_completed_activities} %`
+              isNil(row.original.percentage_completed_graded_activities)
+                ? '' : `${row.original.percentage_completed_graded_activities} %`
             ),
           },
           {
