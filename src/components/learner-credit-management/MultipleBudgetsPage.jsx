@@ -1,25 +1,31 @@
 import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Card, Col, Container, Hyperlink, Row, Skeleton, Stack,
+  Card, Col, Container, Hyperlink, Row, Skeleton, Stack, Tab, Tabs,
 } from '@openedx/paragon';
 import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
+import { useNavigate } from 'react-router-dom';
 import { useIntl, FormattedMessage } from '@edx/frontend-platform/i18n';
 
 import Hero from '../Hero';
 import MultipleBudgetsPicker from './MultipleBudgetsPicker';
+import LearnerCreditAuditTrail from './LearnerCreditAuditTrail';
 import { EnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
-import { configuration } from '../../config';
+import { configuration, features } from '../../config';
 import { useEnterpriseBudgets } from '../EnterpriseSubsidiesContext/data/hooks';
+import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
+import { LEARNER_CREDIT_AUDIT_TRAIL_TAB, LEARNER_CREDIT_BUDGETS_TAB } from './data';
 
 const MultipleBudgetsPage = ({
   enterpriseUUID,
   enterpriseSlug,
   enableLearnerPortal,
   enablePortalLearnerCreditManagementScreen,
+  activeTabKey,
 }) => {
   const intl = useIntl();
+  const navigate = useNavigate();
   const PAGE_TITLE = intl.formatMessage({
     id: 'lcm.page.title',
     defaultMessage: 'Learner Credit Management',
@@ -92,17 +98,57 @@ const MultipleBudgetsPage = ({
     );
   }
 
+  const budgetsPicker = (
+    <MultipleBudgetsPicker
+      budgets={budgets}
+      enterpriseUUID={enterpriseUUID}
+      enterpriseSlug={enterpriseSlug}
+      enableLearnerPortal={enableLearnerPortal}
+    />
+  );
+
+  const handleTabSelect = (tabKey) => {
+    const learnerCreditPath = `/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}`;
+    navigate(tabKey === LEARNER_CREDIT_AUDIT_TRAIL_TAB
+      ? `${learnerCreditPath}/${LEARNER_CREDIT_AUDIT_TRAIL_TAB}`
+      : learnerCreditPath);
+  };
+
   return (
     <>
       <Helmet title={PAGE_TITLE} />
       <Hero title={PAGE_TITLE} />
       <Container className="py-3" fluid>
-        <MultipleBudgetsPicker
-          budgets={budgets}
-          enterpriseUUID={enterpriseUUID}
-          enterpriseSlug={enterpriseSlug}
-          enableLearnerPortal={enableLearnerPortal}
-        />
+        {features.AUDIT_TRAIL ? (
+          <Tabs
+            id="tabs-learner-credit-management"
+            activeKey={activeTabKey}
+            onSelect={handleTabSelect}
+          >
+            <Tab
+              eventKey={LEARNER_CREDIT_BUDGETS_TAB}
+              title={intl.formatMessage({
+                id: 'lcm.page.tabs.details',
+                defaultMessage: 'Details',
+                description: 'Title for the tab listing the budgets on the learner credit management page.',
+              })}
+              className="pt-4"
+            >
+              {activeTabKey === LEARNER_CREDIT_BUDGETS_TAB && budgetsPicker}
+            </Tab>
+            <Tab
+              eventKey={LEARNER_CREDIT_AUDIT_TRAIL_TAB}
+              title={intl.formatMessage({
+                id: 'lcm.page.tabs.audit.trail',
+                defaultMessage: 'Audit trail',
+                description: 'Title for the audit trail tab on the learner credit management page.',
+              })}
+              className="pt-4"
+            >
+              {activeTabKey === LEARNER_CREDIT_AUDIT_TRAIL_TAB && <LearnerCreditAuditTrail />}
+            </Tab>
+          </Tabs>
+        ) : budgetsPicker}
       </Container>
     </>
   );
@@ -123,6 +169,11 @@ MultipleBudgetsPage.propTypes = {
   enterpriseFeatures: PropTypes.shape({
   }).isRequired,
   enablePortalLearnerCreditManagementScreen: PropTypes.bool.isRequired,
+  activeTabKey: PropTypes.oneOf([LEARNER_CREDIT_BUDGETS_TAB, LEARNER_CREDIT_AUDIT_TRAIL_TAB]),
+};
+
+MultipleBudgetsPage.defaultProps = {
+  activeTabKey: LEARNER_CREDIT_BUDGETS_TAB,
 };
 
 export default connect(mapStateToProps)(MultipleBudgetsPage);

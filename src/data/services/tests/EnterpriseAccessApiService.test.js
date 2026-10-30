@@ -153,6 +153,18 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('listContentAssignmentsWithAuditTrail fetches assignments in every state for an assignment configuration', () => {
+    EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail(mockAssignmentConfigurationUUID, { page: 2 });
+    const expectedParams = new URLSearchParams({
+      page: 2,
+      page_size: 100,
+      state__in: 'allocated,accepted,cancelled,errored,expired,reversed',
+    }).toString();
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/assignment-configurations/${mockAssignmentConfigurationUUID}/admin/assignments/?${expectedParams}`,
+    );
+  });
+
   test('listContentAssignments calls enterprise-access to fetch content assignments without learner state filter', () => {
     EnterpriseAccessApiService.listContentAssignments(mockAssignmentConfigurationUUID);
     const expectedParams = new URLSearchParams({
