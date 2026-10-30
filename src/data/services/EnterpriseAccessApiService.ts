@@ -272,6 +272,23 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 
+  /**
+   * List content assignments in every state for a specific AssignmentConfiguration. Each assignment
+   * includes its actions with the audit trail fields (actor, source, affected learner), which are
+   * used to build the learner credit audit trail.
+   */
+  static listContentAssignmentsWithAuditTrail(assignmentConfigurationUUID, options: any = {}) {
+    const params = {
+      page: 1,
+      page_size: 100,
+      state__in: 'allocated,accepted,cancelled,errored,expired,reversed',
+      ...snakeCaseObject(options),
+    };
+    const urlParams = new URLSearchParams(params);
+    const url = `${EnterpriseAccessApiService.baseUrl}/assignment-configurations/${assignmentConfigurationUUID}/admin/assignments/?${urlParams.toString()}`;
+    return EnterpriseAccessApiService.apiClient().get(url);
+  }
+
   static listSubsidyAccessPolicies(enterpriseCustomerId) {
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerId,

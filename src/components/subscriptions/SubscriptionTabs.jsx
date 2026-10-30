@@ -13,8 +13,10 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import { SubsidyRequestsContext } from '../subsidy-requests';
 import SubscriptionSubsidyRequests from './SubscriptionSubsidyRequests';
 import SubscriptionPlanRoutes from './SubscriptionPlanRoutes';
+import SubscriptionAuditTrail from './SubscriptionAuditTrail';
 import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import {
+  AUDIT_TRAIL_TAB,
   MANAGE_LEARNERS_TAB,
   MANAGE_REQUESTS_TAB,
   SUBSCRIPTION_TABS_VALUES,
@@ -22,6 +24,7 @@ import {
 } from './data/constants';
 import { SUPPORTED_SUBSIDY_TYPES } from '../../data/constants/subsidyRequests';
 import NotFoundPage from '../NotFoundPage';
+import { features } from '../../config';
 
 const SubscriptionTabs = ({ enterpriseSlug }) => {
   const { subsidyRequestConfiguration, subsidyRequestsCounts } = useContext(SubsidyRequestsContext);
@@ -29,6 +32,7 @@ const SubscriptionTabs = ({ enterpriseSlug }) => {
   const isSubsidyRequestsEnabled = subsidyRequestConfiguration?.subsidyRequestsEnabled;
   const subsidyType = subsidyRequestConfiguration?.subsidyType;
   const isRequestsTabShown = isSubsidyRequestsEnabled && subsidyType === SUPPORTED_SUBSIDY_TYPES.license;
+  const isAuditTrailTabShown = !!features.AUDIT_TRAIL;
   const intl = useIntl();
 
   const requestsTabNotification = useMemo(() => {
@@ -51,6 +55,7 @@ const SubscriptionTabs = ({ enterpriseSlug }) => {
   const routesByTabKey = {
     [MANAGE_LEARNERS_TAB]: `/${enterpriseSlug}/admin/${ROUTE_NAMES.subscriptionManagement}/${MANAGE_LEARNERS_TAB}`,
     [MANAGE_REQUESTS_TAB]: `/${enterpriseSlug}/admin/${ROUTE_NAMES.subscriptionManagement}/${MANAGE_REQUESTS_TAB}`,
+    [AUDIT_TRAIL_TAB]: `/${enterpriseSlug}/admin/${ROUTE_NAMES.subscriptionManagement}/${AUDIT_TRAIL_TAB}`,
   };
 
   const handleTabSelect = (key) => {
@@ -58,6 +63,8 @@ const SubscriptionTabs = ({ enterpriseSlug }) => {
       navigate(routesByTabKey[MANAGE_REQUESTS_TAB]);
     } else if (key === MANAGE_LEARNERS_TAB) {
       navigate(routesByTabKey[MANAGE_LEARNERS_TAB]);
+    } else if (key === AUDIT_TRAIL_TAB) {
+      navigate(routesByTabKey[AUDIT_TRAIL_TAB]);
     }
   };
 
@@ -102,12 +109,31 @@ const SubscriptionTabs = ({ enterpriseSlug }) => {
         </Tab>,
       );
     }
+    if (isAuditTrailTabShown) {
+      tabs.push(
+        <Tab
+          key={SUBSCRIPTION_TABS_VALUES[AUDIT_TRAIL_TAB]}
+          eventKey={SUBSCRIPTION_TABS_VALUES[AUDIT_TRAIL_TAB]}
+          title={intl.formatMessage({
+            id: 'admin.portal.subscription.tabs.audit.trail',
+            defaultMessage: 'Audit trail',
+            description: 'Title for the Audit trail tab in subscription management.',
+          })}
+          className="pt-4"
+        >
+          {SUBSCRIPTION_TABS_VALUES[AUDIT_TRAIL_TAB] === subscriptionsTab && (
+            <SubscriptionAuditTrail />
+          )}
+        </Tab>,
+      );
+    }
     return tabs;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subscriptionsTab, isRequestsTabShown, requestsTabNotification]);
+  }, [subscriptionsTab, isRequestsTabShown, isAuditTrailTabShown, requestsTabNotification]);
 
   if ((SUBSCRIPTION_TABS_VALUES[MANAGE_LEARNERS_TAB] !== subscriptionsTab)
-     && (SUBSCRIPTION_TABS_VALUES[MANAGE_REQUESTS_TAB] !== subscriptionsTab)) {
+     && (SUBSCRIPTION_TABS_VALUES[MANAGE_REQUESTS_TAB] !== subscriptionsTab)
+     && !(isAuditTrailTabShown && SUBSCRIPTION_TABS_VALUES[AUDIT_TRAIL_TAB] === subscriptionsTab)) {
     return <NotFoundPage />;
   }
 
