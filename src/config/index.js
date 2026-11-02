@@ -74,6 +74,7 @@ const features = {
   ENABLE_DRAG_AND_DROP: process.env.ENABLE_DRAG_AND_DROP || hasFeatureFlagEnabled('ENABLE_DRAG_AND_DROP'),
   ENABLE_NATIVE_BILLING: process.env.FEATURE_ENABLE_NATIVE_BILLING === 'true' || hasFeatureFlagEnabled('ENABLE_NATIVE_BILLING'),
   TOP_UP_LEARNER_CREDIT: process.env.FEATURE_TOP_UP_LEARNER_CREDIT === 'true' || hasFeatureFlagEnabled('TOP_UP_LEARNER_CREDIT'),
+  AUDIT_TRAIL: process.env.FEATURE_AUDIT_TRAIL === 'true' || hasFeatureFlagEnabled('AUDIT_TRAIL'),
 };
 
 export { configuration, features };

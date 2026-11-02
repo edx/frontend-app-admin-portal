@@ -47,6 +47,10 @@ export const DATETIME_FORMAT = 'MMM D, YYYY h:mma';
 
 export const EXEC_ED_OFFER_TYPE = 'learner_credit';
 
+// Learner Credit Management Page Tabs
+export const LEARNER_CREDIT_BUDGETS_TAB = 'budgets';
+export const LEARNER_CREDIT_AUDIT_TRAIL_TAB = 'audit-trail';
+
 // Budget Detail Page Tabs
 export const BUDGET_DETAIL_ACTIVITY_TAB = 'activity';
 export const BUDGET_DETAIL_CATALOG_TAB = 'catalog';
@@ -137,6 +141,7 @@ export const learnerCreditManagementQueryKeys = {
     'containsContentItem',
     contentKey,
   ],
+  auditTrail: (enterpriseId) => [...learnerCreditManagementQueryKeys.all, 'auditTrail', enterpriseId],
 };
 
 // Route to learner credit

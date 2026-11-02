@@ -153,6 +153,17 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('listContentAssignmentsWithAuditTrail fetches assignments in every state for an assignment configuration', () => {
+    EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail(mockAssignmentConfigurationUUID, { page: 2 });
+    const expectedParams = new URLSearchParams({
+      page: 2,
+      page_size: 100,
+    }).toString();
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/assignment-configurations/${mockAssignmentConfigurationUUID}/admin/assignments/?${expectedParams}`,
+    );
+  });
+
   test('listContentAssignments calls enterprise-access to fetch content assignments without learner state filter', () => {
     EnterpriseAccessApiService.listContentAssignments(mockAssignmentConfigurationUUID);
     const expectedParams = new URLSearchParams({
@@ -183,6 +194,13 @@ describe('EnterpriseAccessApiService', () => {
     EnterpriseAccessApiService.listSubsidyAccessPolicies(mockEnterpriseUUID);
     expect(axios.get).toBeCalledWith(
       `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/?enterprise_customer_uuid=${mockEnterpriseUUID}&active=true`,
+    );
+  });
+
+  test('listSubsidyAccessPolicies can include inactive subsidy access policies and fetch a given page', () => {
+    EnterpriseAccessApiService.listSubsidyAccessPolicies(mockEnterpriseUUID, { includeInactive: true, page: 2 });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/?enterprise_customer_uuid=${mockEnterpriseUUID}&page=2`,
     );
   });
 

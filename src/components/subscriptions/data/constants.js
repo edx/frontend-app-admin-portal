@@ -92,9 +92,11 @@ export const BROWSE_AND_REQUEST_ALERT_COOKIE_PREFIX = 'dismissed-browse-and-requ
 // Tabs
 export const MANAGE_LEARNERS_TAB = 'manage-learners';
 export const MANAGE_REQUESTS_TAB = 'manage-requests';
+export const AUDIT_TRAIL_TAB = 'audit-trail';
 
 const MANAGE_LEARNERS_TAB_LABEL = 'Manage Learners';
 const MANAGE_REQUESTS_TAB_LABEL = 'Manage Requests';
+const AUDIT_TRAIL_TAB_LABEL = 'Audit trail';
 
 /**
  * Used as tab values and in router params
@@ -102,6 +104,7 @@ const MANAGE_REQUESTS_TAB_LABEL = 'Manage Requests';
 export const SUBSCRIPTION_TABS_VALUES = {
   [MANAGE_LEARNERS_TAB]: MANAGE_LEARNERS_TAB,
   [MANAGE_REQUESTS_TAB]: MANAGE_REQUESTS_TAB,
+  [AUDIT_TRAIL_TAB]: AUDIT_TRAIL_TAB,
 };
 
 /**
@@ -110,6 +113,7 @@ export const SUBSCRIPTION_TABS_VALUES = {
 export const SUBSCRIPTION_TABS_LABELS = {
   [MANAGE_LEARNERS_TAB]: MANAGE_LEARNERS_TAB_LABEL,
   [MANAGE_REQUESTS_TAB]: MANAGE_REQUESTS_TAB_LABEL,
+  [AUDIT_TRAIL_TAB]: AUDIT_TRAIL_TAB_LABEL,
 };
 
 /** Default tab when no parameter is given */
@@ -120,3 +124,10 @@ export const DEFAULT_TAB = MANAGE_LEARNERS_TAB;
  * Consumed by useCurrentSubscriptionsTab hook to get tab value
  */
 export const SUBSCRIPTIONS_TAB_PARAM = 'subscriptionsTab';
+
+// Query Key factory for the subscriptions module, intended to be used with `@tanstack/react-query`.
+// Inspired by https://tkdodo.eu/blog/effective-react-query-keys#use-query-key-factories.
+export const subscriptionsQueryKeys = {
+  all: ['subscriptions'],
+  auditTrail: (enterpriseId) => [...subscriptionsQueryKeys.all, 'auditTrail', enterpriseId],
+};

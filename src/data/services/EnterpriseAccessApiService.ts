@@ -272,11 +272,40 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 
-  static listSubsidyAccessPolicies(enterpriseCustomerId) {
+  /**
+   * List content assignments for a specific AssignmentConfiguration. No state filter is applied, so
+   * assignments in every state (including any added later) are returned. Each assignment includes its
+   * actions with the audit trail fields (actor, source, affected learner), which are used to build the
+   * learner credit audit trail.
+   */
+  static listContentAssignmentsWithAuditTrail(assignmentConfigurationUUID, options: any = {}) {
+    const params = {
+      page: 1,
+      page_size: 100,
+      ...snakeCaseObject(options),
+    };
+    const urlParams = new URLSearchParams(params);
+    const url = `${EnterpriseAccessApiService.baseUrl}/assignment-configurations/${assignmentConfigurationUUID}/admin/assignments/?${urlParams.toString()}`;
+    return EnterpriseAccessApiService.apiClient().get(url);
+  }
+
+  /**
+   * List the subsidy access policies (budgets) of an enterprise customer. Only active policies are listed,
+   * unless `includeInactive` is true. Results are paginated; `page` selects the page to fetch.
+   */
+  static listSubsidyAccessPolicies(
+    enterpriseCustomerId,
+    { includeInactive = false, page }: { includeInactive?: boolean, page?: number } = {},
+  ) {
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerId,
-      active: 'true',
     });
+    if (!includeInactive) {
+      queryParams.append('active', 'true');
+    }
+    if (page) {
+      queryParams.append('page', page.toString());
+    }
     const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/?${queryParams.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
   }

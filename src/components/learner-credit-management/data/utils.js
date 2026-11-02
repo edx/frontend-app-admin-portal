@@ -8,6 +8,7 @@ import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessA
 import EnterpriseDataApiService from '../../../data/services/EnterpriseDataApiService';
 import SubsidyApiService from '../../../data/services/EnterpriseSubsidyApiService';
 import { isPlanApproachingExpiry } from '../../BudgetExpiryAlertAndModal/data/utils';
+import { transformActionToAuditTrailRow } from '../../AuditTrail/data/utils';
 import { BUDGET_STATUSES } from '../../EnterpriseApp/data/constants';
 import {
   APPROVED_REQUEST_TYPE,
@@ -979,3 +980,18 @@ export const getBudgetCsvFileName = (displayName, suffix) => {
   const prefix = suffix ? `${title}-${suffix}` : title;
   return `${prefix}-${year}-${month}-${day}.csv`;
 };
+
+/**
+ * Flattens the audit trail actions of the given (camelCased) content assignments into audit trail table rows.
+ *
+ * @param {Array} assignments Content assignments, each with its `actions`.
+ * @param {Object} [authenticatedUser] The authenticated user, from `getAuthenticatedUser()`.
+ * @returns {Array} Audit trail rows (see `AuditTrail`).
+ */
+export const transformAssignmentsToAuditTrailRows = (assignments, authenticatedUser) => assignments.flatMap(
+  (assignment) => (assignment.actions || []).map((action) => transformActionToAuditTrailRow(
+    action,
+    { learnerEmail: assignment.learnerEmail, learnerLmsUserId: assignment.lmsUserId },
+    authenticatedUser,
+  )),
+);
