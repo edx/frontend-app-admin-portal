@@ -51,7 +51,6 @@ const AddFundsButton = ({
       style={{ pointerEvents: 'none' }}
       aria-disabled="true"
       aria-describedby={reasonsId}
-      onClick={(e) => e.preventDefault()}
     >
       {buttonText}
     </Button>
