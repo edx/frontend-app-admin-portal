@@ -159,6 +159,40 @@ describe('LearnerActivityTable', () => {
     expect(screen.getByText('70%')).toBeInTheDocument();
     expect(screen.getByText('66%')).toBeInTheDocument();
     expect(screen.getByText('80%')).toBeInTheDocument();
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.getByText('Passed')).toBeInTheDocument();
+  });
+
+  it('renders the Progress Status column immediately after Course Progress', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValueOnce(tableMockData);
+
+    render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" />);
+
+    await screen.findByText('awesome.me@example.com');
+
+    const headers = screen.getAllByRole('columnheader').map(header => header.textContent);
+    const courseProgressIndex = headers.findIndex(header => header.includes('Course Progress'));
+    expect(courseProgressIndex).toBeGreaterThan(-1);
+    expect(headers[courseProgressIndex + 1]).toContain('Progress Status');
+  });
+
+  it('fetches data sorted by progress_status when the Progress Status column header is clicked', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue(tableMockData);
+
+    render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" />);
+
+    await screen.findByText('awesome.me@example.com');
+    fireEvent.click(screen.getByRole('columnheader', { name: /Progress Status/i }));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({
+          learnerActivity: 'active_past_week',
+          ordering: 'progress_status',
+        }),
+      );
+    });
   });
 
   it('fetches sorted data when sorting changes', async () => {

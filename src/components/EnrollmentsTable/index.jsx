@@ -127,6 +127,13 @@ const EnrollmentsTable = ({ enterpriseId }) => {
     },
     {
       Header: intl.formatMessage({
+        id: 'adminPortal.enrollmentsTable.progressStatus',
+        defaultMessage: 'Progress Status',
+      }),
+      accessor: 'progress_status',
+    },
+    {
+      Header: intl.formatMessage({
         id: 'adminPortal.enrollmentsTable.coursePassingGrade',
         defaultMessage: 'Course Passing Grade',
       }),
