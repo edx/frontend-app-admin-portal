@@ -53,6 +53,11 @@ eligibility once and passes it to both:
 | `isEligible: false` | Disabled, with every reason in the warning strip at the bottom of the card |
 | Error (403, 404, 5xx, network) or no row for the budget | Hidden, no error UI |
 
+**Gotcha — failed background refetch:** React Query keeps the last good `data` and sets `isError`
+when a refetch fails, so `SubBudgetCard` ignores `data` while `isError` is true. A budget that
+loaded as eligible (or ineligible) hides its button and reasons once a refetch fails. The Add
+Funds page deliberately does the opposite (see the budget guard below).
+
 **Gotcha — disabled but reachable:** the ineligible button uses `aria-disabled="true"` and the
 `disabled` class with a no-op `onClick`, not the `disabled` attribute, so keyboard and screen reader
 users can focus it. It also sets `pointerEvents: 'none'`, because the `disabled` class alone still

@@ -95,11 +95,13 @@ const BaseSubBudgetCard = ({
   const showActions = status !== BUDGET_STATUSES.scheduled;
   const showAddFunds = showActions && isTopUpCandidate({ isPolicy: source === BUDGET_TYPES.policy, status });
   // Every card shares one eligibility request, and the card doesn't wait for it to render.
-  const { data: topUpEligibility } = useTopUpEligibility({
+  const { data: cachedTopUpEligibility, isError: isTopUpEligibilityError } = useTopUpEligibility({
     enterpriseId,
     policyUuid: id,
     enabled: showAddFunds,
   });
+  // React Query keeps the last good row when a background refetch fails; treat any error as no row.
+  const topUpEligibility = isTopUpEligibilityError ? null : cachedTopUpEligibility;
   const addFundsReasonsId = useId();
   const showAddFundsReasons = showAddFunds && topUpEligibility?.isEligible === false;
 

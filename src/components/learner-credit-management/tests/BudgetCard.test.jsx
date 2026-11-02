@@ -5,6 +5,7 @@ import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
 import dayjs from 'dayjs';
 import {
+  act,
   screen,
   render,
   waitFor,
@@ -682,10 +683,10 @@ describe('<BudgetCard />', () => {
     });
 
     // Renders every budget under one QueryClient, as the budgets list does.
-    const renderPolicyBudgetCards = (budgets = [policyBudget()]) => {
+    const renderPolicyBudgetCards = (budgets = [policyBudget()], client = queryClient()) => {
       useSubsidySummaryAnalyticsApi.mockReturnValue({ isLoading: false, subsidySummary: undefined });
       return render(
-        <QueryClientProvider client={queryClient()}>
+        <QueryClientProvider client={client}>
           <MemoryRouter initialEntries={['/test-enterprise/admin/learner-credit']}>
             <Provider store={store}>
               <IntlProvider locale="en">
@@ -877,6 +878,24 @@ describe('<BudgetCard />', () => {
       expect(screen.getByText(mockBudgetDisplayName)).toBeInTheDocument();
       expect(screen.getByText('View budget')).toBeInTheDocument();
       expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      { row: eligibilityRow(), getAddFunds: () => screen.findByRole('link', { name: 'Add funds' }) },
+      { row: ineligibleRow('budget_not_active'), getAddFunds: () => getDisabledAddFunds() },
+    ])('hides the Add funds CTA and reasons when a background refetch fails after eligibility=$row.is_eligible', async ({ row, getAddFunds }) => {
+      mockEligibility(row);
+      const client = queryClient();
+      renderPolicyBudgetCards([policyBudget()], client);
+      await getAddFunds();
+
+      EnterpriseAccessApiService.getTopUpEligibility.mockRejectedValue(httpError(403));
+      await act(() => client.refetchQueries());
+
+      await waitFor(() => expect(screen.queryByText('Add funds')).not.toBeInTheDocument());
+      expect(screen.queryByTestId('add-funds-ineligible-status')).not.toBeInTheDocument();
+      expect(screen.getByText('View budget')).toBeInTheDocument();
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
