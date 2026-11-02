@@ -54,7 +54,9 @@ const AuditTrailTableContents = ({
   // from a ref, so it's created once and a pending search survives other filter changes and re-renders.
   const [actorSearchInput, setActorSearchInput] = useState(filters.actorSearch);
   const latestFiltersRef = useRef({ filters, handleFiltersChange });
-  latestFiltersRef.current = { filters, handleFiltersChange };
+  useEffect(() => {
+    latestFiltersRef.current = { filters, handleFiltersChange };
+  });
   const debouncedApplyActorSearch = useMemo(() => debounce((actorSearch) => {
     const { filters: latestFilters, handleFiltersChange: applyFilters } = latestFiltersRef.current;
     applyFilters({ ...latestFilters, actorSearch });

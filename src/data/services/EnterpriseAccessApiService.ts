@@ -273,15 +273,15 @@ class EnterpriseAccessApiService {
   }
 
   /**
-   * List content assignments in every state for a specific AssignmentConfiguration. Each assignment
-   * includes its actions with the audit trail fields (actor, source, affected learner), which are
-   * used to build the learner credit audit trail.
+   * List content assignments for a specific AssignmentConfiguration. No state filter is applied, so
+   * assignments in every state (including any added later) are returned. Each assignment includes its
+   * actions with the audit trail fields (actor, source, affected learner), which are used to build the
+   * learner credit audit trail.
    */
   static listContentAssignmentsWithAuditTrail(assignmentConfigurationUUID, options: any = {}) {
     const params = {
       page: 1,
       page_size: 100,
-      state__in: 'allocated,accepted,cancelled,errored,expired,reversed',
       ...snakeCaseObject(options),
     };
     const urlParams = new URLSearchParams(params);

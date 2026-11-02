@@ -158,7 +158,6 @@ describe('EnterpriseAccessApiService', () => {
     const expectedParams = new URLSearchParams({
       page: 2,
       page_size: 100,
-      state__in: 'allocated,accepted,cancelled,errored,expired,reversed',
     }).toString();
     expect(axios.get).toBeCalledWith(
       `${enterpriseAccessBaseUrl}/api/v1/assignment-configurations/${mockAssignmentConfigurationUUID}/admin/assignments/?${expectedParams}`,

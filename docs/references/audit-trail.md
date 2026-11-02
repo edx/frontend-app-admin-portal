@@ -105,8 +105,8 @@ src/data/services/
 
 ## API contract
 
-**Learner credit (enterprise-access):** uses the existing admin assignments endpoint. It passes
-`state__in=allocated,accepted,cancelled,errored,expired,reversed` and `page_size=100`. Each action includes
+**Learner credit (enterprise-access):** uses the existing admin assignments endpoint with `page_size=100`
+and no state filter, so assignments in every state are included. Each action includes
 `created`, `uuid`, `action_type`, `error_reason`, `actor_type`, `actor_lms_user_id`, `source`, `learner_email` and
 an allowlisted `metadata`.
 

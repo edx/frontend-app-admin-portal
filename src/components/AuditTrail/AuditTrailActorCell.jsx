@@ -6,9 +6,11 @@ import { AUDIT_TRAIL_ACTOR_TYPES } from './data/constants';
 import messages, { ACTOR_TYPE_MESSAGES } from './data/messages';
 
 /**
- * Displays who performed an audit trail action. Actor names are resolved by the backend; this cell
- * never assumes a missing actor is the current admin, and falls back to "Unknown user" (with the LMS
- * user ID when available) for human actors whose name could not be resolved.
+ * Displays who performed an audit trail action, using the actor name/email resolved when building the rows
+ * (see `transformActionToAuditTrailRow`): license-manager returns the actor, while for enterprise-access only
+ * the current admin and the affected learner can be resolved. This cell never assumes a missing actor is the
+ * current admin, and falls back to "Unknown user" (with the LMS user ID when available) for human actors whose
+ * name could not be resolved.
  */
 const AuditTrailActorCell = ({ row }) => {
   const intl = useIntl();
