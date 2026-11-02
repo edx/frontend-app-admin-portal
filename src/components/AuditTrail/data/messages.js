@@ -394,10 +394,15 @@ const messages = defineMessages({
     defaultMessage: 'API',
     description: 'Audit trail source label for actions taken via the API.',
   },
-  sourceApiBulk: {
-    id: 'admin.portal.audit.trail.source.api.bulk',
-    defaultMessage: 'API (bulk)',
-    description: 'Audit trail source label for bulk actions taken via the API.',
+  sourceAdminApi: {
+    id: 'admin.portal.audit.trail.source.admin.api',
+    defaultMessage: 'Admin API',
+    description: 'Audit trail source label for actions taken by an admin via the API.',
+  },
+  sourceAdminApiBulk: {
+    id: 'admin.portal.audit.trail.source.admin.api.bulk',
+    defaultMessage: 'Admin API (bulk)',
+    description: 'Audit trail source label for bulk actions taken by an admin via the API.',
   },
   sourceSystemEvent: {
     id: 'admin.portal.audit.trail.source.system.event',
@@ -454,8 +459,8 @@ export const SOURCE_MESSAGES = {
   browse_request_approve_all: messages.sourceBrowseAndRequestApproveAll,
   django_admin: messages.sourceSupport,
   api: messages.sourceApi,
-  admin_api: messages.sourceApi,
-  admin_api_bulk: messages.sourceApiBulk,
+  admin_api: messages.sourceAdminApi,
+  admin_api_bulk: messages.sourceAdminApiBulk,
   signal: messages.sourceSystemEvent,
   scheduled_job: messages.sourceScheduledTask,
   celery_task: messages.sourceBackgroundTask,

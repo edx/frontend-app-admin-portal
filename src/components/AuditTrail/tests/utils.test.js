@@ -13,7 +13,14 @@ import {
   isValidDateRange,
   transformActionToAuditTrailRow,
 } from '../data/utils';
-import { AUDIT_TRAIL_DEFAULT_FILTERS } from '../data/constants';
+import {
+  ASSIGNMENT_AUDIT_ACTION_TYPES,
+  ASSIGNMENT_AUDIT_SOURCES,
+  AUDIT_TRAIL_DEFAULT_FILTERS,
+  AUDIT_TRAIL_STATUS_OPTIONS,
+  LICENSE_AUDIT_ACTION_TYPES,
+  LICENSE_AUDIT_SOURCES,
+} from '../data/constants';
 
 const mockIntl = { formatMessage: (message) => message.defaultMessage };
 
@@ -204,6 +211,12 @@ describe('fetchAllPaginatedResults', () => {
     const fetchPage = jest.fn().mockResolvedValue({ data: { next: null } });
     expect(await fetchAllPaginatedResults(fetchPage)).toEqual([]);
   });
+
+  it('does not share results between calls', async () => {
+    const fetchPage = jest.fn().mockResolvedValue({ data: { next: null, results: [{ uuid: 'a' }] } });
+    expect(await fetchAllPaginatedResults(fetchPage)).toEqual([{ uuid: 'a' }]);
+    expect(await fetchAllPaginatedResults(fetchPage)).toEqual([{ uuid: 'a' }]);
+  });
 });
 
 describe('labels', () => {
@@ -222,6 +235,9 @@ describe('labels', () => {
   it.each([
     ['admin_ui_single', 'Admin Portal'],
     ['admin_ui', 'Admin Portal'],
+    ['api', 'API'],
+    ['admin_api', 'Admin API'],
+    ['admin_api_bulk', 'Admin API (bulk)'],
     ['scheduled_job', 'Scheduled task'],
     ['renewal_job', 'Plan renewal'],
     ['some_new_source', 'Some new source'],
@@ -309,5 +325,19 @@ describe('applyAuditTrailQueryOptions', () => {
 
   it('returns a single empty page when nothing matches', () => {
     expect(applyAuditTrailQueryOptions([], baseOptions)).toEqual({ results: [], itemCount: 0, pageCount: 1 });
+  });
+});
+
+describe('filter options', () => {
+  // Each filter option must be distinguishable, since filtering matches the option's exact value.
+  it.each([
+    ['assignment action types', ASSIGNMENT_AUDIT_ACTION_TYPES, getActionTypeLabel],
+    ['license action types', LICENSE_AUDIT_ACTION_TYPES, getActionTypeLabel],
+    ['assignment sources', ASSIGNMENT_AUDIT_SOURCES, getSourceLabel],
+    ['license sources', LICENSE_AUDIT_SOURCES, getSourceLabel],
+    ['statuses', AUDIT_TRAIL_STATUS_OPTIONS, getStatusLabel],
+  ])('%s have distinct labels', (_, options, getLabel) => {
+    const labels = options.map(option => getLabel(mockIntl, option));
+    expect(new Set(labels).size).toEqual(options.length);
   });
 });

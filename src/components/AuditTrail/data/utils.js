@@ -173,15 +173,14 @@ export const getUnretiredEmail = (email) => (
  * results. Pages are requested in order, until a page has no `next` link.
  *
  * @param {Function} fetchPage Called with a 1-indexed page number; returns the API response for that page.
- * @param {number} [page] The page to start from.
+ * @param {number} [page] The page to fetch next (internal, used when recursing).
+ * @param {Array} [allResults] The results of the pages fetched so far (internal, used when recursing).
  */
-export const fetchAllPaginatedResults = async (fetchPage, page = 1) => {
+export const fetchAllPaginatedResults = async (fetchPage, page = 1, allResults = []) => {
   const response = await fetchPage(page);
   const { results = [], next } = camelCaseObject(response.data);
-  if (!next) {
-    return results;
-  }
-  return [...results, ...await fetchAllPaginatedResults(fetchPage, page + 1)];
+  allResults.push(...results);
+  return next ? fetchAllPaginatedResults(fetchPage, page + 1, allResults) : allResults;
 };
 
 /**

@@ -56,55 +56,49 @@ const MultipleBudgetsPage = ({
     );
   }
 
-  const noBudgetsCard = (
-    <Card>
-      <Card.Section className="text-center">
-        <Row>
-          <Col xs={12} lg={{ span: 8, offset: 2 }}>
-            <h3 className="mb-3">
-              <FormattedMessage
-                id="lcm.budgets.no.budgets"
-                defaultMessage="No budgets for your organization"
-                description="No budgets for your organization"
-              />
-            </h3>
-            <p>
-              <FormattedMessage
-                id="lcm.budgets.no.budgets.description"
-                defaultMessage="We were unable to find any budgets for your organization. Please contact Customer Support if you have questions."
-                description="Description for no budgets found and guidance to contact support."
-              />
-            </p>
-            <Hyperlink
-              className="btn btn-brand"
-              target="_blank"
-              destination={configuration.ENTERPRISE_SUPPORT_URL}
-            >
-              <FormattedMessage
-                id="lcm.budgets.contact.support"
-                defaultMessage="Contact support"
-                description="Contact support text for no budgets found."
-              />
-            </Hyperlink>
-          </Col>
-        </Row>
-      </Card.Section>
-    </Card>
-  );
-
-  // Without the audit trail, the page only lists budgets. With it, the "Audit trail" tab is shown even when there
-  // are no (active) budgets, since retired budgets may still have audit history.
-  if (budgets.length === 0 && !features.AUDIT_TRAIL) {
+  if (budgets.length === 0) {
     return (
       <Stack>
         <Helmet title={PAGE_TITLE} />
         <Hero title={PAGE_TITLE} />
-        {noBudgetsCard}
+        <Card>
+          <Card.Section className="text-center">
+            <Row>
+              <Col xs={12} lg={{ span: 8, offset: 2 }}>
+                <h3 className="mb-3">
+                  <FormattedMessage
+                    id="lcm.budgets.no.budgets"
+                    defaultMessage="No budgets for your organization"
+                    description="No budgets for your organization"
+                  />
+                </h3>
+                <p>
+                  <FormattedMessage
+                    id="lcm.budgets.no.budgets.description"
+                    defaultMessage="We were unable to find any budgets for your organization. Please contact Customer Support if you have questions."
+                    description="Description for no budgets found and guidance to contact support."
+                  />
+                </p>
+                <Hyperlink
+                  className="btn btn-brand"
+                  target="_blank"
+                  destination={configuration.ENTERPRISE_SUPPORT_URL}
+                >
+                  <FormattedMessage
+                    id="lcm.budgets.contact.support"
+                    defaultMessage="Contact support"
+                    description="Contact support text for no budgets found."
+                  />
+                </Hyperlink>
+              </Col>
+            </Row>
+          </Card.Section>
+        </Card>
       </Stack>
     );
   }
 
-  const budgetsContent = budgets.length === 0 ? noBudgetsCard : (
+  const budgetsPicker = (
     <MultipleBudgetsPicker
       budgets={budgets}
       enterpriseUUID={enterpriseUUID}
@@ -140,7 +134,7 @@ const MultipleBudgetsPage = ({
               })}
               className="pt-4"
             >
-              {activeTabKey === LEARNER_CREDIT_BUDGETS_TAB && budgetsContent}
+              {activeTabKey === LEARNER_CREDIT_BUDGETS_TAB && budgetsPicker}
             </Tab>
             <Tab
               eventKey={LEARNER_CREDIT_AUDIT_TRAIL_TAB}
@@ -154,7 +148,7 @@ const MultipleBudgetsPage = ({
               {activeTabKey === LEARNER_CREDIT_AUDIT_TRAIL_TAB && <LearnerCreditAuditTrail />}
             </Tab>
           </Tabs>
-        ) : budgetsContent}
+        ) : budgetsPicker}
       </Container>
     </>
   );

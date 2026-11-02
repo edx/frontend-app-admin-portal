@@ -231,19 +231,6 @@ describe('<MultipleBudgetsPage />', () => {
       expect(screen.queryByText('Budgets')).not.toBeInTheDocument();
     });
 
-    it('shows the tabs when there are no active budgets, so the audit trail stays reachable', () => {
-      useEnterpriseBudgets.mockReturnValueOnce({ data: { budgets: [] } });
-      const { unmount } = render(<MultipleBudgetsPageWrapper />);
-      expect(screen.getByRole('tab', { name: 'Details' })).toHaveAttribute('aria-selected', 'true');
-      expect(screen.getByText('No budgets for your organization')).toBeInTheDocument();
-      unmount();
-
-      useEnterpriseBudgets.mockReturnValueOnce({ data: { budgets: [] } });
-      render(<MultipleBudgetsPageWrapper activeTabKey={LEARNER_CREDIT_AUDIT_TRAIL_TAB} />);
-      expect(screen.getByText('Audit trail content')).toBeInTheDocument();
-      expect(screen.queryByText('No budgets for your organization')).not.toBeInTheDocument();
-    });
-
     it('navigates to the selected tab', async () => {
       const user = userEvent.setup();
       render(<MultipleBudgetsPageWrapper />);

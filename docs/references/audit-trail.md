@@ -88,8 +88,13 @@ src/data/services/
   discards a pending search; changing other filters keeps it.
 - **Session recordings.** Actor and learner identities, the actor search input and its chip are marked
   `data-hj-suppress`, following the repo's pattern for emails.
-- **No active budgets.** With the flag on, the Learner Credit page shows its tabs even without active budgets
-  (Details shows the "No budgets" card), so the audit trail of retired budgets stays reachable.
+- **Freshness.** Both audit queries use `refetchOnMount: 'always'`, so opening an audit trail tab always
+  refetches (showing cached rows meanwhile) and reflects actions just taken elsewhere in the portal. The app's
+  60 second `staleTime` still applies to window-focus refetches.
+- **Reachability.** The audit trail tabs live inside the existing pages, so they follow those pages' gates: the
+  Learner Credit page requires at least one active budget (`canManageLearnerCredit`), and Subscription Management
+  shows its "no active subscriptions" alert without an active plan. Inactive budgets and plans are still included
+  in the history when the page is reachable.
 - **Unknown enum values** (a new action type or source added by the backend) fall back to a humanized label
   instead of failing.
 - **Three non-data states:**

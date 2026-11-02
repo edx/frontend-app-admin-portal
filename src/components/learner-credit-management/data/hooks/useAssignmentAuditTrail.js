@@ -44,6 +44,9 @@ const useAssignmentAuditTrail = ({ enterpriseId, queryOptions }) => {
     queryKey: learnerCreditManagementQueryKeys.auditTrail(enterpriseId),
     queryFn: () => getAssignmentAuditTrailRows(enterpriseId),
     enabled: !!enterpriseId,
+    // Audit history changes whenever admins act on assignments or licenses elsewhere in the portal, so it's
+    // refetched each time an audit trail tab is opened; cached rows are shown meanwhile.
+    refetchOnMount: 'always',
   });
 
   const data = useMemo(() => {

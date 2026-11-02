@@ -3,7 +3,9 @@ import { Provider } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
-import { render, screen, within } from '@testing-library/react';
+import {
+  render, screen, waitFor, within,
+} from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -94,14 +96,14 @@ const mockPlan2AuditHistory = {
   },
 };
 
-const SubscriptionAuditTrailWrapper = () => (
-  <QueryClientProvider client={queryClient()}>
+const renderSubscriptionAuditTrail = (client = queryClient()) => render(
+  <QueryClientProvider client={client}>
     <Provider store={store}>
       <IntlProvider locale="en">
         <SubscriptionAuditTrail />
       </IntlProvider>
     </Provider>
-  </QueryClientProvider>
+  </QueryClientProvider>,
 );
 
 const mockSuccessfulResponses = () => {
@@ -132,7 +134,7 @@ describe('<SubscriptionAuditTrail />', () => {
 
   it('fetches every page of audit history for each subscription plan and renders the actions newest first', async () => {
     mockSuccessfulResponses();
-    render(<SubscriptionAuditTrailWrapper />);
+    renderSubscriptionAuditTrail();
 
     expect(screen.getByText(/History of every action performed on subscription licenses/)).toBeInTheDocument();
     expect(await waitForAuditTrailTable()).toBeInTheDocument();
@@ -154,7 +156,7 @@ describe('<SubscriptionAuditTrail />', () => {
     expect(within(rows[0]).getByText('Revoked')).toBeInTheDocument();
     expect(within(rows[0]).getByText('Success')).toBeInTheDocument();
     expect(within(rows[0]).getByText('audit_admin@example.com')).toBeInTheDocument();
-    expect(within(rows[0]).getByText('API (bulk)')).toBeInTheDocument();
+    expect(within(rows[0]).getByText('Admin API (bulk)')).toBeInTheDocument();
     expect(within(rows[0]).getByText('learner2@example.com')).toBeInTheDocument();
 
     // An unresolved learner actor falls back to the affected learner.
@@ -166,6 +168,7 @@ describe('<SubscriptionAuditTrail />', () => {
     expect(within(rows[2]).getByText('Assigned')).toBeInTheDocument();
     expect(within(rows[2]).getByText('Audit Admin')).toBeInTheDocument();
     expect(within(rows[2]).getByText('Admin · audit_admin@example.com')).toBeInTheDocument();
+    expect(within(rows[2]).getByText('Admin API')).toBeInTheDocument();
 
     // System action with retired learner information.
     expect(within(rows[3]).getByText('Renewed')).toBeInTheDocument();
@@ -178,10 +181,24 @@ describe('<SubscriptionAuditTrail />', () => {
     expect(screen.queryByRole('option', { name: 'Allocated' })).not.toBeInTheDocument();
   });
 
+  it('refetches the audit trail each time it is opened, showing the cached rows meanwhile', async () => {
+    mockSuccessfulResponses();
+    // Use the app's 60 second stale time, so the remount happens while the cached rows are still fresh.
+    const client = queryClient({ queries: { retry: false, staleTime: 60 * 1000 } });
+    const { unmount } = renderSubscriptionAuditTrail(client);
+    await waitForAuditTrailTable();
+    expect(LicenseManagerApiService.fetchCustomerAgreementData).toHaveBeenCalledTimes(1);
+    unmount();
+
+    renderSubscriptionAuditTrail(client);
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    await waitFor(() => expect(LicenseManagerApiService.fetchCustomerAgreementData).toHaveBeenCalledTimes(2));
+  });
+
   it('filters and sorts the audit trail without refetching', async () => {
     const user = userEvent.setup();
     mockSuccessfulResponses();
-    render(<SubscriptionAuditTrailWrapper />);
+    renderSubscriptionAuditTrail();
     await waitForAuditTrailTable();
 
     await user.selectOptions(screen.getByLabelText('Source'), 'Plan renewal');
@@ -198,14 +215,14 @@ describe('<SubscriptionAuditTrail />', () => {
   it('shows an empty state when there is no audit history', async () => {
     LicenseManagerApiService.fetchCustomerAgreementData.mockResolvedValue(mockCustomerAgreementResponse);
     LicenseManagerApiService.fetchSubscriptionAuditHistory.mockResolvedValue({ data: { next: null, results: [] } });
-    render(<SubscriptionAuditTrailWrapper />);
+    renderSubscriptionAuditTrail();
     expect(await screen.findByText('No audit history available')).toBeInTheDocument();
   });
 
   it('shows an error alert when the audit trail fails to load, and retries', async () => {
     const user = userEvent.setup();
     LicenseManagerApiService.fetchCustomerAgreementData.mockRejectedValueOnce(new Error('oops'));
-    render(<SubscriptionAuditTrailWrapper />);
+    renderSubscriptionAuditTrail();
 
     expect(await screen.findByText('We couldn\'t load the audit history')).toBeInTheDocument();
     expect(screen.queryByText('No audit history available')).not.toBeInTheDocument();

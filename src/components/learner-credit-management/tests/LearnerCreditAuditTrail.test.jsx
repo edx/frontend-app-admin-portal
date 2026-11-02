@@ -3,7 +3,9 @@ import { Provider } from 'react-redux';
 import { QueryClientProvider } from '@tanstack/react-query';
 import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
-import { render, screen, within } from '@testing-library/react';
+import {
+  render, screen, waitFor, within,
+} from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -83,14 +85,14 @@ const mockAssignmentsPage2 = {
   },
 };
 
-const LearnerCreditAuditTrailWrapper = () => (
-  <QueryClientProvider client={queryClient()}>
+const renderLearnerCreditAuditTrail = (client = queryClient()) => render(
+  <QueryClientProvider client={client}>
     <Provider store={store}>
       <IntlProvider locale="en">
         <LearnerCreditAuditTrail />
       </IntlProvider>
     </Provider>
-  </QueryClientProvider>
+  </QueryClientProvider>,
 );
 
 const mockSuccessfulResponses = () => {
@@ -98,6 +100,16 @@ const mockSuccessfulResponses = () => {
   EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail
     .mockResolvedValueOnce(mockAssignmentsPage1)
     .mockResolvedValueOnce(mockAssignmentsPage2);
+};
+
+// Unlike `mockSuccessfulResponses`, responds to any number of requests.
+const mockRepeatableResponses = () => {
+  EnterpriseAccessApiService.listSubsidyAccessPolicies.mockResolvedValue(mockPoliciesResponse);
+  EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail.mockImplementation(
+    (assignmentConfigurationUUID, { page }) => Promise.resolve(
+      page === 1 ? mockAssignmentsPage1 : mockAssignmentsPage2,
+    ),
+  );
 };
 
 // Wait for an audit action in the table (the action type labels also appear as filter options).
@@ -118,7 +130,7 @@ describe('<LearnerCreditAuditTrail />', () => {
 
   it('fetches every page of assignments for each assignable budget and renders their actions newest first', async () => {
     mockSuccessfulResponses();
-    render(<LearnerCreditAuditTrailWrapper />);
+    renderLearnerCreditAuditTrail();
 
     expect(screen.getByText(/History of every action performed on learner credit assignments/)).toBeInTheDocument();
     expect(await waitForAuditTrailTable()).toBeInTheDocument();
@@ -182,7 +194,7 @@ describe('<LearnerCreditAuditTrail />', () => {
           : { data: { next: null, results: mockAssignmentsPage1.data.results } },
       ),
     );
-    render(<LearnerCreditAuditTrailWrapper />);
+    renderLearnerCreditAuditTrail();
 
     expect(await waitForAuditTrailTable()).toBeInTheDocument();
     expect(EnterpriseAccessApiService.listSubsidyAccessPolicies).toHaveBeenNthCalledWith(
@@ -197,10 +209,24 @@ describe('<LearnerCreditAuditTrail />', () => {
     expect(getTableRows()).toHaveLength(3);
   });
 
+  it('refetches the audit trail each time it is opened, showing the cached rows meanwhile', async () => {
+    mockRepeatableResponses();
+    // Use the app's 60 second stale time, so the remount happens while the cached rows are still fresh.
+    const client = queryClient({ queries: { retry: false, staleTime: 60 * 1000 } });
+    const { unmount } = renderLearnerCreditAuditTrail(client);
+    await waitForAuditTrailTable();
+    expect(EnterpriseAccessApiService.listSubsidyAccessPolicies).toHaveBeenCalledTimes(1);
+    unmount();
+
+    renderLearnerCreditAuditTrail(client);
+    expect(screen.getByRole('table')).toBeInTheDocument();
+    await waitFor(() => expect(EnterpriseAccessApiService.listSubsidyAccessPolicies).toHaveBeenCalledTimes(2));
+  });
+
   it('filters and sorts the audit trail without refetching', async () => {
     const user = userEvent.setup();
     mockSuccessfulResponses();
-    render(<LearnerCreditAuditTrailWrapper />);
+    renderLearnerCreditAuditTrail();
     await waitForAuditTrailTable();
 
     await user.selectOptions(screen.getByLabelText('Action'), 'Reminded');
@@ -226,7 +252,7 @@ describe('<LearnerCreditAuditTrail />', () => {
   it('shows an error alert when the audit trail fails to load, and retries', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.listSubsidyAccessPolicies.mockRejectedValueOnce(new Error('oops'));
-    render(<LearnerCreditAuditTrailWrapper />);
+    renderLearnerCreditAuditTrail();
 
     expect(await screen.findByText('We couldn\'t load the audit history')).toBeInTheDocument();
     expect(screen.queryByText('No audit history available')).not.toBeInTheDocument();
@@ -238,7 +264,7 @@ describe('<LearnerCreditAuditTrail />', () => {
 
   it('shows an empty state when there are no assignable budgets', async () => {
     EnterpriseAccessApiService.listSubsidyAccessPolicies.mockResolvedValue({ data: { results: [] } });
-    render(<LearnerCreditAuditTrailWrapper />);
+    renderLearnerCreditAuditTrail();
     expect(await screen.findByText('No audit history available')).toBeInTheDocument();
     expect(EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail).not.toHaveBeenCalled();
   });
