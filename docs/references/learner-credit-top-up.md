@@ -32,7 +32,9 @@ Frontend pieces:
 - **No retry on 4xx** (403, and 404 when the backend flag is off, won't change); one retry otherwise.
   The query isn't made at all when the frontend flag is off, so admins don't hit a 404 endpoint
   before rollout.
-- `isTopUpCandidate` (`data/utils.js`): flag on, policy budget, not retired/expired. `SubBudgetCard`
+- `isTopUpCandidate` (`data/utils.js`): policy budget, not retired/expired. It doesn't check the
+  feature flag: the hook's `enabled` (no request, so no button) and the `AddFundsPage` early return
+  (redirect) are the only flag checks. `SubBudgetCard`
   calls the hook with `enabled` set only for candidates that show card actions (not scheduled), so
   other cards never make the request. Retired and expired
   budgets stay hidden even though the API would answer `budget_not_active` for them (an expired
@@ -60,7 +62,7 @@ loaded as eligible (or ineligible) hides its button and reasons once a refetch f
 Funds page deliberately does the opposite (see the budget guard below).
 
 **Gotcha — disabled but reachable:** the ineligible button uses `aria-disabled="true"` and the
-`disabled` class with a no-op `onClick`, not the `disabled` attribute, so keyboard and screen reader
+`disabled` class, not the `disabled` attribute, so keyboard and screen reader
 users can focus it. It also sets `pointerEvents: 'none'`, because the `disabled` class alone still
 shows the outline button's hover fill; this blocks only the mouse, not keyboard focus.
 `aria-describedby` points at the reasons list in the warning strip (a `useId` from `SubBudgetCard`),
@@ -73,11 +75,13 @@ ignores `disabled`.
 show one generic message. The expiring-soon text doesn't name the backend's 14-day threshold, so
 it can't drift from it.
 
-**Strip colors override Paragon:** Paragon's warning `Card.Status` (`$warning-100` bg, `$warning-200`
-border, `#FFD900` icon) is paler than the Figma, so `.add-funds-ineligible-status` in
-`learner-credit-management/styles/index.scss` sets the design's amber values: bg `#FFF8E1`, top
-border `#FFEEBA`, text `#5A4000`, icon `#856404` (a 1rem icon). It keeps Paragon's
-`$card-border-radius` for the bottom corners so they match the card.
+**Strip colors come from the theme:** the strip uses Paragon's warning `Card.Status` colours
+(`theme-color(warning, "background" | "border" | "default")`), so brand themes can restyle it. The
+Figma's darker amber (`#FFF8E1` bg, `#5A4000` text, `#856404` icon) has no Paragon token; change it
+in the brand theme, not here. `.add-funds-ineligible-status` in
+`learner-credit-management/styles/index.scss` only adjusts layout: a 1px top border (Paragon sets
+the width to 0) and a 1rem icon. Its selector must stay at Paragon's specificity
+(`.pgn__card .pgn__card-status...`), or Paragon's 1.5rem icon size wins.
 
 ## Add Funds flow (multi-step checkout)
 
