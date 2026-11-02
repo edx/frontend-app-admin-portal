@@ -6,18 +6,72 @@ Tracking doc for the Learner Credit Top Up feature
 ## Current state
 
 The "Add Funds" CTA on `SubBudgetCard` (`src/components/learner-credit-management/SubBudgetCard.jsx`)
-is currently gated behind a single frontend-only rollout flag, `features.TOP_UP_LEARNER_CREDIT` in
+is gated behind a frontend rollout flag, `features.TOP_UP_LEARNER_CREDIT` in
 `src/config/index.js` (env var `FEATURE_TOP_UP_LEARNER_CREDIT='true'`, or the URL override
 `?feature=TOP_UP_LEARNER_CREDIT`; `hasFeatureFlagEnabled` reads the repeated `feature` query
 parameter, so `?TOP_UP_LEARNER_CREDIT=true` does not work).
 
-The CTA only renders when the flag is on, the budget source is `BUDGET_TYPES.policy`
-(enterprise-access Learner Credit policies — not legacy ecommerce offers or enterprise-subsidy
-sub-budgets; `BudgetCard` passes `source` through to `SubBudgetCard`), **and** `canTopUpBudget`
-allows its status: Active or Expiring only, so scheduled, retired, expired and any unknown future
-status are excluded (it never appears alongside "View budget history"). It uses `outline-primary` so
-"View budget" remains the single primary action on the card, and links to the Add Funds flow
-described below. The flag is a rollout gate ("is this feature live"), not business eligibility.
+The flag is a rollout gate ("is this feature live"), not business eligibility. Business
+eligibility comes from the enterprise-access top-up eligibility API (ENT-12356), see below.
+
+## Eligibility (`GET /api/v1/learner-credit-top-ups/eligibility/`)
+
+The contract (reason codes, status codes, the backend's own `FEATURE_TOP_UP_LEARNER_CREDIT`
+Django flag) is documented in enterprise-access `docs/references/learner_credit_top_ups.md`.
+Frontend pieces:
+
+- `EnterpriseAccessApiService.getTopUpEligibility` and the `useTopUpEligibility` hook
+  (`data/hooks/useTopUpEligibility.ts`). `data` is the budget's camelCased row, or `null` when the
+  response has no row for it (the list only returns `active=True` policies).
+- **One request for the budgets list:** without `isSingleBudgetRequest`, the query key is
+  `topUpEligibility(enterpriseId)` (no budget id), so every card shares one cached request and
+  `select` picks its own row. The cards render without waiting for it.
+- **One request with `policy_uuid` on the Add Funds page** (`isSingleBudgetRequest: true`, key
+  `budgetTopUpEligibility(enterpriseId, policyUuid)`). Invalidating `topUpEligibility(enterpriseId)`
+  invalidates both, which the pay step will need.
+- **No retry on 4xx** (403, and 404 when the backend flag is off, won't change); one retry otherwise.
+  The query isn't made at all when the frontend flag is off, so admins don't hit a 404 endpoint
+  before rollout.
+- `isTopUpCandidate` (`data/utils.js`): flag on, policy budget, not retired/expired. `SubBudgetCard`
+  calls the hook with `enabled` set only for candidates that show card actions (not scheduled), so
+  other cards never make the request. Retired and expired
+  budgets stay hidden even though the API would answer `budget_not_active` for them (an expired
+  subsidy also reports `budget_expiring_soon`), so the CTA never appears next to "View budget
+  history". Scheduled budgets render no card actions at all.
+- `canTopUpBudget({ isPolicy, status, eligibility })` = candidate **and** `eligibility.isEligible`.
+  Shared by the card CTA and the Add Funds page guard so they can't drift.
+
+**The CTA** (`add-funds/AddFundsButton.jsx`, `outline-primary` so "View budget" stays the single
+primary action) and **the reasons** (`add-funds/AddFundsIneligibleStatus.jsx`, a Paragon
+`Card.Status` warning strip across the bottom of the card, per the Figma). `SubBudgetCard` reads the
+eligibility once and passes it to both:
+
+| Eligibility | CTA |
+| --- | --- |
+| Loading | Hidden (no disabled-then-enabled flicker) |
+| `isEligible: true` | Link to the Add Funds flow |
+| `isEligible: false` | Disabled, with every reason in the warning strip at the bottom of the card |
+| Error (403, 404, 5xx, network) or no row for the budget | Hidden, no error UI |
+
+**Gotcha — disabled but reachable:** the ineligible button uses `aria-disabled="true"` and the
+`disabled` class with a no-op `onClick`, not the `disabled` attribute, so keyboard and screen reader
+users can focus it. It also sets `pointerEvents: 'none'`, because the `disabled` class alone still
+shows the outline button's hover fill; this blocks only the mouse, not keyboard focus.
+`aria-describedby` points at the reasons list in the warning strip (a `useId` from `SubBudgetCard`),
+so each reason message must read on its own. It is a plain `<button>`, never `as={Link}`: an `<a>`
+ignores `disabled`.
+
+**Reason text is ours, not the API's:** each `error_code` (`TOP_UP_INELIGIBILITY_REASONS` in
+`add-funds/data/constants.ts`) maps to a translated message in `add-funds/messages.js`; the API's
+`message` is English-only and never shown. Unknown codes, or an ineligible row with no reasons,
+show one generic message. The expiring-soon text doesn't name the backend's 14-day threshold, so
+it can't drift from it.
+
+**Strip colors override Paragon:** Paragon's warning `Card.Status` (`$warning-100` bg, `$warning-200`
+border, `#FFD900` icon) is paler than the Figma, so `.add-funds-ineligible-status` in
+`learner-credit-management/styles/index.scss` sets the design's amber values: bg `#FFF8E1`, top
+border `#FFEEBA`, text `#5A4000`, icon `#856404` (a 1rem icon). It keeps Paragon's
+`$card-border-radius` for the bottom corners so they match the card.
 
 ## Add Funds flow (multi-step checkout)
 
@@ -35,10 +89,12 @@ instead of the existing `FormWorkflow` modal pattern is recorded in
 | 3. Payment Details | `payment-details` | Placeholder (`StepComingSoon`) |
 | 4. Confirmation | `confirmation` | Placeholder (`StepComingSoon`) |
 
-**Budget guard** (`AddFundsPage.jsx`): redirects to budget detail when the flag is off, the
-budget id is not a policy UUID, the policy is scheduled/retired/expired, or the policy fails its
-initial load (404 shows `NotFoundPage`). A failed background refetch keeps the cached policy and
-does not exit the flow, so selections survive a flaky network. The budget-level rule is `canTopUpBudget` in `data/utils.js`,
+**Budget guard** (`AddFundsPage.jsx`): shows the loading state until both the policy and its
+eligibility (`policy_uuid` request) have loaded, then redirects to budget detail when the flag is
+off, the budget id is not a policy UUID, the policy is retired/expired, the policy fails its
+initial load (404 shows `NotFoundPage`), or eligibility is ineligible, has no row, or fails its
+initial load with anything (403, 404, 5xx, network). A failed background refetch of either keeps
+the cached data and does not exit the flow, so selections survive a flaky network. The budget-level rule is `canTopUpBudget` in `data/utils.js`,
 shared with the `SubBudgetCard` CTA. The page reads the budget status from `subsidyAccessPolicy.status`,
 which `useSubsidyAccessPolicy`'s `select` derives once with `getBudgetStatus`; don't recompute it.
 

@@ -1,3 +1,15 @@
+export type TopUpIneligibilityReason = {
+  errorCode: string;
+  message: string;
+};
+
+export type TopUpEligibility = {
+  policyUuid: string;
+  isEligible: boolean;
+  reasons: TopUpIneligibilityReason[];
+  subsidyExpirationDatetime: string | null;
+};
+
 export type SubsidyAccessPolicy = {
   uuid: string;
   displayName: string;

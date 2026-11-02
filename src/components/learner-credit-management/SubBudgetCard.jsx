@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
@@ -9,18 +10,17 @@ import {
   Badge,
   Stack,
 } from '@openedx/paragon';
-import { Add } from '@openedx/paragon/icons';
-
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
 import { BUDGET_STATUSES, BUDGET_TYPES, ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import {
-  getBudgetStatus, getTranslatedBudgetStatus, getTranslatedBudgetTerm,
+  getBudgetStatus, getTranslatedBudgetStatus, getTranslatedBudgetTerm, useTopUpEligibility,
 } from './data';
-import { canTopUpBudget, isBudgetRetiredOrExpired } from './data/utils';
+import { isTopUpCandidate, isBudgetRetiredOrExpired } from './data/utils';
 import { useEnterpriseBudgets } from '../EnterpriseSubsidiesContext/data/hooks';
 import SubBudgetCardUtilization from './SubBudgetCardUtilization';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
-import { ADD_FUNDS_ROUTE_SEGMENT } from './add-funds/data/constants';
+import AddFundsButton from './add-funds/AddFundsButton';
+import AddFundsIneligibleStatus from './add-funds/AddFundsIneligibleStatus';
 
 const BaseBackgroundFetchingWrapper = ({
   enterpriseId,
@@ -92,7 +92,16 @@ const BaseSubBudgetCard = ({
     },
   ) : undefined;
   const isRetiredOrExpired = isBudgetRetiredOrExpired(status);
-  const canAddFunds = canTopUpBudget({ isPolicy: source === BUDGET_TYPES.policy, status });
+  const showActions = status !== BUDGET_STATUSES.scheduled;
+  const showAddFunds = showActions && isTopUpCandidate({ isPolicy: source === BUDGET_TYPES.policy, status });
+  // Every card shares one eligibility request, and the card doesn't wait for it to render.
+  const { data: topUpEligibility } = useTopUpEligibility({
+    enterpriseId,
+    policyUuid: id,
+    enabled: showAddFunds,
+  });
+  const addFundsReasonsId = useId();
+  const showAddFundsReasons = showAddFunds && topUpEligibility?.isEligible === false;
 
   const hasBudgetAggregatesSection = () => {
     const statusesWithoutAggregates = [
@@ -103,20 +112,13 @@ const BaseSubBudgetCard = ({
 
   const renderActions = (budgetId) => (
     <Stack direction="horizontal" gap={2}>
-      {canAddFunds && (
-        <Button
-          data-testid="add-funds"
-          as={Link}
-          to={`/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}/${budgetId}/${ADD_FUNDS_ROUTE_SEGMENT}`}
-          variant="outline-primary"
-          iconBefore={Add}
-        >
-          <FormattedMessage
-            id="lcm.budgets.budget.card.add.funds"
-            defaultMessage="Add funds"
-            description="Button text to add funds to a budget"
-          />
-        </Button>
+      {showAddFunds && (
+        <AddFundsButton
+          enterpriseSlug={enterpriseSlug}
+          budgetId={budgetId}
+          eligibility={topUpEligibility}
+          reasonsId={addFundsReasonsId}
+        />
       )}
       <Button
         data-testid="view-budget"
@@ -154,8 +156,6 @@ const BaseSubBudgetCard = ({
       </Stack>
     );
 
-    const showActions = status !== BUDGET_STATUSES.scheduled;
-
     return (
       <Card.Header
         title={<BackgroundFetchingWrapper>{budgetType}</BackgroundFetchingWrapper>}
@@ -187,6 +187,9 @@ const BaseSubBudgetCard = ({
             />
           )}
         </Stack>
+        {showAddFundsReasons && (
+          <AddFundsIneligibleStatus id={addFundsReasonsId} reasons={topUpEligibility.reasons} />
+        )}
       </Card.Body>
     </Card>
   );

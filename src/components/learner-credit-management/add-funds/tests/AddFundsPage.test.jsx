@@ -15,13 +15,14 @@ import { axe } from 'jest-axe';
 import { features } from '../../../../config';
 import { BUDGET_STATUSES } from '../../../EnterpriseApp/data/constants';
 import LearnerCreditManagementRoutes from '../..';
-import { useSubsidyAccessPolicy } from '../../data';
+import { useSubsidyAccessPolicy, useTopUpEligibility } from '../../data';
 import { queryClient } from '../../../test/testUtils';
 import { accessibilitySettings } from '../../../../../tests/accessibility-settings';
 
 jest.mock('../../data', () => ({
   ...jest.requireActual('../../data'),
   useSubsidyAccessPolicy: jest.fn(),
+  useTopUpEligibility: jest.fn(),
 }));
 jest.mock('../../BudgetDetailPage', () => function MockBudgetDetailPage() {
   return <div data-testid="budget-detail-page" />;
@@ -52,6 +53,14 @@ const mockPolicy = (overrides = {}) => ({
   status: BUDGET_STATUSES.active,
   isRetiredOrExpired: false,
   aggregates: { spendAvailableUsd: 1800 },
+  ...overrides,
+});
+
+const mockEligibility = (overrides = {}) => ({
+  policyUuid: mockBudgetUuid,
+  isEligible: true,
+  reasons: [],
+  subsidyExpirationDatetime: '3027-03-15T00:00:00Z',
   ...overrides,
 });
 
@@ -113,6 +122,11 @@ describe('AddFundsPage', () => {
       isInitialLoading: false,
       isError: false,
     });
+    useTopUpEligibility.mockReturnValue({
+      data: mockEligibility(),
+      isInitialLoading: false,
+      isError: false,
+    });
   });
 
   afterEach(() => {
@@ -163,6 +177,38 @@ describe('AddFundsPage', () => {
     expect(screen.getByText('Learner Credit Management')).toBeInTheDocument();
   });
 
+  it('requests eligibility for this budget only', () => {
+    renderAddFunds();
+    expect(useTopUpEligibility).toHaveBeenCalledWith({
+      enterpriseId: 'test-enterprise-uuid',
+      policyUuid: mockBudgetUuid,
+      isSingleBudgetRequest: true,
+    });
+  });
+
+  it.each([
+    { scenario: 'loads', value: { data: undefined, isInitialLoading: true, isError: false } },
+    { scenario: 'is paused (e.g., offline)', value: { data: undefined, isInitialLoading: false, isError: false } },
+  ])('shows the loading state while eligibility $scenario', ({ value }) => {
+    useTopUpEligibility.mockReturnValue(value);
+    renderAddFunds();
+    expect(screen.getByText('Loading add funds')).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Select an Amount' })).not.toBeInTheDocument();
+    expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
+  });
+
+  it('stays on the flow when a background eligibility refetch fails but eligibility is cached', () => {
+    useTopUpEligibility.mockReturnValue({
+      data: mockEligibility(),
+      isInitialLoading: false,
+      isError: true,
+      error: { customAttributes: { httpErrorStatus: 503 } },
+    });
+    renderAddFunds({ step: 'select-amount' });
+    expect(screen.getByRole('heading', { name: 'Select an Amount' })).toBeInTheDocument();
+    expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
+  });
+
   it('keeps showing the loading state when the policy query is paused (e.g., offline)', () => {
     useSubsidyAccessPolicy.mockReturnValue({ data: undefined, isInitialLoading: false, isError: false });
     renderAddFunds();
@@ -200,7 +246,6 @@ describe('AddFundsPage', () => {
     ...[
       { status: 'retired', overrides: { status: BUDGET_STATUSES.retired, isRetiredOrExpired: true } },
       { status: 'expired', overrides: { status: BUDGET_STATUSES.expired, isRetiredOrExpired: true } },
-      { status: 'scheduled', overrides: { status: BUDGET_STATUSES.scheduled } },
     ].map(({ status, overrides }) => ({
       scenario: `the budget is ${status}`,
       setup: () => useSubsidyAccessPolicy.mockReturnValue({
@@ -211,6 +256,38 @@ describe('AddFundsPage', () => {
       scenario: 'the budget fails to load',
       setup: () => useSubsidyAccessPolicy.mockReturnValue({
         data: undefined, isInitialLoading: false, isError: true, error: { customAttributes: { httpErrorStatus: 500 } },
+      }),
+    },
+    ...[
+      ['budget_not_active'],
+      ['budget_expiring_soon'],
+      ['account_not_eligible'],
+      ['budget_not_active', 'budget_expiring_soon'],
+    ].map((errorCodes) => ({
+      scenario: `the budget is ineligible (${errorCodes.join(', ')})`,
+      setup: () => useTopUpEligibility.mockReturnValue({
+        data: mockEligibility({
+          isEligible: false,
+          reasons: errorCodes.map((errorCode) => ({ errorCode, message: errorCode })),
+        }),
+        isInitialLoading: false,
+        isError: false,
+      }),
+    })),
+    {
+      scenario: 'the eligibility response has no row for the budget',
+      setup: () => useTopUpEligibility.mockReturnValue({ data: null, isInitialLoading: false, isError: false }),
+    },
+    ...[403, 404, 503].map((httpErrorStatus) => ({
+      scenario: `eligibility fails with a ${httpErrorStatus}`,
+      setup: () => useTopUpEligibility.mockReturnValue({
+        data: undefined, isInitialLoading: false, isError: true, error: { customAttributes: { httpErrorStatus } },
+      }),
+    })),
+    {
+      scenario: 'eligibility fails with a network error',
+      setup: () => useTopUpEligibility.mockReturnValue({
+        data: undefined, isInitialLoading: false, isError: true, error: new Error('Network Error'),
       }),
     },
   ])('redirects to budget detail when $scenario', ({ setup, budgetId }) => {

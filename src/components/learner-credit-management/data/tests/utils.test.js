@@ -12,6 +12,7 @@ import {
   getNormalizedStartDate,
   getTranslatedBudgetStatus,
   getTranslatedBudgetTerm,
+  isTopUpCandidate,
   orderBudgets,
   retrieveBudgetDetailActivityOverview,
   startAndEnrollBySortLogic,
@@ -1020,6 +1021,54 @@ describe('canTopUpBudget', () => {
     features.TOP_UP_LEARNER_CREDIT = false;
   });
 
+  const eligible = { isEligible: true, reasons: [] };
+  const ineligible = { isEligible: false, reasons: [{ errorCode: 'budget_not_active' }] };
+
+  it.each([
+    {
+      flag: true, isPolicy: true, status: 'Active', eligibility: eligible, expected: true,
+    },
+    {
+      flag: true, isPolicy: true, status: 'Expiring', eligibility: eligible, expected: true,
+    },
+    // The API decides for any status other than retired/expired, including new ones.
+    {
+      flag: true, isPolicy: true, status: 'SomeFutureStatus', eligibility: eligible, expected: true,
+    },
+    {
+      flag: true, isPolicy: true, status: 'Active', eligibility: ineligible, expected: false,
+    },
+    {
+      flag: true, isPolicy: true, status: 'Active', eligibility: null, expected: false,
+    },
+    {
+      flag: true, isPolicy: true, status: 'Active', eligibility: undefined, expected: false,
+    },
+    {
+      flag: true, isPolicy: true, status: 'Retired', eligibility: eligible, expected: false,
+    },
+    {
+      flag: true, isPolicy: true, status: 'Expired', eligibility: eligible, expected: false,
+    },
+    {
+      flag: true, isPolicy: false, status: 'Active', eligibility: eligible, expected: false,
+    },
+    {
+      flag: false, isPolicy: true, status: 'Active', eligibility: eligible, expected: false,
+    },
+  ])('returns $expected when flag=$flag, isPolicy=$isPolicy, status=$status, eligibility=$eligibility', ({
+    flag, isPolicy, status, eligibility, expected,
+  }) => {
+    features.TOP_UP_LEARNER_CREDIT = flag;
+    expect(canTopUpBudget({ isPolicy, status, eligibility })).toBe(expected);
+  });
+});
+
+describe('isTopUpCandidate', () => {
+  afterEach(() => {
+    features.TOP_UP_LEARNER_CREDIT = false;
+  });
+
   it.each([
     {
       flag: true, isPolicy: true, status: 'Active', expected: true,
@@ -1028,16 +1077,13 @@ describe('canTopUpBudget', () => {
       flag: true, isPolicy: true, status: 'Expiring', expected: true,
     },
     {
-      flag: true, isPolicy: true, status: 'Scheduled', expected: false,
+      flag: true, isPolicy: true, status: 'Scheduled', expected: true,
     },
     {
       flag: true, isPolicy: true, status: 'Retired', expected: false,
     },
     {
       flag: true, isPolicy: true, status: 'Expired', expected: false,
-    },
-    {
-      flag: true, isPolicy: true, status: 'SomeFutureStatus', expected: false,
     },
     {
       flag: true, isPolicy: false, status: 'Active', expected: false,
@@ -1049,6 +1095,6 @@ describe('canTopUpBudget', () => {
     flag, isPolicy, status, expected,
   }) => {
     features.TOP_UP_LEARNER_CREDIT = flag;
-    expect(canTopUpBudget({ isPolicy, status })).toBe(expected);
+    expect(isTopUpCandidate({ isPolicy, status })).toBe(expected);
   });
 });

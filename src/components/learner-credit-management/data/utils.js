@@ -824,15 +824,23 @@ export const getAssignableCourseRuns = ({
 export const isBudgetRetiredOrExpired = (status) => [BUDGET_STATUSES.retired, BUDGET_STATUSES.expired].includes(status);
 
 /**
- * Whether the Add Funds (Learner Credit Top Up) flow is available for a budget. Shared by the
- * "Add funds" CTA on `SubBudgetCard` and the guard in `AddFundsPage` so the two can't drift.
- * Once the top-up eligibility API is available, gate this on its per-budget response instead.
- * Allowlist, so any new budget status is ineligible until explicitly added.
+ * Whether a budget should ask the top-up eligibility API about "Add funds" at all. Retired and
+ * expired budgets never show the CTA (it would sit next to "View budget history"), even though the
+ * API would answer for them with `budget_not_active`.
  */
-export const canTopUpBudget = ({ isPolicy, status }) => (
+export const isTopUpCandidate = ({ isPolicy, status }) => (
   !!features.TOP_UP_LEARNER_CREDIT
   && isPolicy
-  && [BUDGET_STATUSES.active, BUDGET_STATUSES.expiring].includes(status)
+  && !isBudgetRetiredOrExpired(status)
+);
+
+/**
+ * Whether the Add Funds (Learner Credit Top Up) flow is available for a budget. Shared by the
+ * "Add funds" CTA on `SubBudgetCard` and the guard in `AddFundsPage` so the two can't drift.
+ * Business eligibility comes only from the top-up eligibility API row (`useTopUpEligibility`).
+ */
+export const canTopUpBudget = ({ isPolicy, status, eligibility }) => (
+  isTopUpCandidate({ isPolicy, status }) && eligibility?.isEligible === true
 );
 
 export const transformRequestOverview = (requestStates) => {
