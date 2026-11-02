@@ -835,9 +835,10 @@ export const isTopUpCandidate = ({ isPolicy, status }) => (
 );
 
 /**
- * Whether the Add Funds (Learner Credit Top Up) flow is available for a budget. Shared by the
- * "Add funds" CTA on `SubBudgetCard` and the guard in `AddFundsPage` so the two can't drift.
- * Business eligibility comes only from the top-up eligibility API row (`useTopUpEligibility`).
+ * Whether the Add Funds (Learner Credit Top Up) flow is available for a budget; the `AddFundsPage`
+ * guard. `SubBudgetCard` doesn't call it: it renders the CTA (enabled or disabled) for any
+ * `isTopUpCandidate` budget with an eligibility row. Business eligibility comes only from the
+ * top-up eligibility API row (`useTopUpEligibility`).
  */
 export const canTopUpBudget = ({ isPolicy, status, eligibility }) => (
   isTopUpCandidate({ isPolicy, status }) && eligibility?.isEligible === true

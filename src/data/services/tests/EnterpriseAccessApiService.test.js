@@ -626,6 +626,23 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('getTopUpEligibility calls enterprise-access to fetch top-up eligibility for every budget', () => {
+    EnterpriseAccessApiService.getTopUpEligibility({ enterpriseCustomerUuid: mockEnterpriseUUID });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/learner-credit-top-ups/eligibility/?enterprise_customer_uuid=${mockEnterpriseUUID}`,
+    );
+  });
+
+  test('getTopUpEligibility calls enterprise-access to fetch top-up eligibility for one budget', () => {
+    EnterpriseAccessApiService.getTopUpEligibility({
+      enterpriseCustomerUuid: mockEnterpriseUUID,
+      policyUuid: mockSubsidyAccessPolicyUUID,
+    });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/learner-credit-top-ups/eligibility/?enterprise_customer_uuid=${mockEnterpriseUUID}&policy_uuid=${mockSubsidyAccessPolicyUUID}`,
+    );
+  });
+
   // ========== Billing Management Tests ==========
 
   describe('Billing Management Methods', () => {

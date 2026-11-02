@@ -39,7 +39,8 @@ Frontend pieces:
   subsidy also reports `budget_expiring_soon`), so the CTA never appears next to "View budget
   history". Scheduled budgets render no card actions at all.
 - `canTopUpBudget({ isPolicy, status, eligibility })` = candidate **and** `eligibility.isEligible`.
-  Shared by the card CTA and the Add Funds page guard so they can't drift.
+  Only the Add Funds page guard uses it. The card uses `isTopUpCandidate` to decide whether to ask
+  the API, then `AddFundsButton` renders enabled or disabled from the row (see the table below).
 
 **The CTA** (`add-funds/AddFundsButton.jsx`, `outline-primary` so "View budget" stays the single
 primary action) and **the reasons** (`add-funds/AddFundsIneligibleStatus.jsx`, a Paragon
@@ -99,8 +100,8 @@ eligibility (`policy_uuid` request) have loaded, then redirects to budget detail
 off, the budget id is not a policy UUID, the policy is retired/expired, the policy fails its
 initial load (404 shows `NotFoundPage`), or eligibility is ineligible, has no row, or fails its
 initial load with anything (403, 404, 5xx, network). A failed background refetch of either keeps
-the cached data and does not exit the flow, so selections survive a flaky network. The budget-level rule is `canTopUpBudget` in `data/utils.js`,
-shared with the `SubBudgetCard` CTA. The page reads the budget status from `subsidyAccessPolicy.status`,
+the cached data and does not exit the flow, so selections survive a flaky network. The budget-level rule is `canTopUpBudget` in `data/utils.js`;
+the card has its own (see `isTopUpCandidate` above). The page reads the budget status from `subsidyAccessPolicy.status`,
 which `useSubsidyAccessPolicy`'s `select` derives once with `getBudgetStatus`; don't recompute it.
 
 **Step guard** (`AddFundsStepper.jsx` + `getAddFundsStepRedirect` in `data/utils.ts`): a missing
