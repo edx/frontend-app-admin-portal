@@ -34,10 +34,13 @@ learner-credit-management/
   data/utils.js#transformAssignmentsToAuditTrailRows   Flattens assignment actions into audit trail rows
   MultipleBudgetsPage.jsx                  "Details" / "Audit trail" tabs (when the flag is on)
 subscriptions/
-  SubscriptionAuditTrail.jsx               Audit trail tab content (empty state; no API integration yet)
+  SubscriptionAuditTrail.jsx               Audit trail tab content
+  data/hooks.js#useLicenseAuditTrail       react-query hook (key: subscriptionsQueryKeys.auditTrail)
+  data/utils.ts#transformLicenseActionsToAuditTrailRows   Maps license actions to audit trail rows
   SubscriptionTabs.jsx                     "Audit trail" tab (when the flag is on)
 src/data/services/
   EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail
+  LicenseManagerAPIService.fetchSubscriptionAuditHistory (+ existing fetchCustomerAgreementData)
 ```
 
 ## Behavior
@@ -46,17 +49,21 @@ src/data/services/
   enterprise-wide audit list. Instead, the admin assignments endpoint
   (`GET /api/v1/assignment-configurations/{uuid}/admin/assignments/`) returns each assignment with its full
   `actions` history, including the audit fields added in enterprise-access PR #327. The hook does this:
-  1. Lists the enterprise's budgets (`listSubsidyAccessPolicies`).
+  1. Lists every page of the enterprise's budgets, active or not (`listSubsidyAccessPolicies` with
+     `includeInactive`), so retired budgets keep their history. The policies API returns 10 per page.
   2. Fetches every page of assignments, in every state, for each assignable budget.
   3. Flattens their actions into one list.
   4. Applies the filters, sort and page in the browser (`applyAuditTrailQueryOptions`).
 
   This is one fetch per budget page, so it may be slow for enterprises with very large assignment histories.
-- **Subscriptions: not wired to an API yet.** The tab renders the audit trail UI (header, filters, sort) with
-  the "No audit history available" empty state and makes no license-manager requests. The licenses endpoints
-  (`GET /api/v1/subscriptions/{uuid}/licenses/` and `.../{license_uuid}/`) are not the audit trail source;
-  license-manager will provide a dedicated audit trail endpoint. Once it is shared, add a react-query hook
-  following `useAssignmentAuditTrail` and pass its data to `AuditTrail`.
+- **Subscriptions: filtering, sorting and pagination also happen in the browser.** license-manager's audit history
+  endpoint is per subscription plan. The hook does this:
+  1. Lists every subscription plan, active or not, of the enterprise's customer agreements
+     (`fetchCustomerAgreementData` with `active_plans_only=false`, so expired plans keep their history).
+  2. Fetches every page of each plan's audit history (`GET /api/v1/subscriptions/{uuid}/audit-history/`,
+     100 per page).
+  3. Maps the actions into rows (`transformLicenseActionsToAuditTrailRows`) and applies the filters, sort and page
+     in the browser (`applyAuditTrailQueryOptions`).
 - **Changing a filter or the sort order returns to page 1.**
 - **Status.** The API has no status field, so it's derived (`getAuditTrailStatus`): an action is **Failed** when it
   has an `error_reason` or its action type is `errored` or `cancel_email_failed`; otherwise **Success**. The Status
@@ -72,8 +79,17 @@ src/data/services/
   - System actions show "System".
   - Any other actor shows "Unknown user" with their role and LMS user ID.
   - A missing actor is never assumed to be the current admin.
-- **Retired learner data.** enterprise-access clears learner emails on expired assignments, so learners with
-  no name or email show "Learner information removed".
+  - license-manager resolves the actor itself and returns `actor: {email, full_name}` (or `null`), which is shown
+    as is; a `null` learner actor falls back to the affected learner.
+- **Retired learner data.** enterprise-access replaces a retired learner's email with
+  `retired_user<nonce>@retired.invalid` (`LearnerContentAssignment.clear_pii()`), and license-manager clears it.
+  Both are shown as "Learner information removed" (`getUnretiredEmail`).
+- **Actor search** is applied 300 ms after the admin stops typing. Removing the actor chip or "Clear all"
+  discards a pending search; changing other filters keeps it.
+- **Session recordings.** Actor and learner identities, the actor search input and its chip are marked
+  `data-hj-suppress`, following the repo's pattern for emails.
+- **No active budgets.** With the flag on, the Learner Credit page shows its tabs even without active budgets
+  (Details shows the "No budgets" card), so the audit trail of retired budgets stays reachable.
 - **Unknown enum values** (a new action type or source added by the backend) fall back to a humanized label
   instead of failing.
 - **Three non-data states:**
@@ -89,11 +105,13 @@ src/data/services/
 `created`, `uuid`, `action_type`, `error_reason`, `actor_type`, `actor_lms_user_id`, `source`, `learner_email` and
 an allowlisted `metadata`.
 
-**Subscriptions (license-manager):** endpoint pending. The licenses endpoints don't return `LicenseAction`
-records and are not used. The frontend expects each action to have `uuid`, `created`, `action_type`,
-`actor_type`, `actor_lms_user_id`, `source`, `learner_email` and, optionally, `error_reason` (the same shape as
-enterprise-access assignment actions). The audit trail never derives events from `activation_date`,
-`last_remind_date` or `revoked_date`, because those have no actor or source and only keep the latest value.
+**Subscriptions (license-manager):** `GET /api/v1/subscriptions/{subscription_uuid}/audit-history/` (license-manager
+branch `ENT-12035-license-manager-audit-trail`), paginated with `page`/`page_size` (max 500) and newest first. Each
+action includes `uuid`, `created`, `action_type`, `actor_type`, `actor` (`{email, full_name}` or `null`), `source`,
+`license_uuid`, `learner_email`, `correlation_id` and an allowlisted `metadata`. It has no `error_reason`, so license
+actions always show **Success**. The endpoint also supports server-side filters (`action_type`, `actor_type`,
+`source`, `license_uuid`, `learner_email`, `created_after`/`created_before`, `ordering`), which aren't used because
+actions from several plans are combined in the browser.
 
 ## Seeing it locally
 

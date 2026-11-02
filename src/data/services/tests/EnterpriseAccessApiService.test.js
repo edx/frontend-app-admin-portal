@@ -198,6 +198,13 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('listSubsidyAccessPolicies can include inactive subsidy access policies and fetch a given page', () => {
+    EnterpriseAccessApiService.listSubsidyAccessPolicies(mockEnterpriseUUID, { includeInactive: true, page: 2 });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/?enterprise_customer_uuid=${mockEnterpriseUUID}&page=2`,
+    );
+  });
+
   test('exportSubsidyTransactions calls enterprise-access to export spent transactions as a blob', () => {
     EnterpriseAccessApiService.exportSubsidyTransactions({
       enterpriseCustomerUuid: mockEnterpriseUUID,

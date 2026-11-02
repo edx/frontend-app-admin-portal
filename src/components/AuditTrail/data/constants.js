@@ -11,6 +11,9 @@ export const AUDIT_TRAIL_DEFAULT_SORT_BY = [{ id: AUDIT_TRAIL_TIMESTAMP_COLUMN, 
 // API field used for the `ordering` query param when sorting by the timestamp column.
 export const AUDIT_TRAIL_ORDERING_FIELD = 'created';
 
+// Delay before the actor search is applied, so the table doesn't update on every keystroke.
+export const AUDIT_TRAIL_ACTOR_SEARCH_DEBOUNCE_MS = 300;
+
 export const AUDIT_TRAIL_DEFAULT_FILTERS = {
   actorSearch: '',
   actionType: '',
@@ -19,6 +22,10 @@ export const AUDIT_TRAIL_DEFAULT_FILTERS = {
   startDate: '',
   endDate: '',
 };
+
+// enterprise-access replaces a retired learner's email with `retired_user<nonce>@retired.invalid` (see
+// `LearnerContentAssignment.clear_pii()`); such emails are shown as removed learner information.
+export const AUDIT_TRAIL_RETIRED_EMAIL_PATTERN = /^retired_user[^@]*@retired\.invalid$/i;
 
 export const AUDIT_TRAIL_ACTOR_TYPES = {
   admin: 'admin',

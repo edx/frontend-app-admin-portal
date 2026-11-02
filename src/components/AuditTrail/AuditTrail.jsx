@@ -1,5 +1,8 @@
-import React, { useContext, useMemo } from 'react';
+import React, {
+  useContext, useEffect, useMemo, useRef, useState,
+} from 'react';
 import PropTypes from 'prop-types';
+import { debounce } from 'lodash-es';
 import {
   Alert, Button, DataTable, DataTableContext, Skeleton,
 } from '@openedx/paragon';
@@ -18,6 +21,7 @@ import AuditTrailLearnerCell from './AuditTrailLearnerCell';
 import messages from './data/messages';
 import { auditTrailFiltersPropType } from './data/propTypes';
 import {
+  AUDIT_TRAIL_ACTOR_SEARCH_DEBOUNCE_MS,
   AUDIT_TRAIL_DEFAULT_SORT_BY,
   AUDIT_TRAIL_PAGE_SIZE,
   AUDIT_TRAIL_TIMESTAMP_COLUMN,
@@ -44,6 +48,32 @@ const AuditTrailTableContents = ({
   const handleFiltersChange = (nextFilters) => {
     gotoPage(0);
     onFiltersChange(nextFilters);
+  };
+
+  // The actor search is applied after the admin stops typing. The debounced update reads the latest filters
+  // from a ref, so it's created once and a pending search survives other filter changes and re-renders.
+  const [actorSearchInput, setActorSearchInput] = useState(filters.actorSearch);
+  const latestFiltersRef = useRef({ filters, handleFiltersChange });
+  latestFiltersRef.current = { filters, handleFiltersChange };
+  const debouncedApplyActorSearch = useMemo(() => debounce((actorSearch) => {
+    const { filters: latestFilters, handleFiltersChange: applyFilters } = latestFiltersRef.current;
+    applyFilters({ ...latestFilters, actorSearch });
+  }, AUDIT_TRAIL_ACTOR_SEARCH_DEBOUNCE_MS), []);
+  useEffect(() => () => debouncedApplyActorSearch.cancel(), [debouncedApplyActorSearch]);
+
+  const handleActorSearchChange = (actorSearch) => {
+    setActorSearchInput(actorSearch);
+    debouncedApplyActorSearch(actorSearch);
+  };
+
+  // Removing applied filters (a chip, or "Clear all"). Clearing the actor search also discards a pending search,
+  // so it can't re-apply a search the admin just removed.
+  const handleClearFilters = (clearedFilters) => {
+    if ('actorSearch' in clearedFilters) {
+      debouncedApplyActorSearch.cancel();
+      setActorSearchInput(clearedFilters.actorSearch);
+    }
+    handleFiltersChange({ ...filters, ...clearedFilters });
   };
 
   const renderTableBody = () => {
@@ -100,10 +130,12 @@ const AuditTrailTableContents = ({
         <AuditTrailFilters
           filters={filters}
           onFiltersChange={handleFiltersChange}
+          actorSearch={actorSearchInput}
+          onActorSearchChange={handleActorSearchChange}
           actionTypeOptions={actionTypeOptions}
           sourceOptions={sourceOptions}
         />
-        <AuditTrailAppliedFilters filters={filters} onFiltersChange={handleFiltersChange} />
+        <AuditTrailAppliedFilters filters={filters} onClearFilters={handleClearFilters} />
       </div>
       {renderTableBody()}
     </>

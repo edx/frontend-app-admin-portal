@@ -96,6 +96,22 @@ const renderAuditTrail = (props = {}) => render(
 
 const emptyTableData = { results: [], itemCount: 0, pageCount: 1 };
 
+// Renders the audit trail with its filters held in state, as the audit trail pages do.
+const renderStatefulAuditTrail = ({ initialFilters = AUDIT_TRAIL_DEFAULT_FILTERS, onFiltersChange }) => {
+  const StatefulAuditTrail = () => {
+    const [filters, setFilters] = useState(initialFilters);
+    const handleFiltersChange = (nextFilters) => {
+      onFiltersChange(nextFilters);
+      setFilters(nextFilters);
+    };
+    return <AuditTrail {...defaultProps} filters={filters} onFiltersChange={handleFiltersChange} />;
+  };
+  return render(<IntlProvider locale="en"><StatefulAuditTrail /></IntlProvider>);
+};
+
+// Waits longer than the actor search debounce delay.
+const waitForActorSearchDebounce = () => new Promise((resolve) => { setTimeout(resolve, 400); });
+
 describe('<AuditTrail />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -252,15 +268,7 @@ describe('<AuditTrail />', () => {
   it('keeps a pending actor search when another filter changes before the debounce fires', async () => {
     const user = userEvent.setup();
     const onFiltersChange = jest.fn();
-    const StatefulAuditTrail = () => {
-      const [filters, setFilters] = useState(AUDIT_TRAIL_DEFAULT_FILTERS);
-      const handleFiltersChange = (nextFilters) => {
-        onFiltersChange(nextFilters);
-        setFilters(nextFilters);
-      };
-      return <AuditTrail {...defaultProps} filters={filters} onFiltersChange={handleFiltersChange} />;
-    };
-    render(<IntlProvider locale="en"><StatefulAuditTrail /></IntlProvider>);
+    renderStatefulAuditTrail({ onFiltersChange });
 
     await user.type(screen.getByLabelText('Actor'), 'priya');
     await user.selectOptions(screen.getByLabelText('Action'), 'Reminded');
@@ -269,6 +277,49 @@ describe('<AuditTrail />', () => {
       actorSearch: 'priya',
       actionType: 'reminded',
     }));
+  });
+
+  it.each([
+    ['clearing all filters', 'Clear all'],
+    ['removing the actor filter', 'Remove filter'],
+  ])('discards a pending actor search when %s', async (_, buttonName) => {
+    const user = userEvent.setup();
+    const onFiltersChange = jest.fn();
+    const initialFilters = { ...AUDIT_TRAIL_DEFAULT_FILTERS, actorSearch: 'sam' };
+    renderStatefulAuditTrail({ initialFilters, onFiltersChange });
+
+    await user.type(screen.getByLabelText('Actor'), 'uel');
+    await user.click(screen.getByRole('button', { name: buttonName }));
+    await waitForActorSearchDebounce();
+
+    expect(screen.getByLabelText('Actor')).toHaveValue('');
+    expect(onFiltersChange).toHaveBeenCalledTimes(1);
+    expect(onFiltersChange).toHaveBeenLastCalledWith(AUDIT_TRAIL_DEFAULT_FILTERS);
+  });
+
+  it('keeps a pending actor search when another applied filter is removed', async () => {
+    const user = userEvent.setup();
+    const onFiltersChange = jest.fn();
+    renderStatefulAuditTrail({
+      initialFilters: { ...AUDIT_TRAIL_DEFAULT_FILTERS, status: 'failed' },
+      onFiltersChange,
+    });
+
+    await user.type(screen.getByLabelText('Actor'), 'priya');
+    await user.click(screen.getByRole('button', { name: 'Remove filter' }));
+    await waitFor(() => expect(onFiltersChange).toHaveBeenLastCalledWith({
+      ...AUDIT_TRAIL_DEFAULT_FILTERS,
+      actorSearch: 'priya',
+    }));
+  });
+
+  it('hides actor and learner identities from session recordings', () => {
+    renderAuditTrail({ filters: { ...AUDIT_TRAIL_DEFAULT_FILTERS, actorSearch: 'priya' } });
+    const rows = screen.getAllByRole('row').slice(1); // skip header row
+    expect(within(rows[1]).getByText('Priya Sharma').closest('[data-hj-suppress]')).toBeInTheDocument();
+    expect(within(rows[1]).getByText('jane.doe@example.com').closest('[data-hj-suppress]')).toBeInTheDocument();
+    expect(screen.getByText('Actor: priya').closest('[data-hj-suppress]')).toBeInTheDocument();
+    expect(screen.getByLabelText('Actor')).toHaveAttribute('data-hj-suppress');
   });
 
   it('shows a validation error when the start date is after the end date', () => {

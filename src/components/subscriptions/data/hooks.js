@@ -2,6 +2,9 @@ import {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import dayjs from 'dayjs';
+import { useQuery } from '@tanstack/react-query';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
+import { useIntl } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
 
@@ -12,8 +15,12 @@ import {
   SUBSCRIPTION_USERS,
   SUBSCRIPTION_USERS_OVERVIEW,
   SUBSCRIPTIONS,
+  subscriptionsQueryKeys,
 } from './constants';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
+import { applyAuditTrailQueryOptions, fetchAllPaginatedResults } from '../../AuditTrail/data/utils';
+import auditTrailMessages from '../../AuditTrail/data/messages';
+import { transformLicenseActionsToAuditTrailRows } from './utils';
 
 const subscriptionInitState = {
   results: [],
@@ -395,4 +402,56 @@ export const useStripeSubscriptionPlanInfo = ({ subPlanUuid, setErrors }) => {
     renewedSubscriptionPlanUuid,
     loadingStripeSummary,
   };
+};
+
+/**
+ * Retrieves every audit trail action (``LicenseAction`` records) across all subscription plans of the given
+ * enterprise customer. Inactive plans are included, so that the history of expired plans is still shown.
+ */
+const getLicenseAuditTrailRows = async (enterpriseId) => {
+  const customerAgreements = await fetchAllPaginatedResults(
+    page => LicenseManagerApiService.fetchCustomerAgreementData({
+      enterprise_customer_uuid: enterpriseId,
+      active_plans_only: false,
+      page,
+    }),
+  );
+  const subscriptionPlanUUIDs = customerAgreements.flatMap(
+    customerAgreement => (customerAgreement.subscriptions || []).map(subscription => subscription.uuid),
+  );
+  const actionsByPlan = await Promise.all(subscriptionPlanUUIDs.map(
+    subscriptionUUID => fetchAllPaginatedResults(
+      page => LicenseManagerApiService.fetchSubscriptionAuditHistory(subscriptionUUID, { page }),
+    ),
+  ));
+  return transformLicenseActionsToAuditTrailRows(actionsByPlan.flat(), getAuthenticatedUser());
+};
+
+/**
+ * Returns a page of subscription license audit trail actions for the given enterprise customer.
+ *
+ * The license-manager audit history API is per subscription plan, so all actions of every plan are fetched once
+ * and then filtered, sorted and paginated in the browser using `queryOptions`.
+ *
+ * @param {string} enterpriseId The enterprise customer UUID.
+ * @param {object} queryOptions Pagination, ordering and filter options from `useAuditTrailTableState`.
+ */
+export const useLicenseAuditTrail = ({ enterpriseId, queryOptions }) => {
+  const intl = useIntl();
+  const { data: auditTrailRows, ...queryResult } = useQuery({
+    queryKey: subscriptionsQueryKeys.auditTrail(enterpriseId),
+    queryFn: () => getLicenseAuditTrailRows(enterpriseId),
+    enabled: !!enterpriseId,
+  });
+
+  const data = useMemo(() => {
+    if (!auditTrailRows) {
+      return undefined;
+    }
+    return applyAuditTrailQueryOptions(auditTrailRows, queryOptions, {
+      systemActorLabel: intl.formatMessage(auditTrailMessages.actorSystem),
+    });
+  }, [auditTrailRows, queryOptions, intl]);
+
+  return { ...queryResult, data };
 };

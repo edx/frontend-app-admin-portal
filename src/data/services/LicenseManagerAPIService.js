@@ -39,6 +39,20 @@ class LicenseManagerApiService {
     return LicenseManagerApiService.apiClient().get(url);
   }
 
+  /**
+   * Lists the audit history (``LicenseAction`` records, newest first) of a subscription plan, including
+   * actions on licenses that have since been deleted. Each action includes its resolved `actor`.
+   */
+  static fetchSubscriptionAuditHistory(subscriptionUUID, options = {}) {
+    const queryParams = new URLSearchParams({
+      page: 1,
+      page_size: 100,
+      ...options,
+    });
+    const url = `${LicenseManagerApiService.licenseManagerBaseUrl}/subscriptions/${subscriptionUUID}/audit-history/?${queryParams.toString()}`;
+    return LicenseManagerApiService.apiClient().get(url);
+  }
+
   static fetchSubscriptionUsersOverview(subscriptionUUID, options) {
     const queryParams = new URLSearchParams({
       ignore_null_emails: 1,

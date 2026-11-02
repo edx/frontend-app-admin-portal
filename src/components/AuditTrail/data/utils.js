@@ -1,10 +1,12 @@
 import dayjs from 'dayjs';
+import { camelCaseObject } from '@edx/frontend-platform/utils';
 
 import { capitalizeFirstLetter } from '../../../utils';
 import {
   AUDIT_TRAIL_ACTOR_TYPES,
   AUDIT_TRAIL_FAILED_ACTION_TYPES,
   AUDIT_TRAIL_ORDERING_FIELD,
+  AUDIT_TRAIL_RETIRED_EMAIL_PATTERN,
   AUDIT_TRAIL_STATUSES,
   AUDIT_TRAIL_TIMESTAMP_COLUMN,
 } from './constants';
@@ -159,6 +161,30 @@ export const applyAuditTrailQueryOptions = (rows, queryOptions, { systemActorLab
 };
 
 /**
+ * Returns the email, or `null` when it's missing or a retired learner's placeholder email (see
+ * `AUDIT_TRAIL_RETIRED_EMAIL_PATTERN`), so that retired learner information is shown as removed.
+ */
+export const getUnretiredEmail = (email) => (
+  email && !AUDIT_TRAIL_RETIRED_EMAIL_PATTERN.test(email) ? email : null
+);
+
+/**
+ * Fetches every page of a paginated API (`{ results, next }` responses) and returns all of the (camelCased)
+ * results. Pages are requested in order, until a page has no `next` link.
+ *
+ * @param {Function} fetchPage Called with a 1-indexed page number; returns the API response for that page.
+ * @param {number} [page] The page to start from.
+ */
+export const fetchAllPaginatedResults = async (fetchPage, page = 1) => {
+  const response = await fetchPage(page);
+  const { results = [], next } = camelCaseObject(response.data);
+  if (!next) {
+    return results;
+  }
+  return [...results, ...await fetchAllPaginatedResults(fetchPage, page + 1)];
+};
+
+/**
  * Transforms a single (camelCased) audit action, as nested in an enterprise-access content assignment or a
  * license-manager license, into an audit trail table row.
  *
@@ -171,7 +197,7 @@ export const applyAuditTrailQueryOptions = (rows, queryOptions, { systemActorLab
  * @param {Object} [authenticatedUser] The authenticated user, from `getAuthenticatedUser()`.
  */
 export const transformActionToAuditTrailRow = (action, { learnerEmail, learnerLmsUserId }, authenticatedUser) => {
-  const affectedLearnerEmail = action.learnerEmail || learnerEmail || null;
+  const affectedLearnerEmail = getUnretiredEmail(action.learnerEmail) || getUnretiredEmail(learnerEmail);
   let actorName = null;
   let actorEmail = null;
   if (action.actorLmsUserId && action.actorLmsUserId === authenticatedUser?.userId) {

@@ -122,7 +122,11 @@ describe('<LearnerCreditAuditTrail />', () => {
 
     expect(screen.getByText(/History of every action performed on learner credit assignments/)).toBeInTheDocument();
     expect(await waitForAuditTrailTable()).toBeInTheDocument();
-    expect(EnterpriseAccessApiService.listSubsidyAccessPolicies).toHaveBeenCalledWith(enterpriseId);
+    // Inactive budgets are included so that the history of retired budgets is still shown.
+    expect(EnterpriseAccessApiService.listSubsidyAccessPolicies).toHaveBeenCalledWith(
+      enterpriseId,
+      { includeInactive: true, page: 1 },
+    );
     expect(EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail).toHaveBeenCalledTimes(2);
     expect(EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail)
       .toHaveBeenNthCalledWith(1, 'assignment-configuration-1', { page: 1 });
@@ -151,6 +155,46 @@ describe('<LearnerCreditAuditTrail />', () => {
     expect(within(rows[2]).getByText('Priya Sharma')).toBeInTheDocument();
     expect(within(rows[2]).getByText('Admin · priya.sharma@example.com')).toBeInTheDocument();
     expect(within(rows[2]).getByText('API')).toBeInTheDocument();
+  });
+
+  it('fetches every page of budgets and fetches each assignment configuration once', async () => {
+    EnterpriseAccessApiService.listSubsidyAccessPolicies
+      .mockResolvedValueOnce({
+        data: {
+          next: 'http://localhost/next-page',
+          results: [{ uuid: 'policy-1', assignment_configuration: { uuid: 'assignment-configuration-1' } }],
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          next: null,
+          results: [
+            { uuid: 'policy-3', assignment_configuration: { uuid: 'assignment-configuration-2' } },
+            // A duplicate assignment configuration is only fetched once.
+            { uuid: 'policy-4', assignment_configuration: { uuid: 'assignment-configuration-1' } },
+          ],
+        },
+      });
+    EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail.mockImplementation(
+      (assignmentConfigurationUUID) => Promise.resolve(
+        assignmentConfigurationUUID === 'assignment-configuration-1'
+          ? mockAssignmentsPage2
+          : { data: { next: null, results: mockAssignmentsPage1.data.results } },
+      ),
+    );
+    render(<LearnerCreditAuditTrailWrapper />);
+
+    expect(await waitForAuditTrailTable()).toBeInTheDocument();
+    expect(EnterpriseAccessApiService.listSubsidyAccessPolicies).toHaveBeenNthCalledWith(
+      2,
+      enterpriseId,
+      { includeInactive: true, page: 2 },
+    );
+    expect(EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail).toHaveBeenCalledTimes(2);
+    expect(EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail)
+      .toHaveBeenCalledWith('assignment-configuration-2', { page: 1 });
+    // Actions from both pages of budgets are shown.
+    expect(getTableRows()).toHaveLength(3);
   });
 
   it('filters and sorts the audit trail without refetching', async () => {

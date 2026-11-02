@@ -289,11 +289,23 @@ class EnterpriseAccessApiService {
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 
-  static listSubsidyAccessPolicies(enterpriseCustomerId) {
+  /**
+   * List the subsidy access policies (budgets) of an enterprise customer. Only active policies are listed,
+   * unless `includeInactive` is true. Results are paginated; `page` selects the page to fetch.
+   */
+  static listSubsidyAccessPolicies(
+    enterpriseCustomerId,
+    { includeInactive = false, page }: { includeInactive?: boolean, page?: number } = {},
+  ) {
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerId,
-      active: 'true',
     });
+    if (!includeInactive) {
+      queryParams.append('active', 'true');
+    }
+    if (page) {
+      queryParams.append('page', page.toString());
+    }
     const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/?${queryParams.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
   }

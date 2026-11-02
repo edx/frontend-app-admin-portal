@@ -38,8 +38,9 @@ const AuditTrailActorCell = ({ row }) => {
     ].filter(Boolean).join(' · ');
   }
 
+  // Actor names and emails are hidden from session recordings.
   return (
-    <div>
+    <div data-hj-suppress>
       <div>{primaryText}</div>
       {secondaryText && <div className="small text-muted">{secondaryText}</div>}
     </div>

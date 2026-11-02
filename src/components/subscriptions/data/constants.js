@@ -124,3 +124,10 @@ export const DEFAULT_TAB = MANAGE_LEARNERS_TAB;
  * Consumed by useCurrentSubscriptionsTab hook to get tab value
  */
 export const SUBSCRIPTIONS_TAB_PARAM = 'subscriptionsTab';
+
+// Query Key factory for the subscriptions module, intended to be used with `@tanstack/react-query`.
+// Inspired by https://tkdodo.eu/blog/effective-react-query-keys#use-query-key-factories.
+export const subscriptionsQueryKeys = {
+  all: ['subscriptions'],
+  auditTrail: (enterpriseId) => [...subscriptionsQueryKeys.all, 'auditTrail', enterpriseId],
+};

@@ -2,43 +2,30 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { useIntl } from '@edx/frontend-platform/i18n';
-import { camelCaseObject } from '@edx/frontend-platform/utils';
 
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
-import { applyAuditTrailQueryOptions } from '../../../AuditTrail/data/utils';
+import { applyAuditTrailQueryOptions, fetchAllPaginatedResults } from '../../../AuditTrail/data/utils';
 import auditTrailMessages from '../../../AuditTrail/data/messages';
 import { learnerCreditManagementQueryKeys } from '../constants';
 import { transformAssignmentsToAuditTrailRows } from '../utils';
 
 /**
- * Recursively fetches every page of content assignments (with their audit trail actions) for an
- * assignment configuration.
- */
-const fetchAllContentAssignments = async (assignmentConfigurationUUID, page = 1, results = []) => {
-  const response = await EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail(
-    assignmentConfigurationUUID,
-    { page },
-  );
-  const { results: pageResults = [], next } = camelCaseObject(response.data);
-  const allResults = [...results, ...pageResults];
-  if (next) {
-    return fetchAllContentAssignments(assignmentConfigurationUUID, page + 1, allResults);
-  }
-  return allResults;
-};
-
-/**
  * Retrieves every audit trail action (``LearnerContentAssignmentAction`` records) across the content assignments
- * of all assignable budgets (subsidy access policies) belonging to the given enterprise customer.
+ * of all assignable budgets (subsidy access policies) belonging to the given enterprise customer. Inactive budgets
+ * are included, so that the history of retired budgets is still shown.
  */
 const getAssignmentAuditTrailRows = async (enterpriseId) => {
-  const policiesResponse = await EnterpriseAccessApiService.listSubsidyAccessPolicies(enterpriseId);
-  const assignmentConfigurationUUIDs = camelCaseObject(policiesResponse.data?.results || [])
-    .map(policy => policy.assignmentConfiguration?.uuid)
-    .filter(Boolean);
-  const assignmentsByBudget = await Promise.all(
-    assignmentConfigurationUUIDs.map(uuid => fetchAllContentAssignments(uuid)),
+  const policies = await fetchAllPaginatedResults(
+    page => EnterpriseAccessApiService.listSubsidyAccessPolicies(enterpriseId, { includeInactive: true, page }),
   );
+  const assignmentConfigurationUUIDs = [
+    ...new Set(policies.map(policy => policy.assignmentConfiguration?.uuid).filter(Boolean)),
+  ];
+  const assignmentsByBudget = await Promise.all(assignmentConfigurationUUIDs.map(
+    uuid => fetchAllPaginatedResults(
+      page => EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail(uuid, { page }),
+    ),
+  ));
   return transformAssignmentsToAuditTrailRows(assignmentsByBudget.flat(), getAuthenticatedUser());
 };
 

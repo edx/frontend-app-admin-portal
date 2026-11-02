@@ -14,8 +14,9 @@ const AuditTrailLearnerCell = ({ row }) => {
   if (!learnerEmail && !learnerName) {
     return <span className="text-muted">{intl.formatMessage(messages.learnerRemoved)}</span>;
   }
+  // Learner names and emails are hidden from session recordings.
   return (
-    <div>
+    <div data-hj-suppress>
       <div>{learnerEmail || learnerName}</div>
       {learnerEmail && learnerName && <div className="small text-muted">{learnerName}</div>}
     </div>

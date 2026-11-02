@@ -2,11 +2,13 @@ import dayjs from 'dayjs';
 
 import {
   applyAuditTrailQueryOptions,
+  fetchAllPaginatedResults,
   getActionTypeLabel,
   getAuditTrailQueryOptions,
   getAuditTrailStatus,
   getSourceLabel,
   getStatusLabel,
+  getUnretiredEmail,
   hasActiveAuditTrailFilters,
   isValidDateRange,
   transformActionToAuditTrailRow,
@@ -138,6 +140,18 @@ describe('transformActionToAuditTrailRow', () => {
     expect(row.actorEmail).toEqual('jane.doe@example.com');
   });
 
+  it('treats retired learner emails as removed learner information', () => {
+    const row = transformActionToAuditTrailRow(
+      {
+        ...baseAction, actorType: 'learner', actorLmsUserId: 7, learnerEmail: 'retired_user1a2b3c4d@retired.invalid',
+      },
+      { learnerEmail: 'retired_user1a2b3c4d@retired.invalid', learnerLmsUserId: 7 },
+      authenticatedUser,
+    );
+    expect(row.learnerEmail).toBeNull();
+    expect(row.actorEmail).toBeNull();
+  });
+
   it('does not resolve other actors, and prefers the learner email recorded on the action', () => {
     const row = transformActionToAuditTrailRow(
       { ...baseAction, actorLmsUserId: 99, learnerEmail: 'recorded@example.com' },
@@ -159,6 +173,36 @@ describe('getAuditTrailStatus', () => {
     [{ actionType: 'errored', errorReason: null }, 'failed'],
   ])('getAuditTrailStatus(%j) returns %s', (action, expected) => {
     expect(getAuditTrailStatus(action)).toEqual(expected);
+  });
+});
+
+describe('getUnretiredEmail', () => {
+  it.each([
+    ['jane.doe@example.com', 'jane.doe@example.com'],
+    ['retired_user1a2b3c4d@retired.invalid', null],
+    ['RETIRED_USER@RETIRED.INVALID', null],
+    // Only the exact retirement placeholder format is treated as retired.
+    ['retired_user@example.com', 'retired_user@example.com'],
+    [null, null],
+    ['', null],
+  ])('getUnretiredEmail(%s) returns %s', (email, expected) => {
+    expect(getUnretiredEmail(email)).toEqual(expected);
+  });
+});
+
+describe('fetchAllPaginatedResults', () => {
+  it('fetches every page in order and returns the camelCased results', async () => {
+    const fetchPage = jest.fn()
+      .mockResolvedValueOnce({ data: { next: 'http://localhost/?page=2', results: [{ learner_email: 'a@example.com' }] } })
+      .mockResolvedValueOnce({ data: { next: null, results: [{ learner_email: 'b@example.com' }] } });
+    const results = await fetchAllPaginatedResults(fetchPage);
+    expect(results).toEqual([{ learnerEmail: 'a@example.com' }, { learnerEmail: 'b@example.com' }]);
+    expect(fetchPage.mock.calls).toEqual([[1], [2]]);
+  });
+
+  it('returns no results for an empty response', async () => {
+    const fetchPage = jest.fn().mockResolvedValue({ data: { next: null } });
+    expect(await fetchAllPaginatedResults(fetchPage)).toEqual([]);
   });
 });
 

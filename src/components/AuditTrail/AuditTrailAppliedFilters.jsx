@@ -31,9 +31,10 @@ const getDateRangeChipLabel = (intl, startDate, endDate) => {
 };
 
 /**
- * Displays each applied audit trail filter as a removable chip.
+ * Displays each applied audit trail filter as a removable chip, with a button to clear them all.
+ * `onClearFilters` is called with the filters to reset, e.g. `{ source: '' }`.
  */
-const AuditTrailAppliedFilters = ({ filters, onFiltersChange }) => {
+const AuditTrailAppliedFilters = ({ filters, onClearFilters }) => {
   const intl = useIntl();
   const {
     actorSearch,
@@ -48,7 +49,12 @@ const AuditTrailAppliedFilters = ({ filters, onFiltersChange }) => {
   if (actorSearch?.trim()) {
     appliedFilters.push({
       key: 'actorSearch',
-      label: intl.formatMessage(messages.appliedFilterActor, { value: actorSearch.trim() }),
+      // The actor search may contain a name or email, so it's hidden from session recordings.
+      label: (
+        <span data-hj-suppress>
+          {intl.formatMessage(messages.appliedFilterActor, { value: actorSearch.trim() })}
+        </span>
+      ),
       clearedFilters: { actorSearch: '' },
     });
   }
@@ -93,12 +99,12 @@ const AuditTrailAppliedFilters = ({ filters, onFiltersChange }) => {
           key={key}
           iconAfter={Close}
           iconAfterAlt={intl.formatMessage(messages.removeFilter)}
-          onIconAfterClick={() => onFiltersChange({ ...filters, ...clearedFilters })}
+          onIconAfterClick={() => onClearFilters(clearedFilters)}
         >
           {label}
         </Chip>
       ))}
-      <Button variant="link" size="inline" onClick={() => onFiltersChange(AUDIT_TRAIL_DEFAULT_FILTERS)}>
+      <Button variant="link" size="inline" onClick={() => onClearFilters(AUDIT_TRAIL_DEFAULT_FILTERS)}>
         {intl.formatMessage(messages.clearAllFilters)}
       </Button>
     </Stack>
@@ -107,7 +113,7 @@ const AuditTrailAppliedFilters = ({ filters, onFiltersChange }) => {
 
 AuditTrailAppliedFilters.propTypes = {
   filters: auditTrailFiltersPropType.isRequired,
-  onFiltersChange: PropTypes.func.isRequired,
+  onClearFilters: PropTypes.func.isRequired,
 };
 
 export default AuditTrailAppliedFilters;

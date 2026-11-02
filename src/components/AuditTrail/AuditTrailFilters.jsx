@@ -1,8 +1,5 @@
-import React, {
-  useEffect, useMemo, useRef, useState,
-} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { debounce } from 'lodash-es';
 import { Form, Icon } from '@openedx/paragon';
 import { Search } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
@@ -17,44 +14,21 @@ import {
   isValidDateRange,
 } from './data/utils';
 
-const ACTOR_SEARCH_DEBOUNCE_MS = 300;
-
+/**
+ * Inline audit trail filters. The actor search input is controlled by the parent, which debounces applying it.
+ */
 const AuditTrailFilters = ({
   filters,
   onFiltersChange,
+  actorSearch,
+  onActorSearchChange,
   actionTypeOptions,
   sourceOptions,
 }) => {
   const intl = useIntl();
-  const [actorSearch, setActorSearch] = useState(filters.actorSearch);
-
-  // Keep the actor search input in sync when the filter is cleared outside this input (e.g. "Clear all").
-  useEffect(() => {
-    setActorSearch(filters.actorSearch);
-  }, [filters.actorSearch]);
-
-  // The debounced actor search reads the latest filters and callback from a ref, so it's created once and a
-  // pending search isn't cancelled (and lost) when another filter changes or the parent re-renders.
-  const latestPropsRef = useRef({ filters, onFiltersChange });
-  latestPropsRef.current = { filters, onFiltersChange };
-
-  const debouncedActorSearchChange = useMemo(
-    () => debounce((value) => {
-      const { filters: latestFilters, onFiltersChange: latestOnFiltersChange } = latestPropsRef.current;
-      latestOnFiltersChange({ ...latestFilters, actorSearch: value });
-    }, ACTOR_SEARCH_DEBOUNCE_MS),
-    [],
-  );
-
-  useEffect(() => () => debouncedActorSearchChange.cancel(), [debouncedActorSearchChange]);
 
   const handleFilterChange = (key) => (e) => {
     onFiltersChange({ ...filters, [key]: e.target.value });
-  };
-
-  const handleActorSearchChange = (e) => {
-    setActorSearch(e.target.value);
-    debouncedActorSearchChange(e.target.value);
   };
 
   const isDateRangeValid = isValidDateRange(filters.startDate, filters.endDate);
@@ -67,7 +41,8 @@ const AuditTrailFilters = ({
           size="sm"
           type="text"
           value={actorSearch}
-          onChange={handleActorSearchChange}
+          onChange={(e) => onActorSearchChange(e.target.value)}
+          data-hj-suppress
           placeholder={intl.formatMessage(messages.filterActorPlaceholder)}
           leadingElement={<Icon src={Search} />}
         />
@@ -150,6 +125,9 @@ const AuditTrailFilters = ({
 AuditTrailFilters.propTypes = {
   filters: auditTrailFiltersPropType.isRequired,
   onFiltersChange: PropTypes.func.isRequired,
+  /** The (not yet applied) value of the actor search input. */
+  actorSearch: PropTypes.string.isRequired,
+  onActorSearchChange: PropTypes.func.isRequired,
   actionTypeOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
   sourceOptions: PropTypes.arrayOf(PropTypes.string).isRequired,
 };
