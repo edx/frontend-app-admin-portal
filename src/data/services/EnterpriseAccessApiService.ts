@@ -95,7 +95,6 @@ export type DeclineBnrSubsidyRequestResponse = AxiosResponse<DeclineBnrSubsidyRe
 
 type TopUpEligibilityArgs = {
   enterpriseCustomerUuid: string;
-  policyUuid?: string;
 };
 
 type TopUpEligibilityResponseData = {
@@ -745,20 +744,15 @@ class EnterpriseAccessApiService {
    * Retrieves Learner Credit top-up ("Add funds") eligibility for an enterprise's budgets.
    * @param {Object} args - The arguments object
    * @param {string} args.enterpriseCustomerUuid - The UUID of the enterprise customer
-   * @param {string} [args.policyUuid] - Evaluate only this budget (subsidy access policy)
    *
    * @returns A promise that resolves to an AxiosResponse with a `results` array, one row per budget
    */
   static getTopUpEligibility({
     enterpriseCustomerUuid,
-    policyUuid,
   }: TopUpEligibilityArgs): Promise<AxiosResponse<TopUpEligibilityResponseData>> {
     const params = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerUuid,
     });
-    if (policyUuid) {
-      params.append('policy_uuid', policyUuid);
-    }
     const url = `${EnterpriseAccessApiService.baseUrl}/learner-credit-top-ups/eligibility/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
   }

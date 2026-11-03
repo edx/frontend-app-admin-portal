@@ -63,7 +63,6 @@ describe('useTopUpEligibility', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalledWith({
       enterpriseCustomerUuid: mockEnterpriseId,
-      policyUuid: undefined,
     });
     expect(result.current.data).toEqual({
       policyUuid: mockPolicyUuid,
@@ -85,14 +84,17 @@ describe('useTopUpEligibility', () => {
     expect(second.result.current.data.policyUuid).toBe(mockOtherPolicyUuid);
   });
 
-  it('requests a single budget with policy_uuid', async () => {
-    const { result } = renderUseTopUpEligibility({ isSingleBudgetRequest: true });
+  it('serves a later caller (e.g., the Add Funds page) from the cache without a loading state', async () => {
+    // The app's QueryClient (`App/index.jsx`) uses a 60s `staleTime`; the test default of 0 would refetch.
+    const client = queryClient({ queries: { retry: false, staleTime: 1000 * 60 } });
+    const card = renderUseTopUpEligibility({}, client);
+    await waitFor(() => expect(card.result.current.isSuccess).toBe(true));
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalledWith({
-      enterpriseCustomerUuid: mockEnterpriseId,
-      policyUuid: mockPolicyUuid,
-    });
+    const page = renderUseTopUpEligibility({}, client);
+
+    expect(page.result.current.isInitialLoading).toBe(false);
+    expect(page.result.current.data.policyUuid).toBe(mockPolicyUuid);
+    expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalledTimes(1);
   });
 
   it('returns null when the response has no row for the budget', async () => {

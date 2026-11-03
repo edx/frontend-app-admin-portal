@@ -130,14 +130,9 @@ export const learnerCreditManagementQueryKeys = {
   budgetGroupLearners: (budgetId) => [...learnerCreditManagementQueryKeys.budget(budgetId), 'group learners'],
   enterpriseCustomer: (enterpriseId) => [...learnerCreditManagementQueryKeys.all, 'enterpriseCustomer', enterpriseId],
   flexGroup: (enterpriseId) => [...learnerCreditManagementQueryKeys.enterpriseCustomer(enterpriseId), 'flexGroup'],
-  // Invalidating `topUpEligibility` also invalidates every per-budget `budgetTopUpEligibility` query.
   topUpEligibility: (enterpriseId) => [
     ...learnerCreditManagementQueryKeys.enterpriseCustomer(enterpriseId),
     'topUpEligibility',
-  ],
-  budgetTopUpEligibility: (enterpriseId, policyUuid) => [
-    ...learnerCreditManagementQueryKeys.topUpEligibility(enterpriseId),
-    policyUuid,
   ],
   group: (groupUuid) => [...learnerCreditManagementQueryKeys.all, 'group', groupUuid],
   catalog: (catalog) => [...learnerCreditManagementQueryKeys.all, 'catalog', catalog],

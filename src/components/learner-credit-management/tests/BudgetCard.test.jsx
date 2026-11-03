@@ -840,7 +840,7 @@ describe('<BudgetCard />', () => {
       // Activating it does nothing; the card stays as it was. The mouse can't hover or click it.
       await user.keyboard('{Enter}');
       expect(addFunds).toHaveAttribute('aria-disabled', 'true');
-      expect(addFunds).toHaveStyle({ pointerEvents: 'none' });
+      expect(addFunds).toHaveClass('add-funds-button-disabled');
     });
 
     it('lists every reason when a budget is ineligible for several', async () => {

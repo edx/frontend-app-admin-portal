@@ -177,12 +177,11 @@ describe('AddFundsPage', () => {
     expect(screen.getByText('Learner Credit Management')).toBeInTheDocument();
   });
 
-  it('requests eligibility for this budget only', () => {
+  it('reads eligibility for this budget from the enterprise-wide request the budget cards share', () => {
     renderAddFunds();
     expect(useTopUpEligibility).toHaveBeenCalledWith({
       enterpriseId: 'test-enterprise-uuid',
       policyUuid: mockBudgetUuid,
-      isSingleBudgetRequest: true,
     });
   });
 

@@ -59,6 +59,11 @@
   box-shadow: none;
 }
 
+// Ineligible "Add funds" (`AddFundsButton`): blocks the mouse (no hover fill, no click), not keyboard focus.
+.add-funds-button-disabled {
+  pointer-events: none;
+}
+
 // "Add funds" ineligibility strip (`AddFundsIneligibleStatus`); colours come from Paragon's warning Card.Status.
 // The selector matches Paragon's own (`.pgn__card .pgn__card-status ...`) so the icon size wins on import order.
 .pgn__card .pgn__card-status.add-funds-ineligible-status {

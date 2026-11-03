@@ -23,19 +23,22 @@ Frontend pieces:
 - `EnterpriseAccessApiService.getTopUpEligibility` and the `useTopUpEligibility` hook
   (`data/hooks/useTopUpEligibility.ts`). `data` is the budget's camelCased row, or `null` when the
   response has no row for it (the list only returns `active=True` policies).
-- **One request for the budgets list:** without `isSingleBudgetRequest`, the query key is
-  `topUpEligibility(enterpriseId)` (no budget id), so every card shares one cached request and
-  `select` picks its own row. The cards render without waiting for it.
-- **One request with `policy_uuid` on the Add Funds page** (`isSingleBudgetRequest: true`, key
-  `budgetTopUpEligibility(enterpriseId, policyUuid)`). Invalidating `topUpEligibility(enterpriseId)`
-  invalidates both, which the pay step will need.
+- **One request per enterprise:** the query key is `topUpEligibility(enterpriseId)` (no budget
+  id), so every card and the Add Funds page share one cached request and `select` picks each
+  budget's row. The cards render without waiting for it, and going from a card to the Add Funds
+  page shows the flow straight away instead of a loading state. A deep link or refresh of the
+  page fetches the whole list (the endpoint isn't paginated). The API's `policy_uuid` filter isn't
+  used. Within the app's `staleTime` the page can gate on a slightly stale row, so the pay step
+  must have the server re-check eligibility on submit; nothing does that yet.
 - **No retry on 4xx** (403, and 404 when the backend flag is off, won't change); one retry otherwise.
   The query isn't made at all when the frontend flag is off, so admins don't hit a 404 endpoint
   before rollout.
 - `isTopUpCandidate` (`data/utils.js`): policy budget, not retired/expired. It doesn't check the
-  feature flag: the hook's `enabled` (no request, so no button) and the `AddFundsPage` early return
-  (redirect) are the only flag checks. `SubBudgetCard`
-  calls the hook with `enabled` set only for candidates that show card actions (not scheduled), so
+  feature flag; the flag is checked in the hook's `enabled` (no request), in `SubBudgetCard`'s
+  `showAddFunds` (no button, checked explicitly so the CTA stays gated even if `AddFundsButton`
+  starts rendering before eligibility loads), and in the `AddFundsPage` early return (redirect).
+  `SubBudgetCard`
+  calls the hook with `enabled` set only for flagged candidates that show card actions (not scheduled), so
   other cards never make the request. Retired and expired
   budgets stay hidden even though the API would answer `budget_not_active` for them (an expired
   subsidy also reports `budget_expiring_soon`), so the CTA never appears next to "View budget
@@ -63,7 +66,8 @@ Funds page deliberately does the opposite (see the budget guard below).
 
 **Gotcha — disabled but reachable:** the ineligible button uses `aria-disabled="true"` and the
 `disabled` class, not the `disabled` attribute, so keyboard and screen reader
-users can focus it. It also sets `pointerEvents: 'none'`, because the `disabled` class alone still
+users can focus it. It also has the `add-funds-button-disabled` class (`pointer-events: none`, in
+`styles/index.scss`), because the `disabled` class alone still
 shows the outline button's hover fill; this blocks only the mouse, not keyboard focus.
 `aria-describedby` points at the reasons list in the warning strip (a `useId` from `SubBudgetCard`),
 so each reason message must read on its own. It is a plain `<button>`, never `as={Link}`: an `<a>`
@@ -100,7 +104,7 @@ instead of the existing `FormWorkflow` modal pattern is recorded in
 | 4. Confirmation | `confirmation` | Placeholder (`StepComingSoon`) |
 
 **Budget guard** (`AddFundsPage.jsx`): shows the loading state until both the policy and its
-eligibility (`policy_uuid` request) have loaded, then redirects to budget detail when the flag is
+eligibility (the shared enterprise-wide request) have loaded, then redirects to budget detail when the flag is
 off, the budget id is not a policy UUID, the policy is retired/expired, the policy fails its
 initial load (404 shows `NotFoundPage`), or eligibility is ineligible, has no row, or fails its
 initial load with anything (403, 404, 5xx, network). A failed background refetch of either keeps

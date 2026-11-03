@@ -9,17 +9,11 @@ import { TopUpEligibility } from '../types';
 type UseTopUpEligibilityArgs = {
   enterpriseId: string;
   policyUuid: string;
-  // When true, requests only this budget (`policy_uuid`), as the Add Funds page does. Otherwise
-  // requests every budget of the enterprise; budget cards share that one request through the cache.
-  isSingleBudgetRequest?: boolean;
   enabled?: boolean;
 };
 
-const getTopUpEligibility = async (
-  enterpriseCustomerUuid: string,
-  policyUuid?: string,
-): Promise<TopUpEligibility[]> => {
-  const response = await EnterpriseAccessApiService.getTopUpEligibility({ enterpriseCustomerUuid, policyUuid });
+const getTopUpEligibility = async (enterpriseCustomerUuid: string): Promise<TopUpEligibility[]> => {
+  const response = await EnterpriseAccessApiService.getTopUpEligibility({ enterpriseCustomerUuid });
   return camelCaseObject(response.data.results);
 };
 
@@ -35,19 +29,19 @@ const retryTopUpEligibility = (failureCount: number, error) => {
 /**
  * Retrieves whether a budget can be topped up ("Add funds") and, when it can't, every reason why.
  *
+ * Requests every budget of the enterprise under one query key, so the budget cards and the Add Funds
+ * page share one cached request; `select` picks out this budget's row.
+ *
  * `data` is the budget's eligibility row, or `null` when the response has no row for it (e.g., an
  * inactive policy). Callers treat an error the same as no row: the Add Funds CTA is hidden.
  */
 const useTopUpEligibility = ({
   enterpriseId,
   policyUuid,
-  isSingleBudgetRequest = false,
   enabled = true,
 }: UseTopUpEligibilityArgs) => useQuery({
-  queryKey: isSingleBudgetRequest
-    ? learnerCreditManagementQueryKeys.budgetTopUpEligibility(enterpriseId, policyUuid)
-    : learnerCreditManagementQueryKeys.topUpEligibility(enterpriseId),
-  queryFn: () => getTopUpEligibility(enterpriseId, isSingleBudgetRequest ? policyUuid : undefined),
+  queryKey: learnerCreditManagementQueryKeys.topUpEligibility(enterpriseId),
+  queryFn: () => getTopUpEligibility(enterpriseId),
   enabled: enabled && !!features.TOP_UP_LEARNER_CREDIT && !!enterpriseId && !!policyUuid,
   retry: retryTopUpEligibility,
   select: (results) => results.find((result) => result.policyUuid === policyUuid) ?? null,

@@ -40,15 +40,14 @@ const AddFundsButton = ({
   }
 
   // `aria-disabled` rather than `disabled`, so keyboard and screen reader users can still reach
-  // the button and hear why it's unavailable. `pointerEvents: 'none'` drops the mouse hover style
+  // the button and hear why it's unavailable. `add-funds-button-disabled` drops the mouse hover style
   // (the `disabled` class alone doesn't); keyboard focus is unaffected.
   return (
     <Button
       data-testid="add-funds"
       variant="outline-primary"
       iconBefore={Add}
-      className="disabled"
-      style={{ pointerEvents: 'none' }}
+      className="disabled add-funds-button-disabled"
       aria-disabled="true"
       aria-describedby={reasonsId}
     >

@@ -31,14 +31,10 @@ const AddFundsPage = ({ enterpriseId, enterpriseSlug }) => {
     isError,
     error,
   } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
-  const {
-    data: eligibility,
-    isInitialLoading: isInitialLoadingEligibility,
-    isError: isEligibilityError,
-  } = useTopUpEligibility({
+  // Shares the budget cards' cached request, so coming from a card shows the flow straight away.
+  const { data: eligibility, isError: isEligibilityError } = useTopUpEligibility({
     enterpriseId,
     policyUuid: subsidyAccessPolicyId,
-    isSingleBudgetRequest: true,
   });
   const learnerCreditPath = `/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}`;
   const budgetDetailPath = `${learnerCreditPath}/${budgetId}`;
@@ -48,7 +44,8 @@ const AddFundsPage = ({ enterpriseId, enterpriseSlug }) => {
     return <Navigate to={budgetDetailPath} replace />;
   }
 
-  const isLoadingEligibility = isInitialLoadingEligibility || (eligibility === undefined && !isEligibilityError);
+  // `select` returns `null`, never `undefined`, once loaded; this also covers a paused (offline) query.
+  const isLoadingEligibility = eligibility === undefined && !isEligibilityError;
   if (isInitialLoading || (!subsidyAccessPolicy && !isError) || isLoadingEligibility) {
     return (
       <BudgetDetailPageWrapper>
