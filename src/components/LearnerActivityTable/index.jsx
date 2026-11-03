@@ -156,6 +156,14 @@ const LearnerActivityTable = ({
     },
     {
       Header: intl.formatMessage({
+        id: 'admin.portal.lpr.learner.activity.table.progress_status.column.heading',
+        defaultMessage: 'Progress Status',
+        description: 'Column heading for the progress status column in the learner activity table',
+      }),
+      accessor: 'progress_status',
+    },
+    {
+      Header: intl.formatMessage({
         id: 'admin.portal.lpr.learner.activity.table.course_passing_grade.column.heading',
         defaultMessage: 'Course Passing Grade',
         description: 'Column heading for the course passing grade column in the learner activity table',

@@ -159,6 +159,7 @@ describe('EnrollmentsTable', () => {
             course_start_date: '2017-06-23',
             course_end_date: '2017-12-23',
             course_progress: 0.5,
+            progress_status: 'In Progress',
             course_passing_grade: 0.6,
             current_grade: 0.77,
             last_activity_date: '2018-01-15',
@@ -169,11 +170,11 @@ describe('EnrollmentsTable', () => {
 
     const columnTitles = [
       'Email', 'First Name', 'Last Name', 'Course Title', 'Course Price', 'Start Date', 'End Date',
-      'Course Progress', 'Course Passing Grade', 'Current Grade', 'Last Activity Date',
+      'Course Progress', 'Progress Status', 'Course Passing Grade', 'Current Grade', 'Last Activity Date',
     ];
     const rowValues = [
       'test_user_1@example.com', 'Test', 'User', 'Demo Course', '$100', 'June 23, 2017', 'December 23, 2017',
-      '50%', '60%', '77%', 'January 15, 2018',
+      '50%', 'In Progress', '60%', '77%', 'January 15, 2018',
     ];
 
     const { container } = render(<EnrollmentsWrapper />);
@@ -186,6 +187,66 @@ describe('EnrollmentsTable', () => {
 
     rowValues.forEach((value) => {
       expect(container.textContent).toContain(value);
+    });
+  });
+
+  it('renders the Progress Status column immediately after Course Progress', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
+      data: {
+        count: 2,
+        num_pages: 1,
+        results: [
+          {
+            id: 1,
+            user_email: 'passed@example.com',
+            course_progress: 1,
+            progress_status: 'Passed',
+          },
+          {
+            id: 2,
+            user_email: 'expired@example.com',
+            course_progress: 0.2,
+            progress_status: 'In Progress:No Attempt',
+          },
+        ],
+      },
+    });
+
+    render(<EnrollmentsWrapper />);
+
+    await screen.findByText('passed@example.com');
+
+    const headers = screen.getAllByRole('columnheader').map(header => header.textContent);
+    const courseProgressIndex = headers.findIndex(header => header.includes('Course Progress'));
+    expect(courseProgressIndex).toBeGreaterThan(-1);
+    expect(headers[courseProgressIndex + 1]).toContain('Progress Status');
+
+    // Progress status values are displayed exactly as returned by the API.
+    expect(screen.getByText('Passed')).toBeInTheDocument();
+    expect(screen.getByText('In Progress:No Attempt')).toBeInTheDocument();
+  });
+
+  it('sorts by progress_status when the Progress Status column header is clicked', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
+      data: {
+        count: 1,
+        num_pages: 1,
+        results: [{ id: 1, user_email: 'learner@example.com', progress_status: 'Passed' }],
+      },
+    });
+
+    render(<EnrollmentsWrapper />);
+
+    await screen.findByText('learner@example.com');
+    fireEvent.click(screen.getByRole('columnheader', { name: /Progress Status/i }));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({
+          ordering: 'progress_status',
+        }),
+      );
     });
   });
 
@@ -205,6 +266,7 @@ describe('EnrollmentsTable', () => {
             course_start_date: '2017-06-23',
             course_end_date: '2017-12-23',
             course_progress: 0.5,
+            progress_status: 'In Progress',
             course_passing_grade: 0.6,
             current_grade: 0.77,
             last_activity_date: '2018-01-15',

@@ -333,6 +333,41 @@ exports[`EnrollmentsTable renders empty state snapshot correctly 1`] = `
                     class="d-flex align-items-center"
                   >
                     <span>
+                      Progress Status
+                    </span>
+                    <span
+                      class="pgn__icon"
+                      data-testid="arrow-drop-up-down"
+                      style="opacity: 0.5;"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="none"
+                        focusable="false"
+                        height="24"
+                        role="img"
+                        viewBox="0 0 24 24"
+                        width="24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </span>
+                  </span>
+                </th>
+                <th
+                  colspan="1"
+                  role="columnheader"
+                  style="cursor: pointer;"
+                  title="Toggle SortBy"
+                >
+                  <span
+                    class="d-flex align-items-center"
+                  >
+                    <span>
                       Course Passing Grade
                     </span>
                     <span
@@ -953,6 +988,50 @@ exports[`EnrollmentsTable renders enrollments table snapshot correctly 1`] = `
                   className="d-flex align-items-center"
                 >
                   <span>
+                    Progress Status
+                  </span>
+                  <span
+                    className="pgn__icon"
+                    data-testid="arrow-drop-up-down"
+                    style={
+                      {
+                        "opacity": 0.5,
+                      }
+                    }
+                  >
+                    <svg
+                      aria-hidden={true}
+                      fill="none"
+                      focusable={false}
+                      height={24}
+                      role="img"
+                      viewBox="0 0 24 24"
+                      width={24}
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="m7 10 5-5 5 5H7ZM7 14l5 5 5-5H7Z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                  </span>
+                </span>
+              </th>
+              <th
+                colSpan={1}
+                onClick={[Function]}
+                role="columnheader"
+                style={
+                  {
+                    "cursor": "pointer",
+                  }
+                }
+                title="Toggle SortBy"
+              >
+                <span
+                  className="d-flex align-items-center"
+                >
+                  <span>
                     Course Passing Grade
                   </span>
                   <span
@@ -1125,6 +1204,12 @@ exports[`EnrollmentsTable renders enrollments table snapshot correctly 1`] = `
                 role="cell"
               >
                 50%
+              </td>
+              <td
+                className="pgn__data-table-cell-wrap"
+                role="cell"
+              >
+                In Progress
               </td>
               <td
                 className="pgn__data-table-cell-wrap"
