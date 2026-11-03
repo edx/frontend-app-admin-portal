@@ -17,6 +17,7 @@ import {
 } from './data';
 import { isTopUpCandidate, isBudgetRetiredOrExpired } from './data/utils';
 import { useEnterpriseBudgets } from '../EnterpriseSubsidiesContext/data/hooks';
+import { features } from '../../config';
 import SubBudgetCardUtilization from './SubBudgetCardUtilization';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
 import AddFundsButton from './add-funds/AddFundsButton';
@@ -93,7 +94,11 @@ const BaseSubBudgetCard = ({
   ) : undefined;
   const isRetiredOrExpired = isBudgetRetiredOrExpired(status);
   const showActions = status !== BUDGET_STATUSES.scheduled;
-  const showAddFunds = showActions && isTopUpCandidate({ isPolicy: source === BUDGET_TYPES.policy, status });
+  // The hook also checks the flag; checking it here keeps the CTA gated even if the button starts
+  // rendering before eligibility loads.
+  const showAddFunds = !!features.TOP_UP_LEARNER_CREDIT
+    && showActions
+    && isTopUpCandidate({ isPolicy: source === BUDGET_TYPES.policy, status });
   // Every card shares one eligibility request, and the card doesn't wait for it to render.
   const { data: cachedTopUpEligibility, isError: isTopUpEligibilityError } = useTopUpEligibility({
     enterpriseId,

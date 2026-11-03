@@ -755,6 +755,20 @@ describe('<BudgetCard />', () => {
     });
 
     it.each([
+      { scenario: 'eligible', row: eligibilityRow() },
+      { scenario: 'ineligible', row: ineligibleRow('budget_expiring_soon') },
+    ])('does not display the Add funds CTA or reasons, or request eligibility, for an $scenario active Policy when the feature flag is off', ({ row }) => {
+      features.TOP_UP_LEARNER_CREDIT = false;
+      mockEligibility(row);
+      renderPolicyBudgetCards();
+
+      expect(screen.getByText('View budget')).toBeInTheDocument();
+      expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-funds-ineligible-status')).not.toBeInTheDocument();
+      expect(EnterpriseAccessApiService.getTopUpEligibility).not.toHaveBeenCalled();
+    });
+
+    it.each([
       { status: BUDGET_STATUSES.active, dates: currentDates },
       { status: BUDGET_STATUSES.expiring, dates: expiringDates },
     ])('displays an Add funds CTA linking to the add funds flow for an eligible $status Policy (enterprise-access)', async ({ status, dates }) => {
