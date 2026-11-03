@@ -8,7 +8,9 @@ import { FormattedMessage } from '@edx/frontend-platform/i18n';
 import { features } from '../../../config';
 import { ROUTE_NAMES } from '../../EnterpriseApp/data/constants';
 import NotFoundPage from '../../NotFoundPage';
-import { canTopUpBudget, useBudgetId, useSubsidyAccessPolicy } from '../data';
+import {
+  canTopUpBudget, useBudgetId, useSubsidyAccessPolicy, useTopUpEligibility,
+} from '../data';
 import BudgetDetailPageWrapper from '../BudgetDetailPageWrapper';
 import AddFundsBreadcrumbs from './AddFundsBreadcrumbs';
 import AddFundsStepper from './AddFundsStepper';
@@ -18,9 +20,9 @@ import { ADD_FUNDS_ROUTE_SEGMENT, AddFundsContextProvider } from './data';
  * Route entry point for the Learner Credit Top Up ("Add Funds") flow at
  * `/:enterpriseSlug/admin/learner-credit/:budgetId/add-funds/:step?`. Each step has its own URL;
  * step-level redirects are handled by `AddFundsStepper`. Budgets that fail `canTopUpBudget`
- * redirect back to budget detail.
+ * (including any top-up eligibility API error) redirect back to budget detail.
  */
-const AddFundsPage = ({ enterpriseSlug }) => {
+const AddFundsPage = ({ enterpriseId, enterpriseSlug }) => {
   const navigate = useNavigate();
   const { budgetId, subsidyAccessPolicyId } = useBudgetId();
   const {
@@ -29,6 +31,11 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     isError,
     error,
   } = useSubsidyAccessPolicy(subsidyAccessPolicyId);
+  // Shares the budget cards' cached request, so coming from a card shows the flow straight away.
+  const { data: eligibility, isError: isEligibilityError } = useTopUpEligibility({
+    enterpriseId,
+    policyUuid: subsidyAccessPolicyId,
+  });
   const learnerCreditPath = `/${enterpriseSlug}/admin/${ROUTE_NAMES.learnerCredit}`;
   const budgetDetailPath = `${learnerCreditPath}/${budgetId}`;
   const addFundsBasePath = `${budgetDetailPath}/${ADD_FUNDS_ROUTE_SEGMENT}`;
@@ -37,7 +44,9 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     return <Navigate to={budgetDetailPath} replace />;
   }
 
-  if (isInitialLoading || (!subsidyAccessPolicy && !isError)) {
+  // `select` returns `null`, never `undefined`, once loaded; this also covers a paused (offline) query.
+  const isLoadingEligibility = eligibility === undefined && !isEligibilityError;
+  if (isInitialLoading || (!subsidyAccessPolicy && !isError) || isLoadingEligibility) {
     return (
       <BudgetDetailPageWrapper>
         <Skeleton height={25} />
@@ -62,7 +71,9 @@ const AddFundsPage = ({ enterpriseSlug }) => {
     return <Navigate to={budgetDetailPath} replace />;
   }
 
-  if (!canTopUpBudget({ isPolicy: true, status: subsidyAccessPolicy.status })) {
+  // Ineligible, no row for the budget, or an eligibility error with nothing cached (403, 404, 5xx).
+  // As with the budget, a failed background refetch keeps the cached eligibility.
+  if (!canTopUpBudget({ isPolicy: true, status: subsidyAccessPolicy.status, eligibility })) {
     return <Navigate to={budgetDetailPath} replace />;
   }
 
@@ -88,10 +99,12 @@ const AddFundsPage = ({ enterpriseSlug }) => {
 };
 
 AddFundsPage.propTypes = {
+  enterpriseId: PropTypes.string.isRequired,
   enterpriseSlug: PropTypes.string.isRequired,
 };
 
 const mapStateToProps = state => ({
+  enterpriseId: state.portalConfiguration.enterpriseId,
   enterpriseSlug: state.portalConfiguration.enterpriseSlug,
 });
 

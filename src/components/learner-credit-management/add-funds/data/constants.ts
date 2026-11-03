@@ -25,3 +25,10 @@ export const PRESET_TOP_UP_AMOUNTS = [500, 1000, 2500, 5000];
 // Must match the server-side limits (top-up tech spec R-02); the server validates again.
 export const MIN_TOP_UP_AMOUNT = 500;
 export const MAX_TOP_UP_AMOUNT = 20000;
+
+// `error_code` values of the top-up eligibility API (enterprise-access `TOP_UP_INELIGIBILITY_REASONS`).
+export const TOP_UP_INELIGIBILITY_REASONS = {
+  budgetNotActive: 'budget_not_active',
+  budgetExpiringSoon: 'budget_expiring_soon',
+  accountNotEligible: 'account_not_eligible',
+} as const;

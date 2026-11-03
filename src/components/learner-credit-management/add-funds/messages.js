@@ -127,6 +127,31 @@ const messages = defineMessages({
     defaultMessage: 'Plan Expires {expirationDate}',
     description: 'The date the learner credit plan expires',
   },
+  addFundsButton: {
+    id: 'lcm.budgets.budget.card.add.funds',
+    defaultMessage: 'Add funds',
+    description: 'Button text to add funds to a budget',
+  },
+  reasonBudgetNotActive: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.budget.not.active',
+    defaultMessage: 'This budget is inactive and cannot receive additional funds.',
+    description: 'Reason the Add funds button is disabled: the budget is not active',
+  },
+  reasonBudgetExpiringSoon: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.budget.expiring.soon',
+    defaultMessage: 'This budget expires soon and cannot receive additional funds.',
+    description: 'Reason the Add funds button is disabled: the budget expires too soon',
+  },
+  reasonAccountNotEligible: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.account.not.eligible',
+    defaultMessage: 'Your account is not eligible to receive additional funds.',
+    description: 'Reason the Add funds button is disabled: the account is not eligible',
+  },
+  reasonUnknown: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.unknown',
+    defaultMessage: 'This budget cannot receive additional funds right now.',
+    description: 'Reason the Add funds button is disabled when the reason is not recognized',
+  },
 });
 
 export default messages;

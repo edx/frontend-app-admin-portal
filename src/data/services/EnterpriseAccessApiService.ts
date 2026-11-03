@@ -93,6 +93,19 @@ type DeclineBnrSubsidyRequestResponseData = {
 
 export type DeclineBnrSubsidyRequestResponse = AxiosResponse<DeclineBnrSubsidyRequestResponseData>;
 
+type TopUpEligibilityArgs = {
+  enterpriseCustomerUuid: string;
+};
+
+type TopUpEligibilityResponseData = {
+  results: {
+    policy_uuid: string;
+    is_eligible: boolean;
+    reasons: { error_code: string; message: string }[];
+    subsidy_expiration_datetime: string | null;
+  }[];
+};
+
 class EnterpriseAccessApiService {
   static baseUrl = `${configuration.ENTERPRISE_ACCESS_BASE_URL}/api/v1`;
 
@@ -724,6 +737,23 @@ class EnterpriseAccessApiService {
     });
 
     const url = `${EnterpriseAccessApiService.baseUrl}/customer-billing/create-enterprise-admin-portal-session/?${params.toString()}`;
+    return EnterpriseAccessApiService.apiClient().get(url);
+  }
+
+  /**
+   * Retrieves Learner Credit top-up ("Add funds") eligibility for an enterprise's budgets.
+   * @param {Object} args - The arguments object
+   * @param {string} args.enterpriseCustomerUuid - The UUID of the enterprise customer
+   *
+   * @returns A promise that resolves to an AxiosResponse with a `results` array, one row per budget
+   */
+  static getTopUpEligibility({
+    enterpriseCustomerUuid,
+  }: TopUpEligibilityArgs): Promise<AxiosResponse<TopUpEligibilityResponseData>> {
+    const params = new URLSearchParams({
+      enterprise_customer_uuid: enterpriseCustomerUuid,
+    });
+    const url = `${EnterpriseAccessApiService.baseUrl}/learner-credit-top-ups/eligibility/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 

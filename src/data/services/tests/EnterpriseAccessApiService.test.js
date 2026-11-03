@@ -626,6 +626,13 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('getTopUpEligibility calls enterprise-access to fetch top-up eligibility for every budget', () => {
+    EnterpriseAccessApiService.getTopUpEligibility({ enterpriseCustomerUuid: mockEnterpriseUUID });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/learner-credit-top-ups/eligibility/?enterprise_customer_uuid=${mockEnterpriseUUID}`,
+    );
+  });
+
   // ========== Billing Management Tests ==========
 
   describe('Billing Management Methods', () => {

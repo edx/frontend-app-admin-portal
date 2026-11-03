@@ -130,6 +130,10 @@ export const learnerCreditManagementQueryKeys = {
   budgetGroupLearners: (budgetId) => [...learnerCreditManagementQueryKeys.budget(budgetId), 'group learners'],
   enterpriseCustomer: (enterpriseId) => [...learnerCreditManagementQueryKeys.all, 'enterpriseCustomer', enterpriseId],
   flexGroup: (enterpriseId) => [...learnerCreditManagementQueryKeys.enterpriseCustomer(enterpriseId), 'flexGroup'],
+  topUpEligibility: (enterpriseId) => [
+    ...learnerCreditManagementQueryKeys.enterpriseCustomer(enterpriseId),
+    'topUpEligibility',
+  ],
   group: (groupUuid) => [...learnerCreditManagementQueryKeys.all, 'group', groupUuid],
   catalog: (catalog) => [...learnerCreditManagementQueryKeys.all, 'catalog', catalog],
   catalogContainsContentItem: (catalogUuid, contentKey) => [
