@@ -134,6 +134,35 @@ describe('useEnterpriseCuration', () => {
       });
     });
 
+    it('should drop highlight sets whose fetch failed', async () => {
+      EnterpriseCatalogApiService.getEnterpriseCurationConfig.mockResolvedValueOnce({
+        data: {
+          ...mockEnterpriseCurationConfigResponse,
+          results: [{
+            ...mockEnterpriseCurationConfig,
+            highlightSets: [{ uuid: 'failed-uuid' }, { uuid: 'test-uuid' }],
+          }],
+        },
+      });
+      EnterpriseCatalogApiService.fetchHighlightSet
+        .mockRejectedValueOnce(new Error('oh noes!'))
+        .mockResolvedValueOnce(mockEnterpriseHighlightedSetResponse);
+
+      const args = {
+        enterpriseId: TEST_ENTERPRISE_UUID,
+        curationTitleForCreation: TEST_ENTERPRISE_NAME,
+      };
+      const { result } = renderHook(() => useEnterpriseCuration(args));
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+      });
+
+      expect(EnterpriseCatalogApiService.fetchHighlightSet).toHaveBeenCalledTimes(2);
+      expect(result.current.enterpriseHighlightedSets).toEqual([mockEnterpriseHighlightedSetResponse]);
+      expect(result.current.fetchError).toBeNull();
+    });
+
     it('should update enterprise configuration', async () => {
       const updatedEnterpriseCuration = {
         ...mockEnterpriseCurationConfig,

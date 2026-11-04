@@ -1,6 +1,5 @@
 import { logError } from '@edx/frontend-platform/logging';
-import { NEW_ARCHIVED_CONTENT_ALERT_DISMISSED_COOKIE_NAME } from '../../ContentHighlights/data/constants';
-import { isArchivedContent } from '../../../utils';
+import { hasUndismissedArchivedContent } from '../../ContentHighlights/data/archivedContent';
 
 export const initialReducerState = {
   isLoading: true,
@@ -55,9 +54,14 @@ export const enterpriseCurationActions = {
     type: SET_ENTERPRISE_HIGHLIGHTED_CONTENTS,
     payload,
   }),
-  setIsNewArchivedContent: (payload) => ({
+  /**
+   * @param {Array} highlightSets Highlight sets with their `highlightedContent`
+   * @param {Object} dismissedContentKeys Map of highlight set uuid to the archived content keys
+   *   already dismissed for it (see getDismissedArchivedContentKeysByHighlightSet)
+   */
+  setIsNewArchivedContent: (highlightSets, dismissedContentKeys = {}) => ({
     type: SET_IS_NEW_ARCHIVED_CONTENT,
-    payload,
+    payload: { highlightSets, dismissedContentKeys },
   }),
   updateDismissedArchivedCourse: (payload) => ({
     type: UPDATE_DISMISSED_ARCHIVED_CONTENT,
@@ -75,44 +79,6 @@ export const enterpriseCurationActions = {
 
 function getHighlightSetsFromState(state) {
   return state.enterpriseCuration?.highlightSets || [];
-}
-
-/**
- * Helper function to determine if there is a new archived content in a highlight set
- *
- * @param {Array} payload Array of highlight set objects
- * [{
- *  cardImageUrl: bool,
- *  enterpriseCuration: string,
- *  highlightedContent: array,
- *  isPublished: bool,
- *  title: string,
- *  uuid: string,
- * }]
- * @returns {Boolean}
- */
-function getIsNewArchivedContentFromState(payload) {
-  let isNewArchivedContent = false;
-  payload?.forEach(highlightSet => {
-    const dismissedCookies = global.localStorage.getItem(`${NEW_ARCHIVED_CONTENT_ALERT_DISMISSED_COOKIE_NAME}-${highlightSet.uuid}`);
-    // Checks that the highlightSet uuid isn't set
-    if (!dismissedCookies) {
-      highlightSet.highlightedContent.forEach(content => {
-        if (isArchivedContent(content)) {
-          isNewArchivedContent = true;
-        }
-      });
-      // If the highlightSet uuid is already in the cookies, check if it includes the archived course content key
-    } else {
-      highlightSet.highlightedContent.forEach(content => {
-        if (isArchivedContent(content) && !dismissedCookies.includes(content.contentKey)
-        ) {
-          isNewArchivedContent = true;
-        }
-      });
-    }
-  });
-  return isNewArchivedContent;
 }
 
 function enterpriseCurationReducer(state, action) {
@@ -171,10 +137,10 @@ function enterpriseCurationReducer(state, action) {
       };
     }
     case SET_IS_NEW_ARCHIVED_CONTENT: {
-      const isNewArchivedContent = getIsNewArchivedContentFromState(action.payload);
+      const { highlightSets, dismissedContentKeys } = action.payload;
       return {
         ...state,
-        isNewArchivedContent,
+        isNewArchivedContent: hasUndismissedArchivedContent(highlightSets, dismissedContentKeys),
       };
     }
     case UPDATE_DISMISSED_ARCHIVED_CONTENT: {

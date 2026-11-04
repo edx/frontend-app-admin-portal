@@ -14,6 +14,7 @@ import {
   getTimeStampedFilename,
   i18nFormatPassedTimestamp,
   i18nFormatProgressStatus,
+  isArchivedContent,
   isValidNumber,
   pollAsync,
   queryCacheOnErrorHandler,
@@ -404,6 +405,23 @@ describe('utils', () => {
       configuration.BASE_URL = 'https://portal.example.com/';
       const url = getEnterpriseAdminRegisterLogoutUrl('acme');
       expect(decodeNext(url)).toBe('https://portal.example.com/acme/admin/register');
+    });
+  });
+
+  describe('isArchivedContent', () => {
+    it.each([
+      ['every run is archived', ['archived', 'archived'], true],
+      ['runs are archived or unpublished', ['archived', 'unpublished'], true],
+      ['any run is published', ['archived', 'published'], false],
+      ['courseRunStatuses is null', null, false],
+      ['courseRunStatuses is a string', 'archived', false],
+      ['courseRunStatuses is an object', {}, false],
+    ])('when %s (%p), returns %p', (_, courseRunStatuses, expected) => {
+      expect(isArchivedContent({ contentKey: 'edX+DemoX', courseRunStatuses })).toBe(expected);
+    });
+
+    it.each([null, undefined])('returns false when content is %p', (content) => {
+      expect(isArchivedContent(content)).toBe(false);
     });
   });
 });

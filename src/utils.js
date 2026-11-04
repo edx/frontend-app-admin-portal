@@ -613,8 +613,8 @@ const pluralText = (
  * @returns {Boolean}
  */
 function isArchivedContent(content) {
-  const { courseRunStatuses } = content;
-  if (!courseRunStatuses) {
+  const courseRunStatuses = content?.courseRunStatuses;
+  if (!Array.isArray(courseRunStatuses)) {
     return false;
   }
   const ARCHIVABLE_STATUSES = [COURSE_RUN_STATUSES.archived, COURSE_RUN_STATUSES.unpublished];
