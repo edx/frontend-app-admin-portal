@@ -1,5 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 
+import { logError } from '@edx/frontend-platform/logging';
+
 import { useBillingSubscriptionAvailable } from '../hooks';
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
 
@@ -62,9 +64,10 @@ describe('useBillingSubscriptionAvailable', () => {
     expect(result.current.hasBillingSubscription).toBe(false);
   });
 
-  it('returns hasBillingSubscription=false when API returns 404 error', async () => {
-    const error404 = new Error('Not Found');
+  it('returns hasBillingSubscription=false without logging an error when API returns 404', async () => {
+    const error404 = new Error('Axios Error (Response): 404 - See custom attributes for details.');
     error404.response = { status: 404 };
+    error404.customAttributes = { httpErrorStatus: 404 };
 
     EnterpriseAccessApiService.getSubscription.mockRejectedValue(error404);
 
@@ -79,11 +82,13 @@ describe('useBillingSubscriptionAvailable', () => {
     });
 
     expect(result.current.hasBillingSubscription).toBe(false);
+    expect(logError).not.toHaveBeenCalled();
   });
 
-  it('returns hasBillingSubscription=false when API returns server error', async () => {
-    const error500 = new Error('Internal Server Error');
+  it('returns hasBillingSubscription=false and logs the error when API returns server error', async () => {
+    const error500 = new Error('Axios Error (Response): 500 - See custom attributes for details.');
     error500.response = { status: 500 };
+    error500.customAttributes = { httpErrorStatus: 500 };
 
     EnterpriseAccessApiService.getSubscription.mockRejectedValue(error500);
 
@@ -98,6 +103,7 @@ describe('useBillingSubscriptionAvailable', () => {
     });
 
     expect(result.current.hasBillingSubscription).toBe(false);
+    expect(logError).toHaveBeenCalledWith(error500);
   });
 
   it('manages loading state correctly', async () => {
