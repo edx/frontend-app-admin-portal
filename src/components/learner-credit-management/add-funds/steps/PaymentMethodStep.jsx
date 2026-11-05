@@ -24,13 +24,13 @@ const PaymentMethodOption = ({
     labelClassName="mb-0"
     description={description}
   >
-    <Stack direction="horizontal" gap={2} className="flex-wrap">
-      <span className="d-inline-flex bg-light-300 rounded p-1" aria-hidden>
+    <span className="d-inline-flex align-items-center flex-wrap">
+      <span className="d-inline-flex bg-light-300 rounded p-1 mr-2" aria-hidden>
         <Icon src={icon} size="sm" />
       </span>
-      <span className="font-weight-bold">{label}</span>
+      <span className="font-weight-bold mr-2">{label}</span>
       <Badge variant={badgeVariant}>{badge}</Badge>
-    </Stack>
+    </span>
   </Form.Radio>
 );
 

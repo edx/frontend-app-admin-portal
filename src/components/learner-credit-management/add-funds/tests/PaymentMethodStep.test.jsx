@@ -82,7 +82,6 @@ describe('PaymentMethodStep', () => {
     const user = userEvent.setup();
     renderPaymentMethodStep({ paymentMethod: null });
 
-    // The disabled bank account option is skipped, so Tab lands on credit card.
     await user.tab();
     const creditCard = screen.getByRole('radio', { name: /Credit Card/ });
     expect(creditCard).toHaveFocus();
@@ -90,6 +89,25 @@ describe('PaymentMethodStep', () => {
 
     expect(mockUpdateFormData).toHaveBeenCalledWith({ paymentMethod: 'card' });
   });
+
+  it.each(['{ArrowDown}', '{ArrowRight}', '{ArrowUp}', '{ArrowLeft}'])(
+    'skips the disabled bank account option on %s',
+    async (key) => {
+      const user = userEvent.setup();
+      renderPaymentMethodStep();
+      const creditCard = screen.getByRole('radio', { name: /Credit Card/ });
+      const bankAccount = screen.getByRole('radio', { name: /Bank Account/ });
+
+      await user.tab();
+      expect(creditCard).toHaveFocus();
+      await user.keyboard(key);
+
+      expect(bankAccount).not.toHaveFocus();
+      expect(bankAccount).not.toBeChecked();
+      expect(creditCard).toBeChecked();
+      expect(mockUpdateFormData).not.toHaveBeenCalledWith({ paymentMethod: 'bank-account' });
+    },
+  );
 
   it('selects credit card when its label is clicked', async () => {
     const user = userEvent.setup();

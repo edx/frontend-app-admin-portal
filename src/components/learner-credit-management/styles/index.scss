@@ -64,9 +64,7 @@
   pointer-events: none;
 }
 
-// Payment method options (`PaymentMethodStep`): lines the description up with the label text, past the icon.
 .add-funds-payment-method-option .pgn__form-control-description {
-  // Icon box (1.25rem small icon + .25rem padding on each side) plus the .5rem gap before the label.
   padding-inline-start: 2.25rem;
 }
 
