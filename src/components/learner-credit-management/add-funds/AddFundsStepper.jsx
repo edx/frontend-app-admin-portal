@@ -8,6 +8,7 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 
 import { ADD_FUNDS_STEP_KEYS, ADD_FUNDS_STEPS, useAddFunds } from './data';
 import SelectAmountStep from './steps/SelectAmountStep';
+import PaymentMethodStep from './steps/PaymentMethodStep';
 import StepComingSoon from './steps/StepComingSoon';
 import OrderSummary from './OrderSummary';
 import messages from './messages';
@@ -46,6 +47,8 @@ const AddFundsStepper = ({ currentBalance, expirationDate, onExit }) => {
     switch (stepKey) {
       case ADD_FUNDS_STEP_KEYS.selectAmount:
         return <SelectAmountStep />;
+      case ADD_FUNDS_STEP_KEYS.paymentMethod:
+        return <PaymentMethodStep />;
       default:
         return <StepComingSoon title={intl.formatMessage(messages[stepKey])} />;
     }

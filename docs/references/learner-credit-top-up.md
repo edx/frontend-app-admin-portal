@@ -99,7 +99,7 @@ instead of the existing `FormWorkflow` modal pattern is recorded in
 | Step | Key | Status |
 | --- | --- | --- |
 | 1. Select Amount | `select-amount` | Built (`steps/SelectAmountStep.jsx`), see below |
-| 2. Payment Method | `payment-method` | Placeholder (`StepComingSoon`) |
+| 2. Payment Method | `payment-method` | Built (`steps/PaymentMethodStep.jsx`), see below |
 | 3. Payment Details | `payment-details` | Placeholder (`StepComingSoon`) |
 | 4. Confirmation | `confirmation` | Placeholder (`StepComingSoon`) |
 
@@ -145,13 +145,28 @@ covers this. Don't add a budget detail tab named `add-funds`.
 - A custom amount equal to a preset also selects that preset. Picking a preset clears the custom
   input. The raw text is kept in `customAmountInput` so it is restored on return to the step.
 
+**Step 2, Payment Method** (`steps/PaymentMethodStep.jsx`):
+- Credit Card is the only method (`PAYMENT_METHODS` in `data/constants.ts`). It starts selected
+  (`initialAddFundsState`), and the step's completion rule requires it.
+- Bank Account (ACH, Phase 2) is shown with the Figma's "4 Business Days" badge but disabled until
+  PM confirms whether it should be disabled or hidden. Its radio value is never stored and is not
+  a `PaymentMethodType`: ACH was removed by
+  [ADR 0012](../decisions/0012-credit-card-only-payment-methods.rst) and needs Stripe Financial
+  Connections plus a security review before it can come back.
+- Options are native radios (`Form.RadioSet`), not `SelectableBox`: Paragon's `SelectableBox` is a
+  `role="button"` div with an unfocusable input, so it doesn't behave as a radio group for
+  keyboard users. A disabled radio is skipped by Tab and arrow keys.
+- The processing-fee note follows the design copy, which mentions bank account fees. Revisit the
+  copy if Bank Account stays unavailable.
+
 **Order Summary** (`OrderSummary.jsx`, values from `calculateOrderSummary` in `data/utils.ts`):
 - Current balance is the budget's `aggregates.spendAvailableUsd`. When it is missing, Current and
   New Balance show `-` rather than $0.
 - Plan Expires is the budget's `subsidyExpirationDatetime`; the footer is hidden when it is missing.
-- There is no Discount row yet, and Total Cost equals the credit amount. Pricing (any discount and
-  the amount charged) must come from the backend top-up quote once it exists; don't compute
-  prices or discounts in the browser.
+- Discount and Total Cost always show `-` placeholders, on every step. Pricing (any discount and
+  the amount charged) must come from the backend top-up quote (enterprise-access) once it exists;
+  don't compute prices or discounts in the browser. New Balance is current balance plus the
+  credit amount.
 - Screen readers get one labelled `role="status"` sentence ("Adding $X. New balance: $Y."), set
   only when the amount is valid; the card itself is not a live region. Empty values (`-`) have
   hidden "Not available" text. The custom amount error uses `role="alert"`.
@@ -164,8 +179,7 @@ to `confirmation` are redirected.
 2. Replace the `StepComingSoon` fallback for the step in `AddFundsStepper.jsx#renderStepContent`.
 3. Replace the step's placeholder completion rule in `STEP_COMPLETION_RULES` (`data/utils.ts`) —
    this drives both the Continue button and the deep-link step guard. The type requires a rule
-   for every step, so the compiler rejects a step added without one. Today's
-   placeholder steps are marked complete explicitly (`() => true`) and must get real rules.
+   for every step, so the compiler rejects a step added without one.
    This is a client-side check only; the server must verify payment before showing success.
 4. Start the step with `AddFundsStepHeading`; the stepper moves focus to it on step change.
 

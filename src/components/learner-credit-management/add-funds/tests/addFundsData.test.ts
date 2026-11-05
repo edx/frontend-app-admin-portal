@@ -38,8 +38,14 @@ describe('canProceedFromStep', () => {
     expect(canProceedFromStep(ADD_FUNDS_STEP_KEYS.selectAmount, { ...emptyFormData, amount: 1000 })).toBe(true);
   });
 
-  it('allows proceeding through the not-yet-implemented payment method step', () => {
+  it('starts with the card payment method selected', () => {
+    expect(emptyFormData.paymentMethod).toEqual('card');
+  });
+
+  it('requires the card payment method on the payment method step', () => {
     expect(canProceedFromStep(ADD_FUNDS_STEP_KEYS.paymentMethod, emptyFormData)).toBe(true);
+    const noPaymentMethod = { ...emptyFormData, paymentMethod: null };
+    expect(canProceedFromStep(ADD_FUNDS_STEP_KEYS.paymentMethod, noPaymentMethod)).toBe(false);
   });
 
   it('never allows proceeding past payment details until payment is implemented', () => {
@@ -59,6 +65,11 @@ describe('getAddFundsStepRedirect', () => {
     { requested: ADD_FUNDS_STEP_KEYS.paymentMethod, formData: withAmount, expected: null },
     { requested: ADD_FUNDS_STEP_KEYS.paymentDetails, formData: withAmount, expected: null },
     {
+      requested: ADD_FUNDS_STEP_KEYS.paymentDetails,
+      formData: { ...withAmount, paymentMethod: null },
+      expected: ADD_FUNDS_STEP_KEYS.paymentMethod,
+    },
+    {
       requested: ADD_FUNDS_STEP_KEYS.confirmation,
       formData: withAmount,
       expected: ADD_FUNDS_STEP_KEYS.paymentDetails,
@@ -73,10 +84,9 @@ describe('calculateOrderSummary', () => {
     expect(calculateOrderSummary(null, 1800)).toBeNull();
   });
 
-  it('computes total cost and new balance', () => {
+  it('computes the new balance from the credit amount, leaving pricing to the backend', () => {
     expect(calculateOrderSummary(5000, 1800)).toEqual({
       creditAmount: 5000,
-      totalCost: 5000,
       newBalance: 6800,
     });
   });

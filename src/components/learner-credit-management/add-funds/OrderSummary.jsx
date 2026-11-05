@@ -52,9 +52,15 @@ const OrderSummary = ({ currentBalance, expirationDate }) => {
             label={<FormattedMessage {...messages.creditAmount} />}
             value={summary ? formatCurrency(summary.creditAmount) : <EmptyValue />}
           />
+          {/* TODO: show the backend top-up quote's discount and charge amount once the pricing API
+              exists; never compute discounts or prices in the browser. */}
+          <SummaryRow
+            label={<FormattedMessage {...messages.discount} />}
+            value={<EmptyValue />}
+          />
           <SummaryRow
             label={<FormattedMessage {...messages.totalCost} />}
-            value={summary ? formatCurrency(summary.totalCost) : <EmptyValue />}
+            value={<EmptyValue />}
           />
         </dl>
         <hr className="my-3" />

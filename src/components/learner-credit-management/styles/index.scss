@@ -64,6 +64,12 @@
   pointer-events: none;
 }
 
+// Payment method options (`PaymentMethodStep`): lines the description up with the label text, past the icon.
+.add-funds-payment-method-option .pgn__form-control-description {
+  // Icon box (1.25rem small icon + .25rem padding on each side) plus the .5rem gap before the label.
+  padding-inline-start: 2.25rem;
+}
+
 // "Add funds" ineligibility strip (`AddFundsIneligibleStatus`); colours come from Paragon's warning Card.Status.
 // The selector matches Paragon's own (`.pgn__card .pgn__card-status ...`) so the icon size wins on import order.
 .pgn__card .pgn__card-status.add-funds-ineligible-status {
