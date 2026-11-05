@@ -148,8 +148,9 @@ covers this. Don't add a budget detail tab named `add-funds`.
 **Step 2, Payment Method** (`steps/PaymentMethodStep.jsx`):
 - Credit Card is the only method (`PAYMENT_METHODS` in `data/constants.ts`). It starts selected
   (`initialAddFundsState`), and the step's completion rule requires it.
-- Bank Account (ACH, Phase 2) is shown with the Figma's "4 Business Days" badge but disabled until
-  PM confirms whether it should be disabled or hidden. Its radio value is never stored and is not
+- Bank Account (ACH, Phase 2) is shown disabled, with the Figma's "4 Business Days" badge followed by
+  a "Coming soon" badge so admins know why it can't be chosen. Both badges are inside the radio's
+  label, so they are part of its accessible name. Its radio value is never stored and is not
   a `PaymentMethodType`: ACH was removed by
   [ADR 0012](../decisions/0012-credit-card-only-payment-methods.rst) and needs Stripe Financial
   Connections plus a security review before it can come back.

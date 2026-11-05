@@ -50,13 +50,14 @@ describe('PaymentMethodStep', () => {
     expect(screen.getByText('Instant')).toBeInTheDocument();
   });
 
-  it('shows bank account as a disabled option with its transfer time', () => {
+  it('shows bank account as a disabled, coming soon option with its transfer time', () => {
     renderPaymentMethodStep();
 
     const bankAccount = screen.getByRole('radio', { name: /Bank Account/ });
     expect(bankAccount).toBeDisabled();
     expect(bankAccount).not.toBeChecked();
-    expect(bankAccount).toHaveAccessibleName(/4 Business Days/);
+    expect(bankAccount).toHaveAccessibleName(/4 Business Days\s*Coming soon/);
+    expect(screen.getByRole('radio', { name: /Credit Card/ })).not.toHaveAccessibleName(/Coming soon/);
     expect(bankAccount).toHaveAccessibleDescription('Link your bank securely via Stripe Financial Connections.');
   });
 

@@ -122,6 +122,11 @@ const messages = defineMessages({
     defaultMessage: '4 Business Days',
     description: 'Badge on the bank account option saying how long a bank transfer takes to add the funds',
   },
+  paymentMethodComingSoonBadge: {
+    id: 'lcm.budget.add.funds.payment.method.coming.soon.badge',
+    defaultMessage: 'Coming soon',
+    description: 'Badge on a payment method option that cannot be chosen yet',
+  },
   bankAccountDescription: {
     id: 'lcm.budget.add.funds.payment.method.bank.account.description',
     defaultMessage: 'Link your bank securely via Stripe Financial Connections.',

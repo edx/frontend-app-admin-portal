@@ -14,7 +14,7 @@ import AddFundsStepHeading from './AddFundsStepHeading';
 const BANK_ACCOUNT_OPTION_VALUE = 'bank-account';
 
 const PaymentMethodOption = ({
-  value, icon, label, badge, badgeVariant, description, disabled,
+  value, icon, label, badge, badgeVariant, description, disabled, comingSoon,
 }) => (
   <Form.Radio
     value={value}
@@ -30,6 +30,11 @@ const PaymentMethodOption = ({
       </span>
       <span className="font-weight-bold mr-2">{label}</span>
       <Badge variant={badgeVariant}>{badge}</Badge>
+      {comingSoon && (
+        <Badge variant="light" className="ml-2">
+          <FormattedMessage {...messages.paymentMethodComingSoonBadge} />
+        </Badge>
+      )}
     </span>
   </Form.Radio>
 );
@@ -42,10 +47,12 @@ PaymentMethodOption.propTypes = {
   badgeVariant: PropTypes.string.isRequired,
   description: PropTypes.node.isRequired,
   disabled: PropTypes.bool,
+  comingSoon: PropTypes.bool,
 };
 
 PaymentMethodOption.defaultProps = {
   disabled: false,
+  comingSoon: false,
 };
 
 const PaymentMethodStep = () => {
@@ -79,6 +86,7 @@ const PaymentMethodStep = () => {
           badgeVariant="warning"
           description={<FormattedMessage {...messages.bankAccountDescription} />}
           disabled
+          comingSoon
         />
       </Form.RadioSet>
       <div className="d-flex align-items-start bg-light-100 rounded p-3 small" data-testid="add-funds-processing-fee-note">
