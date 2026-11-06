@@ -1,9 +1,16 @@
 export const AUDIT_TRAIL_PAGE_SIZE = 10;
 
-// Bounds on loading audit history, which is fetched in full and filtered in the browser: the most API pages
-// fetched per budget or subscription plan (newest first), and the most of those fetched at the same time.
+// Bounds on loading audit history, which is fetched up front and filtered in the browser: the page size requested
+// from the audit APIs, the most API pages fetched per budget or subscription plan, and the most budgets or plans
+// fetched at the same time.
+export const AUDIT_TRAIL_API_PAGE_SIZE = 100;
 export const AUDIT_TRAIL_MAX_PAGES_PER_SOURCE = 10;
 export const AUDIT_TRAIL_MAX_CONCURRENT_REQUESTS = 3;
+// The most audit history items loaded per budget or plan (e.g. for the truncation notice).
+export const AUDIT_TRAIL_MAX_ITEMS_PER_SOURCE = AUDIT_TRAIL_MAX_PAGES_PER_SOURCE * AUDIT_TRAIL_API_PAGE_SIZE;
+
+// The table data shown before the audit history has loaded.
+export const AUDIT_TRAIL_EMPTY_TABLE_DATA = { results: [], itemCount: 0, pageCount: 1 };
 
 // Column accessor for the timestamp column; the only sortable column in the audit trail table.
 export const AUDIT_TRAIL_TIMESTAMP_COLUMN = 'timestamp';

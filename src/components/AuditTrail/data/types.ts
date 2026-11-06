@@ -46,6 +46,13 @@ export type AuditTrailTableState = {
 /** The audit trail filters and `DataTable` state, applied to the rows by `applyAuditTrailTableOptions`. */
 export type AuditTrailTableOptions = AuditTrailTableState & { filters: AuditTrailFilters };
 
+/** An audit trail's loaded history, as returned by the `queryFn` passed to `useAuditTrailQuery`. */
+export type AuditTrailHistory = {
+  rows: AuditTrailRow[];
+  /** Whether older history was left out (see `AUDIT_TRAIL_MAX_PAGES_PER_SOURCE`). */
+  isTruncated: boolean;
+};
+
 /** A page of audit trail rows, as passed to `AuditTrail` as `tableData`. */
 export type AuditTrailTableData = {
   results: AuditTrailRow[];

@@ -189,8 +189,24 @@ export const fetchPaginatedResults = async <T = any>(
 };
 
 /**
+ * `retry` handler for the audit trail queries. Client errors (4xx, e.g. 403) won't change on retry, so they aren't
+ * retried; other errors are retried once. Each attempt reloads the whole audit history, so retries are kept low;
+ * the audit trail's "Try again" button retries on demand.
+ */
+export const retryAuditTrailQuery = (
+  failureCount: number,
+  error: { customAttributes?: { httpErrorStatus?: number } } | null,
+): boolean => {
+  const httpErrorStatus = error?.customAttributes?.httpErrorStatus;
+  if (httpErrorStatus && httpErrorStatus >= 400 && httpErrorStatus < 500) {
+    return false;
+  }
+  return failureCount < 1;
+};
+
+/**
  * Like `Promise.all(items.map(mapper))`, but runs at most `limit` mappers at a time. Results keep the order of
- * `items`; the returned promise rejects as soon as any mapper rejects.
+ * `items`. The returned promise rejects as soon as any mapper rejects, and no further mappers are started.
  */
 export const mapWithConcurrencyLimit = async <T, R>(
   items: T[],
@@ -199,13 +215,19 @@ export const mapWithConcurrencyLimit = async <T, R>(
 ): Promise<R[]> => {
   const results: R[] = new Array(items.length);
   let nextIndex = 0;
+  let hasFailed = false;
   const runNext = async (): Promise<void> => {
-    if (nextIndex >= items.length) {
+    if (hasFailed || nextIndex >= items.length) {
       return;
     }
     const index = nextIndex;
     nextIndex += 1;
-    results[index] = await mapper(items[index]);
+    try {
+      results[index] = await mapper(items[index]);
+    } catch (error) {
+      hasFailed = true;
+      throw error;
+    }
     await runNext();
   };
   await Promise.all(Array.from({ length: Math.min(limit, items.length) }, runNext));

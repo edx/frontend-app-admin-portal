@@ -41,7 +41,7 @@ const AuditTrailTableContents = ({
   isLoading,
   isError,
   onRetry,
-  isHistoryTruncated = false,
+  historyNotice = '',
 }) => {
   const intl = useIntl();
   const { gotoPage } = useContext(DataTableContext);
@@ -108,9 +108,9 @@ const AuditTrailTableContents = ({
     }
     return (
       <>
-        {isHistoryTruncated && (
+        {historyNotice && (
           <div className="px-3">
-            <Alert variant="info" icon={Info}>{intl.formatMessage(messages.historyTruncated)}</Alert>
+            <Alert variant="info" icon={Info}>{historyNotice}</Alert>
           </div>
         )}
         <DataTable.Table />
@@ -165,8 +165,8 @@ const auditTrailPropTypes = {
   isLoading: PropTypes.bool.isRequired,
   isError: PropTypes.bool.isRequired,
   onRetry: PropTypes.func.isRequired,
-  /** True when only the most recent audit history was fetched, so older events aren't shown. */
-  isHistoryTruncated: PropTypes.bool,
+  /** Notice shown above the table, e.g. describing which part of the audit history was loaded. */
+  historyNotice: PropTypes.string,
 };
 
 AuditTrailTableContents.propTypes = auditTrailPropTypes;
