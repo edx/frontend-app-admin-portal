@@ -164,11 +164,6 @@ const messages = defineMessages({
     defaultMessage: 'Loading audit history...',
     description: 'Screen reader text shown while the audit trail is loading.',
   },
-  historyTruncated: {
-    id: 'admin.portal.audit.trail.history.truncated',
-    defaultMessage: 'Showing the most recent audit history. Older events aren\'t included.',
-    description: 'Notice shown above the audit trail table when only the most recent audit history was loaded.',
-  },
   emptyNoHistory: {
     id: 'admin.portal.audit.trail.empty.no.history',
     defaultMessage: 'No audit history available',

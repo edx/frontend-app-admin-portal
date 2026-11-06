@@ -3,6 +3,8 @@ import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform';
 
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
+import { transformActionToAuditTrailRow } from '../../AuditTrail/data/utils';
+import type { AuditTrailAction, AuditTrailAuthenticatedUser, AuditTrailRow } from '../../AuditTrail/data/types';
 import {
   ASSIGNED, ACTIVE, CANCELED, ENDED, ENROLLABLE_STATUSES, REVOCABLE_STATUSES,
   SCHEDULED, SEEN_SUBSCRIPTION_EXPIRATION_MODAL_COOKIE_PREFIX,
@@ -126,3 +128,31 @@ export const openStripeBillingPortal = async (enterpriseUuid: string): Promise<'
     return ERROR;
   }
 };
+
+/** A (camelCased) license-manager audit history action (``LicenseAction`` record), with its resolved actor. */
+type LicenseAuditTrailAction = AuditTrailAction & {
+  actor?: { email?: string | null, fullName?: string | null } | null;
+};
+
+/**
+ * Transforms (camelCased) license-manager audit history actions (``LicenseAction`` records) into audit trail
+ * table rows. license-manager resolves each action's `actor` (email and full name); when it can't (e.g. a learner
+ * activating their own license), the actor falls back to the learner, as for learner credit audit actions.
+ *
+ * @param actions License actions from the subscription plan audit history API.
+ * @param authenticatedUser The authenticated user, from `getAuthenticatedUser()`.
+ * @returns Audit trail rows (see `AuditTrail`).
+ */
+export const transformLicenseActionsToAuditTrailRows = (
+  actions: LicenseAuditTrailAction[],
+  authenticatedUser?: AuditTrailAuthenticatedUser | null,
+): AuditTrailRow[] => actions.map(
+  (action) => {
+    const row = transformActionToAuditTrailRow(action, { learnerEmail: action.learnerEmail }, authenticatedUser);
+    return {
+      ...row,
+      actorName: action.actor?.fullName || row.actorName,
+      actorEmail: action.actor?.email || row.actorEmail,
+    };
+  },
+);

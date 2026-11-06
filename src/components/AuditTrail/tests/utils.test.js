@@ -11,6 +11,7 @@ import {
   hasActiveAuditTrailFilters,
   isValidDateRange,
   mapWithConcurrencyLimit,
+  retryAuditTrailQuery,
   transformActionToAuditTrailRow,
 } from '../data/utils';
 import {
@@ -163,6 +164,18 @@ describe('fetchPaginatedResults', () => {
   });
 });
 
+describe('retryAuditTrailQuery', () => {
+  it.each([
+    [0, 500, true],
+    [1, 500, false],
+    [0, undefined, true],
+    [0, 403, false],
+    [0, 404, false],
+  ])('after %s failures, with HTTP status %s, returns %s', (failureCount, httpErrorStatus, expected) => {
+    expect(retryAuditTrailQuery(failureCount, { customAttributes: { httpErrorStatus } })).toEqual(expected);
+  });
+});
+
 describe('mapWithConcurrencyLimit', () => {
   it('maps every item in order, running at most `limit` mappers at a time', async () => {
     let running = 0;
@@ -188,6 +201,12 @@ describe('mapWithConcurrencyLimit', () => {
   it('rejects when a mapper rejects', async () => {
     const mapper = jest.fn((item) => (item === 2 ? Promise.reject(new Error('oops')) : Promise.resolve(item)));
     await expect(mapWithConcurrencyLimit([1, 2, 3], 2, mapper)).rejects.toThrow('oops');
+  });
+
+  it('does not start more mappers after a mapper rejects', async () => {
+    const mapper = jest.fn((item) => (item === 2 ? Promise.reject(new Error('oops')) : Promise.resolve(item)));
+    await expect(mapWithConcurrencyLimit([1, 2, 3, 4], 1, mapper)).rejects.toThrow('oops');
+    expect(mapper.mock.calls).toEqual([[1], [2]]);
   });
 });
 

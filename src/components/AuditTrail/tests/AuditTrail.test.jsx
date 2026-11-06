@@ -196,16 +196,16 @@ describe('<AuditTrail />', () => {
     expect(onRetry).toHaveBeenCalledTimes(1);
   });
 
-  it('shows a notice when only the most recent audit history was loaded', () => {
+  it('shows the history notice, when given, above the table', () => {
     const { rerender } = renderAuditTrail();
-    expect(screen.queryByText(/Showing the most recent audit history/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Only part of the history is shown.')).not.toBeInTheDocument();
 
     rerender(
       <IntlProvider locale="en">
-        <AuditTrail {...defaultProps} isHistoryTruncated />
+        <AuditTrail {...defaultProps} historyNotice="Only part of the history is shown." />
       </IntlProvider>,
     );
-    expect(screen.getByText(/Showing the most recent audit history/)).toBeInTheDocument();
+    expect(screen.getByText('Only part of the history is shown.')).toBeInTheDocument();
     expect(screen.getAllByRole('row')).toHaveLength(mockAuditTrailRows.length + 1); // header row
   });
 

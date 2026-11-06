@@ -16,19 +16,29 @@ import { axe } from 'jest-axe';
 import SubscriptionTabs from '../SubscriptionTabs';
 import { SubsidyRequestsContext } from '../../subsidy-requests';
 import {
+  AUDIT_TRAIL_TAB,
   MANAGE_LEARNERS_TAB,
   MANAGE_REQUESTS_TAB,
   SUBSCRIPTION_TABS_LABELS,
 } from '../data/constants';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
+import { features } from '../../../config';
 
 const MANAGE_LEARNERS_MOCK_CONTENT = 'learners';
 const MANAGE_REQUESTS_MOCK_CONTENT = 'requests';
+const AUDIT_TRAIL_MOCK_CONTENT = 'audit trail';
 
 jest.mock(
   '../SubscriptionPlanRoutes',
   () => function SubscriptionPlanRoutes() {
     return <div>{MANAGE_LEARNERS_MOCK_CONTENT}</div>;
+  },
+);
+
+jest.mock(
+  '../SubscriptionAuditTrail',
+  () => function SubscriptionAuditTrail() {
+    return <div>{AUDIT_TRAIL_MOCK_CONTENT}</div>;
   },
 );
 
@@ -106,6 +116,7 @@ describe('<SubscriptionTabs />', () => {
   afterEach(() => {
     cleanup();
     jest.clearAllMocks();
+    features.AUDIT_TRAIL = false;
   });
 
   // Skipped because this test fails a11y checks; to be addressed in ENT-11719
@@ -178,5 +189,33 @@ describe('<SubscriptionTabs />', () => {
     screen.getByText(SUBSCRIPTION_TABS_LABELS[MANAGE_REQUESTS_TAB]);
     screen.getByText(12);
     screen.getByText('outstanding enrollment requests');
+  });
+
+  it('hides the "Audit trail" tab when the audit trail feature is disabled', () => {
+    render(<SubscriptionTabsWrapper />);
+    expect(screen.queryByText(SUBSCRIPTION_TABS_LABELS[AUDIT_TRAIL_TAB])).toBeFalsy();
+  });
+
+  it('renders not found page for the audit trail route when the audit trail feature is disabled', () => {
+    render(<SubscriptionTabsWrapper route={`/${enterpriseSlug}/admin/subscriptions/${AUDIT_TRAIL_TAB}`} />);
+    expect(screen.queryByText('404')).toBeTruthy();
+  });
+
+  it('shows the "Audit trail" tab and its content when the audit trail feature is enabled', async () => {
+    features.AUDIT_TRAIL = true;
+    const user = userEvent.setup();
+    render(<SubscriptionTabsWrapper />);
+    expect(screen.getByText(MANAGE_LEARNERS_MOCK_CONTENT));
+
+    await user.click(screen.getByText(SUBSCRIPTION_TABS_LABELS[AUDIT_TRAIL_TAB]));
+    await screen.findByText(AUDIT_TRAIL_MOCK_CONTENT);
+    expect(screen.queryByText(MANAGE_LEARNERS_MOCK_CONTENT)).toBeFalsy();
+  });
+
+  it('renders the audit trail when navigating directly to the audit trail route', () => {
+    features.AUDIT_TRAIL = true;
+    render(<SubscriptionTabsWrapper route={`/${enterpriseSlug}/admin/subscriptions/${AUDIT_TRAIL_TAB}`} />);
+    expect(screen.getByText(AUDIT_TRAIL_MOCK_CONTENT));
+    expect(screen.queryByText('404')).toBeFalsy();
   });
 });
