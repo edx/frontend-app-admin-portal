@@ -3,6 +3,7 @@ import {
   ADD_FUNDS_STEPS,
   MAX_TOP_UP_AMOUNT,
   MIN_TOP_UP_AMOUNT,
+  PAYMENT_METHODS,
 } from './constants';
 import type { AddFundsStepKey } from './constants';
 import type { AddFundsFormData } from './types';
@@ -24,8 +25,7 @@ type StepCompletionRule = (formData: AddFundsFormData) => boolean;
  */
 const STEP_COMPLETION_RULES: Record<AddFundsStepKey, StepCompletionRule> = {
   [ADD_FUNDS_STEP_KEYS.selectAmount]: ({ amount }) => isValidTopUpAmount(amount),
-  // TODO: replace with the real rule when the Payment Method step is built.
-  [ADD_FUNDS_STEP_KEYS.paymentMethod]: () => true,
+  [ADD_FUNDS_STEP_KEYS.paymentMethod]: ({ paymentMethod }) => paymentMethod === PAYMENT_METHODS.card,
   // TODO: Confirmation must only be reachable after a payment is submitted (or, on a Stripe
   // return redirect, verified against the backend by session id). Until payment is built,
   // nothing can complete this step, so Confirmation stays unreachable.
@@ -69,7 +69,6 @@ export const getAddFundsStepRedirect = (
 
 export type TopUpOrderSummary = {
   creditAmount: number;
-  totalCost: number;
   /** `null` when the current balance is unknown. */
   newBalance: number | null;
 };
@@ -83,9 +82,6 @@ export const calculateOrderSummary = (
   }
   return {
     creditAmount: amount,
-    // TODO: show the backend top-up quote's charge amount once the pricing API exists; never
-    // compute discounts or prices in the browser.
-    totalCost: amount,
     newBalance: currentBalance === undefined ? null : currentBalance + amount,
   };
 };

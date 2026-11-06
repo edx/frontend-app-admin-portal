@@ -304,9 +304,10 @@ describe('AddFundsPage', () => {
     await user.click(presetButton);
 
     expect(presetButton).toHaveAttribute('aria-pressed', 'true');
-    // Until backend pricing exists, total cost is the credit amount.
-    expect(screen.getAllByText('$5,000.00')).toHaveLength(2);
-    expect(screen.queryByText(/Discount/)).not.toBeInTheDocument();
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$5,000.00');
+    // Until the backend quote exists, discount and total cost are placeholders.
+    expect(screen.getByText('Discount').nextElementSibling).toHaveTextContent('-');
+    expect(screen.getByText('Total Cost').nextElementSibling).toHaveTextContent('-');
     expect(screen.getByText('$6,800.00')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
   });
@@ -323,7 +324,7 @@ describe('AddFundsPage', () => {
     await user.clear(input);
     await user.type(input, '1500');
     expect(screen.queryByText('Enter an amount between $500 and $20,000.')).not.toBeInTheDocument();
-    expect(screen.getAllByText('$1,500.00')).toHaveLength(2);
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$1,500.00');
     expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
   });
 
@@ -366,7 +367,7 @@ describe('AddFundsPage', () => {
 
     expect(input).toHaveValue('');
     expect(screen.getByRole('button', { name: '$ 2500' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getAllByText('$2,500.00')).toHaveLength(2);
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$2,500.00');
   });
 
   it('shows no balance instead of $0 when the budget has no aggregates', async () => {
@@ -418,8 +419,7 @@ describe('AddFundsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Continue' }));
 
     expectPath('payment-method');
-    expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
-    expect(screen.getByText(/This step is under development/)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Choose a Payment Method' })).toHaveFocus();
 
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expectPath('payment-details');
@@ -442,7 +442,7 @@ describe('AddFundsPage', () => {
 
     await user.click(screen.getByRole('button', { name: '$ 1000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(screen.getByRole('heading', { name: 'Payment Method' })).toHaveFocus();
+    expect(screen.getByRole('heading', { name: 'Choose a Payment Method' })).toHaveFocus();
   });
 
   it('steps back through history instead of adding entries when Back is clicked', async () => {
@@ -509,6 +509,50 @@ describe('AddFundsPage', () => {
     expect(screen.getByRole('button', { name: '$ 2500' })).toHaveAttribute('aria-pressed', 'true');
   });
 
+  it('opens the payment method step with credit card preselected and the chosen amount in the summary', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'select-amount' });
+
+    await user.click(screen.getByRole('button', { name: '$ 5000' }));
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+
+    expectPath('payment-method');
+    expect(screen.getByRole('heading', { name: 'Choose a Payment Method' })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /Credit Card/ })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /Bank Account/ })).toBeDisabled();
+    expect(screen.getByTestId('add-funds-processing-fee-note')).toBeInTheDocument();
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$5,000.00');
+    expect(screen.getByText('Discount').nextElementSibling).toHaveTextContent('-');
+    expect(screen.getByText('Total Cost').nextElementSibling).toHaveTextContent('-');
+    expect(screen.getByText('Current Balance').nextElementSibling).toHaveTextContent('$1,800.00');
+    expect(screen.getByText('New Balance').nextElementSibling).toHaveTextContent('$6,800.00');
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+  });
+
+  it('keeps the amount and payment method through Back and Continue', async () => {
+    const user = userEvent.setup();
+    renderAddFunds({ step: 'select-amount' });
+
+    await user.click(screen.getByRole('button', { name: '$ 2500' }));
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expectPath('payment-details');
+
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expectPath('payment-method');
+    expect(screen.getByRole('radio', { name: /Credit Card/ })).toBeChecked();
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$2,500.00');
+
+    await user.click(screen.getByRole('button', { name: 'Back' }));
+    expectPath('select-amount');
+    expect(screen.getByRole('button', { name: '$ 2500' })).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(screen.getByRole('button', { name: 'Continue' }));
+    expectPath('payment-method');
+    expect(screen.getByRole('radio', { name: /Credit Card/ })).toBeChecked();
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$2,500.00');
+  });
+
   it.each([
     { scenario: 'no step is given', step: undefined },
     { scenario: 'the step is unknown', step: 'not-a-step' },
@@ -543,6 +587,13 @@ describe('AddFundsPage', () => {
       state: 'with an invalid custom amount',
       act: async (user) => {
         await user.type(screen.getByLabelText('Custom amount'), '100');
+      },
+    },
+    {
+      state: 'on the payment method step',
+      act: async (user) => {
+        await user.click(screen.getByRole('button', { name: '$ 1000' }));
+        await user.click(screen.getByRole('button', { name: 'Continue' }));
       },
     },
   ])('is accessible when $state', async ({ act }) => {

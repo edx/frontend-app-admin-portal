@@ -21,12 +21,13 @@ const renderOrderSummary = ({ amount = 1000, ...props } = {}) => {
 };
 
 describe('OrderSummary', () => {
-  it('shows the amount as the total cost, with no discount row', () => {
+  it('shows the credit amount and new balance, with placeholders for discount and total cost', () => {
     renderOrderSummary();
 
-    expect(screen.queryByText(/Discount/)).not.toBeInTheDocument();
     expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$1,000.00');
-    expect(screen.getByText('Total Cost').nextElementSibling).toHaveTextContent('$1,000.00');
+    // Pricing comes from the backend quote, which doesn't exist yet.
+    expect(screen.getByText('Discount').nextElementSibling).toHaveTextContent('-Not available');
+    expect(screen.getByText('Total Cost').nextElementSibling).toHaveTextContent('-Not available');
     expect(screen.getByText('New Balance').nextElementSibling).toHaveTextContent('$2,800.00');
   });
 
@@ -57,7 +58,7 @@ describe('OrderSummary', () => {
   it('shows placeholders until the amount is valid', () => {
     renderOrderSummary({ amount: null });
 
-    ['Credit Amount', 'Total Cost', 'New Balance'].forEach((label) => {
+    ['Credit Amount', 'Discount', 'Total Cost', 'New Balance'].forEach((label) => {
       expect(screen.getByText(label).nextElementSibling).toHaveTextContent('-Not available');
     });
     expect(screen.getByText('Current Balance').nextElementSibling).toHaveTextContent('$1,800.00');
@@ -68,6 +69,6 @@ describe('OrderSummary', () => {
 
     expect(screen.getByText('Current Balance').nextElementSibling).toHaveTextContent('-Not available');
     expect(screen.getByText('New Balance').nextElementSibling).toHaveTextContent('-Not available');
-    expect(screen.getByText('Total Cost').nextElementSibling).toHaveTextContent('$1,000.00');
+    expect(screen.getByText('Credit Amount').nextElementSibling).toHaveTextContent('$1,000.00');
   });
 });

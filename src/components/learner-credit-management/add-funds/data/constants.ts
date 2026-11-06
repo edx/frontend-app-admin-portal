@@ -21,6 +21,11 @@ export const ADD_FUNDS_STEPS: readonly AddFundsStepKey[] = [
   ADD_FUNDS_STEP_KEYS.confirmation,
 ];
 
+// Card only: ACH was removed by ADR 0012 and needs a security review before it can return.
+export const PAYMENT_METHODS = {
+  card: 'card',
+} as const;
+
 export const PRESET_TOP_UP_AMOUNTS = [500, 1000, 2500, 5000];
 // Must match the server-side limits (top-up tech spec R-02); the server validates again.
 export const MIN_TOP_UP_AMOUNT = 500;

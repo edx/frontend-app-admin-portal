@@ -87,6 +87,56 @@ const messages = defineMessages({
     defaultMessage: 'Minimum {min} · Maximum {max}',
     description: 'Helper text describing the minimum and maximum top-up amount',
   },
+  paymentMethodTitle: {
+    id: 'lcm.budget.add.funds.payment.method.title',
+    defaultMessage: 'Choose a Payment Method',
+    description: 'Heading for the step where the admin chooses how to pay for the top-up',
+  },
+  paymentMethodGroupLabel: {
+    id: 'lcm.budget.add.funds.payment.method.group.label',
+    defaultMessage: 'Payment method',
+    description: 'Accessible label for the group of payment method options',
+  },
+  creditCardLabel: {
+    id: 'lcm.budget.add.funds.payment.method.credit.card.label',
+    defaultMessage: 'Credit Card',
+    description: 'Label for the credit card payment method option',
+  },
+  creditCardBadge: {
+    id: 'lcm.budget.add.funds.payment.method.credit.card.badge',
+    defaultMessage: 'Instant',
+    description: 'Badge on the credit card option saying the funds are added immediately',
+  },
+  creditCardDescription: {
+    id: 'lcm.budget.add.funds.payment.method.credit.card.description',
+    defaultMessage: 'Pay with your Visa, Mastercard, or AmEx.',
+    description: 'Description of the credit card payment method option',
+  },
+  bankAccountLabel: {
+    id: 'lcm.budget.add.funds.payment.method.bank.account.label',
+    defaultMessage: 'Bank Account',
+    description: 'Label for the bank account (ACH) payment method option',
+  },
+  bankAccountBadge: {
+    id: 'lcm.budget.add.funds.payment.method.bank.account.badge',
+    defaultMessage: '4 Business Days',
+    description: 'Badge on the bank account option saying how long a bank transfer takes to add the funds',
+  },
+  paymentMethodComingSoonBadge: {
+    id: 'lcm.budget.add.funds.payment.method.coming.soon.badge',
+    defaultMessage: 'Coming soon',
+    description: 'Badge on a payment method option that cannot be chosen yet',
+  },
+  bankAccountDescription: {
+    id: 'lcm.budget.add.funds.payment.method.bank.account.description',
+    defaultMessage: 'Link your bank securely via Stripe Financial Connections.',
+    description: 'Description of the bank account payment method option',
+  },
+  processingFeeNote: {
+    id: 'lcm.budget.add.funds.payment.method.processing.fee.note',
+    defaultMessage: 'edX covers processing fees on all top-up payments. Credit card processing fees are higher than bank account fees — choosing a bank account helps keep costs down for everyone.',
+    description: 'Note under the payment method options explaining that edX pays the processing fees',
+  },
   orderSummaryTitle: {
     id: 'lcm.budget.add.funds.order.summary.title',
     defaultMessage: 'Order Summary',
@@ -96,6 +146,11 @@ const messages = defineMessages({
     id: 'lcm.budget.add.funds.order.summary.credit.amount',
     defaultMessage: 'Credit Amount',
     description: 'Label for the amount of credit being added to the budget',
+  },
+  discount: {
+    id: 'lcm.budget.add.funds.order.summary.discount',
+    defaultMessage: 'Discount',
+    description: 'Label for the discount applied to the top-up purchase',
   },
   totalCost: {
     id: 'lcm.budget.add.funds.order.summary.total.cost',

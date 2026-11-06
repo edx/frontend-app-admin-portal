@@ -1,10 +1,12 @@
+import { PAYMENT_METHODS } from './constants';
 import type { AddFundsAction, AddFundsState } from './types';
 
 export const initialAddFundsState: AddFundsState = {
   formData: {
     amount: null,
     customAmountInput: '',
-    paymentMethod: null,
+    // Card is the only method offered, so it starts selected.
+    paymentMethod: PAYMENT_METHODS.card,
   },
 };
 
