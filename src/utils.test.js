@@ -14,11 +14,10 @@ import {
   getTimeStampedFilename,
   i18nFormatPassedTimestamp,
   i18nFormatProgressStatus,
-  isEnterpriseCustomerInUuidAllowlist,
+  isArchivedContent,
   isValidNumber,
   pollAsync,
   queryCacheOnErrorHandler,
-  removeCsvColumn,
   removeStringsFromList,
   removeStringsFromListCaseInsensitive,
   saveToLocalStorage,
@@ -276,91 +275,6 @@ describe('utils', () => {
       });
     });
   });
-  describe('removeCsvColumn', () => {
-    it('removes the matching column from every row', () => {
-      const csv = 'email,course_progress,current_grade\nlearner@example.com,50%,77%';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe(
-        'email,current_grade\nlearner@example.com,77%',
-      );
-    });
-
-    it('matches the header case-insensitively and trims whitespace', () => {
-      const csv = 'email, Course_Progress ,current_grade\nlearner@example.com,50%,77%';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe(
-        'email,current_grade\nlearner@example.com,77%',
-      );
-    });
-
-    it('returns the csv unchanged when the header is not found', () => {
-      const csv = 'email,current_grade\nlearner@example.com,77%';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe(csv);
-    });
-
-    it('returns falsy input unchanged', () => {
-      expect(removeCsvColumn('', 'course_progress')).toBe('');
-      expect(removeCsvColumn(undefined, 'course_progress')).toBe(undefined);
-    });
-
-    it('preserves quoted commas in surviving columns', () => {
-      const csv = 'course_title,course_progress,current_grade\n"Business, Basics",50%,77%';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe(
-        'course_title,current_grade\n"Business, Basics",77%',
-      );
-    });
-
-    it('preserves escaped quotes in surviving columns', () => {
-      const csv = 'course_title,course_progress\n"Say ""Hi""",50%';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe(
-        'course_title\n"Say ""Hi"""',
-      );
-    });
-
-    it('re-quotes a surviving column that contains a newline', () => {
-      const csv = 'course_title,course_progress\n"Line one\nLine two",50%';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe(
-        'course_title\n"Line one\nLine two"',
-      );
-    });
-
-    it('does not corrupt an unquoted field containing a stray quote character', () => {
-      const csv = 'user_email,course_title,course_progress,current_grade\n'
-        + 'learner@example.com,6" Screen Basics,50%,77%';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe(
-        'user_email,course_title,current_grade\nlearner@example.com,"6"" Screen Basics",77%',
-      );
-    });
-
-    it('leaves a ragged row with a different field count than the header untouched', () => {
-      const csv = 'a,course_progress,c\n1,2\n3,4,5';
-      expect(removeCsvColumn(csv, 'course_progress')).toBe('a,c\n1,2\n3,5');
-    });
-  });
-  describe('isEnterpriseCustomerInUuidAllowlist', () => {
-    const ENTERPRISE_UUID = 'cepal-enterprise-uuid';
-
-    it('returns true when the enterprise uuid matches the configured uuid', () => {
-      expect(isEnterpriseCustomerInUuidAllowlist(ENTERPRISE_UUID, ENTERPRISE_UUID)).toBe(true);
-    });
-
-    it('returns false when the enterprise uuid does not match the configured uuid', () => {
-      expect(isEnterpriseCustomerInUuidAllowlist('other-uuid', ENTERPRISE_UUID)).toBe(false);
-    });
-
-    it('returns false for a partial/substring match, not just an exact match', () => {
-      expect(isEnterpriseCustomerInUuidAllowlist('uuid', ENTERPRISE_UUID)).toBe(false);
-    });
-
-    it('returns false for a null/undefined/empty configured uuid', () => {
-      expect(isEnterpriseCustomerInUuidAllowlist(ENTERPRISE_UUID, null)).toBe(false);
-      expect(isEnterpriseCustomerInUuidAllowlist(ENTERPRISE_UUID, undefined)).toBe(false);
-      expect(isEnterpriseCustomerInUuidAllowlist(ENTERPRISE_UUID, '')).toBe(false);
-    });
-
-    it('returns false when enterpriseCustomerUuid is falsy, even with a configured uuid', () => {
-      expect(isEnterpriseCustomerInUuidAllowlist(null, ENTERPRISE_UUID)).toBe(false);
-      expect(isEnterpriseCustomerInUuidAllowlist(undefined, ENTERPRISE_UUID)).toBe(false);
-    });
-  });
   describe('splitAndTrim', () => {
     it('returns split and trimmed string array', () => {
       const csvStr = 'a,b,,c ,';
@@ -491,6 +405,23 @@ describe('utils', () => {
       configuration.BASE_URL = 'https://portal.example.com/';
       const url = getEnterpriseAdminRegisterLogoutUrl('acme');
       expect(decodeNext(url)).toBe('https://portal.example.com/acme/admin/register');
+    });
+  });
+
+  describe('isArchivedContent', () => {
+    it.each([
+      ['every run is archived', ['archived', 'archived'], true],
+      ['runs are archived or unpublished', ['archived', 'unpublished'], true],
+      ['any run is published', ['archived', 'published'], false],
+      ['courseRunStatuses is null', null, false],
+      ['courseRunStatuses is a string', 'archived', false],
+      ['courseRunStatuses is an object', {}, false],
+    ])('when %s (%p), returns %p', (_, courseRunStatuses, expected) => {
+      expect(isArchivedContent({ contentKey: 'edX+DemoX', courseRunStatuses })).toBe(expected);
+    });
+
+    it.each([null, undefined])('returns false when content is %p', (content) => {
+      expect(isArchivedContent(content)).toBe(false);
     });
   });
 });

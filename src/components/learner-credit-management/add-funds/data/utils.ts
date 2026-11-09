@@ -1,6 +1,19 @@
-import { ADD_FUNDS_STEP_KEYS, ADD_FUNDS_STEPS } from './constants';
+import {
+  ADD_FUNDS_STEP_KEYS,
+  ADD_FUNDS_STEPS,
+  MAX_TOP_UP_AMOUNT,
+  MIN_TOP_UP_AMOUNT,
+  PAYMENT_METHODS,
+} from './constants';
 import type { AddFundsStepKey } from './constants';
 import type { AddFundsFormData } from './types';
+
+export const isValidTopUpAmount = (amount: number | null): amount is number => (
+  typeof amount === 'number'
+  && Number.isInteger(amount)
+  && amount >= MIN_TOP_UP_AMOUNT
+  && amount <= MAX_TOP_UP_AMOUNT
+);
 
 type StepCompletionRule = (formData: AddFundsFormData) => boolean;
 
@@ -11,10 +24,8 @@ type StepCompletionRule = (formData: AddFundsFormData) => boolean;
  * server must verify payment.
  */
 const STEP_COMPLETION_RULES: Record<AddFundsStepKey, StepCompletionRule> = {
-  // TODO: replace with the real rule when the Select Amount step is built.
-  [ADD_FUNDS_STEP_KEYS.selectAmount]: () => true,
-  // TODO: replace with the real rule when the Payment Method step is built.
-  [ADD_FUNDS_STEP_KEYS.paymentMethod]: () => true,
+  [ADD_FUNDS_STEP_KEYS.selectAmount]: ({ amount }) => isValidTopUpAmount(amount),
+  [ADD_FUNDS_STEP_KEYS.paymentMethod]: ({ paymentMethod }) => paymentMethod === PAYMENT_METHODS.card,
   // TODO: Confirmation must only be reachable after a payment is submitted (or, on a Stripe
   // return redirect, verified against the backend by session id). Until payment is built,
   // nothing can complete this step, so Confirmation stays unreachable.
@@ -54,4 +65,23 @@ export const getAddFundsStepRedirect = (
     return ADD_FUNDS_STEPS[firstIncompleteIndex];
   }
   return null;
+};
+
+export type TopUpOrderSummary = {
+  creditAmount: number;
+  /** `null` when the current balance is unknown. */
+  newBalance: number | null;
+};
+
+export const calculateOrderSummary = (
+  amount: number | null,
+  currentBalance: number | undefined,
+): TopUpOrderSummary | null => {
+  if (!isValidTopUpAmount(amount)) {
+    return null;
+  }
+  return {
+    creditAmount: amount,
+    newBalance: currentBalance === undefined ? null : currentBalance + amount,
+  };
 };

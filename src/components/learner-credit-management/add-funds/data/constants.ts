@@ -20,3 +20,20 @@ export const ADD_FUNDS_STEPS: readonly AddFundsStepKey[] = [
   ADD_FUNDS_STEP_KEYS.paymentDetails,
   ADD_FUNDS_STEP_KEYS.confirmation,
 ];
+
+// Card only: ACH was removed by ADR 0012 and needs a security review before it can return.
+export const PAYMENT_METHODS = {
+  card: 'card',
+} as const;
+
+export const PRESET_TOP_UP_AMOUNTS = [500, 1000, 2500, 5000];
+// Must match the server-side limits (top-up tech spec R-02); the server validates again.
+export const MIN_TOP_UP_AMOUNT = 500;
+export const MAX_TOP_UP_AMOUNT = 20000;
+
+// `error_code` values of the top-up eligibility API (enterprise-access `TOP_UP_INELIGIBILITY_REASONS`).
+export const TOP_UP_INELIGIBILITY_REASONS = {
+  budgetNotActive: 'budget_not_active',
+  budgetExpiringSoon: 'budget_expiring_soon',
+  accountNotEligible: 'account_not_eligible',
+} as const;

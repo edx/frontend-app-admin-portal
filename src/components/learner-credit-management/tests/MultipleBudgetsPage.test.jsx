@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
 import { Provider } from 'react-redux';
+import { MemoryRouter } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
@@ -20,6 +21,18 @@ import MultipleBudgetsPage from '../MultipleBudgetsPage';
 import { queryClient } from '../../test/testUtils';
 import { useEnterpriseBudgets } from '../../EnterpriseSubsidiesContext/data/hooks';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
+import { features } from '../../../config';
+import { LEARNER_CREDIT_AUDIT_TRAIL_TAB } from '../data';
+
+const mockNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockNavigate,
+}));
+
+jest.mock('../LearnerCreditAuditTrail', () => function LearnerCreditAuditTrail() {
+  return <div>Audit trail content</div>;
+});
 
 const mockStore = configureMockStore([thunk]);
 const getMockStore = store => mockStore(store);
@@ -120,9 +133,11 @@ const MultipleBudgetsPageWrapper = ({
   <QueryClientProvider client={queryClient()}>
     <Provider store={store}>
       <IntlProvider locale="en">
-        <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
-          <MultipleBudgetsPage {...rest} />
-        </EnterpriseSubsidiesContext.Provider>
+        <MemoryRouter>
+          <EnterpriseSubsidiesContext.Provider value={enterpriseSubsidiesContextValue}>
+            <MultipleBudgetsPage {...rest} />
+          </EnterpriseSubsidiesContext.Provider>
+        </MemoryRouter>
       </IntlProvider>
     </Provider>
   </QueryClientProvider>
@@ -131,6 +146,7 @@ const MultipleBudgetsPageWrapper = ({
 describe('<MultipleBudgetsPage />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    features.AUDIT_TRAIL = false;
   });
 
   it('has no accessibility violations', async () => {
@@ -187,5 +203,46 @@ describe('<MultipleBudgetsPage />', () => {
       enterpriseSubsidiesContextValue={enterpriseSubsidiesContextValue}
     />);
     expect(screen.getByText('Loading budgets...')).toBeInTheDocument();
+  });
+
+  it('does not show tabs when the audit trail feature is disabled', () => {
+    render(<MultipleBudgetsPageWrapper />);
+    expect(screen.getByText('Budgets')).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Audit trail' })).not.toBeInTheDocument();
+  });
+
+  describe('with the audit trail feature enabled', () => {
+    beforeEach(() => {
+      features.AUDIT_TRAIL = true;
+    });
+
+    it('shows the budgets in the "Details" tab by default', () => {
+      render(<MultipleBudgetsPageWrapper />);
+      expect(screen.getByRole('tab', { name: 'Details' })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('tab', { name: 'Audit trail' })).toHaveAttribute('aria-selected', 'false');
+      expect(screen.getByText('Budgets')).toBeInTheDocument();
+      expect(screen.queryByText('Audit trail content')).not.toBeInTheDocument();
+    });
+
+    it('shows the audit trail in the "Audit trail" tab', () => {
+      render(<MultipleBudgetsPageWrapper activeTabKey={LEARNER_CREDIT_AUDIT_TRAIL_TAB} />);
+      expect(screen.getByRole('tab', { name: 'Audit trail' })).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByText('Audit trail content')).toBeInTheDocument();
+      expect(screen.queryByText('Budgets')).not.toBeInTheDocument();
+    });
+
+    it('navigates to the selected tab', async () => {
+      const user = userEvent.setup();
+      render(<MultipleBudgetsPageWrapper />);
+      await user.click(screen.getByRole('tab', { name: 'Audit trail' }));
+      expect(mockNavigate).toHaveBeenCalledWith(`/${enterpriseSlug}/admin/learner-credit/audit-trail`);
+    });
+
+    it('navigates back to the budgets tab', async () => {
+      const user = userEvent.setup();
+      render(<MultipleBudgetsPageWrapper activeTabKey={LEARNER_CREDIT_AUDIT_TRAIL_TAB} />);
+      await user.click(screen.getByRole('tab', { name: 'Details' }));
+      expect(mockNavigate).toHaveBeenCalledWith(`/${enterpriseSlug}/admin/learner-credit`);
+    });
   });
 });

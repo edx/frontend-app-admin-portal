@@ -39,6 +39,21 @@ class LicenseManagerApiService {
     return LicenseManagerApiService.apiClient().get(url);
   }
 
+  /**
+   * Lists the audit history (``LicenseAction`` records, newest first) of a subscription plan, including
+   * actions on licenses that have since been deleted. Each action includes its resolved `actor`. `signal` cancels
+   * the request (e.g. when the audit trail query is cancelled); the other options are query parameters.
+   */
+  static fetchSubscriptionAuditHistory(subscriptionUUID, { signal, ...options } = {}) {
+    const queryParams = new URLSearchParams({
+      page: 1,
+      page_size: 100,
+      ...options,
+    });
+    const url = `${LicenseManagerApiService.licenseManagerBaseUrl}/subscriptions/${subscriptionUUID}/audit-history/?${queryParams.toString()}`;
+    return LicenseManagerApiService.apiClient().get(url, { signal });
+  }
+
   static fetchSubscriptionUsersOverview(subscriptionUUID, options) {
     const queryParams = new URLSearchParams({
       ignore_null_emails: 1,
@@ -81,10 +96,16 @@ class LicenseManagerApiService {
     return LicenseManagerApiService.apiClient().get(url);
   }
 
-  static fetchCustomerAgreementData(options) {
+  /**
+   * Fetches the customer agreements matching `options` (query parameters). `signal`, when given, cancels the request.
+   */
+  static fetchCustomerAgreementData(options, { signal } = {}) {
     const queryParams = new URLSearchParams(options);
     const url = `${LicenseManagerApiService.licenseManagerBaseUrl}/customer-agreement/?${queryParams.toString()}`;
-    return LicenseManagerApiService.apiClient().get(url);
+    // Existing callers don't pass a `signal`, so the request is unchanged for them.
+    return signal
+      ? LicenseManagerApiService.apiClient().get(url, { signal })
+      : LicenseManagerApiService.apiClient().get(url);
   }
 }
 

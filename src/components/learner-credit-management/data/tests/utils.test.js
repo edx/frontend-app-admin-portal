@@ -12,6 +12,7 @@ import {
   getNormalizedStartDate,
   getTranslatedBudgetStatus,
   getTranslatedBudgetTerm,
+  isTopUpCandidate,
   orderBudgets,
   retrieveBudgetDetailActivityOverview,
   startAndEnrollBySortLogic,
@@ -24,7 +25,6 @@ import { COURSE_PACING_MAP, EXEC_ED_OFFER_TYPE } from '../constants';
 import EnterpriseDataApiService from '../../../../data/services/EnterpriseDataApiService';
 import SubsidyApiService from '../../../../data/services/EnterpriseSubsidyApiService';
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
-import { features } from '../../../../config';
 
 jest.mock('../../../../data/services/EnterpriseDataApiService', () => ({
   fetchCourseEnrollments: jest.fn(),
@@ -1015,40 +1015,56 @@ describe('getSpentTableSearchQuery', () => {
   });
 });
 
+// The feature flag is checked by `useTopUpEligibility` and the `AddFundsPage` early return, not here.
 describe('canTopUpBudget', () => {
-  afterEach(() => {
-    features.TOP_UP_LEARNER_CREDIT = false;
-  });
+  const eligible = { isEligible: true, reasons: [] };
+  const ineligible = { isEligible: false, reasons: [{ errorCode: 'budget_not_active' }] };
 
   it.each([
     {
-      flag: true, isPolicy: true, status: 'Active', expected: true,
+      isPolicy: true, status: 'Active', eligibility: eligible, expected: true,
     },
     {
-      flag: true, isPolicy: true, status: 'Expiring', expected: true,
+      isPolicy: true, status: 'Expiring', eligibility: eligible, expected: true,
+    },
+    // The API decides for any status other than retired/expired, including new ones.
+    {
+      isPolicy: true, status: 'SomeFutureStatus', eligibility: eligible, expected: true,
     },
     {
-      flag: true, isPolicy: true, status: 'Scheduled', expected: false,
+      isPolicy: true, status: 'Active', eligibility: ineligible, expected: false,
     },
     {
-      flag: true, isPolicy: true, status: 'Retired', expected: false,
+      isPolicy: true, status: 'Active', eligibility: null, expected: false,
     },
     {
-      flag: true, isPolicy: true, status: 'Expired', expected: false,
+      isPolicy: true, status: 'Active', eligibility: undefined, expected: false,
     },
     {
-      flag: true, isPolicy: true, status: 'SomeFutureStatus', expected: false,
+      isPolicy: true, status: 'Retired', eligibility: eligible, expected: false,
     },
     {
-      flag: true, isPolicy: false, status: 'Active', expected: false,
+      isPolicy: true, status: 'Expired', eligibility: eligible, expected: false,
     },
     {
-      flag: false, isPolicy: true, status: 'Active', expected: false,
+      isPolicy: false, status: 'Active', eligibility: eligible, expected: false,
     },
-  ])('returns $expected when flag=$flag, isPolicy=$isPolicy, status=$status', ({
-    flag, isPolicy, status, expected,
+  ])('returns $expected when isPolicy=$isPolicy, status=$status, eligibility=$eligibility', ({
+    isPolicy, status, eligibility, expected,
   }) => {
-    features.TOP_UP_LEARNER_CREDIT = flag;
-    expect(canTopUpBudget({ isPolicy, status })).toBe(expected);
+    expect(canTopUpBudget({ isPolicy, status, eligibility })).toBe(expected);
+  });
+});
+
+describe('isTopUpCandidate', () => {
+  it.each([
+    { isPolicy: true, status: 'Active', expected: true },
+    { isPolicy: true, status: 'Expiring', expected: true },
+    { isPolicy: true, status: 'Scheduled', expected: true },
+    { isPolicy: true, status: 'Retired', expected: false },
+    { isPolicy: true, status: 'Expired', expected: false },
+    { isPolicy: false, status: 'Active', expected: false },
+  ])('returns $expected when isPolicy=$isPolicy, status=$status', ({ isPolicy, status, expected }) => {
+    expect(isTopUpCandidate({ isPolicy, status })).toBe(expected);
   });
 });

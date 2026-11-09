@@ -30,7 +30,7 @@ const getMockData = ({ count }) => {
       course_name: `Course ${i}`,
       module_name: `Module ${i}`,
       module_grade: `Module Grade ${i}`,
-      percentage_completed_activities: `${(i % 100)}%`,
+      percentage_completed_graded_activities: `${(i % 100)}.00`,
       hours_online: `${i} Hours Online`,
       log_viewed: `${i} Log Views`,
     });

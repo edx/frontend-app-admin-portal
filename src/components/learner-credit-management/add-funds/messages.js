@@ -52,6 +52,161 @@ const messages = defineMessages({
     defaultMessage: 'Confirmation',
     description: 'Stepper label for the final confirmation step of the Add Funds flow',
   },
+  selectAmountTitle: {
+    id: 'lcm.budget.add.funds.select.amount.title',
+    defaultMessage: 'Select an Amount',
+    description: 'Heading for the step where the admin chooses how much to add to the budget',
+  },
+  presetAmountLabel: {
+    id: 'lcm.budget.add.funds.select.amount.preset.label',
+    defaultMessage: 'Choose a preset amount',
+    description: 'Label for the group of preset top-up amount buttons',
+  },
+  customAmountDivider: {
+    id: 'lcm.budget.add.funds.select.amount.divider',
+    defaultMessage: 'Or enter a custom amount',
+    description: 'Divider text between preset amounts and the custom amount input',
+  },
+  customAmountLabel: {
+    id: 'lcm.budget.add.funds.select.amount.custom.label',
+    defaultMessage: 'Custom amount',
+    description: 'Accessible label for the custom top-up amount input',
+  },
+  customAmountPlaceholder: {
+    id: 'lcm.budget.add.funds.select.amount.custom.placeholder',
+    defaultMessage: 'e.g. 1500',
+    description: 'Placeholder for the custom top-up amount input',
+  },
+  customAmountInvalid: {
+    id: 'lcm.budget.add.funds.select.amount.custom.invalid',
+    defaultMessage: 'Enter an amount between {min} and {max}.',
+    description: 'Validation error when the custom top-up amount is out of range',
+  },
+  amountLimits: {
+    id: 'lcm.budget.add.funds.select.amount.limits',
+    defaultMessage: 'Minimum {min} · Maximum {max}',
+    description: 'Helper text describing the minimum and maximum top-up amount',
+  },
+  paymentMethodTitle: {
+    id: 'lcm.budget.add.funds.payment.method.title',
+    defaultMessage: 'Choose a Payment Method',
+    description: 'Heading for the step where the admin chooses how to pay for the top-up',
+  },
+  paymentMethodGroupLabel: {
+    id: 'lcm.budget.add.funds.payment.method.group.label',
+    defaultMessage: 'Payment method',
+    description: 'Accessible label for the group of payment method options',
+  },
+  creditCardLabel: {
+    id: 'lcm.budget.add.funds.payment.method.credit.card.label',
+    defaultMessage: 'Credit Card',
+    description: 'Label for the credit card payment method option',
+  },
+  creditCardBadge: {
+    id: 'lcm.budget.add.funds.payment.method.credit.card.badge',
+    defaultMessage: 'Instant',
+    description: 'Badge on the credit card option saying the funds are added immediately',
+  },
+  creditCardDescription: {
+    id: 'lcm.budget.add.funds.payment.method.credit.card.description',
+    defaultMessage: 'Pay with your Visa, Mastercard, or AmEx.',
+    description: 'Description of the credit card payment method option',
+  },
+  bankAccountLabel: {
+    id: 'lcm.budget.add.funds.payment.method.bank.account.label',
+    defaultMessage: 'Bank Account',
+    description: 'Label for the bank account (ACH) payment method option',
+  },
+  bankAccountBadge: {
+    id: 'lcm.budget.add.funds.payment.method.bank.account.badge',
+    defaultMessage: '4 Business Days',
+    description: 'Badge on the bank account option saying how long a bank transfer takes to add the funds',
+  },
+  paymentMethodComingSoonBadge: {
+    id: 'lcm.budget.add.funds.payment.method.coming.soon.badge',
+    defaultMessage: 'Coming soon',
+    description: 'Badge on a payment method option that cannot be chosen yet',
+  },
+  bankAccountDescription: {
+    id: 'lcm.budget.add.funds.payment.method.bank.account.description',
+    defaultMessage: 'Link your bank securely via Stripe Financial Connections.',
+    description: 'Description of the bank account payment method option',
+  },
+  processingFeeNote: {
+    id: 'lcm.budget.add.funds.payment.method.processing.fee.note',
+    defaultMessage: 'edX covers processing fees on all top-up payments. Credit card processing fees are higher than bank account fees — choosing a bank account helps keep costs down for everyone.',
+    description: 'Note under the payment method options explaining that edX pays the processing fees',
+  },
+  orderSummaryTitle: {
+    id: 'lcm.budget.add.funds.order.summary.title',
+    defaultMessage: 'Order Summary',
+    description: 'Heading for the order summary panel in the Add Funds flow',
+  },
+  creditAmount: {
+    id: 'lcm.budget.add.funds.order.summary.credit.amount',
+    defaultMessage: 'Credit Amount',
+    description: 'Label for the amount of credit being added to the budget',
+  },
+  discount: {
+    id: 'lcm.budget.add.funds.order.summary.discount',
+    defaultMessage: 'Discount',
+    description: 'Label for the discount applied to the top-up purchase',
+  },
+  totalCost: {
+    id: 'lcm.budget.add.funds.order.summary.total.cost',
+    defaultMessage: 'Total Cost',
+    description: 'Label for the total cost of the top-up purchase',
+  },
+  currentBalance: {
+    id: 'lcm.budget.add.funds.order.summary.current.balance',
+    defaultMessage: 'Current Balance',
+    description: "Label for the budget's current available balance",
+  },
+  newBalance: {
+    id: 'lcm.budget.add.funds.order.summary.new.balance',
+    defaultMessage: 'New Balance',
+    description: "Label for the budget's balance after the top-up is applied",
+  },
+  newBalanceAnnouncement: {
+    id: 'lcm.budget.add.funds.order.summary.new.balance.announcement',
+    defaultMessage: 'Adding {amount}. New balance: {newBalance}.',
+    description: 'Screen reader announcement when a valid top-up amount updates the order summary',
+  },
+  notAvailable: {
+    id: 'lcm.budget.add.funds.order.summary.not.available',
+    defaultMessage: 'Not available',
+    description: 'Screen reader text for an order summary value that cannot be shown yet',
+  },
+  planExpires: {
+    id: 'lcm.budget.add.funds.order.summary.plan.expires',
+    defaultMessage: 'Plan Expires {expirationDate}',
+    description: 'The date the learner credit plan expires',
+  },
+  addFundsButton: {
+    id: 'lcm.budgets.budget.card.add.funds',
+    defaultMessage: 'Add funds',
+    description: 'Button text to add funds to a budget',
+  },
+  reasonBudgetNotActive: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.budget.not.active',
+    defaultMessage: 'This budget is inactive and cannot receive additional funds.',
+    description: 'Reason the Add funds button is disabled: the budget is not active',
+  },
+  reasonBudgetExpiringSoon: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.budget.expiring.soon',
+    defaultMessage: 'This budget expires soon and cannot receive additional funds.',
+    description: 'Reason the Add funds button is disabled: the budget expires too soon',
+  },
+  reasonAccountNotEligible: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.account.not.eligible',
+    defaultMessage: 'Your account is not eligible to receive additional funds.',
+    description: 'Reason the Add funds button is disabled: the account is not eligible',
+  },
+  reasonUnknown: {
+    id: 'lcm.budgets.budget.card.add.funds.reason.unknown',
+    defaultMessage: 'This budget cannot receive additional funds right now.',
+    description: 'Reason the Add funds button is disabled when the reason is not recognized',
+  },
 });
 
 export default messages;

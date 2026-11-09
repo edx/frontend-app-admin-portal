@@ -5,7 +5,6 @@ import renderer from 'react-test-renderer';
 import configureMockStore from 'redux-mock-store';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
-import { mergeConfig } from '@edx/frontend-platform/config';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
 import {
@@ -69,7 +68,7 @@ const EnrollmentsWrapper = props => (
   <MemoryRouter initialEntries={props.initialEntries || ['/']}>
     {props.navigateTo && <NavigationHelper to={props.navigateTo} />}
     <IntlProvider locale="en">
-      <Provider store={props.store || store}>
+      <Provider store={store}>
         <EnrollmentsTable
           {...props}
         />
@@ -92,7 +91,6 @@ describe('EnrollmentsTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     capturedFetchData = undefined;
-    mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: null });
     EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
       data: {
         count: 0,
@@ -161,6 +159,7 @@ describe('EnrollmentsTable', () => {
             course_start_date: '2017-06-23',
             course_end_date: '2017-12-23',
             course_progress: 0.5,
+            progress_status: 'In Progress',
             course_passing_grade: 0.6,
             current_grade: 0.77,
             last_activity_date: '2018-01-15',
@@ -171,11 +170,11 @@ describe('EnrollmentsTable', () => {
 
     const columnTitles = [
       'Email', 'First Name', 'Last Name', 'Course Title', 'Course Price', 'Start Date', 'End Date',
-      'Course Progress', 'Course Passing Grade', 'Current Grade', 'Last Activity Date',
+      'Course Progress', 'Progress Status', 'Course Passing Grade', 'Current Grade', 'Last Activity Date',
     ];
     const rowValues = [
       'test_user_1@example.com', 'Test', 'User', 'Demo Course', '$100', 'June 23, 2017', 'December 23, 2017',
-      '50%', '60%', '77%', 'January 15, 2018',
+      '50%', 'In Progress', '60%', '77%', 'January 15, 2018',
     ];
 
     const { container } = render(<EnrollmentsWrapper />);
@@ -188,6 +187,66 @@ describe('EnrollmentsTable', () => {
 
     rowValues.forEach((value) => {
       expect(container.textContent).toContain(value);
+    });
+  });
+
+  it('renders the Progress Status column immediately after Course Progress', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
+      data: {
+        count: 2,
+        num_pages: 1,
+        results: [
+          {
+            id: 1,
+            user_email: 'passed@example.com',
+            course_progress: 1,
+            progress_status: 'Passed',
+          },
+          {
+            id: 2,
+            user_email: 'expired@example.com',
+            course_progress: 0.2,
+            progress_status: 'In Progress:No Attempt',
+          },
+        ],
+      },
+    });
+
+    render(<EnrollmentsWrapper />);
+
+    await screen.findByText('passed@example.com');
+
+    const headers = screen.getAllByRole('columnheader').map(header => header.textContent);
+    const courseProgressIndex = headers.findIndex(header => header.includes('Course Progress'));
+    expect(courseProgressIndex).toBeGreaterThan(-1);
+    expect(headers[courseProgressIndex + 1]).toContain('Progress Status');
+
+    // Progress status values are displayed exactly as returned by the API.
+    expect(screen.getByText('Passed')).toBeInTheDocument();
+    expect(screen.getByText('In Progress:No Attempt')).toBeInTheDocument();
+  });
+
+  it('sorts by progress_status when the Progress Status column header is clicked', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
+      data: {
+        count: 1,
+        num_pages: 1,
+        results: [{ id: 1, user_email: 'learner@example.com', progress_status: 'Passed' }],
+      },
+    });
+
+    render(<EnrollmentsWrapper />);
+
+    await screen.findByText('learner@example.com');
+    fireEvent.click(screen.getByRole('columnheader', { name: /Progress Status/i }));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({
+          ordering: 'progress_status',
+        }),
+      );
     });
   });
 
@@ -207,6 +266,7 @@ describe('EnrollmentsTable', () => {
             course_start_date: '2017-06-23',
             course_end_date: '2017-12-23',
             course_progress: 0.5,
+            progress_status: 'In Progress',
             course_passing_grade: 0.6,
             current_grade: 0.77,
             last_activity_date: '2018-01-15',
@@ -370,50 +430,6 @@ describe('EnrollmentsTable', () => {
     expect(screen.getByText('Try refreshing your screen.')).toBeInTheDocument();
     expect(screen.queryByText('Bad request')).not.toBeInTheDocument();
     expect(logError).toHaveBeenCalled();
-  });
-
-  it('hides the Course Progress column for an enterprise in the disabled-columns allowlist', async () => {
-    const cepalEnterpriseId = '6396a958-df6a-42e9-b90b-770f394e8ced';
-    mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: cepalEnterpriseId });
-    const cepalStore = mockStore({
-      portalConfiguration: { enterpriseId: cepalEnterpriseId },
-    });
-    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
-      data: {
-        count: 1,
-        num_pages: 1,
-        results: [
-          {
-            id: 1,
-            user_email: 'test_user_1@example.com',
-            user_first_name: 'Test',
-            user_last_name: 'User',
-            course_title: 'Demo Course',
-            course_list_price: 100,
-            course_start_date: '2017-06-23',
-            course_end_date: '2017-12-23',
-            course_progress: 0.5,
-            course_passing_grade: 0.6,
-            current_grade: 0.77,
-            last_activity_date: '2018-01-15',
-          },
-        ],
-      },
-    });
-
-    const { container } = render(<EnrollmentsWrapper store={cepalStore} />);
-
-    await screen.findByText('test_user_1@example.com');
-
-    expect(screen.queryByText('Course Progress')).not.toBeInTheDocument();
-    expect(screen.queryByText('50%')).not.toBeInTheDocument();
-
-    [
-      'Email', 'First Name', 'Last Name', 'Course Title', 'Course Price', 'Start Date', 'End Date',
-      'Course Passing Grade', 'Current Grade', 'Last Activity Date',
-    ].forEach((columnTitle) => {
-      expect(container.textContent).toContain(columnTitle);
-    });
   });
 
   it('fetches next page when fetchData is called with pagination only (no sort)', async () => {

@@ -1,8 +1,11 @@
-// Card only: ACH was removed by ADR 0012 and needs a security review before it can return.
-export type PaymentMethodType = 'card';
+import type { PAYMENT_METHODS } from './constants';
+
+export type PaymentMethodType = typeof PAYMENT_METHODS[keyof typeof PAYMENT_METHODS];
 
 export type AddFundsFormData = {
   amount: number | null;
+  // Raw custom input text, kept so it is restored when returning to the step.
+  customAmountInput: string;
   paymentMethod: PaymentMethodType | null;
 };
 

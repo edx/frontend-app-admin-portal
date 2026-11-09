@@ -5,10 +5,13 @@ import thunk from 'redux-thunk';
 import configureMockStore from 'redux-mock-store';
 import dayjs from 'dayjs';
 import {
+  act,
   screen,
   render,
+  waitFor,
   within,
 } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom/extend-expect';
 
 import { IntlProvider } from '@edx/frontend-platform/i18n';
@@ -21,12 +24,16 @@ import { BUDGET_STATUSES, BUDGET_TYPES } from '../../EnterpriseApp/data/constant
 import { EnterpriseSubsidiesContext } from '../../EnterpriseSubsidiesContext';
 import { queryClient } from '../../test/testUtils';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
+import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
 
 jest.mock('../../EnterpriseSubsidiesContext/data/hooks', () => ({
   ...jest.requireActual('../../EnterpriseSubsidiesContext/data/hooks'),
   useEnterpriseBudgets: jest.fn().mockReturnValue({
     isFetchingBudgets: false,
   }),
+}));
+jest.mock('../../../data/services/EnterpriseAccessApiService', () => ({
+  getTopUpEligibility: jest.fn(),
 }));
 jest.mock('../data', () => ({
   ...jest.requireActual('../data'),
@@ -636,10 +643,62 @@ describe('<BudgetCard />', () => {
       spent: 200,
       available: 4800,
     };
+    const mockOtherBudgetUuid = 'test-other-budget-uuid';
+    const mockOtherBudgetDisplayName = 'Other Budget Display Name';
     const currentDates = { start: '2022-01-01', end: '3023-01-01' };
     const expiringDates = { start: '2022-01-01', end: dayjs().add(30, 'day').format('YYYY-MM-DD') };
     const expiredDates = { start: '2022-01-01', end: '2023-01-01' };
     const scheduledDates = { start: '3022-01-01', end: '3023-01-01' };
+
+    const eligibilityRow = (overrides = {}) => ({
+      policy_uuid: mockBudgetUuid,
+      is_eligible: true,
+      reasons: [],
+      subsidy_expiration_datetime: '3023-01-01T00:00:00Z',
+      ...overrides,
+    });
+    const ineligibleRow = (...errorCodes) => eligibilityRow({
+      is_eligible: false,
+      reasons: errorCodes.map((errorCode) => ({ error_code: errorCode, message: `English server text for ${errorCode}` })),
+    });
+    const mockEligibility = (...rows) => {
+      EnterpriseAccessApiService.getTopUpEligibility.mockResolvedValue({ data: { results: rows } });
+    };
+    const httpError = (httpErrorStatus) => Object.assign(new Error(`HTTP ${httpErrorStatus}`), {
+      customAttributes: { httpErrorStatus },
+    });
+
+    const policyBudget = (overrides = {}) => ({
+      id: mockBudgetUuid,
+      name: mockBudgetDisplayName,
+      ...currentDates,
+      source: BUDGET_TYPES.policy,
+      aggregates: mockBudgetAggregates,
+      isAssignable: false,
+      isRetired: false,
+      retiredAt: null,
+      enterpriseSlug,
+      enterpriseUUID,
+      ...overrides,
+    });
+
+    // Renders every budget under one QueryClient, as the budgets list does.
+    const renderPolicyBudgetCards = (budgets = [policyBudget()], client = queryClient()) => {
+      useSubsidySummaryAnalyticsApi.mockReturnValue({ isLoading: false, subsidySummary: undefined });
+      return render(
+        <QueryClientProvider client={client}>
+          <MemoryRouter initialEntries={['/test-enterprise/admin/learner-credit']}>
+            <Provider store={store}>
+              <IntlProvider locale="en">
+                <EnterpriseSubsidiesContext.Provider value={defaultEnterpriseSubsidiesContextValue}>
+                  {budgets.map((budget) => <BudgetCard key={budget.id} original={budget} />)}
+                </EnterpriseSubsidiesContext.Provider>
+              </IntlProvider>
+            </Provider>
+          </MemoryRouter>
+        </QueryClientProvider>,
+      );
+    };
 
     const renderBudgetCard = ({
       source,
@@ -688,23 +747,191 @@ describe('<BudgetCard />', () => {
       />);
     };
 
+    const getDisabledAddFunds = () => screen.findByRole('button', { name: 'Add funds' });
+
     beforeEach(() => {
       features.TOP_UP_LEARNER_CREDIT = true;
+      mockEligibility(eligibilityRow());
+    });
+
+    it.each([
+      { scenario: 'eligible', row: eligibilityRow() },
+      { scenario: 'ineligible', row: ineligibleRow('budget_expiring_soon') },
+    ])('does not display the Add funds CTA or reasons, or request eligibility, for an $scenario active Policy when the feature flag is off', ({ row }) => {
+      features.TOP_UP_LEARNER_CREDIT = false;
+      mockEligibility(row);
+      renderPolicyBudgetCards();
+
+      expect(screen.getByText('View budget')).toBeInTheDocument();
+      expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('add-funds-ineligible-status')).not.toBeInTheDocument();
+      expect(EnterpriseAccessApiService.getTopUpEligibility).not.toHaveBeenCalled();
     });
 
     it.each([
       { status: BUDGET_STATUSES.active, dates: currentDates },
       { status: BUDGET_STATUSES.expiring, dates: expiringDates },
-    ])('displays an Add funds CTA linking to the add funds flow for a $status Policy (enterprise-access)', ({ status, dates }) => {
-      renderBudgetCard({ source: BUDGET_TYPES.policy, ...dates });
+    ])('displays an Add funds CTA linking to the add funds flow for an eligible $status Policy (enterprise-access)', async ({ status, dates }) => {
+      renderPolicyBudgetCards([policyBudget(dates)]);
 
       expect(screen.getByText(status)).toBeInTheDocument();
-      const addFundsCTA = screen.getByRole('link', { name: 'Add funds' });
+      const addFundsCTA = await screen.findByRole('link', { name: 'Add funds' });
       expect(addFundsCTA).toHaveAttribute(
         'href',
         `/${enterpriseSlug}/admin/learner-credit/${mockBudgetUuid}/add-funds`,
       );
+      expect(addFundsCTA).not.toHaveAttribute('aria-disabled');
+      expect(screen.queryByTestId('add-funds-ineligible-status')).not.toBeInTheDocument();
       expect(screen.getByText('View budget')).toBeInTheDocument();
+      expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalledWith({
+        enterpriseCustomerUuid: enterpriseUUID,
+        policyUuid: undefined,
+      });
+    });
+
+    it('renders the card without waiting for eligibility, and hides the CTA while it loads', () => {
+      EnterpriseAccessApiService.getTopUpEligibility.mockReturnValue(new Promise(() => {}));
+      renderPolicyBudgetCards();
+
+      expect(screen.getByText(mockBudgetDisplayName)).toBeInTheDocument();
+      expect(screen.getByText('View budget')).toBeInTheDocument();
+      expect(screen.getByText(formatPrice(mockBudgetAggregates.available))).toBeInTheDocument();
+      expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
+    });
+
+    it('makes one eligibility request for every budget card', async () => {
+      mockEligibility(
+        eligibilityRow(),
+        { ...ineligibleRow('budget_expiring_soon'), policy_uuid: mockOtherBudgetUuid },
+      );
+      renderPolicyBudgetCards([
+        policyBudget(),
+        policyBudget({ id: mockOtherBudgetUuid, name: mockOtherBudgetDisplayName }),
+      ]);
+
+      expect(await screen.findByRole('link', { name: 'Add funds' })).toHaveAttribute(
+        'href',
+        `/${enterpriseSlug}/admin/learner-credit/${mockBudgetUuid}/add-funds`,
+      );
+      expect(await getDisabledAddFunds()).toHaveAttribute('aria-disabled', 'true');
+      expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalledTimes(1);
+    });
+
+    it.each([
+      { errorCode: 'budget_not_active', message: 'This budget is inactive and cannot receive additional funds.' },
+      { errorCode: 'budget_expiring_soon', message: 'This budget expires soon and cannot receive additional funds.' },
+      { errorCode: 'account_not_eligible', message: 'Your account is not eligible to receive additional funds.' },
+    ])('displays a disabled, focusable Add funds button explaining $errorCode', async ({ errorCode, message }) => {
+      const user = userEvent.setup();
+      mockEligibility(ineligibleRow(errorCode));
+      renderPolicyBudgetCards();
+
+      const addFunds = await getDisabledAddFunds();
+      expect(addFunds).toHaveAttribute('aria-disabled', 'true');
+      expect(addFunds).not.toBeDisabled();
+      expect(addFunds).toHaveAccessibleDescription(message);
+      // The reason sits in a warning strip at the bottom of the card, not under the button.
+      expect(within(screen.getByTestId('add-funds-ineligible-status')).getByText(message)).toBeVisible();
+      expect(screen.queryByText(`English server text for ${errorCode}`)).not.toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'Add funds' })).not.toBeInTheDocument();
+
+      await user.tab();
+      expect(addFunds).toHaveFocus();
+      // Activating it does nothing; the card stays as it was. The mouse can't hover or click it.
+      await user.keyboard('{Enter}');
+      expect(addFunds).toHaveAttribute('aria-disabled', 'true');
+      expect(addFunds).toHaveClass('add-funds-button-disabled');
+    });
+
+    it('lists every reason when a budget is ineligible for several', async () => {
+      mockEligibility(ineligibleRow('budget_not_active', 'budget_expiring_soon', 'account_not_eligible'));
+      renderPolicyBudgetCards();
+
+      const addFunds = await getDisabledAddFunds();
+      const reasons = within(document.getElementById(addFunds.getAttribute('aria-describedby'))).getAllByRole('listitem');
+      expect(reasons.map((reason) => reason.textContent)).toEqual([
+        'This budget is inactive and cannot receive additional funds.',
+        'This budget expires soon and cannot receive additional funds.',
+        'Your account is not eligible to receive additional funds.',
+      ]);
+    });
+
+    it.each([
+      { scenario: 'unrecognized reasons', row: ineligibleRow('some_new_reason', 'another_new_reason') },
+      { scenario: 'no reasons', row: eligibilityRow({ is_eligible: false }) },
+    ])('shows one generic reason for $scenario', async ({ row }) => {
+      mockEligibility(row);
+      renderPolicyBudgetCards();
+
+      await getDisabledAddFunds();
+      expect(screen.getAllByText('This budget cannot receive additional funds right now.')).toHaveLength(1);
+    });
+
+    it('has no accessibility violations when Add funds is disabled', async () => {
+      mockEligibility(ineligibleRow('budget_not_active', 'budget_expiring_soon'));
+      const { container } = renderPolicyBudgetCards();
+
+      await getDisabledAddFunds();
+      const results = await axe(container, accessibilitySettings);
+      expect(results).toHaveNoViolations();
+    });
+
+    it.each([
+      { status: 403, expectedCalls: 1 },
+      { status: 404, expectedCalls: 1 },
+      // 5xx is retried once before giving up.
+      { status: 503, expectedCalls: 2 },
+    ])('hides the Add funds CTA and shows no error when eligibility fails with a $status', async ({ status, expectedCalls }) => {
+      EnterpriseAccessApiService.getTopUpEligibility.mockRejectedValue(httpError(status));
+      renderPolicyBudgetCards();
+
+      await waitFor(
+        () => expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalledTimes(expectedCalls),
+        { timeout: 3000 },
+      );
+      expect(screen.getByText(mockBudgetDisplayName)).toBeInTheDocument();
+      expect(screen.getByText('View budget')).toBeInTheDocument();
+      expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it.each([
+      { row: eligibilityRow(), getAddFunds: () => screen.findByRole('link', { name: 'Add funds' }) },
+      { row: ineligibleRow('budget_not_active'), getAddFunds: () => getDisabledAddFunds() },
+    ])('hides the Add funds CTA and reasons when a background refetch fails after eligibility=$row.is_eligible', async ({ row, getAddFunds }) => {
+      mockEligibility(row);
+      const client = queryClient();
+      renderPolicyBudgetCards([policyBudget()], client);
+      await getAddFunds();
+
+      EnterpriseAccessApiService.getTopUpEligibility.mockRejectedValue(httpError(403));
+      await act(() => client.refetchQueries());
+
+      await waitFor(() => expect(screen.queryByText('Add funds')).not.toBeInTheDocument());
+      expect(screen.queryByTestId('add-funds-ineligible-status')).not.toBeInTheDocument();
+      expect(screen.getByText('View budget')).toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('hides the Add funds CTA on a network error', async () => {
+      EnterpriseAccessApiService.getTopUpEligibility.mockRejectedValue(new Error('Network Error'));
+      renderPolicyBudgetCards();
+
+      await waitFor(
+        () => expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalledTimes(2),
+        { timeout: 3000 },
+      );
+      expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
+      expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    });
+
+    it('hides the Add funds CTA when the response has no row for the budget', async () => {
+      mockEligibility({ ...eligibilityRow(), policy_uuid: mockOtherBudgetUuid });
+      renderPolicyBudgetCards();
+
+      await waitFor(() => expect(EnterpriseAccessApiService.getTopUpEligibility).toHaveBeenCalled());
+      expect(screen.getByText('View budget')).toBeInTheDocument();
+      expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
     });
 
     it.each([
@@ -717,7 +944,7 @@ describe('<BudgetCard />', () => {
       { status: BUDGET_STATUSES.scheduled, source: BUDGET_TYPES.policy, budget: scheduledDates },
       { status: BUDGET_STATUSES.active, source: BUDGET_TYPES.ecommerce, budget: currentDates },
       { status: BUDGET_STATUSES.active, source: BUDGET_TYPES.subsidy, budget: currentDates },
-    ])('does not display the Add funds CTA for a $status $source budget', ({ status, source, budget }) => {
+    ])('does not display the Add funds CTA or request eligibility for a $status $source budget', ({ status, source, budget }) => {
       renderBudgetCard({ source, ...budget });
 
       // Ensure the card rendered with the intended status, and that only the CTA was suppressed.
@@ -728,6 +955,7 @@ describe('<BudgetCard />', () => {
         expect(screen.getByText(/View budget/)).toBeInTheDocument();
       }
       expect(screen.queryByText('Add funds')).not.toBeInTheDocument();
+      expect(EnterpriseAccessApiService.getTopUpEligibility).not.toHaveBeenCalled();
     });
   });
 

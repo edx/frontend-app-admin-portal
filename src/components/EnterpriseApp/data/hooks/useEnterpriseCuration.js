@@ -12,8 +12,8 @@ const getHighlightSet = async (highlightSetUUID) => {
     return await EnterpriseCatalogApiService.fetchHighlightSet(highlightSetUUID);
   } catch (e) {
     logError(e);
+    return null;
   }
-  return undefined;
 };
 
 /**
@@ -88,7 +88,8 @@ function useEnterpriseCuration({ enterpriseId, curationTitleForCreation }) {
           const data = await getHighlightSet(highlightSet.uuid);
           return data;
         }));
-        setEnterpriseHighlightedSets(curationHighlightedContents);
+        // Drop highlight sets whose fetch failed (null) so consumers only see loaded sets.
+        setEnterpriseHighlightedSets(curationHighlightedContents.filter(Boolean));
         setEnterpriseCuration(curation);
       } catch (error) {
         logError(error);

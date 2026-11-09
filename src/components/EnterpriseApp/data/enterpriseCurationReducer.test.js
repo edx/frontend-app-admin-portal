@@ -74,6 +74,58 @@ describe('enterpriseCurationReducer', () => {
     ).toMatchObject({ isNewArchivedContent: true });
   });
 
+  it('should set isNewArchivedContent to false before highlight sets have loaded', () => {
+    expect(
+      enterpriseCurationReducer(
+        initialState,
+        enterpriseCurationActions.setIsNewArchivedContent(null),
+      ),
+    ).toMatchObject({ isNewArchivedContent: false });
+  });
+
+  describe('with dismissed archived content', () => {
+    const enterpriseHighlightedSets = [{
+      uuid: 'test-uuid',
+      highlightedContent: [{ contentKey: 'edX+DemoX', courseRunStatuses: ['archived'] }],
+    }];
+
+    it('should not flag archived content that was already dismissed', () => {
+      expect(
+        enterpriseCurationReducer(
+          initialState,
+          enterpriseCurationActions.setIsNewArchivedContent(
+            enterpriseHighlightedSets,
+            { 'test-uuid': ['edX+DemoX'] },
+          ),
+        ),
+      ).toMatchObject({ isNewArchivedContent: false });
+    });
+
+    it('should flag archived content whose key is only a prefix of a dismissed key', () => {
+      expect(
+        enterpriseCurationReducer(
+          initialState,
+          enterpriseCurationActions.setIsNewArchivedContent(
+            enterpriseHighlightedSets,
+            { 'test-uuid': ['edX+DemoX2'] },
+          ),
+        ),
+      ).toMatchObject({ isNewArchivedContent: true });
+    });
+
+    it('should flag archived content dismissed only for a different highlight set', () => {
+      expect(
+        enterpriseCurationReducer(
+          initialState,
+          enterpriseCurationActions.setIsNewArchivedContent(
+            enterpriseHighlightedSets,
+            { 'other-uuid': ['edX+DemoX'] },
+          ),
+        ),
+      ).toMatchObject({ isNewArchivedContent: true });
+    });
+  });
+
   it('should set fetch error', () => {
     const fetchError = new Error('oh noes!');
     expect(

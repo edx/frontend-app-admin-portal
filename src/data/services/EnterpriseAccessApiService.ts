@@ -93,6 +93,19 @@ type DeclineBnrSubsidyRequestResponseData = {
 
 export type DeclineBnrSubsidyRequestResponse = AxiosResponse<DeclineBnrSubsidyRequestResponseData>;
 
+type TopUpEligibilityArgs = {
+  enterpriseCustomerUuid: string;
+};
+
+type TopUpEligibilityResponseData = {
+  results: {
+    policy_uuid: string;
+    is_eligible: boolean;
+    reasons: { error_code: string; message: string }[];
+    subsidy_expiration_datetime: string | null;
+  }[];
+};
+
 class EnterpriseAccessApiService {
   static baseUrl = `${configuration.ENTERPRISE_ACCESS_BASE_URL}/api/v1`;
 
@@ -267,18 +280,69 @@ class EnterpriseAccessApiService {
     if (learnerState) {
       params.learner_state__in = learnerState;
     }
-    const urlParams = new URLSearchParams(params);
-    const url = `${EnterpriseAccessApiService.baseUrl}/assignment-configurations/${assignmentConfigurationUUID}/admin/assignments/?${urlParams.toString()}`;
+    const url = EnterpriseAccessApiService.getAdminAssignmentsUrl(assignmentConfigurationUUID, params);
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 
-  static listSubsidyAccessPolicies(enterpriseCustomerId) {
+  /**
+   * Returns the URL of the admin content assignments API of an AssignmentConfiguration, with the given query params.
+   */
+  static getAdminAssignmentsUrl(
+    assignmentConfigurationUUID: string,
+    params: ConstructorParameters<typeof URLSearchParams>[0],
+  ) {
+    const urlParams = new URLSearchParams(params);
+    return `${EnterpriseAccessApiService.baseUrl}/assignment-configurations/${assignmentConfigurationUUID}/admin/assignments/?${urlParams.toString()}`;
+  }
+
+  /**
+   * List content assignments for a specific AssignmentConfiguration, most recently active first (by allocation
+   * or reminder time). No state filter is applied, so assignments in every state (including any added later) are
+   * returned. Each assignment includes its actions with the audit trail fields (actor, source, affected learner),
+   * which are used to build the learner credit audit trail. `signal` cancels the request (e.g. when the audit trail
+   * query is cancelled).
+   */
+  static listContentAssignmentsWithAuditTrail(
+    assignmentConfigurationUUID: string,
+    { signal, ...options }: { page?: number, pageSize?: number, signal?: AbortSignal } = {},
+  ) {
+    const params = {
+      page: 1,
+      page_size: 100,
+      ordering: '-recent_action_time',
+      ...snakeCaseObject(options),
+    };
+    const url = EnterpriseAccessApiService.getAdminAssignmentsUrl(assignmentConfigurationUUID, params);
+    return EnterpriseAccessApiService.apiClient().get(url, { signal });
+  }
+
+  /**
+   * List the subsidy access policies (budgets) of an enterprise customer. Only active policies are listed,
+   * unless `includeInactive` is true. Results are paginated; `page` selects the page to fetch. `signal`, when
+   * given, cancels the request.
+   */
+  static listSubsidyAccessPolicies(
+    enterpriseCustomerId,
+    {
+      includeInactive = false,
+      page,
+      signal,
+    }: { includeInactive?: boolean, page?: number, signal?: AbortSignal } = {},
+  ) {
     const queryParams = new URLSearchParams({
       enterprise_customer_uuid: enterpriseCustomerId,
-      active: 'true',
     });
+    if (!includeInactive) {
+      queryParams.append('active', 'true');
+    }
+    if (page) {
+      queryParams.append('page', page.toString());
+    }
     const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/?${queryParams.toString()}`;
-    return EnterpriseAccessApiService.apiClient().get(url);
+    // Existing callers don't pass a `signal`, so the request is unchanged for them.
+    return signal
+      ? EnterpriseAccessApiService.apiClient().get(url, { signal })
+      : EnterpriseAccessApiService.apiClient().get(url);
   }
 
   /**
@@ -724,6 +788,23 @@ class EnterpriseAccessApiService {
     });
 
     const url = `${EnterpriseAccessApiService.baseUrl}/customer-billing/create-enterprise-admin-portal-session/?${params.toString()}`;
+    return EnterpriseAccessApiService.apiClient().get(url);
+  }
+
+  /**
+   * Retrieves Learner Credit top-up ("Add funds") eligibility for an enterprise's budgets.
+   * @param {Object} args - The arguments object
+   * @param {string} args.enterpriseCustomerUuid - The UUID of the enterprise customer
+   *
+   * @returns A promise that resolves to an AxiosResponse with a `results` array, one row per budget
+   */
+  static getTopUpEligibility({
+    enterpriseCustomerUuid,
+  }: TopUpEligibilityArgs): Promise<AxiosResponse<TopUpEligibilityResponseData>> {
+    const params = new URLSearchParams({
+      enterprise_customer_uuid: enterpriseCustomerUuid,
+    });
+    const url = `${EnterpriseAccessApiService.baseUrl}/learner-credit-top-ups/eligibility/?${params.toString()}`;
     return EnterpriseAccessApiService.apiClient().get(url);
   }
 

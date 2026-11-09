@@ -47,6 +47,10 @@ export const DATETIME_FORMAT = 'MMM D, YYYY h:mma';
 
 export const EXEC_ED_OFFER_TYPE = 'learner_credit';
 
+// Learner Credit Management Page Tabs
+export const LEARNER_CREDIT_BUDGETS_TAB = 'budgets';
+export const LEARNER_CREDIT_AUDIT_TRAIL_TAB = 'audit-trail';
+
 // Budget Detail Page Tabs
 export const BUDGET_DETAIL_ACTIVITY_TAB = 'activity';
 export const BUDGET_DETAIL_CATALOG_TAB = 'catalog';
@@ -130,6 +134,10 @@ export const learnerCreditManagementQueryKeys = {
   budgetGroupLearners: (budgetId) => [...learnerCreditManagementQueryKeys.budget(budgetId), 'group learners'],
   enterpriseCustomer: (enterpriseId) => [...learnerCreditManagementQueryKeys.all, 'enterpriseCustomer', enterpriseId],
   flexGroup: (enterpriseId) => [...learnerCreditManagementQueryKeys.enterpriseCustomer(enterpriseId), 'flexGroup'],
+  topUpEligibility: (enterpriseId) => [
+    ...learnerCreditManagementQueryKeys.enterpriseCustomer(enterpriseId),
+    'topUpEligibility',
+  ],
   group: (groupUuid) => [...learnerCreditManagementQueryKeys.all, 'group', groupUuid],
   catalog: (catalog) => [...learnerCreditManagementQueryKeys.all, 'catalog', catalog],
   catalogContainsContentItem: (catalogUuid, contentKey) => [
@@ -137,6 +145,7 @@ export const learnerCreditManagementQueryKeys = {
     'containsContentItem',
     contentKey,
   ],
+  auditTrail: (enterpriseId) => [...learnerCreditManagementQueryKeys.all, 'auditTrail', enterpriseId],
 };
 
 // Route to learner credit

@@ -2,6 +2,7 @@ import {
   useCallback, useEffect, useMemo, useState,
 } from 'react';
 import dayjs from 'dayjs';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform/utils';
 
@@ -14,8 +15,20 @@ import {
   SUBSCRIPTION_USERS,
   SUBSCRIPTION_USERS_OVERVIEW,
   SUBSCRIPTIONS,
+  subscriptionsQueryKeys,
 } from './constants';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
+import {
+  fetchPaginatedResults,
+  mapWithConcurrencyLimit,
+} from '../../AuditTrail/data/utils';
+import {
+  AUDIT_TRAIL_API_PAGE_SIZE,
+  AUDIT_TRAIL_MAX_CONCURRENT_REQUESTS,
+  AUDIT_TRAIL_MAX_PAGES_PER_SOURCE,
+} from '../../AuditTrail/data/constants';
+import { useAuditTrailQuery } from '../../AuditTrail/data/hooks';
+import { transformLicenseActionsToAuditTrailRows } from './utils';
 
 const subscriptionInitState = {
   results: [],
@@ -400,3 +413,59 @@ export const useStripeSubscriptionPlanInfo = ({ subPlanUuid, setErrors }) => {
     loadingStripeSummary,
   };
 };
+
+/**
+ * Retrieves the audit trail actions (``LicenseAction`` records) of all subscription plans of the given enterprise
+ * customer. Inactive plans are included, so that the history of expired plans is still shown.
+ *
+ * Loading is bounded per plan: at most `AUDIT_TRAIL_MAX_PAGES_PER_SOURCE` pages of its most recent actions are
+ * fetched (the API returns them newest first), for at most `AUDIT_TRAIL_MAX_CONCURRENT_REQUESTS` plans at a time.
+ * `isTruncated` is true when older actions were left out. `signal` cancels the requests when the query is cancelled.
+ */
+const getLicenseAuditTrailHistory = async (enterpriseId, signal) => {
+  const { results: customerAgreements } = await fetchPaginatedResults(
+    page => LicenseManagerApiService.fetchCustomerAgreementData({
+      enterprise_customer_uuid: enterpriseId,
+      active_plans_only: false,
+      page,
+    }, { signal }),
+  );
+  const subscriptionPlanUUIDs = customerAgreements.flatMap(
+    customerAgreement => (customerAgreement.subscriptions || []).map(subscription => subscription.uuid),
+  );
+  const actionsByPlan = await mapWithConcurrencyLimit(
+    subscriptionPlanUUIDs,
+    AUDIT_TRAIL_MAX_CONCURRENT_REQUESTS,
+    subscriptionUUID => fetchPaginatedResults(
+      page => LicenseManagerApiService.fetchSubscriptionAuditHistory(
+        subscriptionUUID,
+        { page, page_size: AUDIT_TRAIL_API_PAGE_SIZE, signal },
+      ),
+      { maxPages: AUDIT_TRAIL_MAX_PAGES_PER_SOURCE },
+    ),
+  );
+  return {
+    rows: transformLicenseActionsToAuditTrailRows(
+      actionsByPlan.flatMap(({ results }) => results),
+      getAuthenticatedUser(),
+    ),
+    isTruncated: actionsByPlan.some(({ isTruncated }) => isTruncated),
+  };
+};
+
+/**
+ * Returns a page of subscription license audit trail actions for the given enterprise customer (`tableData`), and
+ * whether older history was left out (`isHistoryTruncated`); see `useAuditTrailQuery`.
+ *
+ * The license-manager audit history API is per subscription plan, so the actions of every plan are fetched once
+ * (see `getLicenseAuditTrailHistory`) and then filtered, sorted and paginated in the browser using `tableOptions`.
+ *
+ * @param {string} enterpriseId The enterprise customer UUID.
+ * @param {object} tableOptions Filters and `DataTable` (pagination/sort) state from `useAuditTrailTableState`.
+ */
+export const useLicenseAuditTrail = ({ enterpriseId, tableOptions }) => useAuditTrailQuery({
+  queryKey: subscriptionsQueryKeys.auditTrail(enterpriseId),
+  queryFn: ({ signal }) => getLicenseAuditTrailHistory(enterpriseId, signal),
+  enabled: !!enterpriseId,
+  tableOptions,
+});

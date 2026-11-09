@@ -5,6 +5,7 @@ import enterpriseCurationReducer, {
   initialReducerState,
   enterpriseCurationActions,
 } from '../enterpriseCurationReducer';
+import { getDismissedArchivedContentKeysByHighlightSet } from '../../../ContentHighlights/data/archivedContent';
 
 /**
  * TODO
@@ -46,7 +47,11 @@ function useEnterpriseCurationContext({
   }, [fetchError]);
 
   useEffect(() => {
-    dispatch(enterpriseCurationActions.setIsNewArchivedContent(enterpriseHighlightedSets));
+    // Dismissals live in localStorage; read them here so the reducer stays free of I/O.
+    dispatch(enterpriseCurationActions.setIsNewArchivedContent(
+      enterpriseHighlightedSets,
+      getDismissedArchivedContentKeysByHighlightSet(enterpriseHighlightedSets),
+    ));
   }, [enterpriseHighlightedSets]);
 
   const contextValue = useMemo(() => ({

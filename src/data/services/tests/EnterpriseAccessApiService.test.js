@@ -153,6 +153,23 @@ describe('EnterpriseAccessApiService', () => {
     );
   });
 
+  test('listContentAssignmentsWithAuditTrail fetches assignments in every state for an assignment configuration', () => {
+    const { signal } = new AbortController();
+    EnterpriseAccessApiService.listContentAssignmentsWithAuditTrail(
+      mockAssignmentConfigurationUUID,
+      { page: 2, pageSize: 50, signal },
+    );
+    const expectedParams = new URLSearchParams({
+      page: 2,
+      page_size: 50,
+      ordering: '-recent_action_time',
+    }).toString();
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/assignment-configurations/${mockAssignmentConfigurationUUID}/admin/assignments/?${expectedParams}`,
+      { signal },
+    );
+  });
+
   test('listContentAssignments calls enterprise-access to fetch content assignments without learner state filter', () => {
     EnterpriseAccessApiService.listContentAssignments(mockAssignmentConfigurationUUID);
     const expectedParams = new URLSearchParams({
@@ -183,6 +200,25 @@ describe('EnterpriseAccessApiService', () => {
     EnterpriseAccessApiService.listSubsidyAccessPolicies(mockEnterpriseUUID);
     expect(axios.get).toBeCalledWith(
       `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/?enterprise_customer_uuid=${mockEnterpriseUUID}&active=true`,
+    );
+  });
+
+  test('listSubsidyAccessPolicies passes the given cancellation signal', () => {
+    const { signal } = new AbortController();
+    EnterpriseAccessApiService.listSubsidyAccessPolicies(
+      mockEnterpriseUUID,
+      { includeInactive: true, page: 1, signal },
+    );
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/?enterprise_customer_uuid=${mockEnterpriseUUID}&page=1`,
+      { signal },
+    );
+  });
+
+  test('listSubsidyAccessPolicies can include inactive subsidy access policies and fetch a given page', () => {
+    EnterpriseAccessApiService.listSubsidyAccessPolicies(mockEnterpriseUUID, { includeInactive: true, page: 2 });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/subsidy-access-policies/?enterprise_customer_uuid=${mockEnterpriseUUID}&page=2`,
     );
   });
 
@@ -623,6 +659,13 @@ describe('EnterpriseAccessApiService', () => {
 
     expect(axios.get).toBeCalledWith(
       `${enterpriseAccessBaseUrl}/api/v1/stripe-event-summary/get-stripe-subscription-plan-info/?${expectedParams.toString()}`,
+    );
+  });
+
+  test('getTopUpEligibility calls enterprise-access to fetch top-up eligibility for every budget', () => {
+    EnterpriseAccessApiService.getTopUpEligibility({ enterpriseCustomerUuid: mockEnterpriseUUID });
+    expect(axios.get).toBeCalledWith(
+      `${enterpriseAccessBaseUrl}/api/v1/learner-credit-top-ups/eligibility/?enterprise_customer_uuid=${mockEnterpriseUUID}`,
     );
   });
 

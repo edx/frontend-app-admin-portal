@@ -5,7 +5,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { sendEnterpriseTrackEvent } from '@2uinc/frontend-enterprise-utils';
 import { FormattedMessage, useIntl } from '@edx/frontend-platform/i18n';
-import { getConfig } from '@edx/frontend-platform/config';
 import { Alert, DataTable } from '@openedx/paragon';
 import { Error } from '@openedx/paragon/icons';
 
@@ -17,7 +16,6 @@ import {
   getSortStateFromOrdering,
   getTableStateFromSearch,
   i18nFormatTimestamp,
-  isEnterpriseCustomerInUuidAllowlist,
   updateUrl,
 } from '../../utils';
 import usePaginatedLearnerTableData from '../../hooks/usePaginatedLearnerTableData';
@@ -129,6 +127,13 @@ const EnrollmentsTable = ({ enterpriseId }) => {
     },
     {
       Header: intl.formatMessage({
+        id: 'adminPortal.enrollmentsTable.progressStatus',
+        defaultMessage: 'Progress Status',
+      }),
+      accessor: 'progress_status',
+    },
+    {
+      Header: intl.formatMessage({
         id: 'adminPortal.enrollmentsTable.coursePassingGrade',
         defaultMessage: 'Course Passing Grade',
       }),
@@ -152,14 +157,6 @@ const EnrollmentsTable = ({ enterpriseId }) => {
       Cell: ({ value }) => i18nFormatTimestamp({ intl, timestamp: value }),
     },
   ], [intl]);
-
-  const visibleTableColumns = React.useMemo(() => {
-    const disabledFor = getConfig().DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER;
-    if (isEnterpriseCustomerInUuidAllowlist(enterpriseId, disabledFor)) {
-      return tableColumns.filter(({ accessor }) => accessor !== 'course_progress');
-    }
-    return tableColumns;
-  }, [tableColumns, enterpriseId]);
 
   React.useEffect(() => {
     const nextTableState = getTableStateFromSearch(location.search, DEFAULT_ORDERING);
@@ -255,7 +252,7 @@ const EnrollmentsTable = ({ enterpriseId }) => {
       itemCount={itemCount}
       pageCount={pageCount}
       fetchData={fetchData}
-      columns={visibleTableColumns}
+      columns={tableColumns}
     >
       <DataTable.TableControlBar />
       <DataTable.Table />

@@ -1,7 +1,6 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
-import { mergeConfig } from '@edx/frontend-platform/config';
 import configureMockStore from 'redux-mock-store';
 import thunk from 'redux-thunk';
 import { Provider } from 'react-redux';
@@ -79,7 +78,7 @@ const tableMockData = {
 const LearnerActivityTableWrapper = props => (
   <MemoryRouter>
     <IntlProvider locale="en">
-      <Provider store={props.store || store}>
+      <Provider store={store}>
         <LearnerActivityTable
           {...props}
         />
@@ -106,7 +105,6 @@ const renderLearnerActivityTable = async (tableId = 'active-week', activity = 'a
 describe('LearnerActivityTable', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: null });
     EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue({
       data: {
         count: 0,
@@ -161,25 +159,40 @@ describe('LearnerActivityTable', () => {
     expect(screen.getByText('70%')).toBeInTheDocument();
     expect(screen.getByText('66%')).toBeInTheDocument();
     expect(screen.getByText('80%')).toBeInTheDocument();
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.getByText('Passed')).toBeInTheDocument();
   });
 
-  it('hides the Course Progress column for an enterprise in the disabled-columns allowlist', async () => {
-    const cepalEnterpriseId = '6396a958-df6a-42e9-b90b-770f394e8ced';
-    mergeConfig({ DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER: cepalEnterpriseId });
-    const cepalStore = mockStore({
-      portalConfiguration: { enterpriseId: cepalEnterpriseId },
-    });
+  it('renders the Progress Status column immediately after Course Progress', async () => {
     EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValueOnce(tableMockData);
 
-    render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" store={cepalStore} />);
+    render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" />);
 
-    expect(await screen.findByText('awesome.me@example.com')).toBeInTheDocument();
-    expect(screen.queryByText('Course Progress')).not.toBeInTheDocument();
-    expect(screen.queryByText('50%')).not.toBeInTheDocument();
-    expect(screen.queryByText('75%')).not.toBeInTheDocument();
-    expect(screen.getByText('70%')).toBeInTheDocument();
-    expect(screen.getByText('66%')).toBeInTheDocument();
-    expect(screen.getByText('80%')).toBeInTheDocument();
+    await screen.findByText('awesome.me@example.com');
+
+    const headers = screen.getAllByRole('columnheader').map(header => header.textContent);
+    const courseProgressIndex = headers.findIndex(header => header.includes('Course Progress'));
+    expect(courseProgressIndex).toBeGreaterThan(-1);
+    expect(headers[courseProgressIndex + 1]).toContain('Progress Status');
+  });
+
+  it('fetches data sorted by progress_status when the Progress Status column header is clicked', async () => {
+    EnterpriseDataApiService.fetchCourseEnrollments.mockResolvedValue(tableMockData);
+
+    render(<LearnerActivityTableWrapper id="active-week" activity="active_past_week" />);
+
+    await screen.findByText('awesome.me@example.com');
+    fireEvent.click(screen.getByRole('columnheader', { name: /Progress Status/i }));
+
+    await waitFor(() => {
+      expect(EnterpriseDataApiService.fetchCourseEnrollments).toHaveBeenCalledWith(
+        enterpriseId,
+        expect.objectContaining({
+          learnerActivity: 'active_past_week',
+          ordering: 'progress_status',
+        }),
+      );
+    });
   });
 
   it('fetches sorted data when sorting changes', async () => {

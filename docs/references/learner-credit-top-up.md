@@ -6,18 +6,86 @@ Tracking doc for the Learner Credit Top Up feature
 ## Current state
 
 The "Add Funds" CTA on `SubBudgetCard` (`src/components/learner-credit-management/SubBudgetCard.jsx`)
-is currently gated behind a single frontend-only rollout flag, `features.TOP_UP_LEARNER_CREDIT` in
+is gated behind a frontend rollout flag, `features.TOP_UP_LEARNER_CREDIT` in
 `src/config/index.js` (env var `FEATURE_TOP_UP_LEARNER_CREDIT='true'`, or the URL override
 `?feature=TOP_UP_LEARNER_CREDIT`; `hasFeatureFlagEnabled` reads the repeated `feature` query
 parameter, so `?TOP_UP_LEARNER_CREDIT=true` does not work).
 
-The CTA only renders when the flag is on, the budget source is `BUDGET_TYPES.policy`
-(enterprise-access Learner Credit policies — not legacy ecommerce offers or enterprise-subsidy
-sub-budgets; `BudgetCard` passes `source` through to `SubBudgetCard`), **and** `canTopUpBudget`
-allows its status: Active or Expiring only, so scheduled, retired, expired and any unknown future
-status are excluded (it never appears alongside "View budget history"). It uses `outline-primary` so
-"View budget" remains the single primary action on the card, and links to the Add Funds flow
-described below. The flag is a rollout gate ("is this feature live"), not business eligibility.
+The flag is a rollout gate ("is this feature live"), not business eligibility. Business
+eligibility comes from the enterprise-access top-up eligibility API (ENT-12356), see below.
+
+## Eligibility (`GET /api/v1/learner-credit-top-ups/eligibility/`)
+
+The contract (reason codes, status codes, the backend's own `FEATURE_TOP_UP_LEARNER_CREDIT`
+Django flag) is documented in enterprise-access `docs/references/learner_credit_top_ups.md`.
+Frontend pieces:
+
+- `EnterpriseAccessApiService.getTopUpEligibility` and the `useTopUpEligibility` hook
+  (`data/hooks/useTopUpEligibility.ts`). `data` is the budget's camelCased row, or `null` when the
+  response has no row for it (the list only returns `active=True` policies).
+- **One request per enterprise:** the query key is `topUpEligibility(enterpriseId)` (no budget
+  id), so every card and the Add Funds page share one cached request and `select` picks each
+  budget's row. The cards render without waiting for it, and going from a card to the Add Funds
+  page shows the flow straight away instead of a loading state. A deep link or refresh of the
+  page fetches the whole list (the endpoint isn't paginated). The API's `policy_uuid` filter isn't
+  used. Within the app's `staleTime` the page can gate on a slightly stale row, so the pay step
+  must have the server re-check eligibility on submit; nothing does that yet.
+- **No retry on 4xx** (403, and 404 when the backend flag is off, won't change); one retry otherwise.
+  The query isn't made at all when the frontend flag is off, so admins don't hit a 404 endpoint
+  before rollout.
+- `isTopUpCandidate` (`data/utils.js`): policy budget, not retired/expired. It doesn't check the
+  feature flag; the flag is checked in the hook's `enabled` (no request), in `SubBudgetCard`'s
+  `showAddFunds` (no button, checked explicitly so the CTA stays gated even if `AddFundsButton`
+  starts rendering before eligibility loads), and in the `AddFundsPage` early return (redirect).
+  `SubBudgetCard`
+  calls the hook with `enabled` set only for flagged candidates that show card actions (not scheduled), so
+  other cards never make the request. Retired and expired
+  budgets stay hidden even though the API would answer `budget_not_active` for them (an expired
+  subsidy also reports `budget_expiring_soon`), so the CTA never appears next to "View budget
+  history". Scheduled budgets render no card actions at all.
+- `canTopUpBudget({ isPolicy, status, eligibility })` = candidate **and** `eligibility.isEligible`.
+  Only the Add Funds page guard uses it. The card uses `isTopUpCandidate` to decide whether to ask
+  the API, then `AddFundsButton` renders enabled or disabled from the row (see the table below).
+
+**The CTA** (`add-funds/AddFundsButton.jsx`, `outline-primary` so "View budget" stays the single
+primary action) and **the reasons** (`add-funds/AddFundsIneligibleStatus.jsx`, a Paragon
+`Card.Status` warning strip across the bottom of the card, per the Figma). `SubBudgetCard` reads the
+eligibility once and passes it to both:
+
+| Eligibility | CTA |
+| --- | --- |
+| Loading | Hidden (no disabled-then-enabled flicker) |
+| `isEligible: true` | Link to the Add Funds flow |
+| `isEligible: false` | Disabled, with every reason in the warning strip at the bottom of the card |
+| Error (403, 404, 5xx, network) or no row for the budget | Hidden, no error UI |
+
+**Gotcha — failed background refetch:** React Query keeps the last good `data` and sets `isError`
+when a refetch fails, so `SubBudgetCard` ignores `data` while `isError` is true. A budget that
+loaded as eligible (or ineligible) hides its button and reasons once a refetch fails. The Add
+Funds page deliberately does the opposite (see the budget guard below).
+
+**Gotcha — disabled but reachable:** the ineligible button uses `aria-disabled="true"` and the
+`disabled` class, not the `disabled` attribute, so keyboard and screen reader
+users can focus it. It also has the `add-funds-button-disabled` class (`pointer-events: none`, in
+`styles/index.scss`), because the `disabled` class alone still
+shows the outline button's hover fill; this blocks only the mouse, not keyboard focus.
+`aria-describedby` points at the reasons list in the warning strip (a `useId` from `SubBudgetCard`),
+so each reason message must read on its own. It is a plain `<button>`, never `as={Link}`: an `<a>`
+ignores `disabled`.
+
+**Reason text is ours, not the API's:** each `error_code` (`TOP_UP_INELIGIBILITY_REASONS` in
+`add-funds/data/constants.ts`) maps to a translated message in `add-funds/messages.js`; the API's
+`message` is English-only and never shown. Unknown codes, or an ineligible row with no reasons,
+show one generic message. The expiring-soon text doesn't name the backend's 14-day threshold, so
+it can't drift from it.
+
+**Strip colors come from the theme:** the strip uses Paragon's warning `Card.Status` colours
+(`theme-color(warning, "background" | "border" | "default")`), so brand themes can restyle it. The
+Figma's darker amber (`#FFF8E1` bg, `#5A4000` text, `#856404` icon) has no Paragon token; change it
+in the brand theme, not here. `.add-funds-ineligible-status` in
+`learner-credit-management/styles/index.scss` only adjusts layout: a 1px top border (Paragon sets
+the width to 0) and a 1rem icon. Its selector must stay at Paragon's specificity
+(`.pgn__card .pgn__card-status...`), or Paragon's 1.5rem icon size wins.
 
 ## Add Funds flow (multi-step checkout)
 
@@ -26,20 +94,22 @@ Route: `/:enterpriseSlug/admin/learner-credit/:budgetId/add-funds/:step?`, regis
 `.../add-funds/select-amount`), matching frontend-app-enterprise-checkout. Code lives in
 `src/components/learner-credit-management/add-funds/`. Why this flow uses one URL per step
 instead of the existing `FormWorkflow` modal pattern is recorded in
-[ADR 0014](../decisions/0014-url-per-step-for-add-funds-flow.rst).
+[ADR 0014](../decisions/0014-add-funds-one-url-per-step.rst).
 
 | Step | Key | Status |
 | --- | --- | --- |
-| 1. Select Amount | `select-amount` | Placeholder (`StepComingSoon`) |
-| 2. Payment Method | `payment-method` | Placeholder (`StepComingSoon`) |
+| 1. Select Amount | `select-amount` | Built (`steps/SelectAmountStep.jsx`), see below |
+| 2. Payment Method | `payment-method` | Built (`steps/PaymentMethodStep.jsx`), see below |
 | 3. Payment Details | `payment-details` | Placeholder (`StepComingSoon`) |
 | 4. Confirmation | `confirmation` | Placeholder (`StepComingSoon`) |
 
-**Budget guard** (`AddFundsPage.jsx`): redirects to budget detail when the flag is off, the
-budget id is not a policy UUID, the policy is scheduled/retired/expired, or the policy fails its
-initial load (404 shows `NotFoundPage`). A failed background refetch keeps the cached policy and
-does not exit the flow, so selections survive a flaky network. The budget-level rule is `canTopUpBudget` in `data/utils.js`,
-shared with the `SubBudgetCard` CTA. The page reads the budget status from `subsidyAccessPolicy.status`,
+**Budget guard** (`AddFundsPage.jsx`): shows the loading state until both the policy and its
+eligibility (the shared enterprise-wide request) have loaded, then redirects to budget detail when the flag is
+off, the budget id is not a policy UUID, the policy is retired/expired, the policy fails its
+initial load (404 shows `NotFoundPage`), or eligibility is ineligible, has no row, or fails its
+initial load with anything (403, 404, 5xx, network). A failed background refetch of either keeps
+the cached data and does not exit the flow, so selections survive a flaky network. The budget-level rule is `canTopUpBudget` in `data/utils.js`;
+the card has its own (see `isTopUpCandidate` above). The page reads the budget status from `subsidyAccessPolicy.status`,
 which `useSubsidyAccessPolicy`'s `select` derives once with `getBudgetStatus`; don't recompute it.
 
 **Step guard** (`AddFundsStepper.jsx` + `getAddFundsStepRedirect` in `data/utils.ts`): a missing
@@ -61,11 +131,46 @@ covers this. Don't add a budget detail tab named `add-funds`.
   Back on the first step replaces the remaining flow entry with budget detail, so browser Back
   after leaving does not reopen the flow. Don't change Back to push entries.
 - *User selections* — `AddFundsContextProvider` (`data/AddFundsContext.tsx`), a typed
-  `useReducer` + React Context (not Redux) holding `formData` (`amount`, `paymentMethod`).
+  `useReducer` + React Context (not Redux) holding `formData` (`amount`, `customAmountInput`, `paymentMethod`).
   In-memory only — a refresh mid-flow clears it and the step guard sends the user back to the
   first incomplete step, by design (no payment data in browser storage).
 - *Server state* — react-query. Budget data comes from the existing `useSubsidyAccessPolicy`,
   so the cache is shared with the budget detail page.
+
+**Step 1, Select Amount** (`steps/SelectAmountStep.jsx`):
+- Preset buttons (`PRESET_TOP_UP_AMOUNTS`) or a custom amount. The custom amount must be whole
+  dollars (a text input with `inputMode="numeric"`, digits only, so `1e3` is rejected) from `MIN_TOP_UP_AMOUNT` to `MAX_TOP_UP_AMOUNT`
+  ($500 to $20,000, tech spec R-02); the server validates again. The range error updates as the
+  admin types.
+- A custom amount equal to a preset also selects that preset. Picking a preset clears the custom
+  input. The raw text is kept in `customAmountInput` so it is restored on return to the step.
+
+**Step 2, Payment Method** (`steps/PaymentMethodStep.jsx`):
+- Credit Card is the only method (`PAYMENT_METHODS` in `data/constants.ts`). It starts selected
+  (`initialAddFundsState`), and the step's completion rule requires it.
+- Bank Account (ACH, Phase 2) is shown disabled, with the Figma's "4 Business Days" badge followed by
+  a "Coming soon" badge so admins know why it can't be chosen. Both badges are inside the radio's
+  label, so they are part of its accessible name. Its radio value is never stored and is not
+  a `PaymentMethodType`: ACH was removed by
+  [ADR 0012](../decisions/0012-credit-card-only-payment-methods.rst) and needs Stripe Financial
+  Connections plus a security review before it can come back.
+- Options are native radios (`Form.RadioSet`), not `SelectableBox`: Paragon's `SelectableBox` is a
+  `role="button"` div with an unfocusable input, so it doesn't behave as a radio group for
+  keyboard users. A disabled radio is skipped by Tab and arrow keys.
+- The processing-fee note follows the design copy, which mentions bank account fees. Revisit the
+  copy if Bank Account stays unavailable.
+
+**Order Summary** (`OrderSummary.jsx`, values from `calculateOrderSummary` in `data/utils.ts`):
+- Current balance is the budget's `aggregates.spendAvailableUsd`. When it is missing, Current and
+  New Balance show `-` rather than $0.
+- Plan Expires is the budget's `subsidyExpirationDatetime`; the footer is hidden when it is missing.
+- Discount and Total Cost always show `-` placeholders, on every step. Pricing (any discount and
+  the amount charged) must come from the backend top-up quote (enterprise-access) once it exists;
+  don't compute prices or discounts in the browser. New Balance is current balance plus the
+  credit amount.
+- Screen readers get one labelled `role="status"` sentence ("Adding $X. New balance: $Y."), set
+  only when the amount is valid; the card itself is not a live region. Empty values (`-`) have
+  hidden "Not available" text. The custom amount error uses `role="alert"`.
 
 **Confirmation is currently unreachable**: the `payment-details` completion rule returns `false` until payment submission exists, so Continue is disabled there and deep links
 to `confirmation` are redirected.
@@ -75,8 +180,7 @@ to `confirmation` are redirected.
 2. Replace the `StepComingSoon` fallback for the step in `AddFundsStepper.jsx#renderStepContent`.
 3. Replace the step's placeholder completion rule in `STEP_COMPLETION_RULES` (`data/utils.ts`) —
    this drives both the Continue button and the deep-link step guard. The type requires a rule
-   for every step, so the compiler rejects a step added without one. Today's
-   placeholder steps are marked complete explicitly (`() => true`) and must get real rules.
+   for every step, so the compiler rejects a step added without one.
    This is a client-side check only; the server must verify payment before showing success.
 4. Start the step with `AddFundsStepHeading`; the stepper moves focus to it on step change.
 

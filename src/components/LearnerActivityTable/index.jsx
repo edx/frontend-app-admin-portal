@@ -10,12 +10,11 @@ import { connect } from 'react-redux';
 
 import { injectIntl, intlShape } from '@edx/frontend-platform/i18n';
 import { logError } from '@edx/frontend-platform/logging';
-import { getConfig } from '@edx/frontend-platform/config';
 import { Alert, DataTable } from '@openedx/paragon';
 import { Error } from '@openedx/paragon/icons';
 
 import {
-  i18nFormatTimestamp, formatPercentage, isEnterpriseCustomerInUuidAllowlist,
+  i18nFormatTimestamp, formatPercentage,
 } from '../../utils';
 import EnterpriseDataApiService from '../../data/services/EnterpriseDataApiService';
 
@@ -157,6 +156,14 @@ const LearnerActivityTable = ({
     },
     {
       Header: intl.formatMessage({
+        id: 'admin.portal.lpr.learner.activity.table.progress_status.column.heading',
+        defaultMessage: 'Progress Status',
+        description: 'Column heading for the progress status column in the learner activity table',
+      }),
+      accessor: 'progress_status',
+    },
+    {
+      Header: intl.formatMessage({
         id: 'admin.portal.lpr.learner.activity.table.course_passing_grade.column.heading',
         defaultMessage: 'Course Passing Grade',
         description: 'Column heading for the course passing grade column in the learner activity table',
@@ -180,14 +187,6 @@ const LearnerActivityTable = ({
       accessor: 'last_activity_date',
     },
   ]), [intl]);
-
-  const visibleTableColumns = useMemo(() => {
-    const disabledFor = getConfig().DISABLE_COURSE_PROGRESS_COLUMN_FOR_ENTERPRISE_CUSTOMER;
-    if (isEnterpriseCustomerInUuidAllowlist(enterpriseId, disabledFor)) {
-      return tableColumns.filter(({ accessor }) => accessor !== 'course_progress');
-    }
-    return tableColumns;
-  }, [tableColumns, enterpriseId]);
 
   const formattedData = useMemo(() => paginationData.data.map(enrollment => ({
     ...enrollment,
@@ -228,7 +227,7 @@ const LearnerActivityTable = ({
       pageCount={paginationData.pageCount}
       fetchData={fetchData}
       data={formattedData}
-      columns={visibleTableColumns}
+      columns={tableColumns}
       initialState={{
         pageSize: 50,
         pageIndex: 0,
