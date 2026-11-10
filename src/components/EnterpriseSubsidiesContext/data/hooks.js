@@ -239,7 +239,10 @@ export const useBillingSubscriptionAvailable = ({ enterpriseId }) => {
         setHasBillingSubscription(!!subscriptionData);
         setProductType(subscriptionData?.productType ?? null);
       } catch (error) {
-        logError(error);
+        // A 404 means the enterprise has no self-service checkout (e.g. sales-provisioned), which is expected.
+        if (error?.customAttributes?.httpErrorStatus !== 404) {
+          logError(error);
+        }
         setHasBillingSubscription(false);
         setProductType(null);
       } finally {
