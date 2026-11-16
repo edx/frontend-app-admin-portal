@@ -193,14 +193,42 @@ const SubscriptionLifecycle = ({
                 <div className="font-weight-bold">{subscriptionTypeLabel}</div>
               </div>
 
-              {/* Current Period End */}
+              {/* Status, only while a cancellation is pending (ENT-11534) */}
+              {cancelAtPeriodEnd && (
+                <div>
+                  <div className="small text-muted">
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.status.label"
+                      defaultMessage="Status"
+                      description="Label for subscription status field"
+                    />
+                  </div>
+                  <div className="font-weight-bold">
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.status.pendingCancellation"
+                      defaultMessage="Pending Cancellation"
+                      description="Status shown when the admin has canceled the subscription but it stays active until the end of the paid period"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Current Period End, or the expiry date while a cancellation is pending */}
               <div>
                 <div className="small text-muted">
-                  <FormattedMessage
-                    id="admin.portal.billing.subscription.currentPeriodEnd.label"
-                    defaultMessage="Current Period Ends"
-                    description="Label for current period end field"
-                  />
+                  {cancelAtPeriodEnd ? (
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.expiresOn.label"
+                      defaultMessage="Expires On"
+                      description="Label for the date a canceled subscription expires (end of the paid period)"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.currentPeriodEnd.label"
+                      defaultMessage="Current Period Ends"
+                      description="Label for current period end field"
+                    />
+                  )}
                 </div>
                 <div className="font-weight-bold">{formattedPeriodEnd}</div>
               </div>
@@ -263,10 +291,12 @@ const SubscriptionLifecycle = ({
           <p>
             <FormattedMessage
               id="admin.portal.billing.subscription.cancelModal.body"
-              defaultMessage="Your subscription will remain active until {currentPeriodEnd}. After this date, you will lose access to all subscription features and your learners will no longer be able to enroll in courses."
-              description="Body text for cancel subscription modal"
+              defaultMessage="Your {amount} / year subscription for {licenseCount, plural, one {# license} other {# licenses}} will remain active until {currentPeriodEnd} and will not renew. After this date, your learners' enrollments will move to Audit."
+              description="Body text for cancel subscription modal: the plan stays active to the end of the paid period, then learners' enrollments move to Audit"
               values={{
-                currentPeriodEnd: formattedPeriodEnd,
+                amount: formattedAmount,
+                licenseCount,
+                currentPeriodEnd: <span className="font-weight-bold">{formattedPeriodEnd}</span>,
               }}
             />
           </p>

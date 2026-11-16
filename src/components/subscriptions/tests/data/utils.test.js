@@ -1,5 +1,7 @@
 import dayjs from 'dayjs';
-import { ACTIVE, SCHEDULED, ENDED } from '../../data/constants';
+import {
+  ACTIVE, CANCELED, ENDED, PENDING_CANCELLATION, SCHEDULED,
+} from '../../data/constants';
 import { getSubscriptionStatus, openStripeBillingPortal, sortSubscriptionsByStatus } from '../../data/utils';
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
 
@@ -25,6 +27,21 @@ describe('utils', () => {
       expect(getSubscriptionStatus(scheduledSub)).toEqual(SCHEDULED);
       expect(getSubscriptionStatus(activeSub)).toEqual(ACTIVE);
       expect(getSubscriptionStatus(expiredSub)).toEqual(ENDED);
+    });
+
+    it('returns Pending Cancellation while the cancellation date is in the future', () => {
+      const canceledDate = dayjs().add(5, 'days').toISOString();
+      expect(getSubscriptionStatus(activeSub, canceledDate)).toEqual(PENDING_CANCELLATION);
+    });
+
+    it('returns Ended, not Pending Cancellation, for an earlier plan that already ended (e.g. the trial)', () => {
+      const canceledDate = dayjs().add(5, 'days').toISOString();
+      expect(getSubscriptionStatus(expiredSub, canceledDate)).toEqual(ENDED);
+    });
+
+    it('returns Canceled once the cancellation date has passed', () => {
+      const canceledDate = dayjs().subtract(1, 'days').toISOString();
+      expect(getSubscriptionStatus(expiredSub, canceledDate)).toEqual(CANCELED);
     });
   });
 
