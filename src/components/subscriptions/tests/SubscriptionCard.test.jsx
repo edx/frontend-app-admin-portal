@@ -15,7 +15,7 @@ import { axe } from 'jest-axe';
 import { renderWithRouter } from '../../test/testUtils';
 import SubscriptionCard from '../SubscriptionCard';
 import {
-  CANCELED, ENDED, FREE_TRIAL_BADGE, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL,
+  CANCELED, ENDED, FREE_TRIAL_BADGE, PENDING_CANCELLATION, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL,
 } from '../data/constants';
 import { SubscriptionContext } from '../SubscriptionData';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
@@ -252,7 +252,7 @@ describe('SubscriptionCard', () => {
     expect(screen.queryByText('Your 14-day free trial will conclude')).not.toBeInTheDocument();
   });
 
-  it('renders canceled trial messaging when subscription is canceled', () => {
+  it('renders pending cancellation trial messaging when the cancellation date is in the future', () => {
     renderWithRouter(
       <SubscriptionCardWrapper
         {...trialProps}
@@ -260,8 +260,9 @@ describe('SubscriptionCard', () => {
       />,
     );
 
-    // Check for Canceled and Free Trial badge
-    expect(screen.getByText(CANCELED)).toBeInTheDocument();
+    // Check for Pending Cancellation and Free Trial badge
+    expect(screen.getByText(PENDING_CANCELLATION)).toBeInTheDocument();
+    expect(screen.queryByText(CANCELED)).not.toBeInTheDocument();
     expect(screen.getByText(FREE_TRIAL_BADGE)).toBeInTheDocument();
 
     expect(screen.getByText(/Your plan is scheduled to end on/i)).toBeInTheDocument();
@@ -269,6 +270,68 @@ describe('SubscriptionCard', () => {
 
     // Ensure the active-trial billing warning is NOT shown
     expect(screen.queryByText('Your 14-day free trial will conclude')).not.toBeInTheDocument();
+  });
+
+  describe('paid plan cancellation (ENT-11534)', () => {
+    // "now" is pinned to 2020-01-01 above.
+    const paidSubscription = {
+      uuid: 'paid-uuid',
+      title: 'Paid Plan',
+      startDate: '2019-06-01',
+      expirationDate: '2020-06-01',
+      planType: SELF_SERVICE_PAID,
+      licenses: {
+        assigned: 5, unassigned: 2, activated: 3, allocated: 10, total: 20,
+      },
+    };
+    const stripeInfoWithCanceledDate = (canceledDate) => ({
+      ...mockStripeInfoActive,
+      canceledDate,
+    });
+
+    it('shows Pending Cancellation and the bold expiry date, not Canceled, before the cancellation date', () => {
+      renderWithRouter(
+        <SubscriptionCardWrapper
+          subscription={paidSubscription}
+          stripeInfoByUuid={{ [paidSubscription.uuid]: stripeInfoWithCanceledDate('2020-06-01T00:00:00Z') }}
+        />,
+      );
+
+      expect(screen.getByText(PENDING_CANCELLATION)).toBeInTheDocument();
+      expect(screen.queryByText(CANCELED)).not.toBeInTheDocument();
+      expect(screen.queryByText(ENDED)).not.toBeInTheDocument();
+      expect(screen.getByText(/This plan won't renew/)).toBeInTheDocument();
+      expect(screen.getByText(/enrollments move to Audit/)).toBeInTheDocument();
+      const expiryDate = screen.getAllByText('June 1, 2020').find(el => el.classList.contains('font-weight-bold'));
+      expect(expiryDate).toBeInTheDocument();
+      // The plan is still running, so its licenses are still shown.
+      expect(screen.getByText('Licenses')).toBeInTheDocument();
+    });
+
+    it('shows Canceled once the cancellation date has passed', () => {
+      renderWithRouter(
+        <SubscriptionCardWrapper
+          subscription={paidSubscription}
+          stripeInfoByUuid={{ [paidSubscription.uuid]: stripeInfoWithCanceledDate('2019-12-01T00:00:00Z') }}
+        />,
+      );
+
+      expect(screen.getByText(CANCELED)).toBeInTheDocument();
+      expect(screen.queryByText(PENDING_CANCELLATION)).not.toBeInTheDocument();
+      expect(screen.queryByText(/This plan won't renew/)).not.toBeInTheDocument();
+      expect(screen.queryByText('Licenses')).not.toBeInTheDocument();
+    });
+
+    it('has no accessibility violations while pending cancellation', async () => {
+      const { container } = renderWithRouter(
+        <SubscriptionCardWrapper
+          subscription={paidSubscription}
+          stripeInfoByUuid={{ [paidSubscription.uuid]: stripeInfoWithCanceledDate('2020-06-01T00:00:00Z') }}
+        />,
+      );
+      const results = await axe(container, accessibilitySettings);
+      expect(results).toHaveNoViolations();
+    });
   });
 
   it('renders the composed title with academy name when billing subscription data is present', () => {
