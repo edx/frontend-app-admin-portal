@@ -20,6 +20,7 @@ import {
 import { SubscriptionContext } from '../SubscriptionData';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 import { useSubscription } from '../../billing/data/hooks';
+import { features } from '../../../config';
 
 jest.mock('../../billing/data/hooks');
 
@@ -136,6 +137,7 @@ const initialStoreState = {
 
 beforeEach(() => {
   useSubscription.mockReturnValue({ data: undefined });
+  features.ENABLE_SSP_PAID_RENEWAL = false;
 });
 
 const SubscriptionCardWrapper = ({
@@ -253,6 +255,7 @@ describe('SubscriptionCard', () => {
   });
 
   it('renders pending cancellation trial messaging when the cancellation date is in the future', () => {
+    features.ENABLE_SSP_PAID_RENEWAL = true;
     renderWithRouter(
       <SubscriptionCardWrapper
         {...trialProps}
@@ -272,7 +275,27 @@ describe('SubscriptionCard', () => {
     expect(screen.queryByText('Your 14-day free trial will conclude')).not.toBeInTheDocument();
   });
 
+  it('renders canceled trial messaging when subscription is canceled (ENABLE_SSP_PAID_RENEWAL off)', () => {
+    renderWithRouter(
+      <SubscriptionCardWrapper
+        {...trialProps}
+        stripeInfoByUuid={{ [trialSubscription.uuid]: mockStripeInfoCanceled }}
+      />,
+    );
+
+    // As before ENT-11534: Canceled, not Pending Cancellation
+    expect(screen.getByText(CANCELED)).toBeInTheDocument();
+    expect(screen.queryByText(PENDING_CANCELLATION)).not.toBeInTheDocument();
+    expect(screen.getByText(FREE_TRIAL_BADGE)).toBeInTheDocument();
+
+    expect(screen.getByText(/Your plan is scheduled to end on/i)).toBeInTheDocument();
+    expect(screen.getByText('January 29, 2027')).toBeInTheDocument();
+    expect(screen.queryByText('Your 14-day free trial will conclude')).not.toBeInTheDocument();
+  });
+
   describe('paid plan cancellation (ENT-11534)', () => {
+    beforeEach(() => { features.ENABLE_SSP_PAID_RENEWAL = true; });
+
     // "now" is pinned to 2020-01-01 above.
     const paidSubscription = {
       uuid: 'paid-uuid',
@@ -331,6 +354,20 @@ describe('SubscriptionCard', () => {
       );
       const results = await axe(container, accessibilitySettings);
       expect(results).toHaveNoViolations();
+    });
+
+    it('shows no Pending Cancellation with ENABLE_SSP_PAID_RENEWAL off, as before', () => {
+      features.ENABLE_SSP_PAID_RENEWAL = false;
+      renderWithRouter(
+        <SubscriptionCardWrapper
+          subscription={paidSubscription}
+          stripeInfoByUuid={{ [paidSubscription.uuid]: stripeInfoWithCanceledDate('2020-06-01T00:00:00Z') }}
+        />,
+      );
+
+      expect(screen.getByText(CANCELED)).toBeInTheDocument();
+      expect(screen.queryByText(PENDING_CANCELLATION)).not.toBeInTheDocument();
+      expect(screen.queryByText(/This plan won't renew/)).not.toBeInTheDocument();
     });
   });
 

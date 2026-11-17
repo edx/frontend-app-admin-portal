@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import SubscriptionLifecycle from '../SubscriptionLifecycle';
 import * as hooks from '../data/hooks';
+import { features } from '../../../config';
 
 jest.mock('../data/hooks');
 
@@ -109,6 +110,9 @@ describe('SubscriptionLifecycle', () => {
   });
 
   describe('cancellation (ENT-11534)', () => {
+    beforeEach(() => { features.ENABLE_SSP_PAID_RENEWAL = true; });
+    afterEach(() => { features.ENABLE_SSP_PAID_RENEWAL = false; });
+
     it('shows Current Period Ends and no pending status when no cancellation is scheduled', () => {
       renderSubscriptionLifecycle('teams');
 
@@ -136,6 +140,26 @@ describe('SubscriptionLifecycle', () => {
       expect(body).toHaveTextContent('$1,200.00 / year subscription for 25 licenses');
       expect(body).toHaveTextContent('will not renew');
       expect(screen.queryByText(/lose access/)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('cancellation with ENABLE_SSP_PAID_RENEWAL off (as before ENT-11534)', () => {
+    it('shows no Pending Cancellation status and keeps Current Period Ends when a cancellation is scheduled', () => {
+      renderSubscriptionLifecycle('teams', { cancelAtPeriodEnd: true });
+
+      expect(screen.queryByText('Pending Cancellation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Expires On')).not.toBeInTheDocument();
+      expect(screen.getByText('Current Period Ends')).toBeInTheDocument();
+      expect(screen.getByText('Reinstate Subscription')).toBeInTheDocument();
+    });
+
+    it('cancel modal keeps the old text', () => {
+      renderSubscriptionLifecycle('teams');
+
+      fireEvent.click(screen.getByText('Cancel Subscription'));
+
+      expect(screen.getByText(/lose access to all subscription features/)).toBeInTheDocument();
+      expect(screen.queryByText(/enrollments will move to Audit/)).not.toBeInTheDocument();
     });
   });
 });
