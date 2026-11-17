@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform';
 
+import { features } from '../../../config';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
 import { transformActionToAuditTrailRow } from '../../AuditTrail/data/utils';
 import type { AuditTrailAction, AuditTrailAuthenticatedUser, AuditTrailRow } from '../../AuditTrail/data/types';
@@ -46,11 +47,13 @@ interface Subscription {
  * Every plan in a self-service chain (trial, then paid) reads the same renewal record, so an earlier
  * plan that has already ended on its own date (e.g. the trial) gets the same future `canceledDate`
  * as the running paid plan. That plan is Ended, not Pending Cancellation.
+ *
+ * Behind the ENABLE_SSP_PAID_RENEWAL feature flag. With it off, any `canceledDate` means Canceled, as before.
  */
 export const getSubscriptionStatus = (subscription: Subscription, canceledDate?: string | null): string => {
   const now = dayjs();
   if (canceledDate) {
-    if (now.isBefore(canceledDate)) {
+    if (features.ENABLE_SSP_PAID_RENEWAL && now.isBefore(canceledDate)) {
       return now.isAfter(subscription.expirationDate) ? ENDED : PENDING_CANCELLATION;
     }
     return CANCELED;

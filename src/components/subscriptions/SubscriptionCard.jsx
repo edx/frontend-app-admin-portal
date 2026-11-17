@@ -10,7 +10,7 @@ import { FormattedMessage, getLocale, useIntl } from '@edx/frontend-platform/i18
 
 import classNames from 'classnames';
 import {
-  ACTIVE, FREE_TRIAL_BADGE, PENDING_CANCELLATION, SCHEDULED, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL,
+  ACTIVE, CANCELED, FREE_TRIAL_BADGE, PENDING_CANCELLATION, SCHEDULED, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL,
   SUBSCRIPTION_STATUS_BADGE_MAP,
 } from './data/constants';
 import { SubscriptionContext } from './SubscriptionData';
@@ -19,6 +19,7 @@ import { makePlural } from '../../utils';
 import { getSubscriptionStatus } from './data/utils';
 import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import { useSubscription } from '../billing/data/hooks';
+import { features } from '../../config';
 
 const SubscriptionCard = ({
   enterpriseUuid,
@@ -48,6 +49,10 @@ const SubscriptionCard = ({
   const subscriptionStatus = getSubscriptionStatus(subscription, canceledDate);
   // A plan pending cancellation is still running: learners keep access until the cancellation date.
   const isPlanRunning = [ACTIVE, PENDING_CANCELLATION].includes(subscriptionStatus);
+  // A canceled trial's "scheduled to end" message. With ENABLE_SSP_PAID_RENEWAL off, keep the old condition.
+  const isTrialCancellationScheduled = subscriptionStatus === (
+    features.ENABLE_SSP_PAID_RENEWAL ? PENDING_CANCELLATION : CANCELED
+  );
 
   const isSelfServiceSub = [SELF_SERVICE_PAID, SELF_SERVICE_TRIAL].includes(planType);
   const periodEndDate = typeof currentPeriodEnd === 'number'
@@ -139,7 +144,7 @@ const SubscriptionCard = ({
                 />
               </span>
             )}
-            {subscriptionStatus === PENDING_CANCELLATION && (
+            {isTrialCancellationScheduled && (
               <span className="d-inline mt-2">
                 <FormattedMessage
                   id="subscriptions.subscriptionCard.canceledTrialDescription"

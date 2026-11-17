@@ -11,6 +11,7 @@ import CancelSubscriptionSuccessToast from './CancelSubscriptionSuccessToast';
 import ReinstateSubscriptionSuccessToast from './ReinstateSubscriptionSuccessToast';
 import SubscriptionErrorToast from './SubscriptionErrorToast';
 import { SUBSCRIPTION_TYPE_LABEL_MAP } from '../subscriptions/data/constants';
+import { features } from '../../config';
 
 /**
  * SubscriptionLifecycle - Component for managing subscription cancellation and reinstatement
@@ -129,6 +130,9 @@ const SubscriptionLifecycle = ({
     ? SUBSCRIPTION_TYPE_LABEL_MAP.essentials
     : SUBSCRIPTION_TYPE_LABEL_MAP.teams;
   const subscriptionTypeLabel = intl.formatMessage(subscriptionTypeMessage);
+  // The new cancellation UI (ENT-11534) is behind ENABLE_SSP_PAID_RENEWAL. With it off, show what we did before.
+  const isSspPaidRenewalEnabled = features.ENABLE_SSP_PAID_RENEWAL;
+  const showPendingCancellation = isSspPaidRenewalEnabled && cancelAtPeriodEnd;
 
   return (
     <>
@@ -194,7 +198,7 @@ const SubscriptionLifecycle = ({
               </div>
 
               {/* Status, only while a cancellation is pending (ENT-11534) */}
-              {cancelAtPeriodEnd && (
+              {showPendingCancellation && (
                 <div>
                   <div className="small text-muted">
                     <FormattedMessage
@@ -216,7 +220,7 @@ const SubscriptionLifecycle = ({
               {/* Current Period End, or the expiry date while a cancellation is pending */}
               <div>
                 <div className="small text-muted">
-                  {cancelAtPeriodEnd ? (
+                  {showPendingCancellation ? (
                     <FormattedMessage
                       id="admin.portal.billing.subscription.expiresOn.label"
                       defaultMessage="Expires On"
@@ -289,16 +293,27 @@ const SubscriptionLifecycle = ({
         </ModalDialog.Header>
         <ModalDialog.Body>
           <p>
-            <FormattedMessage
-              id="admin.portal.billing.subscription.cancelModal.body"
-              defaultMessage="Your {amount} / year subscription for {licenseCount, plural, one {# license} other {# licenses}} will remain active until {currentPeriodEnd} and will not renew. After this date, your learners' enrollments will move to Audit."
-              description="Body text for cancel subscription modal: the plan stays active to the end of the paid period, then learners' enrollments move to Audit"
-              values={{
-                amount: formattedAmount,
-                licenseCount,
-                currentPeriodEnd: <span className="font-weight-bold">{formattedPeriodEnd}</span>,
-              }}
-            />
+            {isSspPaidRenewalEnabled ? (
+              <FormattedMessage
+                id="admin.portal.billing.subscription.cancelModal.body.auditAccess"
+                defaultMessage="Your {amount} / year subscription for {licenseCount, plural, one {# license} other {# licenses}} will remain active until {currentPeriodEnd} and will not renew. After this date, your learners' enrollments will move to Audit."
+                description="Body text for cancel subscription modal: the plan stays active to the end of the paid period, then learners' enrollments move to Audit"
+                values={{
+                  amount: formattedAmount,
+                  licenseCount,
+                  currentPeriodEnd: <span className="font-weight-bold">{formattedPeriodEnd}</span>,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="admin.portal.billing.subscription.cancelModal.body"
+                defaultMessage="Your subscription will remain active until {currentPeriodEnd}. After this date, you will lose access to all subscription features and your learners will no longer be able to enroll in courses."
+                description="Body text for cancel subscription modal"
+                values={{
+                  currentPeriodEnd: formattedPeriodEnd,
+                }}
+              />
+            )}
           </p>
           <Alert variant="info" dismissible={false}>
             <FormattedMessage
