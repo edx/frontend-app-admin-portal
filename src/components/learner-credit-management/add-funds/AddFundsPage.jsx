@@ -20,7 +20,8 @@ import { ADD_FUNDS_ROUTE_SEGMENT, AddFundsContextProvider } from './data';
  * Route entry point for the Learner Credit Top Up ("Add Funds") flow at
  * `/:enterpriseSlug/admin/learner-credit/:budgetId/add-funds/:step?`. Each step has its own URL;
  * step-level redirects are handled by `AddFundsStepper`. Budgets that fail `canTopUpBudget`
- * (including any top-up eligibility API error) redirect back to budget detail.
+ * (including any top-up eligibility API error) redirect back to budget detail. Back on the first
+ * step returns to the Learner Credit overview, where the "Add funds" button lives.
  */
 const AddFundsPage = ({ enterpriseId, enterpriseSlug }) => {
   const navigate = useNavigate();
@@ -90,7 +91,7 @@ const AddFundsPage = ({ enterpriseId, enterpriseSlug }) => {
           <AddFundsStepper
             currentBalance={subsidyAccessPolicy.aggregates?.spendAvailableUsd}
             expirationDate={subsidyAccessPolicy.subsidyExpirationDatetime}
-            onExit={() => navigate(budgetDetailPath, { replace: true })}
+            onExit={() => navigate(learnerCreditPath, { replace: true })}
           />
         </AddFundsContextProvider>
       </Stack>

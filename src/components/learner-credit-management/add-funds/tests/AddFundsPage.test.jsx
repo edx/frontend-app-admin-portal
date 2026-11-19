@@ -468,10 +468,11 @@ describe('AddFundsPage', () => {
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
-    expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
+    expect(screen.getByTestId('multiple-budgets-page')).toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent(new RegExp(`^${learnerCreditPath}$`));
 
     await user.click(screen.getByRole('button', { name: 'Browser back' }));
-    expect(screen.getByTestId('multiple-budgets-page')).toBeInTheDocument();
+    expect(screen.getByTestId('location')).not.toHaveTextContent('/add-funds');
   });
 
   it('replaces the current entry on Back when the previous step is not behind it in history', async () => {
@@ -564,15 +565,17 @@ describe('AddFundsPage', () => {
     expect(screen.getByRole('heading', { name: 'Select an Amount' })).toBeInTheDocument();
   });
 
-  it('returns to budget detail when Back is clicked on the first step, leaving the flow', async () => {
+  it('returns to the Learner Credit overview when Back is clicked on the first step, leaving the flow', async () => {
     const user = userEvent.setup();
-    renderAddFunds({ step: 'select-amount', previousEntries: [`${learnerCreditPath}/${mockBudgetUuid}`] });
+    renderAddFunds({ step: 'select-amount', previousEntries: [learnerCreditPath] });
 
     await user.click(screen.getByRole('button', { name: '$ 1000' }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
     await user.click(screen.getByRole('button', { name: 'Back' }));
-    expect(screen.getByTestId('budget-detail-page')).toBeInTheDocument();
+    expect(screen.getByTestId('multiple-budgets-page')).toBeInTheDocument();
+    expect(screen.queryByTestId('budget-detail-page')).not.toBeInTheDocument();
+    expect(screen.getByTestId('location')).toHaveTextContent(new RegExp(`^${learnerCreditPath}$`));
 
     // Back popped the step Continue pushed and leaving replaced the remaining flow entry, so
     // browser Back doesn't re-enter the flow.
