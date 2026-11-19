@@ -47,9 +47,9 @@ const SubscriptionCard = ({
   const formattedExpirationDate = dayjs(expirationDate).format('MMMM D, YYYY');
   const formattedCanceledDate = canceledDate ? dayjs(canceledDate).format('MMMM D, YYYY') : null;
   const subscriptionStatus = getSubscriptionStatus(subscription, canceledDate);
-  // A plan pending cancellation is still running: learners keep access until the cancellation date.
+  // Learners keep access until the cancellation date.
   const isPlanRunning = [ACTIVE, PENDING_CANCELLATION].includes(subscriptionStatus);
-  // A canceled trial's "scheduled to end" message. With ENABLE_SSP_PAID_RENEWAL off, keep the old condition.
+  // Trial "scheduled to end" message; flag off keeps the old condition.
   const isTrialCancellationScheduled = subscriptionStatus === (
     features.ENABLE_SSP_PAID_RENEWAL ? PENDING_CANCELLATION : CANCELED
   );

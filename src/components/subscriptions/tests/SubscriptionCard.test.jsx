@@ -283,7 +283,7 @@ describe('SubscriptionCard', () => {
       />,
     );
 
-    // As before ENT-11534: Canceled, not Pending Cancellation
+    // Flag off: Canceled, not Pending Cancellation
     expect(screen.getByText(CANCELED)).toBeInTheDocument();
     expect(screen.queryByText(PENDING_CANCELLATION)).not.toBeInTheDocument();
     expect(screen.getByText(FREE_TRIAL_BADGE)).toBeInTheDocument();
@@ -293,7 +293,7 @@ describe('SubscriptionCard', () => {
     expect(screen.queryByText('Your 14-day free trial will conclude')).not.toBeInTheDocument();
   });
 
-  describe('paid plan cancellation (ENT-11534)', () => {
+  describe('paid plan cancellation', () => {
     beforeEach(() => { features.ENABLE_SSP_PAID_RENEWAL = true; });
 
     // "now" is pinned to 2020-01-01 above.

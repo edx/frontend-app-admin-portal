@@ -39,16 +39,9 @@ interface Subscription {
 /**
  * Returns the display status of a subscription plan.
  *
- * `canceledDate` is the date a cancellation takes effect (Stripe's `cancel_at`, i.e. the end of
- * the paid period), not the date the admin clicked cancel. Until it passes, the plan is still
- * running and learners keep access, so it shows as Pending Cancellation, never as Canceled or
- * Ended (ENT-11534).
- *
- * Every plan in a self-service chain (trial, then paid) reads the same renewal record, so an earlier
- * plan that has already ended on its own date (e.g. the trial) gets the same future `canceledDate`
- * as the running paid plan. That plan is Ended, not Pending Cancellation.
- *
- * Behind the ENABLE_SSP_PAID_RENEWAL feature flag. With it off, any `canceledDate` means Canceled, as before.
+ * `canceledDate` is when the cancellation takes effect (the period end). Before it, the plan is
+ * Pending Cancellation, or Ended if it already expired (e.g. the trial). With
+ * ENABLE_SSP_PAID_RENEWAL off, any `canceledDate` means Canceled.
  */
 export const getSubscriptionStatus = (subscription: Subscription, canceledDate?: string | null): string => {
   const now = dayjs();

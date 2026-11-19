@@ -109,7 +109,7 @@ describe('SubscriptionLifecycle', () => {
     expect(screen.getByText('Teams')).toBeInTheDocument();
   });
 
-  describe('cancellation (ENT-11534)', () => {
+  describe('cancellation', () => {
     beforeEach(() => { features.ENABLE_SSP_PAID_RENEWAL = true; });
     afterEach(() => { features.ENABLE_SSP_PAID_RENEWAL = false; });
 
@@ -143,7 +143,7 @@ describe('SubscriptionLifecycle', () => {
     });
   });
 
-  describe('cancellation with ENABLE_SSP_PAID_RENEWAL off (as before ENT-11534)', () => {
+  describe('cancellation with ENABLE_SSP_PAID_RENEWAL off', () => {
     it('shows no Pending Cancellation status and keeps Current Period Ends when a cancellation is scheduled', () => {
       renderSubscriptionLifecycle('teams', { cancelAtPeriodEnd: true });
 
