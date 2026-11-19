@@ -75,8 +75,7 @@ const features = {
   ENABLE_NATIVE_BILLING: process.env.FEATURE_ENABLE_NATIVE_BILLING === 'true' || hasFeatureFlagEnabled('ENABLE_NATIVE_BILLING'),
   TOP_UP_LEARNER_CREDIT: process.env.FEATURE_TOP_UP_LEARNER_CREDIT === 'true' || hasFeatureFlagEnabled('TOP_UP_LEARNER_CREDIT'),
   AUDIT_TRAIL: process.env.FEATURE_AUDIT_TRAIL === 'true' || hasFeatureFlagEnabled('AUDIT_TRAIL'),
-  // Self-service (Teams / Essentials) paid plan renewal and cancellation UI, e.g. Pending Cancellation (ENT-11534).
-  // Launch together with enterprise-access's `enterprise_access.ssp_paid_renewal` waffle switch.
+  // Self-service paid renewal/cancellation UI. Turn on after the enterprise-access ssp_paid_renewal switch.
   ENABLE_SSP_PAID_RENEWAL: process.env.FEATURE_ENABLE_SSP_PAID_RENEWAL === 'true' || hasFeatureFlagEnabled('ENABLE_SSP_PAID_RENEWAL'),
 };
 

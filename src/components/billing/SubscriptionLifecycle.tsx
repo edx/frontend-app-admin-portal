@@ -130,7 +130,7 @@ const SubscriptionLifecycle = ({
     ? SUBSCRIPTION_TYPE_LABEL_MAP.essentials
     : SUBSCRIPTION_TYPE_LABEL_MAP.teams;
   const subscriptionTypeLabel = intl.formatMessage(subscriptionTypeMessage);
-  // The new cancellation UI (ENT-11534) is behind ENABLE_SSP_PAID_RENEWAL. With it off, show what we did before.
+  // Behind ENABLE_SSP_PAID_RENEWAL; with it off, the old UI is shown.
   const isSspPaidRenewalEnabled = features.ENABLE_SSP_PAID_RENEWAL;
   const showPendingCancellation = isSspPaidRenewalEnabled && cancelAtPeriodEnd;
 
@@ -197,7 +197,7 @@ const SubscriptionLifecycle = ({
                 <div className="font-weight-bold">{subscriptionTypeLabel}</div>
               </div>
 
-              {/* Status, only while a cancellation is pending (ENT-11534) */}
+              {/* Status, only while a cancellation is pending */}
               {showPendingCancellation && (
                 <div>
                   <div className="small text-muted">
