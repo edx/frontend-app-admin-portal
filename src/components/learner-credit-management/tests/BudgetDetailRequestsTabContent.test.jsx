@@ -10,8 +10,10 @@ import thunk from 'redux-thunk';
 
 import { axe } from 'jest-axe';
 import BudgetDetailRequestsTabContent from '../BudgetDetailRequestsTabContent';
+import { BudgetDetailPageContext } from '../BudgetDetailPageWrapper';
 import useBnrSubsidyRequests from '../data/hooks/useBnrSubsidyRequests';
-import { useBudgetId } from '../data';
+import { isBudgetRetiredOrExpired, useBudgetId, useSubsidyAccessPolicy } from '../data';
+import { BUDGET_STATUSES } from '../../EnterpriseApp/data/constants';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
 import { queryClient } from '../../test/testUtils';
 import '@testing-library/jest-dom/extend-expect';
@@ -21,6 +23,7 @@ jest.mock('../data/hooks/useBnrSubsidyRequests');
 jest.mock('../data', () => ({
   ...jest.requireActual('../data'),
   useBudgetId: jest.fn(),
+  useSubsidyAccessPolicy: jest.fn(),
   BNR_REQUEST_PAGE_SIZE: 10,
 }));
 jest.mock('../../../data/services/EnterpriseAccessApiService', () => ({
@@ -83,9 +86,16 @@ const defaultStore = {
   },
 };
 
+// The bulk action modals read their toast helpers from this context.
+const budgetDetailPageContextValue = {
+  successfulBulkApprovalToast: { displayToastForBulkApproval: jest.fn() },
+  successfulBulkDeclineToast: { displayToastForBulkDecline: jest.fn() },
+};
+
 const BudgetDetailRequestsTabContentWrapper = ({
   initialState = defaultStore,
   hookValues = defaultHookValues,
+  budgetStatus = BUDGET_STATUSES.active,
   ...props
 }) => {
   const store = mockStore(initialState);
@@ -95,13 +105,19 @@ const BudgetDetailRequestsTabContentWrapper = ({
   useBudgetId.mockReturnValue({
     subsidyAccessPolicyId: 'test-policy-id',
   });
+  // Mirrors how useSubsidyAccessPolicy derives `isRetiredOrExpired` from the budget status.
+  useSubsidyAccessPolicy.mockReturnValue({
+    data: { status: budgetStatus, isRetiredOrExpired: isBudgetRetiredOrExpired(budgetStatus) },
+  });
 
   return (
     <MemoryRouter>
       <QueryClientProvider client={queryClient()}>
         <IntlProvider locale="en">
           <Provider store={store}>
-            <BudgetDetailRequestsTabContent {...defaultProps} {...props} />
+            <BudgetDetailPageContext.Provider value={budgetDetailPageContextValue}>
+              <BudgetDetailRequestsTabContent {...defaultProps} {...props} />
+            </BudgetDetailPageContext.Provider>
           </Provider>
         </IntlProvider>
       </QueryClientProvider>
@@ -220,6 +236,47 @@ describe('BudgetDetailRequestsTabContent', () => {
 
       expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: /decline/i })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('Retired or Expired Budget', () => {
+    const budgetEndedNotice = 'This budget has ended, so requests can no longer be approved. You can still decline pending requests.';
+    // The first checkbox is "Select all"; the second selects the first row, which reveals the bulk actions.
+    const selectFirstRow = (user) => user.click(screen.getAllByRole('checkbox')[1]);
+
+    it.each([
+      BUDGET_STATUSES.expired,
+      BUDGET_STATUSES.retired,
+    ])('should only allow declining requests when the budget is %s', async (budgetStatus) => {
+      const user = userEvent.setup();
+      render(<BudgetDetailRequestsTabContentWrapper budgetStatus={budgetStatus} />);
+
+      expect(screen.getByText(budgetEndedNotice)).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Approve' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Decline' })).toBeEnabled();
+
+      await selectFirstRow(user);
+
+      expect(await screen.findByRole('button', { name: /Decline \(\d+\)/ })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: /Approve \(\d+\)/ })).not.toBeInTheDocument();
+    });
+
+    it.each([
+      BUDGET_STATUSES.active,
+      BUDGET_STATUSES.scheduled,
+      BUDGET_STATUSES.expiring,
+    ])('should keep the approve actions and show no notice when the budget is %s', async (budgetStatus) => {
+      const user = userEvent.setup();
+      render(<BudgetDetailRequestsTabContentWrapper budgetStatus={budgetStatus} />);
+
+      expect(screen.queryByText(budgetEndedNotice)).not.toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Approve' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Decline' })).toBeEnabled();
+
+      await selectFirstRow(user);
+
+      expect(await screen.findByRole('button', { name: /Approve \(\d+\)/ })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /Decline \(\d+\)/ })).toBeInTheDocument();
     });
   });
 
