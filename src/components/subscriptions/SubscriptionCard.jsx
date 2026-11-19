@@ -10,7 +10,8 @@ import { FormattedMessage, getLocale, useIntl } from '@edx/frontend-platform/i18
 
 import classNames from 'classnames';
 import {
-  ACTIVE, CANCELED, FREE_TRIAL_BADGE, SCHEDULED, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL, SUBSCRIPTION_STATUS_BADGE_MAP,
+  ACTIVE, CANCELED, FREE_TRIAL_BADGE, PENDING_CANCELLATION, SCHEDULED, SELF_SERVICE_PAID, SELF_SERVICE_TRIAL,
+  SUBSCRIPTION_STATUS_BADGE_MAP,
 } from './data/constants';
 import { SubscriptionContext } from './SubscriptionData';
 import { ADMINISTER_SUBSCRIPTIONS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
@@ -18,6 +19,7 @@ import { makePlural } from '../../utils';
 import { getSubscriptionStatus } from './data/utils';
 import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
 import { useSubscription } from '../billing/data/hooks';
+import { features } from '../../config';
 
 const SubscriptionCard = ({
   enterpriseUuid,
@@ -45,6 +47,12 @@ const SubscriptionCard = ({
   const formattedExpirationDate = dayjs(expirationDate).format('MMMM D, YYYY');
   const formattedCanceledDate = canceledDate ? dayjs(canceledDate).format('MMMM D, YYYY') : null;
   const subscriptionStatus = getSubscriptionStatus(subscription, canceledDate);
+  // Learners keep access until the cancellation date.
+  const isPlanRunning = [ACTIVE, PENDING_CANCELLATION].includes(subscriptionStatus);
+  // Trial "scheduled to end" message; flag off keeps the old condition.
+  const isTrialCancellationScheduled = subscriptionStatus === (
+    features.ENABLE_SSP_PAID_RENEWAL ? PENDING_CANCELLATION : CANCELED
+  );
 
   const isSelfServiceSub = [SELF_SERVICE_PAID, SELF_SERVICE_TRIAL].includes(planType);
   const periodEndDate = typeof currentPeriodEnd === 'number'
@@ -136,7 +144,7 @@ const SubscriptionCard = ({
                 />
               </span>
             )}
-            {subscriptionStatus === CANCELED && (
+            {isTrialCancellationScheduled && (
               <span className="d-inline mt-2">
                 <FormattedMessage
                   id="subscriptions.subscriptionCard.canceledTrialDescription"
@@ -159,12 +167,24 @@ const SubscriptionCard = ({
             {formattedStartDate} - {formattedExpirationDate}
           </span>
         )}
+        {planType !== SELF_SERVICE_TRIAL && subscriptionStatus === PENDING_CANCELLATION && (
+          <span className="d-block w-100 mt-2">
+            <FormattedMessage
+              id="subscriptions.subscriptionCard.pendingCancellationDescription"
+              defaultMessage="This plan won't renew. It expires on {boldDate}. After that, your learners' enrollments move to Audit."
+              description="Message shown on a paid subscription plan that the admin has canceled but that is still active until the end of the paid period"
+              values={{
+                boldDate: <span className="font-weight-bold">{formattedCanceledDate}</span>,
+              }}
+            />
+          </span>
+        )}
       </div>
     );
     return (
       <Card.Header
         className={classNames({
-          'pb-1': subscriptionStatus !== ACTIVE,
+          'pb-1': !isPlanRunning,
         })}
         title={cardTitle}
         subtitle={subtitle}
@@ -179,7 +199,7 @@ const SubscriptionCard = ({
   };
 
   const renderCardSection = () => {
-    if (subscriptionStatus !== ACTIVE) {
+    if (!isPlanRunning) {
       return null;
     }
 
@@ -204,7 +224,7 @@ const SubscriptionCard = ({
     <Card
       orientation="horizontal"
       className={classNames('subscription-card', {
-        'pb-4': subscriptionStatus !== ACTIVE,
+        'pb-4': !isPlanRunning,
       })}
     >
       <Card.Body>

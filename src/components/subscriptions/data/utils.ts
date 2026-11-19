@@ -2,11 +2,12 @@ import dayjs from 'dayjs';
 import { logError } from '@edx/frontend-platform/logging';
 import { camelCaseObject } from '@edx/frontend-platform';
 
+import { features } from '../../../config';
 import EnterpriseAccessApiService from '../../../data/services/EnterpriseAccessApiService';
 import { transformActionToAuditTrailRow } from '../../AuditTrail/data/utils';
 import type { AuditTrailAction, AuditTrailAuthenticatedUser, AuditTrailRow } from '../../AuditTrail/data/types';
 import {
-  ASSIGNED, ACTIVE, CANCELED, ENDED, ENROLLABLE_STATUSES, REVOCABLE_STATUSES,
+  ASSIGNED, ACTIVE, CANCELED, ENDED, ENROLLABLE_STATUSES, PENDING_CANCELLATION, REVOCABLE_STATUSES,
   SCHEDULED, SEEN_SUBSCRIPTION_EXPIRATION_MODAL_COOKIE_PREFIX,
 } from './constants';
 
@@ -35,11 +36,21 @@ interface Subscription {
   [key: string]: any;
 }
 
+/**
+ * Returns the display status of a subscription plan.
+ *
+ * `canceledDate` is when the cancellation takes effect (the period end). Before it, the plan is
+ * Pending Cancellation, or Ended if it already expired (e.g. the trial). With
+ * ENABLE_SSP_PAID_RENEWAL off, any `canceledDate` means Canceled.
+ */
 export const getSubscriptionStatus = (subscription: Subscription, canceledDate?: string | null): string => {
+  const now = dayjs();
   if (canceledDate) {
+    if (features.ENABLE_SSP_PAID_RENEWAL && now.isBefore(canceledDate)) {
+      return now.isAfter(subscription.expirationDate) ? ENDED : PENDING_CANCELLATION;
+    }
     return CANCELED;
   }
-  const now = dayjs();
 
   if (now.isBefore(subscription.startDate)) {
     return SCHEDULED;

@@ -1,7 +1,10 @@
 import dayjs from 'dayjs';
-import { ACTIVE, SCHEDULED, ENDED } from '../../data/constants';
+import {
+  ACTIVE, CANCELED, ENDED, PENDING_CANCELLATION, SCHEDULED,
+} from '../../data/constants';
 import { getSubscriptionStatus, openStripeBillingPortal, sortSubscriptionsByStatus } from '../../data/utils';
 import EnterpriseAccessApiService from '../../../../data/services/EnterpriseAccessApiService';
+import { features } from '../../../../config';
 
 describe('utils', () => {
   const scheduledSub = {
@@ -25,6 +28,36 @@ describe('utils', () => {
       expect(getSubscriptionStatus(scheduledSub)).toEqual(SCHEDULED);
       expect(getSubscriptionStatus(activeSub)).toEqual(ACTIVE);
       expect(getSubscriptionStatus(expiredSub)).toEqual(ENDED);
+    });
+
+    describe('with ENABLE_SSP_PAID_RENEWAL on', () => {
+      beforeEach(() => { features.ENABLE_SSP_PAID_RENEWAL = true; });
+      afterEach(() => { features.ENABLE_SSP_PAID_RENEWAL = false; });
+
+      it('returns Pending Cancellation while the cancellation date is in the future', () => {
+        const canceledDate = dayjs().add(5, 'days').toISOString();
+        expect(getSubscriptionStatus(activeSub, canceledDate)).toEqual(PENDING_CANCELLATION);
+      });
+
+      it('returns Ended, not Pending Cancellation, for an earlier plan that already ended (e.g. the trial)', () => {
+        const canceledDate = dayjs().add(5, 'days').toISOString();
+        expect(getSubscriptionStatus(expiredSub, canceledDate)).toEqual(ENDED);
+      });
+
+      it('returns Canceled once the cancellation date has passed', () => {
+        const canceledDate = dayjs().subtract(1, 'days').toISOString();
+        expect(getSubscriptionStatus(expiredSub, canceledDate)).toEqual(CANCELED);
+      });
+    });
+
+    describe('with ENABLE_SSP_PAID_RENEWAL off', () => {
+      it.each([
+        ['in the future', dayjs().add(5, 'days').toISOString()],
+        ['in the past', dayjs().subtract(1, 'days').toISOString()],
+      ])('returns Canceled for any cancellation date (%s), as before', (_, canceledDate) => {
+        expect(getSubscriptionStatus(activeSub, canceledDate)).toEqual(CANCELED);
+        expect(getSubscriptionStatus(expiredSub, canceledDate)).toEqual(CANCELED);
+      });
     });
   });
 
