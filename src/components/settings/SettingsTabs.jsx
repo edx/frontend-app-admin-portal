@@ -19,6 +19,7 @@ import {
   SSO_TAB,
   APPEARANCE_TAB,
   API_CREDENTIALS_TAB,
+  MULTI_PLAN_FUNDING_TAB,
   SCHOLAR_THEME,
   SETTINGS_TABS_VALUES,
   SETTINGS_TAB_PARAM,
@@ -28,6 +29,10 @@ import { SettingsAppearanceTab } from './SettingsAppearanceTab';
 import SettingsLMSTab from './SettingsLMSTab';
 import SettingsSSOTab from './SettingsSSOTab';
 import SettingsApiCredentialsTab from './SettingsApiCredentialsTab';
+import SettingsMultiPlanFundingTab from './SettingsMultiPlanFundingTab';
+import { useIsMultiPlanFundingOptInVisible } from './SettingsMultiPlanFundingTab/data/hooks';
+import { MULTI_PLAN_FUNDING_TAB_TOUR_TARGET } from './SettingsMultiPlanFundingTab/constants';
+import multiPlanFundingMessages from './SettingsMultiPlanFundingTab/messages';
 import { features } from '../../config';
 import { updatePortalConfigurationEvent } from '../../data/actions/portalConfiguration';
 
@@ -80,6 +85,7 @@ const SettingsTabs = ({
   } = features;
 
   const tab = useCurrentSettingsTab();
+  const isMultiPlanFundingTabShown = useIsMultiPlanFundingOptInVisible();
 
   const navigate = useNavigate();
 
@@ -164,9 +170,28 @@ const SettingsTabs = ({
         </Tab>,
       );
     }
+    if (isMultiPlanFundingTabShown) {
+      initialTabs.push(
+        <Tab
+          key={MULTI_PLAN_FUNDING_TAB}
+          eventKey={MULTI_PLAN_FUNDING_TAB}
+          title={(
+            <span id={MULTI_PLAN_FUNDING_TAB_TOUR_TARGET}>
+              <FormattedMessage {...multiPlanFundingMessages.tabLabel} />
+            </span>
+          )}
+        >
+          <SettingsMultiPlanFundingTab
+            enterpriseId={enterpriseId}
+            enterpriseSlug={enterpriseSlug}
+          />
+        </Tab>,
+      );
+    }
 
     return initialTabs;
   }, [
+    isMultiPlanFundingTabShown,
     FEATURE_SSO_SETTINGS_TAB,
     FEATURE_API_CREDENTIALS_TAB,
     SETTINGS_PAGE_APPEARANCE_TAB,
