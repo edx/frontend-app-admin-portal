@@ -29,4 +29,9 @@ export type SubsidyAccessPolicy = {
     amountAllocatedUsd: number;
   };
   bnrEnabled?: boolean;
+  // Multi-plan learner credit (ENT-12446): whether the budget is opted in to the multi-plan pool.
+  isMultiPlanEligible?: boolean;
+  active?: boolean;
+  // Budget total in USD cents.
+  spendLimit?: number;
 };

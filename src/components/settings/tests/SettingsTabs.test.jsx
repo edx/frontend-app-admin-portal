@@ -15,6 +15,7 @@ import SettingsTabs from '../SettingsTabs';
 import { SCHOLAR_THEME } from '../data/constants';
 
 import { features } from '../../../config';
+import { SubsidyRequestsContext } from '../../subsidy-requests';
 import '@testing-library/jest-dom/extend-expect';
 import { accessibilitySettings } from '../../../../tests/accessibility-settings';
 
@@ -59,6 +60,14 @@ jest.mock(
   },
 );
 
+const MULTI_PLAN_FUNDING_CONTENT = 'multi-plan funding plans';
+jest.mock(
+  '../SettingsMultiPlanFundingTab/',
+  () => function SettingsMultiPlanFundingTab() {
+    return <div>{MULTI_PLAN_FUNDING_CONTENT}</div>;
+  },
+);
+
 const enterpriseId = 'test-enterprise';
 const initialStore = {
   portalConfiguration: {
@@ -81,13 +90,17 @@ const mockStore = configureMockStore([thunk]);
 const getMockStore = store => mockStore(store);
 const defaultStore = getMockStore({ ...initialStore });
 
-const SettingsTabsWithRouter = ({ store = defaultStore }) => (
+const SettingsTabsWithRouter = ({ store = defaultStore, subsidyRequestConfiguration = null }) => (
   <IntlProvider locale="en">
     <MemoryRouter initialEntries={['/settings']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/settings" element={<SettingsTabs />} />
-        </Routes>
+        <SubsidyRequestsContext.Provider value={{ subsidyRequestConfiguration }}>
+          <Routes>
+            <Route path="/settings" element={<SettingsTabs />} />
+            {/* Selecting a tab navigates to the enterprise settings URL, so match it too (as SettingsPage does). */}
+            <Route path="/:enterpriseSlug/admin/settings/*" element={<SettingsTabs />} />
+          </Routes>
+        </SubsidyRequestsContext.Provider>
       </Provider>
     </MemoryRouter>
   </IntlProvider>
@@ -142,5 +155,50 @@ describe('<SettingsTabs />', () => {
     features.FEATURE_API_CREDENTIALS_TAB = false;
     render(<SettingsTabsWithRouter />);
     expect(screen.queryByText(API_CREDENTIALS_CONTENT)).not.toBeInTheDocument();
+  });
+});
+
+describe('<SettingsTabs /> multi-plan funding tab', () => {
+  const storeWithFlag = (isMultiPlanFundingEnabled) => getMockStore({
+    portalConfiguration: {
+      ...initialStore.portalConfiguration,
+      enterpriseFeatures: { enterpriseMultiPlanFundingEnabled: isMultiPlanFundingEnabled },
+    },
+  });
+
+  it.each([
+    { isMultiPlanFundingEnabled: false, enableMultiPlanFunding: true },
+    { isMultiPlanFundingEnabled: true, enableMultiPlanFunding: false },
+    { isMultiPlanFundingEnabled: true, enableMultiPlanFunding: undefined },
+  ])('is hidden unless the flag and the customer switch are both on (%p)', ({
+    isMultiPlanFundingEnabled, enableMultiPlanFunding,
+  }) => {
+    render(
+      <SettingsTabsWithRouter
+        store={storeWithFlag(isMultiPlanFundingEnabled)}
+        subsidyRequestConfiguration={{ enableMultiPlanFunding }}
+      />,
+    );
+    expect(screen.queryByText('Multi-plan funding')).not.toBeInTheDocument();
+  });
+
+  it('is shown with a tour target when the flag and the customer switch are on', async () => {
+    const user = userEvent.setup();
+    render(
+      <SettingsTabsWithRouter
+        store={storeWithFlag(true)}
+        subsidyRequestConfiguration={{ enableMultiPlanFunding: true }}
+      />,
+    );
+    const tabLabel = screen.getByText('Multi-plan funding');
+    expect(tabLabel).toHaveAttribute('id', 'multi-plan-funding-settings-tab');
+    const tab = screen.getByRole('tab', { name: 'Multi-plan funding' });
+    expect(tab).toHaveAttribute('aria-selected', 'false');
+
+    await user.click(tabLabel);
+
+    // The click navigates to /sluggy/admin/settings/multi_plan_funding, which selects the tab.
+    expect(screen.getByRole('tab', { name: 'Multi-plan funding' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByText(MULTI_PLAN_FUNDING_CONTENT)).toBeVisible();
   });
 });

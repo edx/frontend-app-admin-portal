@@ -148,6 +148,14 @@ export const learnerCreditManagementQueryKeys = {
   auditTrail: (enterpriseId) => [...learnerCreditManagementQueryKeys.all, 'auditTrail', enterpriseId],
 };
 
+/**
+ * Multi-plan learner credit funding (ENT-12457). Backend-controlled flag that gates every multi-plan UI surface.
+ * edx-enterprise exposes it as `enterprise_features.enterprise_multi_plan_funding_enabled` on the enterprise
+ * customer response, following the Invite Admins precedent (`enterprise_invite_admins_enabled`, ENT-11267).
+ * `LmsApiService.fetchEnterpriseBySlug` camelCases `enterprise_features`, so Redux holds the camelCased key.
+ */
+export const MULTI_PLAN_FUNDING_FEATURE_FLAG = 'enterpriseMultiPlanFundingEnabled';
+
 // Route to learner credit
 export const LEARNER_CREDIT_ROUTE = '/:enterpriseSlug/admin/:enterpriseAppPage/:budgetId/:activeTabKey?';
 

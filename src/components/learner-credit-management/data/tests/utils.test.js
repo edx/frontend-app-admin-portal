@@ -7,6 +7,7 @@ import {
   getAssignableCourseRuns,
   getBudgetCsvFileName,
   getSpentTableSearchQuery,
+  getSplitFundingBreakdown,
   getBudgetStatus,
   getLearnerRequestStateCountsByState,
   getNormalizedStartDate,
@@ -20,6 +21,7 @@ import {
   transformRequestOverview,
   transformSelectedApprovedRequestRows,
   transformSubsidySummary,
+  transformUtilizationTableSubsidyTransactionResults,
 } from '../utils';
 import { COURSE_PACING_MAP, EXEC_ED_OFFER_TYPE } from '../constants';
 import EnterpriseDataApiService from '../../../../data/services/EnterpriseDataApiService';
@@ -1066,5 +1068,83 @@ describe('isTopUpCandidate', () => {
     { isPolicy: false, status: 'Active', expected: false },
   ])('returns $expected when isPolicy=$isPolicy, status=$status', ({ isPolicy, status, expected }) => {
     expect(isTopUpCandidate({ isPolicy, status })).toBe(expected);
+  });
+});
+
+describe('transformUtilizationTableSubsidyTransactionResults (multi-plan split funding)', () => {
+  const baseTransaction = {
+    uuid: 'txn-1',
+    created: '2026-09-10T00:00:00Z',
+    unit: 'usd_cents',
+    quantity: -120000,
+    lmsUserEmail: 'learner@example.com',
+    contentTitle: 'Course',
+    parentContentKey: 'edX+Course',
+  };
+
+  it('passes through splitFunding when present', () => {
+    const splitFunding = { totalQuantity: 190000, legs: [] };
+    const [result] = transformUtilizationTableSubsidyTransactionResults([{ ...baseTransaction, splitFunding }]);
+    expect(result.splitFunding).toEqual(splitFunding);
+  });
+
+  it.each([undefined, null])('defaults splitFunding to null for single-budget rows (%s)', (splitFunding) => {
+    const [result] = transformUtilizationTableSubsidyTransactionResults([{ ...baseTransaction, splitFunding }]);
+    expect(result.splitFunding).toBeNull();
+  });
+});
+
+describe('getSplitFundingBreakdown', () => {
+  const budgetNamesById = {
+    'policy-a': 'LC Executive Education',
+    'policy-b': 'BNR OCM only',
+  };
+
+  it.each([
+    null,
+    undefined,
+    {},
+    { legs: [] },
+    { legs: [{ legOrder: 1, subsidyAccessPolicyUuid: 'policy-a', quantity: -1000 }] },
+  ])('returns null when the transaction is not split across budgets (%p)', (splitFunding) => {
+    expect(getSplitFundingBreakdown(splitFunding, budgetNamesById)).toBeNull();
+  });
+
+  it('orders legs by leg order, resolves budget names and converts cents to dollars', () => {
+    const breakdown = getSplitFundingBreakdown({
+      totalQuantity: 190000,
+      legs: [
+        {
+          legOrder: 2, transactionUuid: 'txn-b', subsidyAccessPolicyUuid: 'policy-b', quantity: 70000, reversed: true,
+        },
+        {
+          legOrder: 1, transactionUuid: 'txn-a', subsidyAccessPolicyUuid: 'policy-a', quantity: -120000, reversed: false,
+        },
+      ],
+    }, budgetNamesById);
+    expect(breakdown).toEqual({
+      legs: [
+        {
+          key: 'txn-a', subsidyAccessPolicyUuid: 'policy-a', budgetName: 'LC Executive Education', amount: 1200, reversed: false,
+        },
+        {
+          key: 'txn-b', subsidyAccessPolicyUuid: 'policy-b', budgetName: 'BNR OCM only', amount: 700, reversed: true,
+        },
+      ],
+      total: 1900,
+    });
+  });
+
+  it('falls back to a null budget name and a summed total when data is missing', () => {
+    const breakdown = getSplitFundingBreakdown({
+      legs: [
+        { legOrder: 1, subsidyAccessPolicyUuid: 'policy-a', quantity: 23000 },
+        { legOrder: 2, subsidyAccessPolicyUuid: 'unknown-policy', quantity: 32000 },
+      ],
+    }, budgetNamesById);
+    expect(breakdown.legs[1]).toEqual({
+      key: 'unknown-policy-2', subsidyAccessPolicyUuid: 'unknown-policy', budgetName: null, amount: 320, reversed: false,
+    });
+    expect(breakdown.total).toEqual(550);
   });
 });

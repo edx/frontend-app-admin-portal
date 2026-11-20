@@ -143,7 +143,40 @@ export const transformUtilizationTableSubsidyTransactionResults = results => res
   uuid: result.uuid,
   // In the transaction list response, `parent_content_key` is the course key, and `content_key` is the course run key.
   courseKey: result.parentContentKey,
+  // Multi-plan learner credit: present (non-null) only when the enrollment was funded by more than one
+  // budget. Shape: { splitRecordUuid, state, totalQuantity, legs: [{ legOrder, subsidyAccessPolicyUuid,
+  // quantity, reversed, ... }] }. Quantities are in USD cents.
+  splitFunding: result.splitFunding ?? null,
 }));
+
+/**
+ * Builds the per-budget breakdown for a split-funded spent transaction.
+ *
+ * @param {object} splitFunding The `splitFunding` field of a transformed spent table row.
+ * @param {object} budgetNamesById Map of subsidy access policy UUID to budget display name.
+ *
+ * @returns {object|null} `{ legs: [{ key, subsidyAccessPolicyUuid, budgetName, amount, reversed }], total }` with
+ *   amounts in dollars,
+ *   or null when the transaction was not funded by more than one budget.
+ */
+export const getSplitFundingBreakdown = (splitFunding, budgetNamesById = {}) => {
+  if (!splitFunding?.legs || splitFunding.legs.length < 2) {
+    return null;
+  }
+  const legs = [...splitFunding.legs]
+    .sort((a, b) => a.legOrder - b.legOrder)
+    .map(leg => ({
+      key: leg.transactionUuid || `${leg.subsidyAccessPolicyUuid}-${leg.legOrder}`,
+      subsidyAccessPolicyUuid: leg.subsidyAccessPolicyUuid,
+      budgetName: budgetNamesById[leg.subsidyAccessPolicyUuid] || null,
+      amount: Math.abs(leg.quantity) / 100,
+      reversed: !!leg.reversed,
+    }));
+  const total = splitFunding.totalQuantity !== undefined && splitFunding.totalQuantity !== null
+    ? Math.abs(splitFunding.totalQuantity) / 100
+    : legs.reduce((sum, leg) => sum + leg.amount, 0);
+  return { legs, total };
+};
 
 /**
  * Gets appropriate color variant for the annotated progress bar.
