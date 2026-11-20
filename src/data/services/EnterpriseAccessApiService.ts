@@ -450,6 +450,17 @@ class EnterpriseAccessApiService {
   }
 
   /**
+   * Opt a budget in to (or out of) the multi-plan learner credit pool (ENT-12446).
+   * Responds 200 with the updated policy, or 422 when multi-plan funding is turned off for the customer.
+   * @param {string} subsidyAccessPolicyUUID The UUID of the subsidy access policy (budget).
+   * @param {boolean} isMultiPlanEligible Whether the budget should be part of the multi-plan pool.
+   */
+  static updateSubsidyAccessPolicyMultiPlanFunding(subsidyAccessPolicyUUID: string, isMultiPlanEligible: boolean) {
+    const url = `${EnterpriseAccessApiService.baseUrl}/subsidy-access-policies/${subsidyAccessPolicyUUID}/multi-plan-funding/`;
+    return EnterpriseAccessApiService.apiClient().patch(url, { is_multi_plan_eligible: isMultiPlanEligible });
+  }
+
+  /**
    * Allocates assignments for a specific subsidy access policy.
    * @param {String} subsidyAccessPolicyUUID The UUID of the subsidy access policy to allocate content assignments for.
    * @param {Object} payload The metadata to send to the API, including learner emails and the content key.

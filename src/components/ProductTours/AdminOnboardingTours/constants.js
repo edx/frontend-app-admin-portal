@@ -80,6 +80,8 @@ export const ALLOCATE_LEARNING_BUDGETS_TARGETS = {
   BUDGET_TABLE: 'budget-table',
   ZERO_STATE_ASSIGN_CARD: 'zero-state-assign-card',
   BUDGET_SPENT_TABLE: 'spent-budget-table',
+  // Multi-plan learner credit: "Funded from" column header in the Spent table.
+  BUDGET_SPENT_FUNDED_FROM: 'spent-budget-funded-from',
   BUDGET_CATALOG_TAB: 'budget-catalog-tab',
   BUDGET_MEMBERS_TAB: 'budget-members-tab',
   LEARNER_CREDIT_MANAGEMENT_BREADCRUMBS: 'learner-credit-management-breadcrumbs',

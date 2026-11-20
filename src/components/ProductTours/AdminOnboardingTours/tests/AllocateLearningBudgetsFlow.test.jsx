@@ -7,7 +7,12 @@ import configureStore from 'redux-mock-store';
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 
 import useAllocateLearningBudgetsFlow from '../flows/AllocateLearningBudgetsFlow';
-import { orderBudgets, useBudgetDetailActivityOverview, useSubsidyAccessPolicy } from '../../../learner-credit-management/data';
+import {
+  orderBudgets,
+  useBudgetDetailActivityOverview,
+  useIsMultiPlanFundingEnabled,
+  useSubsidyAccessPolicy,
+} from '../../../learner-credit-management/data';
 import { useEnterpriseBudgets } from '../../../EnterpriseSubsidiesContext/data/hooks';
 
 jest.mock('react-router', () => ({
@@ -21,6 +26,7 @@ jest.mock('@2uinc/frontend-enterprise-utils', () => ({
 jest.mock('../../../learner-credit-management/data', () => ({
   orderBudgets: jest.fn(),
   useBudgetDetailActivityOverview: jest.fn(),
+  useIsMultiPlanFundingEnabled: jest.fn(),
   useSubsidyAccessPolicy: jest.fn(),
 }));
 
@@ -66,6 +72,7 @@ describe('useAllocateLearningBudgetsFlow', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useIsMultiPlanFundingEnabled.mockReturnValue(false);
     useBudgetDetailActivityOverview.mockReturnValue({
       isLoading: false,
       isFetching: false,
@@ -272,6 +279,121 @@ describe('useAllocateLearningBudgetsFlow', () => {
       const { result } = renderHookWithProviders(() => useAllocateLearningBudgetsFlow(props));
       result.current[6].onEnd();
       expect(mockHandleEndTour).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('Multi-plan learner credit "Funded From" copy (no extra step)', () => {
+    const SPENT_COPY = 'The Spent table allows you to review spending details for this budget.';
+    const SPENT_FUNDED_FROM_COPY = 'The Spent table allows you to review spending details for this budget. Some '
+      + 'enrollments are funded by more than one budget: select View details in the Funded From column to see how '
+      + 'much each budget contributed.';
+    const BNE_ACTIVITY_COPY = 'Track all budget activity, including enrollment spending using the “Activity” tab.';
+    const BNE_ACTIVITY_FUNDED_FROM_COPY = 'Track all budget activity, including enrollment spending using the '
+      + '“Activity” tab. Some enrollments are funded by more than one budget: select View details in the Spent '
+      + 'table’s Funded From column to see how much each budget contributed.';
+    const props = {
+      currentStep: 0,
+      enablePortalLearnerCreditManagementScreen: true,
+      enterpriseId: 'test-enterprise-uuid',
+      enterpriseSlug: 'test-enterprise-slug',
+      handleBackTour: mockHandleBackTour,
+      handleEndTour: mockHandleEndTour,
+      setCurrentStep: mockSetCurrentStep,
+      targetSelector: '',
+    };
+
+    const renderFundedFromColumn = () => {
+      const header = document.createElement('span');
+      header.id = 'spent-budget-funded-from';
+      document.body.appendChild(header);
+    };
+    const bodyFor = (steps, target) => steps.find(step => step.target === target).body;
+
+    beforeEach(() => {
+      useParams.mockReturnValue({ '*': 'learner-credit/budget/test-subscription-uuid' });
+    });
+
+    afterEach(() => {
+      document.body.innerHTML = '';
+    });
+
+    describe('assignment budgets', () => {
+      beforeEach(() => {
+        useSubsidyAccessPolicy.mockReturnValue({ data: { policyType: 'AssignedLearnerCreditAccessPolicy' } });
+      });
+
+      it.each([
+        { contentAssignmentsCount: 1 },
+        { contentAssignmentsCount: 0 },
+      ])('explains Funded From in the existing Spent table step, without adding a step (%p)', ({
+        contentAssignmentsCount,
+      }) => {
+        useIsMultiPlanFundingEnabled.mockReturnValue(true);
+        renderFundedFromColumn();
+        useBudgetDetailActivityOverview.mockReturnValue({
+          data: { spentTransactions: { count: 1 }, contentAssignments: { count: contentAssignmentsCount } },
+        });
+
+        const { result } = renderHookWithProviders(() => useAllocateLearningBudgetsFlow(props));
+
+        expect(result.current).toHaveLength(7);
+        expect(result.current.map(step => step.target)).not.toContain('#spent-budget-funded-from');
+        expect(bodyFor(result.current, '#spent-budget-table')).toBe(SPENT_FUNDED_FROM_COPY);
+      });
+
+      it.each([
+        { isMultiPlanFundingEnabled: false, columnRendered: true },
+        { isMultiPlanFundingEnabled: true, columnRendered: false },
+      ])('keeps the original Spent table copy otherwise (%p)', ({ isMultiPlanFundingEnabled, columnRendered }) => {
+        useIsMultiPlanFundingEnabled.mockReturnValue(isMultiPlanFundingEnabled);
+        if (columnRendered) {
+          renderFundedFromColumn();
+        }
+        useBudgetDetailActivityOverview.mockReturnValue({
+          data: { spentTransactions: { count: 1 }, contentAssignments: { count: 1 } },
+        });
+
+        const { result } = renderHookWithProviders(() => useAllocateLearningBudgetsFlow(props));
+
+        expect(result.current).toHaveLength(7);
+        expect(bodyFor(result.current, '#spent-budget-table')).toBe(SPENT_COPY);
+      });
+    });
+
+    describe.each([
+      { variant: 'browse & enroll', groupAssociations: [], length: 3 },
+      { variant: 'invite-only browse & enroll', groupAssociations: ['group1-uuid'], length: 6 },
+    ])('$variant budgets', ({ groupAssociations, length }) => {
+      beforeEach(() => {
+        useSubsidyAccessPolicy.mockReturnValue({
+          data: { policyType: 'PerLearnerSpendCreditAccessPolicy', groupAssociations },
+        });
+      });
+
+      it('explains Funded From in the existing Activity step when the flag is on and the column is rendered', () => {
+        useIsMultiPlanFundingEnabled.mockReturnValue(true);
+        renderFundedFromColumn();
+
+        const { result } = renderHookWithProviders(() => useAllocateLearningBudgetsFlow(props));
+
+        expect(result.current).toHaveLength(length);
+        expect(bodyFor(result.current, '#track-budget-activity')).toBe(BNE_ACTIVITY_FUNDED_FROM_COPY);
+      });
+
+      it.each([
+        { isMultiPlanFundingEnabled: false, columnRendered: true },
+        { isMultiPlanFundingEnabled: true, columnRendered: false },
+      ])('keeps the original Activity copy otherwise (%p)', ({ isMultiPlanFundingEnabled, columnRendered }) => {
+        useIsMultiPlanFundingEnabled.mockReturnValue(isMultiPlanFundingEnabled);
+        if (columnRendered) {
+          renderFundedFromColumn();
+        }
+
+        const { result } = renderHookWithProviders(() => useAllocateLearningBudgetsFlow(props));
+
+        expect(result.current).toHaveLength(length);
+        expect(bodyFor(result.current, '#track-budget-activity')).toBe(BNE_ACTIVITY_COPY);
+      });
     });
   });
 

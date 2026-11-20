@@ -31,3 +31,5 @@ export { default as useBulkDeclineBnrRequests } from './useBulkDeclineBnrRequest
 export { default as useSuccessfulBulkDeclineToastContextValue } from './useSuccessfulBulkDeclineToastContextValue';
 export { default as useAssignmentAuditTrail } from './useAssignmentAuditTrail';
 export { default as useTopUpEligibility } from './useTopUpEligibility';
+export { default as useIsMultiPlanFundingEnabled, selectIsMultiPlanFundingEnabled } from './useIsMultiPlanFundingEnabled';
+export { default as useSubsidyAccessPolicyNames } from './useSubsidyAccessPolicyNames';
