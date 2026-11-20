@@ -15,7 +15,7 @@ import { isBudgetRetiredOrExpired, getBudgetStatus } from '../utils';
  * @param {*} queryKey The queryKey from the associated `useQuery` call.
  * @returns The subsidy access policy object, with the `isAssignable` property added.
  */
-const getSubsidyAccessPolicy = async ({ queryKey }) => {
+export const getSubsidyAccessPolicy = async ({ queryKey }) => {
   const subsidyAccessPolicyUUID = queryKey[2];
   const response: AxiosResponse = await EnterpriseAccessApiService.retrieveSubsidyAccessPolicy(subsidyAccessPolicyUUID);
   const subsidyAccessPolicy: SubsidyAccessPolicy = camelCaseObject(response.data);
