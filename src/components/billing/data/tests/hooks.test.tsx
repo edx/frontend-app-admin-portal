@@ -33,7 +33,6 @@ const EMBARGOED_COUNTRIES = [
   ['IR', 'Iran'],
   ['KP', 'North Korea'],
   ['RU', 'Russia'],
-  ['SY', 'Syria'],
 ] as const;
 
 // Helper to create mock AxiosResponse
@@ -693,6 +692,7 @@ describe('Country Code Utilities', () => {
       ['FR', 'France'],
       ['JP', 'Japan'],
       ['AU', 'Australia'],
+      ['SY', 'Syria'],
     ])('should include common country %s (%s)', (code) => {
       const countryCodes = getSupportedCountryCodes();
       expect(countryCodes).toContain(code);

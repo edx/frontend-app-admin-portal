@@ -13,9 +13,9 @@ export interface Country {
  * List of embargoed countries that should be excluded from billing options.
  *
  * These countries are excluded due to international sanctions and trade restrictions:
- * BY (Belarus), CU (Cuba), IR (Iran), KP (North Korea), RU (Russia), SY (Syria)
+ * BY (Belarus), CU (Cuba), IR (Iran), KP (North Korea), RU (Russia)
  */
-const EMBARGOED_COUNTRY_CODES = new Set(['BY', 'CU', 'IR', 'KP', 'RU', 'SY']);
+const EMBARGOED_COUNTRY_CODES = new Set(['BY', 'CU', 'IR', 'KP', 'RU']);
 
 /**
  * Get all supported ISO 3166-1 alpha-2 country codes for billing and payment methods.
