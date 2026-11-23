@@ -120,10 +120,12 @@ const RequestsTable = ({
         ),
       }]}
       bulkActions={[
-        <RequestsTableApproveAction
-          onRefresh={onRefresh}
-          requestStatusCounts={tableData?.requestStatusCounts || []}
-        />,
+        ...(disableApproveButton ? [] : [
+          <RequestsTableApproveAction
+            onRefresh={onRefresh}
+            requestStatusCounts={tableData?.requestStatusCounts || []}
+          />,
+        ]),
         <RequestsTableDeclineAction
           onRefresh={onRefresh}
           requestStatusCounts={tableData?.requestStatusCounts || []}
