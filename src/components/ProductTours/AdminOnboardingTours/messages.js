@@ -268,6 +268,13 @@ const messages = defineMessages({
     defaultMessage: 'Track all budget activity, including enrollment spending using the “Activity” tab.',
     description: 'Description for the allocate learning budgets bne flow step four',
   },
+  allocateLearningBudgetStepFourBnEFundedFrom: {
+    id: 'adminPortal.productTours.adminOnboarding.allocateLearningBudget.body.4.bne.fundedFrom',
+    defaultMessage: 'Track all budget activity, including enrollment spending using the “Activity” tab. Some '
+      + 'enrollments are funded by more than one budget: select View details in the Spent table’s Funded From column '
+      + 'to see how much each budget contributed.',
+    description: 'Description for the allocate learning budgets bne flow step four when multi-plan learner credit is enabled',
+  },
   allocateLearningBudgetStepFourInviteBnE: {
     id: 'adminPortal.productTours.adminOnboarding.allocateLearningBudget.body.4.inviteBne',
     defaultMessage: '"New members" can be used to invite learners to utilize this budget.',
@@ -314,6 +321,13 @@ const messages = defineMessages({
     id: 'adminPortal.productTours.adminOnboarding.allocateLearningBudget.body.8.assignment',
     defaultMessage: 'The Spent table allows you to review spending details for this budget.',
     description: 'Description for the allocate learning budgets flow step eight',
+  },
+  allocateLearningBudgetStepSevenAssignmentFundedFrom: {
+    id: 'adminPortal.productTours.adminOnboarding.allocateLearningBudget.body.8.assignment.fundedFrom',
+    defaultMessage: 'The Spent table allows you to review spending details for this budget. Some enrollments are '
+      + 'funded by more than one budget: select View details in the Funded From column to see how much each budget '
+      + 'contributed.',
+    description: 'Description for the allocate learning budgets flow Spent table step when multi-plan learner credit is enabled',
   },
   allocateLearningBudgetStepEightAssignment: {
     id: 'adminPortal.productTours.adminOnboarding.allocateAssignmentBudget.body.9.assignment',

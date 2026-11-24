@@ -6,14 +6,18 @@ import { useIntl } from '@edx/frontend-platform/i18n';
 import TableTextFilter from './TableTextFilter';
 import CustomDataTableEmptyState from './CustomDataTableEmptyState';
 import SpendTableEnrollmentDetails from './SpendTableEnrollmentDetails';
+import SpendTableFundedFromContents from './SpendTableFundedFromContents';
 
 import {
   PAGE_SIZE,
   DEFAULT_PAGE,
   SPENT_TABLE_SEARCH_COLUMN_ACCESSOR,
   formatDate,
+  useBudgetId,
+  useIsMultiPlanFundingEnabled,
 } from './data';
 import SpendTableAmountContents from './SpendTableAmountContents';
+import { ALLOCATE_LEARNING_BUDGETS_TARGETS } from '../ProductTours/AdminOnboardingTours/constants';
 
 const FilterStatus = (rest) => <DataTable.FilterStatus showFilteredFields={false} {...rest} />;
 
@@ -24,6 +28,25 @@ const LearnerCreditAllocationTable = ({
   tableActions = [],
 }) => {
   const intl = useIntl();
+  const { subsidyAccessPolicyId } = useBudgetId();
+  const isMultiPlanFundingEnabled = useIsMultiPlanFundingEnabled();
+  // Multi-plan learner credit: only subsidy access policy budgets can be split-funded.
+  const showFundedFromColumn = isMultiPlanFundingEnabled && !!subsidyAccessPolicyId;
+  const fundedFromColumn = {
+    Header: (
+      <span id={ALLOCATE_LEARNING_BUDGETS_TARGETS.BUDGET_SPENT_FUNDED_FROM}>
+        {intl.formatMessage({
+          id: 'lcm.learner.credit.allocation.spent.table.column.funded.from',
+          defaultMessage: 'Funded From',
+          description: 'Column header for the Funded from column in the Learner Credit Allocation table',
+        })}
+      </span>
+    ),
+    id: 'fundedFrom',
+    Cell: SpendTableFundedFromContents,
+    disableFilters: true,
+    disableSortBy: true,
+  };
   return (
     <DataTable
       isSortable
@@ -84,6 +107,7 @@ const LearnerCreditAllocationTable = ({
           },
           disableFilters: true,
         },
+        ...(showFundedFromColumn ? [fundedFromColumn] : []),
       ]}
       initialTableOptions={{
         getRowId: row => row?.uuid?.toString(),
