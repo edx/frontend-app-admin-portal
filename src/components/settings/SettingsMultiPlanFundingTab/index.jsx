@@ -10,9 +10,11 @@ import { useMultiPlanFundingPlans } from './data/hooks';
 import MultiPlanFundingHelpLink from './MultiPlanFundingHelpLink';
 import MultiPlanPoolStatusBadge from './MultiPlanPoolStatusBadge';
 import { getBudgetDetailPath, getMultiPlanFundingPlanPath } from './constants';
+import { MULTI_PLAN_FUNDING_SETTINGS_TARGETS } from '../../ProductTours/AdminOnboardingTours/constants';
 import messages from './messages';
 
 const planRowPropType = PropTypes.shape({
+  index: PropTypes.number,
   original: PropTypes.shape({
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
@@ -52,6 +54,7 @@ const FundingSettingsCell = ({ row }) => {
       to={row.original.fundingSettingsPath}
       variant="outline-primary"
       size="sm"
+      id={row.index === 0 ? MULTI_PLAN_FUNDING_SETTINGS_TARGETS.FIRST_ACTION : undefined}
       aria-label={intl.formatMessage(messages.fundingSettingsButtonAriaLabel, { planName: row.original.name })}
     >
       <FormattedMessage {...messages.fundingSettingsButton} />
@@ -76,7 +79,7 @@ const SettingsMultiPlanFundingTab = ({ enterpriseId, enterpriseSlug }) => {
 
   return (
     <section>
-      <p className="mb-2">
+      <p id={MULTI_PLAN_FUNDING_SETTINGS_TARGETS.TAB_DESCRIPTION} className="mb-2">
         <FormattedMessage {...messages.tabDescription} />
       </p>
       <p className="mb-4">
@@ -87,46 +90,52 @@ const SettingsMultiPlanFundingTab = ({ enterpriseId, enterpriseSlug }) => {
           <FormattedMessage {...messages.loadError} />
         </Alert>
       ) : (
-        <DataTable
-          isLoading={isLoading}
-          itemCount={rows.length}
-          data={rows}
-          isSortable
-          columns={[
-            {
-              Header: intl.formatMessage(messages.plansColumn),
-              accessor: 'name',
-              Cell: PlanNameCell,
-              disableSortBy: true,
-            },
-            {
-              Header: intl.formatMessage(messages.balanceColumn),
-              accessor: 'balance',
-              Cell: BalanceCell,
-            },
-            {
-              Header: intl.formatMessage(messages.drawDownColumn),
-              accessor: 'isMultiPlanEligible',
-              Cell: PoolStatusCell,
-            },
-            {
-              Header: intl.formatMessage(messages.expiresColumn),
-              accessor: 'expires',
-              Cell: ExpiresCell,
-            },
-          ]}
-          additionalColumns={[
-            {
-              id: 'actions',
-              Header: <span className="sr-only">{intl.formatMessage(messages.actionsColumn)}</span>,
-              disableSortBy: true,
-              Cell: FundingSettingsCell,
-            },
-          ]}
-        >
-          <DataTable.Table />
-          <DataTable.EmptyTable content={intl.formatMessage(messages.emptyState)} />
-        </DataTable>
+        <div id={MULTI_PLAN_FUNDING_SETTINGS_TARGETS.PLANS_TABLE}>
+          <DataTable
+            isLoading={isLoading}
+            itemCount={rows.length}
+            data={rows}
+            isSortable
+            columns={[
+              {
+                Header: intl.formatMessage(messages.plansColumn),
+                accessor: 'name',
+                Cell: PlanNameCell,
+                disableSortBy: true,
+              },
+              {
+                Header: intl.formatMessage(messages.balanceColumn),
+                accessor: 'balance',
+                Cell: BalanceCell,
+              },
+              {
+                Header: (
+                  <span id={MULTI_PLAN_FUNDING_SETTINGS_TARGETS.POOL_STATUS_HEADER}>
+                    {intl.formatMessage(messages.drawDownColumn)}
+                  </span>
+                ),
+                accessor: 'isMultiPlanEligible',
+                Cell: PoolStatusCell,
+              },
+              {
+                Header: intl.formatMessage(messages.expiresColumn),
+                accessor: 'expires',
+                Cell: ExpiresCell,
+              },
+            ]}
+            additionalColumns={[
+              {
+                id: 'actions',
+                Header: <span className="sr-only">{intl.formatMessage(messages.actionsColumn)}</span>,
+                disableSortBy: true,
+                Cell: FundingSettingsCell,
+              },
+            ]}
+          >
+            <DataTable.Table />
+            <DataTable.EmptyTable content={intl.formatMessage(messages.emptyState)} />
+          </DataTable>
+        </div>
       )}
     </section>
   );

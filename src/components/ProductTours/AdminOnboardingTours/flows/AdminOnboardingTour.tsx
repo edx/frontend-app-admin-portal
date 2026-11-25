@@ -5,6 +5,7 @@ import {
   ADMINISTER_SUBSCRIPTIONS_TARGETS,
   CUSTOMIZE_REPORTS_SIDEBAR,
   EDIT_HIGHLIGHTS_TARGETS,
+  MULTI_PLAN_FUNDING_SETTINGS_TARGETS,
   ORGANIZE_LEARNER_TARGETS,
   TRACK_LEARNER_PROGRESS_TARGETS,
   ALLOCATE_LEARNING_BUDGETS_TARGETS,
@@ -19,6 +20,7 @@ import EditHighlightsFlow from './EditHighlightsFlow';
 import LearnerProgressFlow from './LearnerProgressFlow';
 import AnalyticsV2Flow from './AnalyticsV2Flow';
 import OrganizeLearnersFlow from './OrganizeLearnersFlow';
+import MultiPlanFundingSettingsFlow from './MultiPlanFundingSettingsFlow';
 import SetUpPreferencesFlow from './SetUpPreferencesFlow';
 import { TOUR_TARGETS } from '../../constants';
 import useFetchCompletedOnboardingFlows from '../data/useFetchCompletedOnboardingFlows';
@@ -106,6 +108,9 @@ const AdminOnboardingTour = (
     setCurrentStep,
     targetSelector,
   });
+  const multiPlanFundingSettingsFlow = MultiPlanFundingSettingsFlow({
+    handleAdvanceTour, handleBackTour, handleEndTour,
+  });
   const setUpPreferencesFlow = SetUpPreferencesFlow({ handleEndTour });
   const editHighlightsFlow = EditHighlightsFlow({
     handleAdvanceTour, handleBackTour, handleEndTour, handleDismissTour,
@@ -133,6 +138,11 @@ const AdminOnboardingTour = (
     ...Object.fromEntries(
       Object.values(EDIT_HIGHLIGHTS_TARGETS)
         .map(target => [target, editHighlightsFlow]),
+    ),
+    // Multi-plan funding settings flow targets
+    ...Object.fromEntries(
+      Object.values(MULTI_PLAN_FUNDING_SETTINGS_TARGETS)
+        .map(target => [target, multiPlanFundingSettingsFlow]),
     ),
     // Customize reports flow target
     [CUSTOMIZE_REPORTS_SIDEBAR]: customizeReportsFlow,

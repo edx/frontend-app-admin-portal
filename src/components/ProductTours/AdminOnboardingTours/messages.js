@@ -413,6 +413,31 @@ const messages = defineMessages({
     defaultMessage: 'To view details or edit a specific Highlight, select its card.',
     description: 'Description for the edit highlights flow step five — view or edit a specific highlight',
   },
+  multiPlanFundingTitle: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.title',
+    defaultMessage: 'Fund enrollments across plans',
+    description: 'Title for the multi-plan funding settings tour',
+  },
+  multiPlanFundingStepOneBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.1',
+    defaultMessage: 'These are your learner credit plans. Add plans to the shared pool so enrollments can automatically draw funds from any eligible plan.',
+    description: 'Description for the multi-plan funding settings tour step one — plans table overview',
+  },
+  multiPlanFundingStepTwoBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.2',
+    defaultMessage: 'Select "Funding settings" to open a plan\'s detail page, where you can toggle the plan into the shared pool.',
+    description: 'Description for the multi-plan funding settings tour step two — funding settings button',
+  },
+  multiPlanFundingStepThreeBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.3',
+    defaultMessage: 'When you enable a plan, a confirmation dialog appears before the change goes live. Plans in the pool show "In Pool" here.',
+    description: 'Description for the multi-plan funding settings tour step three — confirm before live',
+  },
+  multiPlanFundingStepFourBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.4',
+    defaultMessage: 'You\'re all set! Plans in the pool share funds automatically. The plan closest to expiration is used first—no manual selection needed.',
+    description: 'Description for the multi-plan funding settings tour step four — completion',
+  },
   completeTourModalTitle: {
     id: 'adminPortal.productTours.adminOnboarding.completeTour.modalTitle',
     defaultMessage: 'Great job!',

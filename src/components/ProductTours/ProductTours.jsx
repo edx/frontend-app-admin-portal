@@ -41,12 +41,14 @@ import {
   ADMINISTER_SUBSCRIPTIONS_TARGETS,
   ALLOCATE_LEARNING_BUDGETS_TARGETS,
   EDIT_HIGHLIGHTS_TARGETS,
+  MULTI_PLAN_FUNDING_SETTINGS_TARGETS,
   ORGANIZE_LEARNER_TARGETS,
   TRACK_LEARNER_PROGRESS_TARGETS,
   CUSTOMIZE_REPORTS_SIDEBAR,
   ANALYTICS_V2_TARGETS,
 } from './AdminOnboardingTours/constants';
 import { ROUTE_NAMES } from '../EnterpriseApp/data/constants';
+import { MULTI_PLAN_FUNDING_TAB } from '../settings/SettingsMultiPlanFundingTab/constants';
 import OnboardingWelcomeModal from './AdminOnboardingTours/OnboardingWelcomeModal';
 import useHydrateAdminOnboardingData from './AdminOnboardingTours/data/useHydrateAdminOnboardingData';
 
@@ -118,6 +120,8 @@ const ProductTours = ({
     } else if (targetId === EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR) {
       sendEnterpriseTrackEvent(enterpriseSlug, ADMIN_TOUR_EVENT_NAMES.EDIT_HIGHLIGHTS_VIEWED_EVENT_NAME);
       navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.contentHighlights}/`);
+    } else if (targetId === MULTI_PLAN_FUNDING_SETTINGS_TARGETS.PLANS_TABLE) {
+      navigate(`/${enterpriseSlug}/admin/${ROUTE_NAMES.settings}/${MULTI_PLAN_FUNDING_TAB}`);
     }
     setSelectedTourTarget(targetId);
     setIsAdminTourOpen(true);
