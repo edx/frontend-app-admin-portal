@@ -132,7 +132,10 @@ const SubscriptionLifecycle = ({
   const subscriptionTypeLabel = intl.formatMessage(subscriptionTypeMessage);
   // Behind ENABLE_SSP_PAID_RENEWAL; with it off, the old UI is shown.
   const isSspPaidRenewalEnabled = features.ENABLE_SSP_PAID_RENEWAL;
-  const showPendingCancellation = isSspPaidRenewalEnabled && cancelAtPeriodEnd;
+  // Once the period end has passed, the cancellation is no longer pending.
+  const showPendingCancellation = isSspPaidRenewalEnabled
+    && cancelAtPeriodEnd
+    && currentPeriodEnd * 1000 > Date.now();
 
   return (
     <>

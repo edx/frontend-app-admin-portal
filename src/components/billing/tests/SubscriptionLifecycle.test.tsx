@@ -12,6 +12,8 @@ jest.mock('../data/hooks');
 
 const TEST_ENTERPRISE_UUID = 'test-enterprise-uuid';
 
+const FUTURE_PERIOD_END = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+
 const baseMockSubscription = {
   yearlyAmount: 120000,
   currency: 'usd',
@@ -122,13 +124,22 @@ describe('SubscriptionLifecycle', () => {
     });
 
     it('shows a bold Pending Cancellation status and Expires On date when a cancellation is scheduled', () => {
-      renderSubscriptionLifecycle('teams', { cancelAtPeriodEnd: true });
+      renderSubscriptionLifecycle('teams', { cancelAtPeriodEnd: true, currentPeriodEnd: FUTURE_PERIOD_END });
 
       const status = screen.getByText('Pending Cancellation');
       expect(status.closest('.font-weight-bold')).not.toBeNull();
       expect(screen.getByText('Expires On')).toBeInTheDocument();
       expect(screen.queryByText('Current Period Ends')).not.toBeInTheDocument();
       expect(screen.getByText('Reinstate Subscription')).toBeInTheDocument();
+    });
+
+    it('shows no Pending Cancellation status once the period end has passed', () => {
+      // The fixture's currentPeriodEnd (2025-01-01) is in the past.
+      renderSubscriptionLifecycle('teams', { cancelAtPeriodEnd: true });
+
+      expect(screen.queryByText('Pending Cancellation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Expires On')).not.toBeInTheDocument();
+      expect(screen.getByText('Current Period Ends')).toBeInTheDocument();
     });
 
     it('cancel modal says enrollments move to Audit and shows the amount and licenses', () => {
