@@ -11,6 +11,7 @@ import CancelSubscriptionSuccessToast from './CancelSubscriptionSuccessToast';
 import ReinstateSubscriptionSuccessToast from './ReinstateSubscriptionSuccessToast';
 import SubscriptionErrorToast from './SubscriptionErrorToast';
 import { SUBSCRIPTION_TYPE_LABEL_MAP } from '../subscriptions/data/constants';
+import { features } from '../../config';
 
 /**
  * SubscriptionLifecycle - Component for managing subscription cancellation and reinstatement
@@ -129,6 +130,12 @@ const SubscriptionLifecycle = ({
     ? SUBSCRIPTION_TYPE_LABEL_MAP.essentials
     : SUBSCRIPTION_TYPE_LABEL_MAP.teams;
   const subscriptionTypeLabel = intl.formatMessage(subscriptionTypeMessage);
+  // Behind ENABLE_SSP_PAID_RENEWAL; with it off, the old UI is shown.
+  const isSspPaidRenewalEnabled = features.ENABLE_SSP_PAID_RENEWAL;
+  // Once the period end has passed, the cancellation is no longer pending.
+  const showPendingCancellation = isSspPaidRenewalEnabled
+    && cancelAtPeriodEnd
+    && currentPeriodEnd * 1000 > Date.now();
 
   return (
     <>
@@ -193,14 +200,42 @@ const SubscriptionLifecycle = ({
                 <div className="font-weight-bold">{subscriptionTypeLabel}</div>
               </div>
 
-              {/* Current Period End */}
+              {/* Status, only while a cancellation is pending */}
+              {showPendingCancellation && (
+                <div>
+                  <div className="small text-muted">
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.status.label"
+                      defaultMessage="Status"
+                      description="Label for subscription status field"
+                    />
+                  </div>
+                  <div className="font-weight-bold">
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.status.pendingCancellation"
+                      defaultMessage="Pending Cancellation"
+                      description="Status shown when the admin has canceled the subscription but it stays active until the end of the paid period"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Current Period End, or the expiry date while a cancellation is pending */}
               <div>
                 <div className="small text-muted">
-                  <FormattedMessage
-                    id="admin.portal.billing.subscription.currentPeriodEnd.label"
-                    defaultMessage="Current Period Ends"
-                    description="Label for current period end field"
-                  />
+                  {showPendingCancellation ? (
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.expiresOn.label"
+                      defaultMessage="Expires On"
+                      description="Label for the date a canceled subscription expires (end of the paid period)"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="admin.portal.billing.subscription.currentPeriodEnd.label"
+                      defaultMessage="Current Period Ends"
+                      description="Label for current period end field"
+                    />
+                  )}
                 </div>
                 <div className="font-weight-bold">{formattedPeriodEnd}</div>
               </div>
@@ -261,14 +296,27 @@ const SubscriptionLifecycle = ({
         </ModalDialog.Header>
         <ModalDialog.Body>
           <p>
-            <FormattedMessage
-              id="admin.portal.billing.subscription.cancelModal.body"
-              defaultMessage="Your subscription will remain active until {currentPeriodEnd}. After this date, you will lose access to all subscription features and your learners will no longer be able to enroll in courses."
-              description="Body text for cancel subscription modal"
-              values={{
-                currentPeriodEnd: formattedPeriodEnd,
-              }}
-            />
+            {isSspPaidRenewalEnabled ? (
+              <FormattedMessage
+                id="admin.portal.billing.subscription.cancelModal.body.auditAccess"
+                defaultMessage="Your {amount} / year subscription for {licenseCount, plural, one {# license} other {# licenses}} will remain active until {currentPeriodEnd} and will not renew. After this date, your learners' enrollments will move to Audit."
+                description="Body text for cancel subscription modal: the plan stays active to the end of the paid period, then learners' enrollments move to Audit"
+                values={{
+                  amount: formattedAmount,
+                  licenseCount,
+                  currentPeriodEnd: <span className="font-weight-bold">{formattedPeriodEnd}</span>,
+                }}
+              />
+            ) : (
+              <FormattedMessage
+                id="admin.portal.billing.subscription.cancelModal.body"
+                defaultMessage="Your subscription will remain active until {currentPeriodEnd}. After this date, you will lose access to all subscription features and your learners will no longer be able to enroll in courses."
+                description="Body text for cancel subscription modal"
+                values={{
+                  currentPeriodEnd: formattedPeriodEnd,
+                }}
+              />
+            )}
           </p>
           <Alert variant="info" dismissible={false}>
             <FormattedMessage
