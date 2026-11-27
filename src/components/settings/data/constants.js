@@ -1,6 +1,7 @@
 import { defineMessages } from '@edx/frontend-platform/i18n';
 import { configuration } from '../../../config';
 import { SUPPORTED_SUBSIDY_TYPES } from '../../../data/constants/subsidyRequests';
+import { MULTI_PLAN_FUNDING_TAB } from '../SettingsMultiPlanFundingTab/constants';
 
 const messages = defineMessages({
   subsidyTypeCodes: {
@@ -25,6 +26,7 @@ export const LMS_TAB = 'lms';
 export const SSO_TAB = 'sso';
 export const APPEARANCE_TAB = 'appearance';
 export const API_CREDENTIALS_TAB = 'api_credentials';
+export { MULTI_PLAN_FUNDING_TAB };
 
 export const HELP_CENTER_LINK = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBp7OAG/integrations';
 export const HELP_CENTER_BLACKBOARD = 'https://enterprise-support.edx.org/s/topic/0TORc000000GBsLOAW/blackboard';
@@ -81,6 +83,7 @@ export const SETTINGS_TABS_VALUES = {
   [SSO_TAB]: SSO_TAB,
   [APPEARANCE_TAB]: APPEARANCE_TAB,
   [API_CREDENTIALS_TAB]: API_CREDENTIALS_TAB,
+  [MULTI_PLAN_FUNDING_TAB]: MULTI_PLAN_FUNDING_TAB,
 };
 
 /** Default tab when no parameter is given */

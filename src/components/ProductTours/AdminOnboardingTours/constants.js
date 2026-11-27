@@ -80,9 +80,19 @@ export const ALLOCATE_LEARNING_BUDGETS_TARGETS = {
   BUDGET_TABLE: 'budget-table',
   ZERO_STATE_ASSIGN_CARD: 'zero-state-assign-card',
   BUDGET_SPENT_TABLE: 'spent-budget-table',
+  // Multi-plan learner credit: "Funded from" column header in the Spent table.
+  BUDGET_SPENT_FUNDED_FROM: 'spent-budget-funded-from',
   BUDGET_CATALOG_TAB: 'budget-catalog-tab',
   BUDGET_MEMBERS_TAB: 'budget-members-tab',
   LEARNER_CREDIT_MANAGEMENT_BREADCRUMBS: 'learner-credit-management-breadcrumbs',
+};
+
+// Multi-plan funding settings tour (ENT-12457)
+export const MULTI_PLAN_FUNDING_SETTINGS_TARGETS = {
+  PLANS_TABLE: 'multi-plan-funding-plans-table',
+  FIRST_ACTION: 'multi-plan-funding-first-action',
+  POOL_STATUS_HEADER: 'multi-plan-funding-pool-status',
+  TAB_DESCRIPTION: 'multi-plan-funding-tab-description',
 };
 
 // targets that will trigger an index reset
@@ -128,6 +138,10 @@ export const ADMIN_TOUR_EVENT_NAMES = {
   EDIT_HIGHLIGHTS_BACK_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.edit-highlights.back',
   EDIT_HIGHLIGHTS_COMPLETED_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.edit-highlights.completed',
   EDIT_HIGHLIGHTS_DISMISS_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.edit-highlights.dismiss',
+  MULTI_PLAN_FUNDING_ADVANCE_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.multi-plan-funding.advance',
+  MULTI_PLAN_FUNDING_BACK_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.multi-plan-funding.back',
+  MULTI_PLAN_FUNDING_COMPLETED_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.multi-plan-funding.completed',
+  MULTI_PLAN_FUNDING_DISMISS_EVENT_NAME: 'edx.ui.enterprise.admin-portal.admin-onboarding-tours.multi-plan-funding.dismiss',
 };
 
 export const ONBOARDING_WELCOME_MODAL_COOKIE_NAME = 'seen-onboarding-welcome-modal';

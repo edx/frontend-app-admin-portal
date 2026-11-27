@@ -5,7 +5,12 @@ import { useParams } from 'react-router';
 import { ALLOCATE_LEARNING_BUDGETS_TARGETS, ADMIN_TOUR_EVENT_NAMES } from '../constants';
 import messages from '../messages';
 import { TourStep } from '../../types';
-import { orderBudgets, useBudgetDetailActivityOverview, useSubsidyAccessPolicy } from '../../../learner-credit-management/data';
+import {
+  orderBudgets,
+  useBudgetDetailActivityOverview,
+  useIsMultiPlanFundingEnabled,
+  useSubsidyAccessPolicy,
+} from '../../../learner-credit-management/data';
 import { useEnterpriseBudgets } from '../../../EnterpriseSubsidiesContext/data/hooks';
 import { configuration } from '../../../../config';
 
@@ -28,12 +33,14 @@ const AllocateLearningBudgetsFlow = ({
   hasSpentTransactions,
   hasContentAssignments,
   intl,
+  isMultiPlanFundingEnabled,
   isOnBudgetPage,
   policyType,
   setCurrentStep,
   targetSelector,
 }: CreateTourFlowsProps & {
   intl: any;
+  isMultiPlanFundingEnabled: boolean;
   isOnBudgetPage: boolean;
   hasSpentTransactions: boolean;
   hasContentAssignments: boolean;
@@ -62,6 +69,22 @@ const AllocateLearningBudgetsFlow = ({
       configuration.ADMIN_ONBOARDING_UUIDS.FLOW_ALLOCATE_BUDGETS_UUID,
     );
   };
+
+  // Multi-plan learner credit: no extra tour step. When the flag is on and the Spent table's "Funded From" column is
+  // rendered, the existing Spent-table step (assignment budgets) and Activity step (browse & enroll budgets) also
+  // explain split funding. Otherwise the original copy is used.
+  const showFundedFromCopy = isMultiPlanFundingEnabled
+    && !!global.document?.querySelector(`#${ALLOCATE_LEARNING_BUDGETS_TARGETS.BUDGET_SPENT_FUNDED_FROM}`);
+  const spentTableStepBody = intl.formatMessage(
+    showFundedFromCopy
+      ? messages.allocateLearningBudgetStepSevenAssignmentFundedFrom
+      : messages.allocateLearningBudgetStepSevenAssignment,
+  );
+  const bneActivityStepBody = intl.formatMessage(
+    showFundedFromCopy
+      ? messages.allocateLearningBudgetStepFourBnEFundedFrom
+      : messages.allocateLearningBudgetStepFourBnE,
+  );
 
   if (isOnBudgetPage) {
     if (policyType === 'Assignment') {
@@ -94,10 +117,11 @@ const AllocateLearningBudgetsFlow = ({
           }, {
             target: `#${ALLOCATE_LEARNING_BUDGETS_TARGETS.BUDGET_SPENT_TABLE}`,
             placement: 'top',
-            body: intl.formatMessage(messages.allocateLearningBudgetStepSevenAssignment),
+            body: spentTableStepBody,
             onAdvance: onAllocateAdvance,
             onBack: onAllocateBack,
-          }, {
+          },
+          {
             target: `#${ALLOCATE_LEARNING_BUDGETS_TARGETS.BUDGET_CATALOG_TAB}`,
             placement: 'top',
             body: intl.formatMessage(messages.allocateLearningBudgetStepEightAssignment),
@@ -139,10 +163,11 @@ const AllocateLearningBudgetsFlow = ({
           }, {
             target: `#${ALLOCATE_LEARNING_BUDGETS_TARGETS.BUDGET_SPENT_TABLE}`,
             placement: 'top',
-            body: intl.formatMessage(messages.allocateLearningBudgetStepSevenAssignment),
+            body: spentTableStepBody,
             onAdvance: onAllocateAdvance,
             onBack: onAllocateBack,
-          }, {
+          },
+          {
             target: `#${ALLOCATE_LEARNING_BUDGETS_TARGETS.BUDGET_CATALOG_TAB}`,
             placement: 'top',
             body: intl.formatMessage(messages.allocateLearningBudgetStepEightAssignment),
@@ -199,7 +224,7 @@ const AllocateLearningBudgetsFlow = ({
         }, {
           target: `#${ALLOCATE_LEARNING_BUDGETS_TARGETS.TRACK_BUDGET_ACTIVITY}`,
           placement: 'top',
-          body: intl.formatMessage(messages.allocateLearningBudgetStepFourBnE),
+          body: bneActivityStepBody,
           onAdvance: onAllocateAdvance,
           onBack: onAllocateBack,
         }, {
@@ -226,7 +251,7 @@ const AllocateLearningBudgetsFlow = ({
         }, {
           target: `#${ALLOCATE_LEARNING_BUDGETS_TARGETS.TRACK_BUDGET_ACTIVITY}`,
           placement: 'top',
-          body: intl.formatMessage(messages.allocateLearningBudgetStepFourBnE),
+          body: bneActivityStepBody,
           onAdvance: onAllocateAdvance,
           onBack: onAllocateBack,
         }, {
@@ -273,6 +298,7 @@ const AllocateLearningBudgetsFlow = ({
 const useAllocateLearningBudgetsFlow = (props: CreateTourFlowsProps): Array<TourStep> => {
   const intl = useIntl();
   const params = useParams();
+  const isMultiPlanFundingEnabled = useIsMultiPlanFundingEnabled();
 
   const { data: budgetsOverview } = useEnterpriseBudgets({
     enablePortalLearnerCreditManagementScreen: props.enablePortalLearnerCreditManagementScreen,
@@ -310,6 +336,7 @@ const useAllocateLearningBudgetsFlow = (props: CreateTourFlowsProps): Array<Tour
     intl,
     hasSpentTransactions,
     hasContentAssignments,
+    isMultiPlanFundingEnabled,
     isOnBudgetPage,
     policyType,
   });

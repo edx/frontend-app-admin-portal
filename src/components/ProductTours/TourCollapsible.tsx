@@ -7,7 +7,8 @@ import {
   IconButton, Icon, OverlayTrigger, Tooltip, Stack,
 } from '@openedx/paragon';
 import {
-  CreditCard, InsertChartOutlined, MenuBook, MoneyOutline, Person, Question, Settings, TextSnippet, TrendingUp,
+  CreditCard, CurrencyExchange, InsertChartOutlined, MenuBook,
+  MoneyOutline, Person, Question, Settings, TextSnippet, TrendingUp,
 } from '@openedx/paragon/icons';
 import { useIntl } from '@edx/frontend-platform/i18n';
 import { getConfig } from '@edx/frontend-platform';
@@ -27,12 +28,14 @@ import {
   ANALYTICS_V2_TARGETS,
   CUSTOMIZE_REPORTS_SIDEBAR,
   EDIT_HIGHLIGHTS_TARGETS,
+  MULTI_PLAN_FUNDING_SETTINGS_TARGETS,
   ORGANIZE_LEARNER_TARGETS,
   TRACK_LEARNER_PROGRESS_TARGETS,
 } from './AdminOnboardingTours/constants';
 import { TOUR_TARGETS } from './constants';
 import useFetchCompletedOnboardingFlows from './AdminOnboardingTours/data/useFetchCompletedOnboardingFlows';
 import { configuration, features } from '../../config';
+import { useIsMultiPlanFundingOptInVisible } from '../settings/SettingsMultiPlanFundingTab/data/hooks';
 import TourCompleteModal from './TourCompleteModal';
 import { EnterpriseSubsidiesContext } from '../EnterpriseSubsidiesContext';
 import { EnterpriseAppContext } from '../EnterpriseApp/EnterpriseAppContextProvider';
@@ -83,6 +86,7 @@ const TourCollapsible: FC<Props> = (
   const { canManageLearnerCredit } = useContext(EnterpriseSubsidiesContext);
   const { isLoadingCustomerAgreement, customerAgreement } = useContext(EnterpriseSubsidiesContext);
   const { enterpriseCuration: { enterpriseCuration } } = useContext(EnterpriseAppContext);
+  const isMultiPlanFundingVisible = useIsMultiPlanFundingOptInVisible();
   const isEdxStaff = getAuthenticatedUser()?.administrator;
   const [hasBudgetGroup, setHasBudgetGroup] = useState(false);
 
@@ -170,6 +174,12 @@ const TourCollapsible: FC<Props> = (
       timeEstimate: 1,
       targetId: TOUR_TARGETS.SETTINGS_SIDEBAR,
       completed: false,
+    }, {
+      icon: CurrencyExchange,
+      title: intl.formatMessage(messages.multiPlanFundingTitle),
+      timeEstimate: 1,
+      targetId: MULTI_PLAN_FUNDING_SETTINGS_TARGETS.PLANS_TABLE,
+      completed: false,
     }];
 
     const { ADMIN_ONBOARDING_UUIDS } = configuration;
@@ -186,6 +196,9 @@ const TourCollapsible: FC<Props> = (
       [CUSTOMIZE_REPORTS_SIDEBAR, ADMIN_ONBOARDING_UUIDS.FLOW_CUSTOMIZE_REPORTS_UUID?.toString()],
       [EDIT_HIGHLIGHTS_TARGETS.HIGHLIGHTS_SIDEBAR, ADMIN_ONBOARDING_UUIDS.FLOW_SHOWCASE_COURSES_UUID?.toString()],
       [TOUR_TARGETS.SETTINGS_SIDEBAR, ADMIN_ONBOARDING_UUIDS.FLOW_PREFERENCES_UUID?.toString()],
+      [MULTI_PLAN_FUNDING_SETTINGS_TARGETS.PLANS_TABLE,
+        ADMIN_ONBOARDING_UUIDS.FLOW_MULTI_PLAN_FUNDING_UUID?.toString(),
+      ],
     ]);
 
     // filter out steps that are turned off for the user
@@ -204,6 +217,8 @@ const TourCollapsible: FC<Props> = (
           return isHighlightsAvailable;
         case ORGANIZE_LEARNER_TARGETS.PEOPLE_MANAGEMENT_SIDEBAR:
           return enablePeopleManagementScreen;
+        case MULTI_PLAN_FUNDING_SETTINGS_TARGETS.PLANS_TABLE:
+          return isMultiPlanFundingVisible;
         default:
           return true;
       }
@@ -233,6 +248,7 @@ const TourCollapsible: FC<Props> = (
     enableSubscriptionManagementScreen,
     isHighlightsAvailable,
     isLoadingCustomerAgreement,
+    isMultiPlanFundingVisible,
     onboardingTourData?.completedTourFlows,
     onboardingTourData?.onboardingTourCompleted,
     intl,

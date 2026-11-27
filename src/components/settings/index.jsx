@@ -16,6 +16,8 @@ import {
 } from './data/constants';
 import SettingsTabs from './SettingsTabs';
 import SyncHistory from './SettingsLMSTab/ErrorReporting/SyncHistory';
+import MultiPlanFundingPlanPage from './SettingsMultiPlanFundingTab/MultiPlanFundingPlanPage';
+import { MULTI_PLAN_FUNDING_TAB } from './SettingsMultiPlanFundingTab/constants';
 
 /**
  * Behaves as the router for settings page
@@ -50,6 +52,10 @@ const SettingsPage = () => {
         <Route
           path="lms/:lms/:configId"
           element={<SyncHistory />}
+        />
+        <Route
+          path={`${MULTI_PLAN_FUNDING_TAB}/:planId`}
+          element={<MultiPlanFundingPlanPage />}
         />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>

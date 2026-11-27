@@ -268,6 +268,13 @@ const messages = defineMessages({
     defaultMessage: 'Track all budget activity, including enrollment spending using the “Activity” tab.',
     description: 'Description for the allocate learning budgets bne flow step four',
   },
+  allocateLearningBudgetStepFourBnEFundedFrom: {
+    id: 'adminPortal.productTours.adminOnboarding.allocateLearningBudget.body.4.bne.fundedFrom',
+    defaultMessage: 'Track all budget activity, including enrollment spending using the “Activity” tab. Some '
+      + 'enrollments are funded by more than one budget: select View details in the Spent table’s Funded From column '
+      + 'to see how much each budget contributed.',
+    description: 'Description for the allocate learning budgets bne flow step four when multi-plan learner credit is enabled',
+  },
   allocateLearningBudgetStepFourInviteBnE: {
     id: 'adminPortal.productTours.adminOnboarding.allocateLearningBudget.body.4.inviteBne',
     defaultMessage: '"New members" can be used to invite learners to utilize this budget.',
@@ -315,6 +322,13 @@ const messages = defineMessages({
     defaultMessage: 'The Spent table allows you to review spending details for this budget.',
     description: 'Description for the allocate learning budgets flow step eight',
   },
+  allocateLearningBudgetStepSevenAssignmentFundedFrom: {
+    id: 'adminPortal.productTours.adminOnboarding.allocateLearningBudget.body.8.assignment.fundedFrom',
+    defaultMessage: 'The Spent table allows you to review spending details for this budget. Some enrollments are '
+      + 'funded by more than one budget: select View details in the Funded From column to see how much each budget '
+      + 'contributed.',
+    description: 'Description for the allocate learning budgets flow Spent table step when multi-plan learner credit is enabled',
+  },
   allocateLearningBudgetStepEightAssignment: {
     id: 'adminPortal.productTours.adminOnboarding.allocateAssignmentBudget.body.9.assignment',
     defaultMessage: 'Use the Catalog tab to browse available courses and assign them directly to learners.',
@@ -351,6 +365,13 @@ const messages = defineMessages({
     defaultMessage: 'Customize and configure your portal to fit your organization\'s needs. Set up branding, '
       + 'manage learner access, enable SSO, and integrate learning platforms—all in one place.',
     description: 'Description for the set up preferences step',
+  },
+  viewSetUpPreferencesWithMultiPlanFunding: {
+    id: 'adminPortal.productTours.adminOnboarding.setUpPreferences.title.1.multiPlanFunding',
+    defaultMessage: 'Customize and configure your portal to fit your organization\'s needs. Set up branding, '
+      + 'manage learner access, enable SSO, integrate learning platforms, and choose which learner credit plans '
+      + 'join the shared pool with Multi-plan funding—all in one place.',
+    description: 'Description for the set up preferences step when the Multi-plan funding settings tab is available',
   },
   editHighlightsStepOneTitle: {
     id: 'adminPortal.productTours.adminOnboarding.editHighlights.title.1',
@@ -391,6 +412,31 @@ const messages = defineMessages({
     id: 'adminPortal.productTours.adminOnboarding.editHighlights.body.5',
     defaultMessage: 'To view details or edit a specific Highlight, select its card.',
     description: 'Description for the edit highlights flow step five — view or edit a specific highlight',
+  },
+  multiPlanFundingTitle: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.title',
+    defaultMessage: 'Fund enrollments across plans',
+    description: 'Title for the multi-plan funding settings tour',
+  },
+  multiPlanFundingStepOneBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.1',
+    defaultMessage: 'These are your learner credit plans. Add plans to the shared pool so enrollments can automatically draw funds from any eligible plan.',
+    description: 'Description for the multi-plan funding settings tour step one — plans table overview',
+  },
+  multiPlanFundingStepTwoBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.2',
+    defaultMessage: 'Select "Funding settings" to open a plan\'s detail page, where you can toggle the plan into the shared pool.',
+    description: 'Description for the multi-plan funding settings tour step two — funding settings button',
+  },
+  multiPlanFundingStepThreeBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.3',
+    defaultMessage: 'When you enable a plan, a confirmation dialog appears before the change goes live. Plans in the pool show "In Pool" here.',
+    description: 'Description for the multi-plan funding settings tour step three — confirm before live',
+  },
+  multiPlanFundingStepFourBody: {
+    id: 'adminPortal.productTours.adminOnboarding.multiPlanFunding.body.4',
+    defaultMessage: 'You\'re all set! Plans in the pool share funds automatically. The plan closest to expiration is used first—no manual selection needed.',
+    description: 'Description for the multi-plan funding settings tour step four — completion',
   },
   completeTourModalTitle: {
     id: 'adminPortal.productTours.adminOnboarding.completeTour.modalTitle',

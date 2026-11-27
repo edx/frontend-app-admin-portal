@@ -60,6 +60,7 @@ jest.mock('@2uinc/frontend-enterprise-utils', () => {
 jest.mock('../../../learner-credit-management/data', () => ({
   orderBudgets: jest.fn(),
   useBudgetDetailActivityOverview: jest.fn(),
+  useIsMultiPlanFundingEnabled: jest.fn(() => false),
   useSubsidyAccessPolicy: jest.fn(),
 }));
 

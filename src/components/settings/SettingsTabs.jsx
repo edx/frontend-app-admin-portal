@@ -19,6 +19,7 @@ import {
   SSO_TAB,
   APPEARANCE_TAB,
   API_CREDENTIALS_TAB,
+  MULTI_PLAN_FUNDING_TAB,
   SCHOLAR_THEME,
   SETTINGS_TABS_VALUES,
   SETTINGS_TAB_PARAM,
@@ -28,6 +29,10 @@ import { SettingsAppearanceTab } from './SettingsAppearanceTab';
 import SettingsLMSTab from './SettingsLMSTab';
 import SettingsSSOTab from './SettingsSSOTab';
 import SettingsApiCredentialsTab from './SettingsApiCredentialsTab';
+import SettingsMultiPlanFundingTab from './SettingsMultiPlanFundingTab';
+import { useIsMultiPlanFundingOptInVisible } from './SettingsMultiPlanFundingTab/data/hooks';
+import { MULTI_PLAN_FUNDING_TAB_TOUR_TARGET } from './SettingsMultiPlanFundingTab/constants';
+import multiPlanFundingMessages from './SettingsMultiPlanFundingTab/messages';
 import { features } from '../../config';
 import { updatePortalConfigurationEvent } from '../../data/actions/portalConfiguration';
 
@@ -79,7 +84,8 @@ const SettingsTabs = ({
     FEATURE_API_CREDENTIALS_TAB,
   } = features;
 
-  const tab = useCurrentSettingsTab();
+  const rawTab = useCurrentSettingsTab();
+  const isMultiPlanFundingTabShown = useIsMultiPlanFundingOptInVisible();
 
   const navigate = useNavigate();
 
@@ -164,9 +170,28 @@ const SettingsTabs = ({
         </Tab>,
       );
     }
+    if (isMultiPlanFundingTabShown) {
+      initialTabs.push(
+        <Tab
+          key={MULTI_PLAN_FUNDING_TAB}
+          eventKey={MULTI_PLAN_FUNDING_TAB}
+          title={(
+            <span id={MULTI_PLAN_FUNDING_TAB_TOUR_TARGET}>
+              <FormattedMessage {...multiPlanFundingMessages.tabLabel} />
+            </span>
+          )}
+        >
+          <SettingsMultiPlanFundingTab
+            enterpriseId={enterpriseId}
+            enterpriseSlug={enterpriseSlug}
+          />
+        </Tab>,
+      );
+    }
 
     return initialTabs;
   }, [
+    isMultiPlanFundingTabShown,
     FEATURE_SSO_SETTINGS_TAB,
     FEATURE_API_CREDENTIALS_TAB,
     SETTINGS_PAGE_APPEARANCE_TAB,
@@ -184,6 +209,11 @@ const SettingsTabs = ({
     updatePortalConfiguration,
     enterpriseBranding,
   ]);
+
+  // Fall back to the first rendered tab when the URL names a tab that isn't in the array
+  // (e.g. direct navigation to /settings/multi_plan_funding when the flag is off).
+  const renderedKeys = tabArray.map(t => t.key);
+  const tab = renderedKeys.includes(rawTab) ? rawTab : renderedKeys[0];
 
   /**
    * Given a key from SETTINGS_TABS_VALUES, this function
