@@ -84,7 +84,7 @@ const SettingsTabs = ({
     FEATURE_API_CREDENTIALS_TAB,
   } = features;
 
-  const tab = useCurrentSettingsTab();
+  const rawTab = useCurrentSettingsTab();
   const isMultiPlanFundingTabShown = useIsMultiPlanFundingOptInVisible();
 
   const navigate = useNavigate();
@@ -209,6 +209,11 @@ const SettingsTabs = ({
     updatePortalConfiguration,
     enterpriseBranding,
   ]);
+
+  // Fall back to the first rendered tab when the URL names a tab that isn't in the array
+  // (e.g. direct navigation to /settings/multi_plan_funding when the flag is off).
+  const renderedKeys = tabArray.map(t => t.key);
+  const tab = renderedKeys.includes(rawTab) ? rawTab : renderedKeys[0];
 
   /**
    * Given a key from SETTINGS_TABS_VALUES, this function

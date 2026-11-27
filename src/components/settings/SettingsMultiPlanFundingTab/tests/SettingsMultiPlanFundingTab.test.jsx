@@ -269,17 +269,20 @@ describe('<MultiPlanFundingPlanPage />', () => {
     expect(screen.getByRole('button', { name: 'Save Changes' })).toBeDisabled();
   });
 
-  it('does not save when the confirmation is cancelled', async () => {
+  it('does not save when the confirmation is cancelled and reverts the toggle', async () => {
     const user = userEvent.setup();
     EnterpriseAccessApiService.retrieveSubsidyAccessPolicy.mockResolvedValue({ data: makePolicy() });
     renderPage();
 
-    await user.click(await screen.findByRole('switch', { name: /Add this plan to the shared pool/ }));
+    const switchInput = await screen.findByRole('switch', { name: /Add this plan to the shared pool/ });
+    expect(switchInput).not.toBeChecked();
+    await user.click(switchInput);
     await user.click(screen.getByRole('button', { name: 'Save Changes' }));
     await user.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
 
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
     expect(EnterpriseAccessApiService.updateSubsidyAccessPolicyMultiPlanFunding).not.toHaveBeenCalled();
+    expect(switchInput).not.toBeChecked();
   });
 
   it('removes the plan from the pool without a confirmation', async () => {

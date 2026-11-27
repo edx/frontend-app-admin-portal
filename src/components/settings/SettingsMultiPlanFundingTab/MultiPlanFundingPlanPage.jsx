@@ -223,7 +223,7 @@ const MultiPlanFundingPlanPage = ({ enterpriseId, enterpriseSlug }) => {
       <EnableMultiPlanFundingModal
         isOpen={isConfirmOpen}
         isSaving={isSaving}
-        onCancel={closeConfirm}
+        onCancel={() => { setIsInPool(savedValue); closeConfirm(); }}
         onConfirm={() => save(true)}
         planName={plan.name}
       />
